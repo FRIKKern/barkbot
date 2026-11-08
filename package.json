@@ -6,7 +6,8 @@
   "scripts": {
     "check": "node scripts/check.mjs",
     "board": "node scripts/board.mjs",
-    "docs": "node scripts/generate-roadmap.mjs && node scripts/generate-parity.mjs && node scripts/readme-timeline.mjs",
+    "docs": "node scripts/generate-hero.mjs && node scripts/generate-roadmap.mjs && node scripts/generate-parity.mjs && node scripts/readme-timeline.mjs",
+    "hero": "node scripts/generate-hero.mjs",
     "roadmap": "node scripts/generate-roadmap.mjs",
     "parity": "node scripts/generate-parity.mjs",
     "timeline": "node scripts/readme-timeline.mjs"

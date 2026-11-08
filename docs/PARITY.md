@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-0 of 32 items done, 0 partial, 13 open, 19 not yet read on the oracle.
+0 of 33 items done, 0 partial, 14 open, 19 not yet read on the oracle.
 Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Edit the JSON, never this page.
 
 ## S0 Harness
@@ -16,6 +16,7 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 | H5 | Gate B: a recorded turn replayed in ours, report in parity/gate-b.json | — | ○ open | — |
 | H6 | Inventory: every visible control, ours against the oracle, to docs/MISSING.md | — | ○ open | — |
 | H7 | Feel budgets measured on the oracle and written in QUALITY.md | — | ○ open | — |
+| H8 | Hero motion: the guessed TIMING in scripts/generate-hero.mjs replaced by the oracle's recorded turn | — | ○ open | — |
 
 ## S1 Talk
 

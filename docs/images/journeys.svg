@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="814" viewBox="0 0 1200 814" role="img" aria-labelledby="t d">
 <title id="t">BarkBot journeys</title>
-<desc id="d">0 of 32 items done, 0 partial, 13 open, 19 not yet read on the oracle. J01: open. J02: unknown. J03: unknown. J04: unknown. J05: unknown. J06: open. J07: unknown. J08: unknown. J09: unknown. J10: unknown. J11: unknown. J12: unknown. J13: unknown.</desc>
+<desc id="d">0 of 33 items done, 0 partial, 14 open, 19 not yet read on the oracle. J01: open. J02: unknown. J03: unknown. J04: unknown. J05: unknown. J06: open. J07: unknown. J08: unknown. J09: unknown. J10: unknown. J11: unknown. J12: unknown. J13: unknown.</desc>
 <style>
   svg { --bg:#f7f6f3; --card:#ffffff; --line:#e4e1da; --ink:#1c1b19; --muted:#6e6b64; --done:#2f7d52; --now:#c27a12; --todo:#a29f97; --unk:#8569b3; --nowbg:#fff5e3; --accent:#e8962e; }
   @media (prefers-color-scheme: dark) {
@@ -15,10 +15,10 @@
 <rect class="bg" width="1200" height="814" rx="16"/>
 <text x="40" y="70" font-size="36" font-weight="700" letter-spacing="-0.8">Journeys</text>
 <text x="40" y="102" font-size="19" class="muted">The spec of "works". Each passes when the oracle and BarkBot end the same way.</text>
-<text x="1160" y="70" font-size="40" font-weight="700" text-anchor="end">0<tspan class="muted" font-weight="400"> / 32</tspan></text>
+<text x="1160" y="70" font-size="40" font-weight="700" text-anchor="end">0<tspan class="muted" font-weight="400"> / 33</tspan></text>
 <text x="1160" y="102" font-size="16" text-anchor="end" class="muted">parity items done</text>
-<rect x="40" y="124" width="1120" height="8" rx="4" class="track"/><rect x="40" y="124" width="455" height="8" class="todo"/><rect x="495" y="124" width="665" height="8" class="unk"/>
-<text x="40" y="168" font-size="16"><tspan class="done">● done 0</tspan><tspan class="now" dx="24">● partial 0</tspan><tspan class="todo" dx="24">● open 13</tspan><tspan class="unk" dx="24">● not yet read on the oracle 19</tspan></text>
+<rect x="40" y="124" width="1120" height="8" rx="4" class="track"/><rect x="40" y="124" width="475.1515151515151" height="8" class="todo"/><rect x="515.1515151515151" y="124" width="644.8484848484849" height="8" class="unk"/>
+<text x="40" y="168" font-size="16"><tspan class="done">● done 0</tspan><tspan class="now" dx="24">● partial 0</tspan><tspan class="todo" dx="24">● open 14</tspan><tspan class="unk" dx="24">● not yet read on the oracle 19</tspan></text>
 <text x="1160" y="168" font-size="16" text-anchor="end" class="muted">one dot per item</text>
 <g data-journey="J01">
 <rect x="40" y="214" width="211.2" height="168" rx="12" class="card"/>

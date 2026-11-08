@@ -9,6 +9,7 @@
     {"id": "H5", "slice": "S0", "journey": null, "title": "Gate B: a recorded turn replayed in ours, report in parity/gate-b.json", "status": "open"},
     {"id": "H6", "slice": "S0", "journey": null, "title": "Inventory: every visible control, ours against the oracle, to docs/MISSING.md", "status": "open"},
     {"id": "H7", "slice": "S0", "journey": null, "title": "Feel budgets measured on the oracle and written in QUALITY.md", "status": "open"},
+    {"id": "H8", "slice": "S0", "journey": null, "title": "Hero motion: the guessed TIMING in scripts/generate-hero.mjs replaced by the oracle's recorded turn", "status": "open"},
     {"id": "T1", "slice": "S1", "journey": "J01", "title": "App shell: TanStack Start; the Barkpark token lives only in server functions", "status": "open"},
     {"id": "T2", "slice": "S1", "journey": "J01", "title": "Transcript: user and bot bubbles, grouping, the day and time line", "status": "unknown"},
     {"id": "T3", "slice": "S1", "journey": "J01", "title": "Working line: the bot's mark and what it is doing now", "status": "unknown"},

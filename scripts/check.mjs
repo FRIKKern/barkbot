@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import { path, read, items, journeys, slices } from './lib/data.mjs';
 import { roadmapSvg } from './generate-roadmap.mjs';
 import { journeysSvg, parityMd } from './generate-parity.mjs';
+import { heroSvg } from './generate-hero.mjs';
 
 const fails = [];
 const ran = {};
@@ -59,6 +60,7 @@ for (const j of jIds) {
 
 // 4. Generated files match their sources.
 const gen = [
+  ['docs/images/hero.svg', heroSvg()],
   ['docs/images/roadmap.svg', roadmapSvg()],
   ['docs/images/journeys.svg', journeysSvg()],
   ['docs/PARITY.md', parityMd()],

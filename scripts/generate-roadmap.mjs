@@ -31,7 +31,8 @@ export function roadmapSvg() {
 ${reward.map((l, k) => `<text x="${x + 20}" y="${y + 116 + k * 22}" font-size="16">${esc(l)}</text>`).join('\n')}
 <rect x="${x + 20}" y="${y + 150}" width="${cw - 40}" height="5" rx="2.5" class="track"/>
 <rect x="${x + 20}" y="${y + 150}" width="${(cw - 40) * frac}" height="5" rx="2.5" class="bar"/>${state === 'now' ? `
-<rect x="${x + 20}" y="${y + 150}" width="${cw - 40}" height="5" rx="2.5" fill="url(#shimmer)"/>` : ''}
+<clipPath id="track-${s.id}"><rect x="${x + 20}" y="${y + 150}" width="${cw - 40}" height="5" rx="2.5"/></clipPath>
+<g clip-path="url(#track-${s.id})"><rect class="sweep" x="${x - 100}" y="${y + 150}" width="120" height="5" fill="url(#shimmer)"/></g>` : ''}
 <text x="${x + 20}" y="${y + 170}" font-size="13" class="muted">${done} of ${total} items done${crit}</text>
 <text x="${x + 20}" y="${y + 196}" font-size="15" class="${cls}">${foot}</text>
 </g>`;
@@ -41,7 +42,8 @@ ${reward.map((l, k) => `<text x="${x + 20}" y="${y + 116 + k * 22}" font-size="1
 <title id="t">BarkBot roadmap</title>
 <desc id="d">${delivered} of ${all.length} slices delivered. ${esc(desc)}</desc>
 ${STYLE}
-<defs><linearGradient id="shimmer" gradientUnits="userSpaceOnUse" x1="-120" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#c27a12" stop-opacity="0"/><stop offset=".5" stop-color="#efb453" stop-opacity=".55"/><stop offset="1" stop-color="#c27a12" stop-opacity="0"/><animateTransform attributeName="gradientTransform" type="translate" values="20 0;480 0" dur="3.4s" calcMode="spline" keyTimes="0;1" keySplines=".4 0 .2 1" repeatCount="indefinite"/></linearGradient></defs>
+<defs><linearGradient id="shimmer"><stop offset="0" stop-color="#efb453" stop-opacity="0"/><stop offset=".5" stop-color="#efb453" stop-opacity=".6"/><stop offset="1" stop-color="#efb453" stop-opacity="0"/></linearGradient></defs>
+<style>.sweep { animation: sweep 3.2s cubic-bezier(.65,0,.35,1) infinite; } @keyframes sweep { 0% { transform: translateX(0) } 75%, 100% { transform: translateX(${cw + 100}px) } } @media (prefers-reduced-motion: reduce) { .sweep { animation: none; opacity: 0; } }</style>
 <rect class="bg" width="${W}" height="${H}" rx="16"/>
 <text x="40" y="70" font-size="36" font-weight="700" letter-spacing="-0.8">BarkBot</text>
 <text x="40" y="102" font-size="19" class="muted">An agent with its own computer, built slice by slice against a live oracle.</text>

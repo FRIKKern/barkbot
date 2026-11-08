@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 4 changes
+- **Today** · 5 changes
+  - Hero from a timeline: the chat scrolls, one working line, typing by letter
   - Hero: calmer timing, softer fades and shimmer
-  - Hero: a minimal wireframe of the oracle screen that plays one turn
 <!-- timeline:end -->
 
 ## Where things live (one fact, one home)
