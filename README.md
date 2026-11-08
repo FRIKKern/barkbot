@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 6 changes
+- **Today** · 7 changes
+  - Hero rebuilt from a captured oracle state
   - Oracle harness and a hero timed from Grok Bot's real turn
-  - Hero from a timeline: the chat scrolls, one working line, typing by letter
 <!-- timeline:end -->
 
 ## Where things live (one fact, one home)

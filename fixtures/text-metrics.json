@@ -1,0 +1,101 @@
+{
+ "measured": "2026-11-08",
+ "wrapWidth": 456,
+ "font": {
+  "family": "XVF, -apple-system, \"system-ui\", \"Segoe UI\", sans-serif",
+  "size": "15px",
+  "weight": "425",
+  "lineHeight": "22px",
+  "letterSpacing": "0.15px"
+ },
+ "control": 0,
+ "strings": {
+  "Hi! What should we work on first?": {
+   "width": 235.7,
+   "lines": [
+    "Hi! What should we work on first?"
+   ],
+   "lineWidths": [
+    235.7
+   ]
+  },
+  "How much storage do you have, and where?": {
+   "width": 312,
+   "lines": [
+    "How much storage do you have, and where?"
+   ],
+   "lineWidths": [
+    312
+   ]
+  },
+  "Let me look at the disk on my computer.": {
+   "width": 282.8,
+   "lines": [
+    "Let me look at the disk on my computer."
+   ],
+   "lineWidths": [
+    282.8
+   ]
+  },
+  "My computer has 128 GB of storage, and about 122 GB is free. Work in progress lives in one folder and files I keep live in my home folder, both on the same disk. It is my own machine in the cloud, separate from your Mac.": {
+   "width": 1548.6,
+   "lines": [
+    "My computer has 128 GB of storage, and about 122 GB is free.",
+    "Work in progress lives in one folder and files I keep live in my",
+    "home folder, both on the same disk. It is my own machine in the",
+    "cloud, separate from your Mac."
+   ],
+   "lineWidths": [
+    438.5,
+    429,
+    450.7,
+    219
+   ]
+  },
+  "Checking system storage": {
+   "width": 179.8,
+   "lines": [
+    "Checking system storage"
+   ],
+   "lineWidths": [
+    179.8
+   ]
+  },
+  "Typing…": {
+   "width": 56.6,
+   "lines": [
+    "Typing…"
+   ],
+   "lineWidths": [
+    56.6
+   ]
+  },
+  "Message Oracle": {
+   "width": 114.2,
+   "lines": [
+    "Message Oracle"
+   ],
+   "lineWidths": [
+    114.2
+   ]
+  },
+  "Today 9:41 PM": {
+   "width": 102.7,
+   "lines": [
+    "Today 9:41 PM"
+   ],
+   "lineWidths": [
+    102.7
+   ]
+  },
+  "Oracle": {
+   "width": 46.4,
+   "lines": [
+    "Oracle"
+   ],
+   "lineWidths": [
+    46.4
+   ]
+  }
+ }
+}

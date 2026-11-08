@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-2 of 34 items done, 1 partial, 12 open, 19 not yet read on the oracle.
+2 of 34 items done, 2 partial, 11 open, 19 not yet read on the oracle.
 Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Edit the JSON, never this page.
 
 ## S0 Harness
@@ -10,13 +10,13 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 | Id | Item | Journey | Status | Gate or evidence |
 |---|---|---|---|---|
 | H1 | Oracle access: headless Chrome with the owner's login copied from their tab, one lane at a time | — | ✓ done | Gate: recipes guard + 4 recorded recipes. Evidence: Grok Bot.app relaunched with --remote-debugging-port=9333 (127.0.0.1); traces/2026-11-08-*.json; the send guard refused Grookie |
-| H2 | State capture: element boxes, tokens and labels to fixtures/states/<id>.json, dated | — | ○ open | — |
+| H2 | State capture: element boxes, tokens and labels to fixtures/states/<id>.json, dated | — | ◐ partial | Evidence: scripts/oracle/capture.mjs -> fixtures/states/oracle-turn-1040.json (289 elements: box, colour, radius, type; UI labels only); scripts/oracle/measure-text.mjs -> fixtures/text-metrics.json (control: clone vs live paragraph, 0 px). One state so far. |
 | H3 | Turn recorder: the oracle's DOM over time to traces/<id>.json | — | ◐ partial | Evidence: scripts/oracle/record.mjs: DOM events, engine animations with keyframes and timing, scroll; missing: status label styles (shimmer direction, colours) |
 | H4 | Gate A: box and token diff, ours against the oracle, report in parity/gate-a.json | — | ○ open | — |
 | H5 | Gate B: a recorded turn replayed in ours, report in parity/gate-b.json | — | ○ open | — |
 | H6 | Inventory: every visible control, ours against the oracle, to docs/MISSING.md | — | ○ open | — |
 | H7 | Feel budgets measured on the oracle and written in QUALITY.md | — | ○ open | — |
-| H8 | Hero motion: the guessed TIMING in scripts/generate-hero.mjs replaced by the oracle's recorded turn | — | ✓ done | Gate: npm run check (hero fresh), seam diff under 1 px. Evidence: scripts/generate-hero.mjs ORACLE block from traces/2026-11-08-storage.json and -say-hi.json; typing and loop reset stay ours by design |
+| H8 | Hero motion: the guessed TIMING in scripts/generate-hero.mjs replaced by the oracle's recorded turn | — | ✓ done | Gate: npm run check (hero fresh), seam diff under 1 px. Evidence: scripts/generate-hero.mjs draws rail, header, transcript, composer and panel from fixtures/states/oracle-turn-1040.json; text held to oracle-measured widths; motion from traces/2026-11-08-*.json. Region diff vs the live capture: rail 1.4%, header 0.9%, composer 1.4%, panel 1.3%. |
 
 ## S1 Talk
 

@@ -25,7 +25,10 @@ const READ = `function () {
   const kf = e ? e.getKeyframes().map((k) => { const o = {}; for (const [p, v] of Object.entries(k)) if (!['composite', 'computedOffset'].includes(p)) o[p] = typeof v === 'string' ? v.slice(0, 120) : v; return o; }) : [];
   const tm = e ? e.getTiming() : {};
   const who = el ? (el.nodeType === 1 ? el : el.parentElement) : null;
-  return { keyframes: kf, timing: { duration: tm.duration, delay: tm.delay, easing: tm.easing, iterations: tm.iterations === Infinity ? 'infinite' : tm.iterations, fill: tm.fill },
+  const cs = who ? getComputedStyle(who) : null;
+  const look = cs ? Object.fromEntries(['color', 'background-image', 'background-size', 'background-clip', '-webkit-text-fill-color', 'transform-origin']
+    .map((k) => [k, cs.getPropertyValue(k).slice(0, 200)]).filter(([, v]) => v && v !== 'none' && v !== 'auto')) : undefined;
+  return { keyframes: kf, look, timing: { duration: tm.duration, delay: tm.delay, easing: tm.easing, iterations: tm.iterations === Infinity ? 'infinite' : tm.iterations, fill: tm.fill },
            pseudo: e && e.pseudoElement || undefined, target: who && window.__oracle ? window.__oracle.describe(who) : null };
 }`;
 page.on('Animation.animationStarted', ({ animation: a }) => {
