@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-7 of 40 items done, 6 partial, 11 open, 16 not yet read on the oracle.
+8 of 40 items done, 5 partial, 11 open, 16 not yet read on the oracle.
 Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an item file, never this page.
 
 ## S0 Harness
@@ -22,7 +22,7 @@ Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an it
 | Id | Item | Journey | Status | Gate or evidence |
 |---|---|---|---|---|
 | H5 | Gate B: a recorded turn replayed in ours (needs the S1 transcript), report in parity/gate-b.json | — | ○ open | — |
-| H9 | Gate A in CI: build the app and run npm run gate in headless Chrome on every pull request | — | ◐ partial | Evidence: .github/workflows/gate.yml runs node scripts/gate.mjs --ci on macos-15 for every pull request and push to main. Done when a run is green on GitHub. |
+| H9 | Gate A in CI: build the app and run npm run gate in headless Chrome on every pull request | — | ✓ done | Gate: GitHub Actions workflow gate (macos-15): node scripts/gate.mjs --ci. Evidence: Run 42534687321 on 100bb6c: green, every recorded count matched on a clean macOS runner. Red when a count drops or a captured state has no record. |
 | T1 | App shell: TanStack Start; the Barkpark token lives only in server functions | J01 | ◐ partial | Evidence: app/src/server/barkpark.ts (server-only; token from .env or the owner's bp login); app/src/chat/api.ts loadChat/startChat/sendMessage; /api/chat/$id/events passes Barkpark's stream through. Browser bundle has no token code (build checked). Missing: a real turn end to end (T6). |
 | T2 | Transcript: user and bot bubbles, grouping, the day and time line | J01 | ◐ partial | Evidence: app/src/components/Transcript.tsx: bubbles 15/22, 7x12, radius 18, max 480, user .18 / bot .04, +12 on a change of speaker, time row 12/16 (fixture articles 71-86); slide-in 12 pt 240 ms. Not yet gated: Gate B (H5) needs a live turn. |
 | T3 | Working line: the bot's mark and what it is doing now | J01 | ◐ partial | Evidence: Working line in Transcript.tsx + styles.css: row 180 ms, mark 340 ms spring, label 180 ms (+220 ms first), shimmer steps(60) 2.2 s, face squash and tilt, exit 140 ms. Labels: Thinking, Typing…, a tool's own description. The oracle's summary labels ("Checking system storage") need tool events from the host: task-f13fc4b4dc2af6de. |
