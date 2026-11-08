@@ -1,11 +1,11 @@
 # Traces
 
-Recorded oracle turns, order and timing only ([0002](../docs/decisions/0002-gates.md)). One file per turn: `<id>.json`.
+Recorded oracle turns ([0002](../docs/decisions/0002-gates.md)), written by `node scripts/oracle/record.mjs <recipe>`. One file per turn.
 
-```json
-{ "id": "T0001-say-hi", "captured": "2026-11-09", "recipe": "say-hi",
-  "steps": [{ "t": 0, "kind": "user-bubble" }, { "t": 410, "kind": "working-line" },
-            { "t": 2380, "kind": "bot-bubble" }, { "t": 2390, "kind": "working-line-gone" }] }
-```
+| Field | What |
+|---|---|
+| `events` | DOM changes in ms after the gesture: what was added or removed, its kind (`bubble:user`, `main`, `panel`, `rail`), box, short status labels as text, bubble text as a length only |
+| `animations` | Every transition and animation the engine started: duration, delay, easing, keyframes, and what it moved |
+| `samples`, `scroll` | Opacity and position of new parts per frame (only while the window draws), and the transcript's scroll |
 
-Gate B plays the same recipe through BarkBot and compares kinds, order and grouping; times are checked against the feel budgets in [QUALITY.md](../QUALITY.md).
+Recipes and the send guard live in [`scripts/oracle/recipes.mjs`](../scripts/oracle/recipes.mjs). Starting the oracle: [`scripts/oracle/README.md`](../scripts/oracle/README.md).

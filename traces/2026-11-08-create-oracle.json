@@ -1,0 +1,2112 @@
+{
+ "id": "2026-11-08-create-oracle",
+ "recipe": "create-oracle",
+ "bot": "Grookie",
+ "captured": "2026-11-08T21:25:58.043Z",
+ "engine": "electron",
+ "durationS": 19.166,
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "note": "times in ms from the gesture; samples are [eventIndex, t, opacity, transform, y]; scroll is [t, scrollTop, scrollHeight]",
+ "events": [
+  {
+   "t": 349.2,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "div",
+   "label": "Resize details"
+  },
+  {
+   "t": 349.2,
+   "type": "text",
+   "kind": "other",
+   "text": "Creating…"
+  },
+  {
+   "t": 349.2,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "aside"
+  },
+  {
+   "t": 367.9,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "aside"
+  },
+  {
+   "t": 663.4,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "aside"
+  },
+  {
+   "t": 688.4,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "div"
+  },
+  {
+   "t": 1150.9,
+   "type": "add",
+   "kind": "rail",
+   "tag": "div",
+   "role": "listitem",
+   "box": [
+    12,
+    187,
+    64,
+    54
+   ]
+  },
+  {
+   "t": 1150.9,
+   "type": "add",
+   "kind": "rail",
+   "tag": "div",
+   "role": "separator",
+   "label": "Resize sidebar",
+   "box": [
+    82,
+    0,
+    12,
+    760
+   ]
+  },
+  {
+   "t": 1150.9,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  },
+  {
+   "t": 1150.9,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "aside"
+  },
+  {
+   "t": 1150.9,
+   "type": "remove",
+   "kind": "rail",
+   "tag": "span"
+  },
+  {
+   "t": 1150.9,
+   "type": "add",
+   "kind": "rail",
+   "tag": "span",
+   "data": "grokState",
+   "box": [
+    26,
+    196,
+    36,
+    36
+   ]
+  },
+  {
+   "t": 1150.9,
+   "type": "add",
+   "kind": "other",
+   "tag": "span",
+   "box": [
+    0,
+    0,
+    8,
+    8
+   ]
+  },
+  {
+   "t": 1150.9,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    -2,
+    -2,
+    12,
+    12
+   ]
+  },
+  {
+   "t": 2361.1,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "aside"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "rail",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "text",
+   "kind": "main",
+   "text": "Oracle"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-label",
+   "value": "Oracle",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "bubble:assistant",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "bubble:assistant",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "bubble:assistant",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "bubble:assistant",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "bubble:assistant",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "bubble:assistant",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "main",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "add",
+   "kind": "main",
+   "tag": "div",
+   "data": "scrollPadding visibility direction",
+   "box": [
+    88,
+    0,
+    952,
+    760
+   ],
+   "text": "Today 10:25 PM",
+   "textLength": 14
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "main",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "add",
+   "kind": "panel",
+   "tag": "div",
+   "box": [
+    1040,
+    0,
+    320,
+    760
+   ],
+   "textLength": 16
+  },
+  {
+   "t": 2740.7,
+   "type": "add",
+   "kind": "panel",
+   "tag": "div",
+   "role": "separator",
+   "label": "Resize details",
+   "box": [
+    1040,
+    0,
+    10,
+    760
+   ]
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-label",
+   "value": "Conversation transcript",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "tag": "aside"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-hidden",
+   "tag": "header"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-hidden",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "other",
+   "name": "aria-hidden",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "other",
+   "name": "aria-hidden",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "other",
+   "name": "aria-hidden",
+   "tag": "div"
+  },
+  {
+   "t": 2740.7,
+   "type": "add",
+   "kind": "panel",
+   "tag": "svg",
+   "box": [
+    1151,
+    51,
+    98,
+    98
+   ]
+  },
+  {
+   "t": 2740.7,
+   "type": "add",
+   "kind": "panel",
+   "tag": "svg",
+   "box": [
+    1281,
+    269,
+    37,
+    37
+   ]
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "tag": "aside"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-hidden",
+   "tag": "main"
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "tag": "aside"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 2740.7,
+   "type": "add",
+   "kind": "main",
+   "tag": "div",
+   "data": "rowKey",
+   "box": [
+    104,
+    0,
+    920,
+    60
+   ]
+  },
+  {
+   "t": 2740.7,
+   "type": "add",
+   "kind": "main",
+   "tag": "div",
+   "data": "rowKey",
+   "box": [
+    104,
+    150,
+    920,
+    72
+   ]
+  },
+  {
+   "t": 2740.7,
+   "type": "add",
+   "kind": "main",
+   "tag": "div",
+   "data": "rowKey",
+   "box": [
+    104,
+    60,
+    920,
+    90
+   ],
+   "text": "Today 10:25 PM",
+   "textLength": 14
+  },
+  {
+   "t": 2740.7,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-busy",
+   "value": "true",
+   "tag": "div"
+  },
+  {
+   "t": 2799.2,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "span"
+  },
+  {
+   "t": 2799.2,
+   "type": "add",
+   "kind": "panel",
+   "tag": "span",
+   "box": [
+    1268,
+    268,
+    64,
+    40
+   ]
+  },
+  {
+   "t": 2874.1,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "span"
+  },
+  {
+   "t": 2874.1,
+   "type": "add",
+   "kind": "panel",
+   "tag": "span",
+   "box": [
+    1268,
+    268,
+    64,
+    40
+   ]
+  },
+  {
+   "t": 2874.1,
+   "type": "add",
+   "kind": "panel",
+   "tag": "svg",
+   "box": [
+    1281,
+    269,
+    37,
+    37
+   ]
+  },
+  {
+   "t": 3029.3,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "span"
+  },
+  {
+   "t": 3029.3,
+   "type": "add",
+   "kind": "panel",
+   "tag": "span",
+   "box": [
+    1268,
+    268,
+    64,
+    40
+   ]
+  },
+  {
+   "t": 3224,
+   "type": "add",
+   "kind": "panel",
+   "tag": "section",
+   "box": [
+    1056,
+    229,
+    288,
+    109
+   ]
+  },
+  {
+   "t": 3241.4,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "div"
+  },
+  {
+   "t": 3241.4,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "span"
+  },
+  {
+   "t": 3241.4,
+   "type": "add",
+   "kind": "panel",
+   "tag": "span",
+   "box": [
+    1268,
+    409,
+    64,
+    40
+   ]
+  },
+  {
+   "t": 3241.4,
+   "type": "add",
+   "kind": "panel",
+   "tag": "svg",
+   "box": [
+    1281,
+    410,
+    37,
+    37
+   ]
+  },
+  {
+   "t": 3345.3,
+   "type": "remove",
+   "kind": "main",
+   "tag": "time"
+  },
+  {
+   "t": 3345.3,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 3345.3,
+   "type": "add",
+   "kind": "other",
+   "tag": "span",
+   "box": [
+    -1,
+    -1,
+    104,
+    20
+   ],
+   "text": "Oracle replied",
+   "textLength": 14
+  },
+  {
+   "t": 3345.3,
+   "type": "add",
+   "kind": "main",
+   "tag": "div",
+   "data": "index rowKey",
+   "box": [
+    104,
+    60,
+    920,
+    54
+   ],
+   "text": "Today 10:25 PM",
+   "textLength": 14
+  },
+  {
+   "t": 3345.3,
+   "type": "add",
+   "kind": "bubble:assistant",
+   "tag": "div",
+   "role": "article",
+   "data": "index rowKey",
+   "box": [
+    104,
+    114,
+    920,
+    40
+   ],
+   "textLength": 64
+  },
+  {
+   "t": 3450.8,
+   "type": "add",
+   "kind": "rail",
+   "tag": "span",
+   "role": "status",
+   "label": "Unread activity",
+   "box": [
+    52,
+    173,
+    8,
+    8
+   ]
+  },
+  {
+   "t": 3450.8,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-label",
+   "value": "Oracle, Unread activity",
+   "tag": "button"
+  },
+  {
+   "t": 4339.9,
+   "type": "remove",
+   "kind": "other",
+   "tag": "div"
+  },
+  {
+   "t": 4339.9,
+   "type": "remove",
+   "kind": "bubble:assistant",
+   "tag": "div"
+  },
+  {
+   "t": 6320.9,
+   "type": "attr",
+   "kind": "bubble:assistant",
+   "name": "aria-busy",
+   "tag": "div"
+  },
+  {
+   "t": 6332.8,
+   "type": "text",
+   "kind": "panel",
+   "text": "Waking up…"
+  },
+  {
+   "t": 8310.7,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "span"
+  },
+  {
+   "t": 8310.7,
+   "type": "add",
+   "kind": "panel",
+   "tag": "span",
+   "box": [
+    1268,
+    409,
+    64,
+    40
+   ]
+  },
+  {
+   "t": 8696,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "span"
+  },
+  {
+   "t": 8696,
+   "type": "add",
+   "kind": "panel",
+   "tag": "span",
+   "box": [
+    1268,
+    409,
+    64,
+    40
+   ]
+  },
+  {
+   "t": 8696,
+   "type": "add",
+   "kind": "panel",
+   "tag": "svg",
+   "box": [
+    1281,
+    410,
+    37,
+    37
+   ]
+  }
+ ],
+ "samples": [
+  [
+   6,
+   1163.9,
+   1,
+   null,
+   187
+  ],
+  [
+   7,
+   1163.9,
+   1,
+   null,
+   0
+  ],
+  [
+   11,
+   1163.9,
+   1,
+   null,
+   196
+  ],
+  [
+   12,
+   1163.9,
+   1,
+   null,
+   0
+  ],
+  [
+   13,
+   1163.9,
+   1,
+   null,
+   -2
+  ],
+  [
+   6,
+   1169.2,
+   1,
+   null,
+   187
+  ],
+  [
+   7,
+   1169.2,
+   1,
+   null,
+   0
+  ],
+  [
+   11,
+   1169.2,
+   1,
+   null,
+   196
+  ],
+  [
+   12,
+   1169.2,
+   1,
+   null,
+   0
+  ],
+  [
+   13,
+   1169.2,
+   1,
+   null,
+   -2
+  ],
+  [
+   6,
+   1176.1,
+   1,
+   null,
+   187
+  ],
+  [
+   7,
+   1176.1,
+   1,
+   null,
+   0
+  ],
+  [
+   11,
+   1176.1,
+   1,
+   null,
+   196
+  ],
+  [
+   12,
+   1176.1,
+   1,
+   null,
+   0
+  ],
+  [
+   13,
+   1176.1,
+   1,
+   null,
+   -2
+  ],
+  [
+   6,
+   1193.9,
+   1,
+   null,
+   187
+  ],
+  [
+   7,
+   1193.9,
+   1,
+   null,
+   0
+  ],
+  [
+   11,
+   1193.9,
+   1,
+   null,
+   196
+  ],
+  [
+   12,
+   1193.9,
+   1,
+   null,
+   0
+  ],
+  [
+   13,
+   1193.9,
+   1,
+   null,
+   -2
+  ],
+  [
+   6,
+   1209,
+   1,
+   null,
+   187
+  ],
+  [
+   7,
+   1209,
+   1,
+   null,
+   0
+  ],
+  [
+   11,
+   1209,
+   1,
+   null,
+   196
+  ],
+  [
+   12,
+   1209,
+   1,
+   null,
+   0
+  ],
+  [
+   13,
+   1209,
+   1,
+   null,
+   -2
+  ],
+  [
+   6,
+   1227,
+   1,
+   null,
+   187
+  ],
+  [
+   7,
+   1227,
+   1,
+   null,
+   0
+  ],
+  [
+   11,
+   1227,
+   1,
+   null,
+   196
+  ],
+  [
+   12,
+   1227,
+   1,
+   null,
+   0
+  ],
+  [
+   13,
+   1227,
+   1,
+   null,
+   -2
+  ],
+  [
+   6,
+   1242.7,
+   1,
+   null,
+   187
+  ],
+  [
+   7,
+   1242.7,
+   1,
+   null,
+   0
+  ],
+  [
+   11,
+   1242.7,
+   1,
+   null,
+   196
+  ],
+  [
+   12,
+   1242.7,
+   1,
+   null,
+   0
+  ],
+  [
+   13,
+   1242.7,
+   1,
+   null,
+   -2
+  ],
+  [
+   6,
+   1260,
+   1,
+   null,
+   187
+  ],
+  [
+   7,
+   1260,
+   1,
+   null,
+   0
+  ],
+  [
+   11,
+   1260,
+   1,
+   null,
+   196
+  ],
+  [
+   12,
+   1260,
+   1,
+   null,
+   0
+  ],
+  [
+   13,
+   1260,
+   1,
+   null,
+   -2
+  ],
+  [
+   6,
+   1276.2,
+   1,
+   null,
+   187
+  ],
+  [
+   7,
+   1276.2,
+   1,
+   null,
+   0
+  ],
+  [
+   11,
+   1276.2,
+   1,
+   null,
+   196
+  ],
+  [
+   12,
+   1276.2,
+   1,
+   null,
+   0
+  ],
+  [
+   13,
+   1276.2,
+   1,
+   null,
+   -2
+  ]
+ ],
+ "scroll": [
+  [
+   9.8,
+   14882,
+   15642
+  ],
+  [
+   440.3,
+   14884,
+   15644
+  ],
+  [
+   466.4,
+   14835,
+   15595
+  ]
+ ],
+ "animations": [
+  {
+   "type": "CSSAnimation",
+   "name": "sand-12vywve-B",
+   "durationMs": 2400,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-in-out"
+    ],
+    [
+     "50%",
+     null,
+     "ease-in-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-in-out"
+    ]
+   ],
+   "t": -19,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": -5,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": -800,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": -4,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": -1600,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": -4,
+   "target": "gone"
+  },
+  {
+   "type": "CSSTransition",
+   "name": "color",
+   "durationMs": 120,
+   "delayMs": 0,
+   "easing": "ease-out",
+   "iterations": 1,
+   "t": 49,
+   "target": {
+    "kind": "other",
+    "tag": "button",
+    "data": "sentiment size variant",
+    "box": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "text": "Creating…",
+    "textLength": 9
+   }
+  },
+  {
+   "type": "CSSTransition",
+   "name": "background-color",
+   "durationMs": 120,
+   "delayMs": 0,
+   "easing": "ease-out",
+   "iterations": 1,
+   "t": 49,
+   "target": {
+    "kind": "other",
+    "tag": "button",
+    "data": "sentiment size variant",
+    "box": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "text": "Creating…",
+    "textLength": 9
+   }
+  },
+  {
+   "type": "CSSTransition",
+   "name": "width",
+   "durationMs": 300,
+   "delayMs": 0,
+   "easing": "cubic-bezier(0.2, 0, 0, 1)",
+   "iterations": 1,
+   "t": 460,
+   "target": {
+    "kind": "panel",
+    "tag": "aside",
+    "label": "Conversation details",
+    "data": "open",
+    "box": [
+     720,
+     0,
+     320,
+     760
+    ],
+    "textLength": 140
+   }
+  },
+  {
+   "type": "CSSTransition",
+   "name": "color",
+   "durationMs": 120,
+   "delayMs": 0,
+   "easing": "ease-out",
+   "iterations": 1,
+   "t": 462,
+   "target": {
+    "kind": "other",
+    "tag": "button",
+    "data": "sentiment size variant",
+    "box": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "text": "Cancel",
+    "textLength": 6
+   }
+  },
+  {
+   "type": "CSSTransition",
+   "name": "background-color",
+   "durationMs": 120,
+   "delayMs": 0,
+   "easing": "ease-out",
+   "iterations": 1,
+   "t": 463,
+   "target": {
+    "kind": "other",
+    "tag": "button",
+    "data": "sentiment size variant",
+    "box": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "text": "Cancel",
+    "textLength": 6
+   }
+  },
+  {
+   "type": "CSSTransition",
+   "name": "color",
+   "durationMs": 120,
+   "delayMs": 0,
+   "easing": "ease-out",
+   "iterations": 1,
+   "t": 463,
+   "target": {
+    "kind": "other",
+    "tag": "button",
+    "data": "sentiment size variant",
+    "box": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "text": "Creating…",
+    "textLength": 9
+   }
+  },
+  {
+   "type": "CSSTransition",
+   "name": "background-color",
+   "durationMs": 120,
+   "delayMs": 0,
+   "easing": "ease-out",
+   "iterations": 1,
+   "t": 464,
+   "target": {
+    "kind": "other",
+    "tag": "button",
+    "data": "sentiment size variant",
+    "box": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "text": "Creating…",
+    "textLength": 9
+   }
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-12vywve-B",
+   "durationMs": 2400,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-in-out"
+    ],
+    [
+     "50%",
+     null,
+     "ease-in-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-in-out"
+    ]
+   ],
+   "t": 2789,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1wc8ddo-B",
+   "durationMs": 700,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "linear"
+    ],
+    [
+     "100%",
+     null,
+     "linear"
+    ]
+   ],
+   "t": 2792,
+   "target": "gone"
+  },
+  {
+   "type": "CSSTransition",
+   "name": "width",
+   "durationMs": 300,
+   "delayMs": 0,
+   "easing": "cubic-bezier(0.2, 0, 0, 1)",
+   "iterations": 1,
+   "t": 2795,
+   "target": {
+    "kind": "panel",
+    "tag": "aside",
+    "label": "Conversation details",
+    "data": "open",
+    "box": [
+     720,
+     0,
+     320,
+     760
+    ],
+    "textLength": 140
+   }
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": -800,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 2796,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 2796,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": -1600,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 2797,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18re5ia-B",
+   "durationMs": 360,
+   "delayMs": 200,
+   "easing": "linear",
+   "iterations": 1,
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 2798,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-gcq4cg-B",
+   "durationMs": 180,
+   "delayMs": 420,
+   "easing": "linear",
+   "iterations": 1,
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "cubic-bezier(0.22, 1, 0.36, 1)"
+    ],
+    [
+     "100%",
+     null,
+     "cubic-bezier(0.22, 1, 0.36, 1)"
+    ]
+   ],
+   "t": 2798,
+   "target": "gone"
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-top-color",
+   "durationMs": 150,
+   "delayMs": 0,
+   "easing": "ease",
+   "iterations": 1,
+   "t": 2799,
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "box": [
+     104,
+     700,
+     600,
+     44
+    ]
+   }
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-bottom-color",
+   "durationMs": 150,
+   "delayMs": 0,
+   "easing": "ease",
+   "iterations": 1,
+   "t": 2812,
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "box": [
+     104,
+     700,
+     600,
+     44
+    ]
+   }
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-left-color",
+   "durationMs": 150,
+   "delayMs": 0,
+   "easing": "ease",
+   "iterations": 1,
+   "t": 2813,
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "box": [
+     104,
+     700,
+     600,
+     44
+    ]
+   }
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-right-color",
+   "durationMs": 150,
+   "delayMs": 0,
+   "easing": "ease",
+   "iterations": 1,
+   "t": 2817,
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "box": [
+     104,
+     700,
+     600,
+     44
+    ]
+   }
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": -800,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 2890,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-12vywve-B",
+   "durationMs": 2400,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-in-out"
+    ],
+    [
+     "50%",
+     null,
+     "ease-in-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-in-out"
+    ]
+   ],
+   "t": 2890,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": -1600,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 2890,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 2890,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-12vywve-B",
+   "durationMs": 2400,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-in-out"
+    ],
+    [
+     "50%",
+     null,
+     "ease-in-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-in-out"
+    ]
+   ],
+   "t": 3256,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": -1600,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 3256,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 3256,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": -800,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 3256,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1uvc5f5-B",
+   "durationMs": 140,
+   "delayMs": 200,
+   "easing": "linear",
+   "iterations": 1,
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 3453,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18re5ia-B",
+   "durationMs": 130,
+   "delayMs": 0,
+   "easing": "linear",
+   "iterations": 1,
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "cubic-bezier(0.22, 1, 0.36, 1)"
+    ],
+    [
+     "100%",
+     null,
+     "cubic-bezier(0.22, 1, 0.36, 1)"
+    ]
+   ],
+   "t": 3453,
+   "target": {
+    "kind": "rail",
+    "tag": "span",
+    "role": "status",
+    "label": "Unread activity",
+    "box": [
+     52,
+     164,
+     8,
+     8
+    ]
+   }
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "durationMs": 160,
+   "delayMs": 0,
+   "easing": "ease-out",
+   "iterations": 1,
+   "t": 6344,
+   "target": "gone"
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": -800,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 8708,
+   "target": {
+    "kind": "panel",
+    "tag": "span",
+    "box": [
+     992,
+     399,
+     5,
+     11
+    ]
+   }
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 8708,
+   "target": {
+    "kind": "panel",
+    "tag": "span",
+    "box": [
+     988,
+     403,
+     5,
+     9
+    ]
+   }
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-12vywve-B",
+   "durationMs": 2400,
+   "delayMs": 0,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-in-out"
+    ],
+    [
+     "50%",
+     null,
+     "ease-in-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-in-out"
+    ]
+   ],
+   "t": 8712,
+   "target": {
+    "kind": "panel",
+    "tag": "span",
+    "box": [
+     967,
+     416,
+     25,
+     25
+    ]
+   }
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "durationMs": 2400,
+   "delayMs": -1600,
+   "easing": "linear",
+   "keyframes": [
+    [
+     "0%",
+     null,
+     "ease-out"
+    ],
+    [
+     "25%",
+     null,
+     "ease-out"
+    ],
+    [
+     "100%",
+     null,
+     "ease-out"
+    ]
+   ],
+   "t": 8716,
+   "target": {
+    "kind": "panel",
+    "tag": "span",
+    "box": [
+     996,
+     409,
+     4,
+     7
+    ]
+   }
+  }
+ ]
+}

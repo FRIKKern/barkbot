@@ -1,0 +1,418 @@
+{
+ "id": "2026-11-08-new-bot",
+ "recipe": "new-bot",
+ "bot": "Grookie",
+ "captured": "2026-11-08T21:24:57.491Z",
+ "engine": "electron",
+ "durationS": 15.943,
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "note": "times in ms from the gesture; samples are [eventIndex, t, opacity, transform, y]; scroll is [t, scrollTop, scrollHeight]",
+ "events": [
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "div",
+   "data": "status floatingUiInert",
+   "box": [
+    0,
+    0,
+    1040,
+    760
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "div",
+   "role": "dialog",
+   "data": "uiDialogRoot presentation status floatingUiFocusable",
+   "box": [
+    300,
+    91,
+    440,
+    579
+   ],
+   "textLength": 28
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    446,
+    136,
+    147,
+    147
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    380,
+    327,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    436,
+    327,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    492,
+    327,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    548,
+    327,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    604,
+    327,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    380,
+    383,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    436,
+    383,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    492,
+    383,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    548,
+    383,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    604,
+    383,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    436,
+    439,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    492,
+    439,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "add",
+   "kind": "other",
+   "tag": "svg",
+   "box": [
+    548,
+    439,
+    55,
+    55
+   ]
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "aside"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "bubble:user",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "main"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "other",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "div"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "aside"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "div"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "div"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "div"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "div"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "div"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "span"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "header"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "div"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "other",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "span"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "other",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "div"
+  },
+  {
+   "t": 317.2,
+   "type": "attr",
+   "kind": "other",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "div"
+  },
+  {
+   "t": 6349.4,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "aside"
+  },
+  {
+   "t": 6862.1,
+   "type": "text",
+   "kind": "panel",
+   "text": "Unreachable"
+  },
+  {
+   "t": 6862.1,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "span"
+  },
+  {
+   "t": 6862.1,
+   "type": "add",
+   "kind": "panel",
+   "tag": "span",
+   "box": [
+    948,
+    517,
+    64,
+    40
+   ]
+  },
+  {
+   "t": 6862.1,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "aside"
+  },
+  {
+   "t": 7475.4,
+   "type": "text",
+   "kind": "panel",
+   "text": "Asleep"
+  },
+  {
+   "t": 7475.4,
+   "type": "remove",
+   "kind": "panel",
+   "tag": "span"
+  },
+  {
+   "t": 7475.4,
+   "type": "add",
+   "kind": "panel",
+   "tag": "span",
+   "box": [
+    948,
+    517,
+    64,
+    40
+   ]
+  },
+  {
+   "t": 7475.4,
+   "type": "attr",
+   "kind": "panel",
+   "name": "aria-hidden",
+   "value": "true",
+   "tag": "aside"
+  },
+  {
+   "t": 7475.4,
+   "type": "add",
+   "kind": "panel",
+   "tag": "svg",
+   "box": [
+    961,
+    518,
+    37,
+    37
+   ]
+  }
+ ],
+ "samples": [],
+ "scroll": []
+}

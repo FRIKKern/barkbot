@@ -2,21 +2,21 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-0 of 33 items done, 0 partial, 14 open, 19 not yet read on the oracle.
+2 of 34 items done, 1 partial, 12 open, 19 not yet read on the oracle.
 Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Edit the JSON, never this page.
 
 ## S0 Harness
 
 | Id | Item | Journey | Status | Gate or evidence |
 |---|---|---|---|---|
-| H1 | Oracle access: headless Chrome with the owner's login copied from their tab, one lane at a time | — | ○ open | — |
+| H1 | Oracle access: headless Chrome with the owner's login copied from their tab, one lane at a time | — | ✓ done | Gate: recipes guard + 4 recorded recipes. Evidence: Grok Bot.app relaunched with --remote-debugging-port=9333 (127.0.0.1); traces/2026-11-08-*.json; the send guard refused Grookie |
 | H2 | State capture: element boxes, tokens and labels to fixtures/states/<id>.json, dated | — | ○ open | — |
-| H3 | Turn recorder: the oracle's DOM over time to traces/<id>.json | — | ○ open | — |
+| H3 | Turn recorder: the oracle's DOM over time to traces/<id>.json | — | ◐ partial | Evidence: scripts/oracle/record.mjs: DOM events, engine animations with keyframes and timing, scroll; missing: status label styles (shimmer direction, colours) |
 | H4 | Gate A: box and token diff, ours against the oracle, report in parity/gate-a.json | — | ○ open | — |
 | H5 | Gate B: a recorded turn replayed in ours, report in parity/gate-b.json | — | ○ open | — |
 | H6 | Inventory: every visible control, ours against the oracle, to docs/MISSING.md | — | ○ open | — |
 | H7 | Feel budgets measured on the oracle and written in QUALITY.md | — | ○ open | — |
-| H8 | Hero motion: the guessed TIMING in scripts/generate-hero.mjs replaced by the oracle's recorded turn | — | ○ open | — |
+| H8 | Hero motion: the guessed TIMING in scripts/generate-hero.mjs replaced by the oracle's recorded turn | — | ✓ done | Gate: npm run check (hero fresh), seam diff under 1 px. Evidence: scripts/generate-hero.mjs ORACLE block from traces/2026-11-08-storage.json and -say-hi.json; typing and loop reset stay ours by design |
 
 ## S1 Talk
 
@@ -37,7 +37,7 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 | F2 | Header: the bot's name pill, centred over the transcript | J02 | ? unread | — |
 | F5 | Top bar: sidebar toggle and Share | J02 | ? unread | — |
 | F3 | Right panel: mark, name, Activity and Library tabs, close | J03 | ? unread | — |
-| F4 | Computer card: asleep, waking, working, read from the host heartbeat | J04 | ? unread | — |
+| F4 | Computer card: asleep (zzz, breathing), waking up, unreachable, working; read from the host heartbeat | J04 | ? unread | — |
 
 ## S3 Control
 
@@ -74,6 +74,7 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 | Id | Item | Journey | Status | Gate or evidence |
 |---|---|---|---|---|
 | N1 | First run: greeting, naming, a 'Renamed to' line | J12 | ? unread | — |
+| N5 | Create New Bot dialog: name, 13 shapes, 11 colours, Cancel and Create (Create stays disabled until named) | J12 | ○ open | — |
 | N2 | Message actions on hover | — | ? unread | — |
 | N3 | Suggested card: Add to Slack and Create a routine; each opens 1:1 and stops before acting outside the page | — | ? unread | — |
 | N4 | Voice chat card: voice, speed and language pickers | — | ? unread | — |
