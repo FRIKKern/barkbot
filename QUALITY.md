@@ -4,16 +4,27 @@
 
 | Gate | Compares | Passes when |
 |---|---|---|
-| A · Look | Each named element in each captured oracle state (rail, header, bubbles, working line, cards, composer, panel) against ours, at 1280, 1600 and 2000 px | Box within 1 px; color, radius, font size, weight and line height equal |
+| A · Look | Each named element in each captured oracle state against ours in the same scene (`/gate/<state>`), at the width it was captured | Box within 1 pt on every edge; color, background, radius, font size, weight and line height equal |
 | B · Turn | A recorded oracle turn (what appears, in what order) against ours playing the same event script | Same element kinds, same order, same grouping into bubbles |
 | C · Feel | Budgets measured on the oracle first | Within the budget below |
 | Inventory | Every visible control and label in each oracle state against ours | Every gap is an item in `parity/items.json` or a named `outOfScope` entry |
 
-Both sides run in headless Chrome. The oracle's DOM is watched over time with a MutationObserver, never its network. A gate run with zero cases fails. A change that lowers a pass count does not land.
+`npm run gate` runs A and the inventory; `scripts/oracle/collect.mjs` measures both sides, so one instrument reads both. The oracle's DOM is watched over time, never its network. A gate run with zero cases fails. A change that lowers a pass count does not land.
 
 ## Feel budgets
 
-Measured on the oracle in S0 (H7), then kept here: send to first visible change, scroll pinned while a reply arrives, Enter and Shift+Enter, focus after send, panel open and close.
+Measured on the oracle on 2026-11-08 (`traces/2026-11-08-*.json`). Ours must stay inside the budget.
+
+| Moment | Oracle | Budget |
+|---|---|---|
+| Send → composer clears | 3 ms | 1 frame |
+| Send → own bubble | 325–439 ms, slides up 12 pt in 240 ms | ≤ 440 ms |
+| Send → working line | 0.96–2.03 s | when the run starts, ≤ 2.0 s |
+| Reply lands → working line gone | 101–111 ms, then a 140 ms exit | ≤ 250 ms |
+| Scroll while a reply lands | pinned: 0 pt from the bottom, 150 frames | 0 pt |
+| Enter, Shift+Enter | Enter sends; Shift+Enter adds a line (box 20 → 40 pt) and sends nothing | same |
+| Focus after send | stays in Prompt | same |
+| Details panel close, open | width 320 ↔ 0 in 300 ms, `cubic-bezier(.2,0,0,1)` | same curve |
 
 ## Oracle rules
 

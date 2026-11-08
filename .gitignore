@@ -9,3 +9,7 @@ evidence/
 fixtures/raw/
 .DS_Store
 .barkpark/papers/
+app/dist/
+app/.output/
+app/.tanstack/
+.cache/

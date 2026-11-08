@@ -2,7 +2,9 @@
   "name": "barkbot",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "check": "node scripts/check.mjs",
     "board": "node scripts/board.mjs",
@@ -10,6 +12,7 @@
     "hero": "node scripts/generate-hero.mjs",
     "roadmap": "node scripts/generate-roadmap.mjs",
     "parity": "node scripts/generate-parity.mjs",
-    "timeline": "node scripts/readme-timeline.mjs"
+    "timeline": "node scripts/readme-timeline.mjs",
+    "gate": "node scripts/gate.mjs"
   }
 }

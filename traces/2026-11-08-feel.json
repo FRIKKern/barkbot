@@ -1,0 +1,18 @@
+{
+ "id": "2026-11-08-feel",
+ "bot": "Oracle",
+ "captured": "2026-11-08T22:01:53.782Z",
+ "engine": "electron",
+ "viewport": [
+  1040,
+  760
+ ],
+ "focusAfterSend": "Prompt",
+ "send": {
+  "firstChangeMs": 3,
+  "frames": 150,
+  "maxGapFromBottom": 0,
+  "endGapFromBottom": 0
+ },
+ "note": "send part only. Its first Shift+Enter and panel readings were instrument faults (a bubble count in a list that keeps only what is on screen; the wrong Close button) and are removed; see -feel-shift.json and -feel-panel.json."
+}

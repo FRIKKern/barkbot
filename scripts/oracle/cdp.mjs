@@ -3,20 +3,20 @@
 // Read-only by design (O1): it reads the page; gestures live in recipes.
 export const PORT = Number(process.env.ORACLE_PORT || 9333);
 
-export async function targets() {
-  const res = await fetch(`http://127.0.0.1:${PORT}/json/list`);
+export async function targets(port = PORT) {
+  const res = await fetch(`http://127.0.0.1:${port}/json/list`);
   return res.json();
 }
 
 // The app's main window: the first page target that is not DevTools.
-export async function mainPage() {
-  const pages = (await targets()).filter((t) => t.type === 'page' && !t.url.startsWith('devtools://'));
-  if (!pages.length) throw new Error(`no page on port ${PORT}: is Grok Bot running with --remote-debugging-port=${PORT}?`);
+export async function mainPage(port = PORT) {
+  const pages = (await targets(port)).filter((t) => t.type === 'page' && !t.url.startsWith('devtools://'));
+  if (!pages.length) throw new Error(`no page on port ${port}: is it running with --remote-debugging-port=${port}?`);
   return pages[0];
 }
 
-export async function connect(target) {
-  const t = target || (await mainPage());
+export async function connect(target, port = PORT) {
+  const t = target || (await mainPage(port));
   const ws = new WebSocket(t.webSocketDebuggerUrl);
   await new Promise((ok, bad) => { ws.onopen = ok; ws.onerror = bad; });
   let id = 0;

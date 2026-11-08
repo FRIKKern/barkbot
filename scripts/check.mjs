@@ -7,6 +7,7 @@ import { path, read, items, journeys, slices } from './lib/data.mjs';
 import { roadmapSvg } from './generate-roadmap.mjs';
 import { journeysSvg, parityMd } from './generate-parity.mjs';
 import { heroSvg } from './generate-hero.mjs';
+import { controls } from './lib/controls.mjs';
 
 const fails = [];
 const ran = {};
@@ -78,8 +79,29 @@ for (const f of tracked) {
   if (SECRET.test(readFileSync(path(f), 'utf8'))) fail(`${f}: looks like a secret`);
 }
 
+// 6. Inventory, offline: every control in every captured state belongs to an item (its `controls`).
+const stateFiles = readdirSync(path('fixtures', 'states')).filter((f) => f.endsWith('.json'));
+for (const f of stateFiles) {
+  const state = JSON.parse(read('fixtures', 'states', f));
+  for (const name of new Set(controls(state).map((c) => c.name))) {
+    rule('controls tracked', 1);
+    if (!its.some((i) => (i.controls || []).includes(name))) fail(`inventory: ${f} has control "${name}" that no item in parity/items.json claims`);
+  }
+}
+
+// 7. Gate A has a recorded run for every captured state, and it checked something.
+const gateFile = path('parity', 'gate-a.json');
+const gate = existsSync(gateFile) ? JSON.parse(readFileSync(gateFile, 'utf8')) : { states: [] };
+for (const f of stateFiles) {
+  rule('gate records', 1);
+  const id = f.replace(/\.json$/, '');
+  const s = gate.states.find((x) => x.id === id);
+  if (!s) fail(`gate: no Gate A run for ${id}: run npm run gate`);
+  else if (!s.cases) fail(`gate: the Gate A run for ${id} checked nothing`);
+}
+
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets']) {
+for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'gate records']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

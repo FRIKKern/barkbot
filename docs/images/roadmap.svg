@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="704" viewBox="0 0 1200 704" role="img" aria-labelledby="t d">
 <title id="t">BarkBot roadmap</title>
-<desc id="d">0 of 8 slices delivered. S0 Harness: now, reward: 1:1 becomes a number, 2 of 8 items done. S1 Talk: later, reward: A BarkBot you can talk to, 0 of 6 items done. S2 Frame: later, reward: It looks like the real thing, 0 of 5 items done. S3 Control: later, reward: Trusted with long work, 0 of 2 items done. S4 Things: later, reward: It shows its work, 0 of 3 items done. S5 Ask: later, reward: It asks before it acts, 0 of 3 items done. S6 Own computer: later, reward: It works while you are away, 0 of 2 items done. S7 Hello: later, reward: Nothing left to tell apart, 0 of 5 items done.</desc>
+<desc id="d">0 of 8 slices delivered. S0 Harness: now, reward: 1:1 becomes a number, 5 of 8 items done. S1 Talk: later, reward: A BarkBot you can talk to, 0 of 6 items done. S2 Frame: later, reward: It looks like the real thing, 0 of 5 items done. S3 Control: later, reward: Trusted with long work, 0 of 2 items done. S4 Things: later, reward: It shows its work, 0 of 3 items done. S5 Ask: later, reward: It asks before it acts, 0 of 3 items done. S6 Own computer: later, reward: It works while you are away, 0 of 2 items done. S7 Hello: later, reward: Nothing left to tell apart, 0 of 5 items done.</desc>
 <style>
   svg { --bg:#f7f6f3; --card:#ffffff; --line:#e4e1da; --ink:#1c1b19; --muted:#6e6b64; --done:#2f7d52; --now:#c27a12; --todo:#a29f97; --unk:#8569b3; --nowbg:#fff5e3; --accent:#e8962e; }
   @media (prefers-color-scheme: dark) {
@@ -31,10 +31,10 @@
 <path d="M60 282H288" class="rule"/>
 <text x="60" y="312" font-size="16">1:1 becomes a number</text>
 <rect x="60" y="346" width="228" height="5" rx="2.5" class="track"/>
-<rect x="60" y="346" width="57" height="5" rx="2.5" class="bar"/>
+<rect x="60" y="346" width="142.5" height="5" rx="2.5" class="bar"/>
 <clipPath id="track-S0"><rect x="60" y="346" width="228" height="5" rx="2.5"/></clipPath>
 <g clip-path="url(#track-S0)"><rect class="sweep" x="-60" y="346" width="120" height="5" fill="url(#shimmer)"/></g>
-<text x="60" y="366" font-size="13" class="muted">2 of 8 items done · 0 of 4 criteria met</text>
+<text x="60" y="366" font-size="13" class="muted">5 of 8 items done · 0 of 4 criteria met</text>
 <text x="60" y="392" font-size="15" class="now">◐ in progress</text>
 </g>
 <g data-slice="S1">

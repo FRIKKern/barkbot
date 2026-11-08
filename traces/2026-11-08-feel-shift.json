@@ -1,0 +1,27 @@
+{
+ "id": "2026-11-08-feel",
+ "bot": "Oracle",
+ "captured": "2026-11-08T22:03:18.267Z",
+ "engine": "electron",
+ "viewport": [
+  1040,
+  760
+ ],
+ "shiftEnter": {
+  "before": {
+   "chars": 29,
+   "breaks": 0,
+   "blocks": 1,
+   "height": 20
+  },
+  "after": {
+   "chars": 29,
+   "breaks": 2,
+   "blocks": 1,
+   "height": 40
+  },
+  "sent": false,
+  "newLine": true,
+  "clearedAfter": true
+ }
+}

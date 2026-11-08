@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 8 changes
+- **Today** · 9 changes
+  - S0 harness: Gate A, inventory, feel budgets, and the app skeleton
   - Hero motion pass: the working face moves, eases match the oracle
-  - Hero rebuilt from a captured oracle state
 <!-- timeline:end -->
 
 ## Where things live (one fact, one home)
@@ -39,6 +39,7 @@ read · one gesture · read ─────► fixtures/ and traces/
 | Why | [`docs/decisions/`](docs/decisions/), one page each, superseded never edited |
 | Captured oracle states (numbers only) | `fixtures/states/` |
 | Recorded oracle turns (order and timing only) | `traces/` |
+| The app | `app/` (TanStack Start + React); Gate A's results in `parity/gate-a.json` and `parity/inventory.json` |
 | How we work | [`AGENTS.md`](AGENTS.md), [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
 ## Run it
@@ -47,6 +48,6 @@ read · one gesture · read ─────► fixtures/ and traces/
 npm run check    # doc caps, links, items, fresh pictures, no secrets
 npm run board    # snapshot the Barkpark board (needs bp)
 npm run docs     # redraw the pictures, PARITY.md and the timeline
+npm run gate     # Gate A and the inventory: the app against every captured oracle state
+cd app && pnpm install && pnpm dev   # the app on http://localhost:3170
 ```
-
-The app itself arrives with slice S1.

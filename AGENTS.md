@@ -10,7 +10,8 @@ item status   ─► parity/items.json (one row per item, evidence on done)
 what "works"  ─► JOURNEYS.md (J01–J13)
 how good      ─► QUALITY.md (gates, oracle rules O1–O4, pace)
 why           ─► docs/decisions/NNNN-*.md (supersede, never edit)
-the oracle    ─► Grok Bot in the owner's logged-in tab, read headless
+the oracle    ─► Grok Bot.app on the owner's Mac, over a local DevTools port (0006)
+the app       ─► app/ (TanStack Start); /gate/<state> is Gate A's stage
 ```
 
 ## Loop
@@ -19,7 +20,7 @@ the oracle    ─► Grok Bot in the owner's logged-in tab, read headless
 2. An unread item is captured on the oracle first (O1), then built.
 3. Work in a worktree. The main checkout stays on `main`.
 4. Name the item in the commit: `T3: working line with the bot's mark`.
-5. `npm run check` before every commit.
+5. `npm run check` before every commit; `npm run gate` after any change in `app/`.
 6. Set the item in `parity/items.json` with gate and evidence, then `npm run docs`.
 7. Evidence (clips, screenshots) goes on the task, never in git.
 

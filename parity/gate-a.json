@@ -1,0 +1,186 @@
+{
+ "run": "2026-11-08T22:10:28.838Z",
+ "states": [
+  {
+   "id": "oracle-turn-1040",
+   "captured": "2026-11-08",
+   "viewport": [
+    1040,
+    760,
+    2
+   ],
+   "cases": 39,
+   "pass": 27,
+   "results": [
+    {
+     "key": "aside:Bots",
+     "pass": true
+    },
+    {
+     "key": "control:Bot tile",
+     "pass": true
+    },
+    {
+     "key": "control:Bot tile#2",
+     "pass": true
+    },
+    {
+     "key": "control:New Bot",
+     "pass": true
+    },
+    {
+     "key": "control:Connect apps",
+     "pass": true
+    },
+    {
+     "key": "control:Open account menu",
+     "pass": true
+    },
+    {
+     "key": "control:View conversation details",
+     "pass": true
+    },
+    {
+     "key": "span:Oracle",
+     "pass": true
+    },
+    {
+     "key": "control:Share",
+     "pass": true
+    },
+    {
+     "key": "span:Share",
+     "pass": true
+    },
+    {
+     "key": "control:Prompt",
+     "pass": true
+    },
+    {
+     "key": "control:Composer actions",
+     "pass": true
+    },
+    {
+     "key": "control:Start voice input",
+     "pass": true
+    },
+    {
+     "key": "control:Start voice chat",
+     "pass": true
+    },
+    {
+     "key": "aside:Conversation details",
+     "pass": true
+    },
+    {
+     "key": "control:Close",
+     "pass": true
+    },
+    {
+     "key": "control:Edit Bot avatar",
+     "pass": true
+    },
+    {
+     "key": "control:Bot name",
+     "pass": false,
+     "why": "box off by 1.5,0,-2.9,0"
+    },
+    {
+     "key": "control:Activity",
+     "pass": false,
+     "why": "box off by -1.4,0,0.9,0"
+    },
+    {
+     "key": "control:Library",
+     "pass": false,
+     "why": "box off by -0.4,0,1.9,0"
+    },
+    {
+     "key": "span:Suggested",
+     "pass": true
+    },
+    {
+     "key": "control:Add to Slack",
+     "pass": true
+    },
+    {
+     "key": "span:Add to Slack",
+     "pass": true
+    },
+    {
+     "key": "control:Create a routine",
+     "pass": true
+    },
+    {
+     "key": "span:Create a routine",
+     "pass": false,
+     "why": "box off by 0,0,1.9,0"
+    },
+    {
+     "key": "span:Computer",
+     "pass": true
+    },
+    {
+     "key": "control:Bot's computer",
+     "pass": true
+    },
+    {
+     "key": "bdi:Bot's computer",
+     "pass": false,
+     "why": "box off by 0,0,2.2,0"
+    },
+    {
+     "key": "bdi:Asleep",
+     "pass": true
+    },
+    {
+     "key": "span:Voice chat",
+     "pass": false,
+     "why": "box off by 0,0,1.2,0"
+    },
+    {
+     "key": "span:Voice",
+     "pass": true
+    },
+    {
+     "key": "control:Voice",
+     "pass": false,
+     "why": "box off by -3.5,0,3.5,0"
+    },
+    {
+     "key": "span:Helix",
+     "pass": false,
+     "why": "box off by -2.5,0,1.5,0"
+    },
+    {
+     "key": "span:Speed",
+     "pass": true
+    },
+    {
+     "key": "control:Speed",
+     "pass": false,
+     "why": "box off by -2.8,0,2.8,0"
+    },
+    {
+     "key": "span:1x",
+     "pass": false,
+     "why": "box off by -1.8,0,0.8,0"
+    },
+    {
+     "key": "span:Language",
+     "pass": false,
+     "why": "box off by 0,0,1.9,0"
+    },
+    {
+     "key": "control:Language",
+     "pass": false,
+     "why": "box off by -1.8,0,1.8,0"
+    },
+    {
+     "key": "span:Auto-detect",
+     "pass": true
+    }
+   ]
+  }
+ ]
+}
