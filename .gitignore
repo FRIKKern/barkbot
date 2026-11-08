@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+# Evidence lives on the Barkpark task, never in git (decision 0003).
+evidence/
+*.webm
+*.mp4
+# Raw oracle pages hold other people's content; fixtures keep numbers only (0001).
+fixtures/raw/
+.DS_Store
+.barkpark/papers/

@@ -1,0 +1,34 @@
+# AGENTS.md
+
+Lead with a picture, then the fewest words that carry the point.
+
+## Where things live
+
+```
+slice status  ─► Barkpark goal task-e7970acf9582cad2 and its S0–S7 children
+item status   ─► parity/items.json (one row per item, evidence on done)
+what "works"  ─► JOURNEYS.md (J01–J13)
+how good      ─► QUALITY.md (gates, oracle rules O1–O4, pace)
+why           ─► docs/decisions/NNNN-*.md (supersede, never edit)
+the oracle    ─► Grok Bot in the owner's logged-in tab, read headless
+```
+
+## Loop
+
+1. Claim the current slice task: `bp task claim <id> <worker>`.
+2. An unread item is captured on the oracle first (O1), then built.
+3. Work in a worktree. The main checkout stays on `main`.
+4. Name the item in the commit: `T3: working line with the bot's mark`.
+5. `npm run check` before every commit.
+6. Set the item in `parity/items.json` with gate and evidence, then `npm run docs`.
+7. Evidence (clips, screenshots) goes on the task, never in git.
+
+## Rules
+
+- **Unrun means unrun.** Never report a check you did not run.
+- **Nobody signs off their own journey.** Owner sign-off needs the owner's own words.
+- **No skip-pass.** A check with nothing to check fails.
+- **Black box only** (O2). Watch Grok Bot; never copy its code, art or name.
+- **Never press Connect, Approve or Share on the oracle** (O1).
+- **A Barkpark gap is a Barkpark task**, never a workaround here.
+- **No secrets** in prompts, files or output. Ask before pushing.

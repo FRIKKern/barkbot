@@ -1,0 +1,69 @@
+{
+  "goal": "task-e7970acf9582cad2",
+  "slices": {
+    "S0": {
+      "task": "task-3edafaf95ea3f1d0",
+      "status": "open",
+      "criteria": {
+        "met": 0,
+        "total": 4
+      }
+    },
+    "S1": {
+      "task": "task-bceeb2a323ba6411",
+      "status": "open",
+      "criteria": {
+        "met": 0,
+        "total": 3
+      }
+    },
+    "S2": {
+      "task": "task-60c53b8bd0d37afd",
+      "status": "open",
+      "criteria": {
+        "met": 0,
+        "total": 3
+      }
+    },
+    "S3": {
+      "task": "task-5cf8808db84edcf0",
+      "status": "open",
+      "criteria": {
+        "met": 0,
+        "total": 3
+      }
+    },
+    "S4": {
+      "task": "task-4813335ad4c709e7",
+      "status": "open",
+      "criteria": {
+        "met": 0,
+        "total": 3
+      }
+    },
+    "S5": {
+      "task": "task-caa8254a0cd627e8",
+      "status": "open",
+      "criteria": {
+        "met": 0,
+        "total": 3
+      }
+    },
+    "S6": {
+      "task": "task-4d67732cc38a5267",
+      "status": "open",
+      "criteria": {
+        "met": 0,
+        "total": 2
+      }
+    },
+    "S7": {
+      "task": "task-7317a35bbd1bf7cd",
+      "status": "open",
+      "criteria": {
+        "met": 0,
+        "total": 2
+      }
+    }
+  }
+}

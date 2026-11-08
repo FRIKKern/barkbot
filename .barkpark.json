@@ -1,0 +1,5 @@
+{
+  "server": "https://guerrilla.barkpark.cloud",
+  "goal": "task-e7970acf9582cad2",
+  "papers": ["/papers/barkbot-oracle-method", "/papers/barkbot-build-spec"]
+}

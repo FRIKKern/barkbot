@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="814" viewBox="0 0 1200 814" role="img" aria-labelledby="t d">
+<title id="t">BarkBot journeys</title>
+<desc id="d">0 of 30 items done, 0 partial, 13 open, 17 not yet read on the oracle. J01: open. J02: unknown. J03: unknown. J04: unknown. J05: unknown. J06: open. J07: unknown. J08: unknown. J09: unknown. J10: unknown. J11: unknown. J12: unknown. J13: unknown.</desc>
+<style>
+  svg { --bg:#f7f6f3; --card:#ffffff; --line:#e4e1da; --ink:#1c1b19; --muted:#6e6b64; --done:#2f7d52; --now:#c27a12; --todo:#a29f97; --unk:#8569b3; --nowbg:#fff5e3; --accent:#e8962e; }
+  @media (prefers-color-scheme: dark) {
+    svg { --bg:#121314; --card:#1b1c1e; --line:#2e3033; --ink:#ecebe7; --muted:#9a9a96; --done:#6bc48f; --now:#efb453; --todo:#6c6e72; --unk:#b29ce0; --nowbg:#2a2318; --accent:#f2a93b; }
+  }
+  text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--ink); }
+  .muted { fill: var(--muted); } .done { fill: var(--done); } .now { fill: var(--now); } .todo { fill: var(--todo); } .unk { fill: var(--unk); }
+  .bg { fill: var(--bg); } .track { fill: var(--line); } .bar { fill: var(--done); } .rule { stroke: var(--line); }
+  .card { fill: var(--card); stroke: var(--line); } .card.on { fill: var(--nowbg); stroke: var(--now); stroke-width: 2; }
+  .accent { fill: var(--accent); }
+</style>
+<rect class="bg" width="1200" height="814" rx="16"/>
+<text x="40" y="70" font-size="36" font-weight="700" letter-spacing="-0.8">Journeys</text>
+<text x="40" y="102" font-size="19" class="muted">The spec of "works". Each passes when the oracle and BarkBot end the same way.</text>
+<text x="1160" y="70" font-size="40" font-weight="700" text-anchor="end">0<tspan class="muted" font-weight="400"> / 30</tspan></text>
+<text x="1160" y="102" font-size="16" text-anchor="end" class="muted">parity items done</text>
+<rect x="40" y="124" width="1120" height="8" rx="4" class="track"/><rect x="40" y="124" width="485.3333333333333" height="8" class="todo"/><rect x="525.3333333333333" y="124" width="634.6666666666666" height="8" class="unk"/>
+<text x="40" y="168" font-size="16"><tspan class="done">● done 0</tspan><tspan class="now" dx="24">● partial 0</tspan><tspan class="todo" dx="24">● open 13</tspan><tspan class="unk" dx="24">● not yet read on the oracle 17</tspan></text>
+<text x="1160" y="168" font-size="16" text-anchor="end" class="muted">one dot per item</text>
+<g data-journey="J01">
+<rect x="40" y="214" width="211.2" height="168" rx="12" class="card"/>
+<text x="58" y="244" font-size="15" font-weight="700">J01<tspan class="muted" font-weight="400" dx="8">S1</tspan></text>
+<text x="233.2" y="244" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="todo">OPEN</text>
+<text x="58" y="272" font-size="14">Send a message. A working</text>
+<text x="58" y="291" font-size="14">line with the bot's mark</text>
+<text x="58" y="310" font-size="14">shows, then the reply</text>
+<text x="58" y="329" font-size="14">arrives in one or …</text>
+<circle cx="66" cy="360" r="5" class="todo"/><circle cx="80" cy="360" r="5" class="unk"/><circle cx="94" cy="360" r="5" class="unk"/><circle cx="108" cy="360" r="5" class="unk"/><circle cx="122" cy="360" r="5" class="todo"/><circle cx="136" cy="360" r="5" class="todo"/><text x="233.2" y="365" font-size="12" text-anchor="end" class="muted">0/6</text>
+</g>
+<g data-journey="J02">
+<rect x="267.2" y="214" width="211.2" height="168" rx="12" class="card"/>
+<text x="285.2" y="244" font-size="15" font-weight="700">J02<tspan class="muted" font-weight="400" dx="8">S2</tspan></text>
+<text x="460.4" y="244" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="285.2" y="272" font-size="14">The left rail shows my</text>
+<text x="285.2" y="291" font-size="14">bots and the active one;</text>
+<text x="285.2" y="310" font-size="14">new chat, the apps grid</text>
+<text x="285.2" y="329" font-size="14">and my avatar sit at …</text>
+<circle cx="293.2" cy="360" r="5" class="unk"/><circle cx="307.2" cy="360" r="5" class="unk"/><text x="460.4" y="365" font-size="12" text-anchor="end" class="muted">0/2</text>
+</g>
+<g data-journey="J03">
+<rect x="494.4" y="214" width="211.2" height="168" rx="12" class="card"/>
+<text x="512.4" y="244" font-size="15" font-weight="700">J03<tspan class="muted" font-weight="400" dx="8">S2</tspan></text>
+<text x="687.5999999999999" y="244" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="512.4" y="272" font-size="14">The right panel opens and</text>
+<text x="512.4" y="291" font-size="14">closes: mark, name,</text>
+<text x="512.4" y="310" font-size="14">Activity and Library</text>
+<text x="512.4" y="329" font-size="14">tabs, its cards</text>
+<circle cx="520.4" cy="360" r="5" class="unk"/><text x="687.5999999999999" y="365" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<g data-journey="J04">
+<rect x="721.5999999999999" y="214" width="211.2" height="168" rx="12" class="card"/>
+<text x="739.5999999999999" y="244" font-size="15" font-weight="700">J04<tspan class="muted" font-weight="400" dx="8">S2</tspan></text>
+<text x="914.8" y="244" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="739.5999999999999" y="272" font-size="14">The Computer card tells</text>
+<text x="739.5999999999999" y="291" font-size="14">the truth: asleep, waking</text>
+<text x="739.5999999999999" y="310" font-size="14">or working</text>
+<circle cx="747.5999999999999" cy="360" r="5" class="unk"/><text x="914.8" y="365" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<g data-journey="J05">
+<rect x="948.8" y="214" width="211.2" height="168" rx="12" class="card"/>
+<text x="966.8" y="244" font-size="15" font-weight="700">J05<tspan class="muted" font-weight="400" dx="8">S3</tspan></text>
+<text x="1142" y="244" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="966.8" y="272" font-size="14">Cancel a running reply.</text>
+<text x="966.8" y="291" font-size="14">It stops at once and the</text>
+<text x="966.8" y="310" font-size="14">machine has nothing left</text>
+<text x="966.8" y="329" font-size="14">running</text>
+<circle cx="974.8" cy="360" r="5" class="unk"/><text x="1142" y="365" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<g data-journey="J06">
+<rect x="40" y="398" width="211.2" height="168" rx="12" class="card"/>
+<text x="58" y="428" font-size="15" font-weight="700">J06<tspan class="muted" font-weight="400" dx="8">S3</tspan></text>
+<text x="233.2" y="428" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="todo">OPEN</text>
+<text x="58" y="456" font-size="14">Close everything and come</text>
+<text x="58" y="475" font-size="14">back: the conversation is</text>
+<text x="58" y="494" font-size="14">there and the bot</text>
+<text x="58" y="513" font-size="14">remembers it</text>
+<circle cx="66" cy="544" r="5" class="todo"/><text x="233.2" y="549" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<g data-journey="J07">
+<rect x="267.2" y="398" width="211.2" height="168" rx="12" class="card"/>
+<text x="285.2" y="428" font-size="15" font-weight="700">J07<tspan class="muted" font-weight="400" dx="8">S4</tspan></text>
+<text x="460.4" y="428" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="285.2" y="456" font-size="14">Attach a file with +. It</text>
+<text x="285.2" y="475" font-size="14">shows as a card with name</text>
+<text x="285.2" y="494" font-size="14">and size, and the bot can</text>
+<text x="285.2" y="513" font-size="14">read it</text>
+<circle cx="293.2" cy="544" r="5" class="unk"/><text x="460.4" y="549" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<g data-journey="J08">
+<rect x="494.4" y="398" width="211.2" height="168" rx="12" class="card"/>
+<text x="512.4" y="428" font-size="15" font-weight="700">J08<tspan class="muted" font-weight="400" dx="8">S4</tspan></text>
+<text x="687.5999999999999" y="428" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="512.4" y="456" font-size="14">The bot replies with</text>
+<text x="512.4" y="475" font-size="14">pictures: a grid with a</text>
+<text x="512.4" y="494" font-size="14">+N tile, each opens large</text>
+<circle cx="520.4" cy="544" r="5" class="unk"/><text x="687.5999999999999" y="549" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<g data-journey="J09">
+<rect x="721.5999999999999" y="398" width="211.2" height="168" rx="12" class="card"/>
+<text x="739.5999999999999" y="428" font-size="15" font-weight="700">J09<tspan class="muted" font-weight="400" dx="8">S4</tspan></text>
+<text x="914.8" y="428" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="739.5999999999999" y="456" font-size="14">Library lists what the</text>
+<text x="739.5999999999999" y="475" font-size="14">bot saved, newest first</text>
+<circle cx="747.5999999999999" cy="544" r="5" class="unk"/><text x="914.8" y="549" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<g data-journey="J10">
+<rect x="948.8" y="398" width="211.2" height="168" rx="12" class="card"/>
+<text x="966.8" y="428" font-size="15" font-weight="700">J10<tspan class="muted" font-weight="400" dx="8">S5</tspan></text>
+<text x="1142" y="428" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="966.8" y="456" font-size="14">The bot asks before</text>
+<text x="966.8" y="475" font-size="14">acting; nothing happens</text>
+<text x="966.8" y="494" font-size="14">until I press</text>
+<circle cx="974.8" cy="544" r="5" class="unk"/><text x="1142" y="549" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<g data-journey="J11">
+<rect x="40" y="582" width="211.2" height="168" rx="12" class="card"/>
+<text x="58" y="612" font-size="15" font-weight="700">J11<tspan class="muted" font-weight="400" dx="8">S5</tspan></text>
+<text x="233.2" y="612" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="58" y="640" font-size="14">The bot asks a question</text>
+<text x="58" y="659" font-size="14">with lettered choices;</text>
+<text x="58" y="678" font-size="14">picking one answers it</text>
+<circle cx="66" cy="728" r="5" class="unk"/><text x="233.2" y="733" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<g data-journey="J12">
+<rect x="267.2" y="582" width="211.2" height="168" rx="12" class="card"/>
+<text x="285.2" y="612" font-size="15" font-weight="700">J12<tspan class="muted" font-weight="400" dx="8">S7</tspan></text>
+<text x="460.4" y="612" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="285.2" y="640" font-size="14">First run: the bot greets</text>
+<text x="285.2" y="659" font-size="14">me and I name it; a</text>
+<text x="285.2" y="678" font-size="14">"Renamed to …" line marks</text>
+<text x="285.2" y="697" font-size="14">it</text>
+<circle cx="293.2" cy="728" r="5" class="unk"/><text x="460.4" y="733" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<g data-journey="J13">
+<rect x="494.4" y="582" width="211.2" height="168" rx="12" class="card"/>
+<text x="512.4" y="612" font-size="15" font-weight="700">J13<tspan class="muted" font-weight="400" dx="8">S5</tspan></text>
+<text x="687.5999999999999" y="612" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="512.4" y="640" font-size="14">Activity shows the bot's</text>
+<text x="512.4" y="659" font-size="14">open work, such as a pull</text>
+<text x="512.4" y="678" font-size="14">request and its state</text>
+<circle cx="520.4" cy="728" r="5" class="unk"/><text x="687.5999999999999" y="733" font-size="12" text-anchor="end" class="muted">0/1</text>
+</g>
+<text x="40" y="786" font-size="14" class="muted">Generated by scripts/generate-parity.mjs from JOURNEYS.md and parity/items.json</text>
+</svg>
