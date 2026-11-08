@@ -28,7 +28,8 @@ the oracle    ─► Grok Bot in the owner's logged-in tab, read headless
 - **Unrun means unrun.** Never report a check you did not run.
 - **Nobody signs off their own journey.** Owner sign-off needs the owner's own words.
 - **No skip-pass.** A check with nothing to check fails.
-- **Black box only** (O2). Watch Grok Bot; never copy its code, art or name.
+- **Recreate first** (0005). Match the oracle 1:1; no ideas of our own until the gates say 1:1.
+- **Black box only** (O2). Watch Grok Bot; never copy its code, art or font files.
 - **Never press Connect, Approve or Share on the oracle** (O1).
 - **A Barkpark gap is a Barkpark task**, never a workaround here.
 - **No secrets** in prompts, files or output. Ask before pushing.

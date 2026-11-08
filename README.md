@@ -1,6 +1,6 @@
 # BarkBot
 
-![BarkBot: a slim rail of bots, the conversation in the middle, the bot's activity and computer on the right](docs/images/hero.svg)
+![The oracle's screen, recreated: the rail, the conversation, and the bot's Activity panel with Coding, Suggested, Computer and Voice chat](docs/images/hero.svg)
 
 An AI agent with its own computer. You talk to it here; it works on a machine of its own, keeps going while you are away, and shows its work. Built on [Barkpark](https://github.com/FRIKKern/barkpark): Barkpark keeps the bots, the conversations and the evidence, and a stock `claude -p` on the bot's machine does the work, on the owner's own login.
 
@@ -16,14 +16,15 @@ read · one gesture · read ─────► fixtures/ and traces/
                                  someone else signs the journey
 ```
 
-We copy how Grok Bot looks and behaves by watching it, never its code, art or name ([0001](docs/decisions/0001-black-box-oracle.md)). "1:1" is a number three gates print ([0002](docs/decisions/0002-gates.md)). Each slice is one journey built all the way down, real Barkpark and real `claude` included; the first computer is the owner's Mac. The method in full: [BarkBot Oracle Method](https://guerrilla.barkpark.cloud/papers/barkbot-oracle-method). What gets built: [BarkBot Build Spec](https://guerrilla.barkpark.cloud/papers/barkbot-build-spec).
+**Recreate first** ([0005](docs/decisions/0005-recreate-first.md)): every screen, label, size and timing matches Grok Bot before we change anything. We learn it by watching ([0001](docs/decisions/0001-black-box-oracle.md)), never by copying its code, art or font files; those get plain stand-ins of the same size. "1:1" is a number three gates print ([0002](docs/decisions/0002-gates.md)). Each slice is one journey built all the way down, real Barkpark and real `claude` included; the first computer is the owner's Mac. The method in full: [BarkBot Oracle Method](https://guerrilla.barkpark.cloud/papers/barkbot-oracle-method). What gets built: [BarkBot Build Spec](https://guerrilla.barkpark.cloud/papers/barkbot-build-spec).
 
 [![Journeys: one tile per journey, one dot per parity item](docs/images/journeys.svg)](JOURNEYS.md)
 
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 1 change
+- **Today** · 2 changes
+  - Recreate first: the hero is the oracle's screen, 1:1, with plain stand-ins
   - Founding: README, roadmap and journey pictures, gates, oracle rules and the check
 <!-- timeline:end -->
 

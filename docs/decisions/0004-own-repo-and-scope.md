@@ -1,6 +1,6 @@
 # 0004 Its own repo on Barkpark's chat API; some oracle parts wait
 
-Date: 2026-11-08 · Status: accepted
+Date: 2026-11-08 · Status: accepted · Superseded in part by [0005](0005-recreate-first.md)
 
 ```
 barkbot (this repo) ── server functions ── /v1/chat, /v1/bots ──► Barkpark

@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-0 of 30 items done, 0 partial, 13 open, 17 not yet read on the oracle.
+0 of 32 items done, 0 partial, 13 open, 19 not yet read on the oracle.
 Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Edit the JSON, never this page.
 
 ## S0 Harness
@@ -34,6 +34,7 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 |---|---|---|---|---|
 | F1 | Left rail: bots, the active one, badge, new chat, apps grid, my avatar | J02 | ? unread | — |
 | F2 | Header: the bot's name pill, centred over the transcript | J02 | ? unread | — |
+| F5 | Top bar: sidebar toggle and Share | J02 | ? unread | — |
 | F3 | Right panel: mark, name, Activity and Library tabs, close | J03 | ? unread | — |
 | F4 | Computer card: asleep, waking, working, read from the host heartbeat | J04 | ? unread | — |
 
@@ -73,4 +74,5 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 |---|---|---|---|---|
 | N1 | First run: greeting, naming, a 'Renamed to' line | J12 | ? unread | — |
 | N2 | Message actions on hover | — | ? unread | — |
-| N3 | Right panel extras: Suggested and Voice chat | — | ? unread | Out of scope: 0004: voice chat, Share, Add to Slack, routines and app connectors wait for their own decision |
+| N3 | Suggested card: Add to Slack and Create a routine; each opens 1:1 and stops before acting outside the page | — | ? unread | — |
+| N4 | Voice chat card: voice, speed and language pickers | — | ? unread | — |

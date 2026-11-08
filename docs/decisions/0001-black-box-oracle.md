@@ -1,6 +1,6 @@
 # 0001 Grok Bot is the oracle, watched as a black box
 
-Date: 2026-11-08 · Status: accepted
+Date: 2026-11-08 · Status: accepted · Superseded in part by [0005](0005-recreate-first.md)
 
 ```
 oracle: Grok Bot, owner's tab      ours: BarkBot

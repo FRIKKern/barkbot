@@ -20,7 +20,7 @@ Measured on the oracle in S0 (H7), then kept here: send to first visible change,
 | # | Rule |
 |---|---|
 | O1 | Read state, do one gesture, read state, leave. Never press Connect, Approve, Share, Add to Slack or Create a routine, and never answer a permission prompt: they act on the owner's real accounts. Probes use a throwaway bot or conversation. |
-| O2 | Black box only. No Grok Bot JavaScript, CSS files, icons, mascot, fonts, copy text or name in this repo. We store numbers: boxes, colors, sizes, timings, label lists. |
+| O2 | Black box only. No Grok Bot JavaScript, CSS files, mascot or logo art, or font files in this repo; they get plain stand-ins of the same size. Everything else is recreated 1:1, labels included ([0005](docs/decisions/0005-recreate-first.md)). |
 | O3 | Messages sent to the oracle are fixed recipes in `scripts/oracle/recipes.mjs`, never free typing. Each send uses the owner's allowance, so recapture only when a gate needs it. |
 | O4 | An oracle change that breaks a gate is a finding: recapture, date it, never hide it. A capture older than 30 days is recaptured before it is trusted. |
 

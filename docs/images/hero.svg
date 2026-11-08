@@ -1,124 +1,125 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="660" viewBox="0 0 1200 660" role="img" aria-labelledby="t d">
-<title id="t">BarkBot, the three panes</title>
-<desc id="d">A dark three-pane window. Left: a slim rail of bots with new chat, apps and your avatar (J02). Middle: the bot's name pill, a conversation with a working line (J01), a picture grid with a +2 tile (J08) and the composer with attach (J07). Right: the bot's mark and name, Activity and Library tabs (J03), a Coding card (J13), a Computer card that reads Working (J04) and the bot's grants.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="892" viewBox="0 0 1200 892" role="img" aria-labelledby="t d">
+<title id="t">The oracle screen, recreated</title>
+<desc id="d">A recreation of the oracle's desktop window, measured from a screenshot of 8 November 2026, with a plain stand-in avatar. Left rail: window controls, the bot's tile with a badge, then new chat, apps and the owner's avatar at the bottom. Middle: sidebar button, the bot's name pill, Share, a file card, the time, a request bubble, three reply bubbles and a picture grid with +2, then the composer. Right panel: close, the avatar and name, Activity and Library tabs, and the Coding, Suggested, Computer and Voice chat cards.</desc>
 <style>
   .page { fill: #f7f6f3; }
   @media (prefers-color-scheme: dark) { .page { fill: #0d0d0e; } }
   text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
-  .ink { fill: #ececea; } .dim { fill: #8b8b90; } .faint { fill: #6a6a70; }
-  .pane { fill: #161617; } .edge { stroke: #2a2a2d; fill: none; }
-  .bubble { fill: #1f1f22; } .mine { fill: #2d2d31; }
-  .card { fill: #1c1c1f; stroke: #2c2c30; }
-  .tag rect { fill: #f2a93b; } .tag text { fill: #1d1406; font-size: 11px; font-weight: 700; letter-spacing: .6px; }
+  .ink { fill: #ececec; } .dim { fill: #8e8e8e; } .faint { fill: #6f6f6f; }
+  .bot { fill: #212121; stroke: #2b2b2b; } .me { fill: #383838; }
+  .card { fill: #1d1d1d; stroke: #2a2a2a; }
+  .line { stroke: #262626; }
+  .icon { fill: none; stroke: #b9b9b9; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 <defs>
-  <g id="mk">
-    <path d="M26 3 C33 1 39 4 39 11 C35 9 31 9 28 10 Z" fill="#f2a93b"/>
-    <path d="M20 2 A18 18 0 1 1 6.5 32.5 L2 38 L4.2 29.4 A18 18 0 0 1 20 2 Z" fill="#f4f2ee"/>
-    <circle cx="14.5" cy="19" r="2.6" fill="#141414"/><circle cx="25.5" cy="19" r="2.6" fill="#141414"/>
-  </g>
-  <g id="mkdim">
-    <path d="M26 3 C33 1 39 4 39 11 C35 9 31 9 28 10 Z" fill="#7a5a2c"/>
-    <path d="M20 2 A18 18 0 1 1 6.5 32.5 L2 38 L4.2 29.4 A18 18 0 0 1 20 2 Z" fill="#6b6b70"/>
-    <circle cx="14.5" cy="19" r="2.6" fill="#161617"/><circle cx="25.5" cy="19" r="2.6" fill="#161617"/>
-  </g>
-  <linearGradient id="shot" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#26262b"/><stop offset="1" stop-color="#1a1a1e"/></linearGradient>
-  <g id="thumb">
-    <rect width="170" height="104" rx="12" fill="url(#shot)" stroke="#303034"/>
-    <rect x="14" y="14" width="64" height="8" rx="4" fill="#3a3a40"/>
-    <rect x="14" y="32" width="120" height="14" rx="7" fill="#34343a"/>
-    <rect x="58" y="54" width="98" height="14" rx="7" fill="#45454c"/>
-    <rect x="14" y="76" width="142" height="14" rx="7" fill="#2f2f35"/>
-  </g>
+  <linearGradient id="shot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2a2a"/><stop offset="1" stop-color="#1b1b1b"/></linearGradient>
+  <g id="thumb"><rect width="1" height="1" fill="url(#shot)"/></g>
 </defs>
 
-<rect class="page" width="1200" height="660" rx="18"/>
-<rect x="24" y="24" width="1152" height="612" rx="18" class="pane"/>
-<rect x="24.5" y="24.5" width="1151" height="611" rx="17.5" class="edge"/>
-
-<!-- window controls -->
-<circle cx="52" cy="50" r="6" fill="#ff5f57"/><circle cx="72" cy="50" r="6" fill="#febc2e"/><circle cx="92" cy="50" r="6" fill="#28c840"/>
+<rect class="page" width="1200" height="892" rx="18"/>
+<rect x="24" y="24" width="1152" height="843" rx="16" fill="#151515" stroke="#2a2a2a"/>
 
 <!-- left rail -->
-<path d="M108 24V636" stroke="#222225"/>
-<rect x="40" y="80" width="52" height="52" rx="14" fill="#26262a"/>
-<use href="#mk" transform="translate(48.5 88.5) scale(0.875)"/>
-<circle cx="88" cy="128" r="7" fill="#f2a93b" stroke="#161617" stroke-width="3"/>
-<use href="#mkdim" transform="translate(51 152) scale(0.75)"/>
-<g class="tag" transform="translate(44 202)"><rect width="44" height="20" rx="10"/><text x="22" y="14" text-anchor="middle">J02</text></g>
-<path d="M58 530H74M66 522V538" stroke="#9a9aa0" stroke-width="2" stroke-linecap="round"/>
-<g fill="none" stroke="#9a9aa0" stroke-width="1.8"><rect x="57" y="560" width="7" height="7" rx="1.5"/><rect x="68" y="560" width="7" height="7" rx="1.5"/><rect x="57" y="571" width="7" height="7" rx="1.5"/><path d="M71.5 571V578M68 574.5H75"/></g>
-<circle cx="66" cy="608" r="15" fill="#3b4b6e"/><circle cx="66" cy="603" r="5.5" fill="#c9d3ea"/><path d="M56 617C58 610 74 610 76 617" fill="#c9d3ea"/>
-<circle cx="78" cy="619" r="4.5" fill="#3d8bfd" stroke="#161617" stroke-width="2"/>
+<circle cx="49.5" cy="50" r="6.5" fill="#ff5f57"/><circle cx="71.5" cy="50" r="6.5" fill="#febc2e"/><circle cx="94" cy="50" r="6.5" fill="#28c840"/>
+<path d="M120.5 24.5V866.5" class="line"/>
+<rect x="43.5" y="79" width="58" height="58" rx="13" fill="#232323"/>
+<circle cx="72" cy="105" r="19" fill="#f4f4f4"/>
+<circle cx="86" cy="121" r="8" fill="#f08c2e" stroke="#232323" stroke-width="2.5"/>
+<path d="M86 116.8l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3z" fill="#fff"/>
+<path d="M64 738H80M72 730V746" class="icon"/>
+<g class="icon"><rect x="63" y="767" width="7" height="7" rx="1.5"/><rect x="74" y="767" width="7" height="7" rx="1.5"/><rect x="63" y="778" width="7" height="7" rx="1.5"/><path d="M77.5 778V785M74 781.5H81"/></g>
+<circle cx="72" cy="827" r="20" fill="#2f4f8f"/><circle cx="72" cy="821" r="7" fill="#e0b9a0"/><path d="M58 842C61 832 83 832 86 842" fill="#1d2b4d"/>
+<circle cx="86" cy="841" r="5.5" fill="#3d8bfd" stroke="#151515" stroke-width="2"/>
 
-<!-- middle: header -->
-<rect x="406" y="40" width="156" height="42" rx="21" fill="#1f1f22" stroke="#2d2d31"/>
-<use href="#mk" transform="translate(421 50) scale(0.55)"/>
-<text x="451" y="67" font-size="17" class="ink">BarkBot</text>
-<rect x="770" y="40" width="74" height="42" rx="21" fill="none" stroke="#2d2d31"/>
-<text x="807" y="66" font-size="15" text-anchor="middle" class="dim">Share</text>
+<!-- middle: top bar -->
+<circle cx="150" cy="55" r="19.5" fill="#1f1f1f" stroke="#2b2b2b"/>
+<rect x="141" y="48" width="18" height="14" rx="3" class="icon"/><path d="M147 48V62" class="icon"/>
+<rect x="386" y="36" width="117" height="40" rx="20" fill="#1f1f1f" stroke="#2b2b2b"/>
+<circle cx="409" cy="56" r="12" fill="#f4f4f4"/>
+<text x="429" y="62" font-size="16.5" class="ink">Grookie</text>
+<rect x="750" y="37" width="80" height="39" rx="19.5" fill="#1f1f1f" stroke="#2b2b2b"/>
+<text x="790" y="62" font-size="15.5" text-anchor="middle" class="ink">Share</text>
 
-<!-- conversation -->
-<text x="484" y="120" font-size="13" text-anchor="middle" class="faint">Today 9:17 PM</text>
-<rect x="510" y="138" width="334" height="42" rx="21" class="mine"/>
-<text x="530" y="164" font-size="15" class="ink">How much storage do you have, and where?</text>
-<rect x="128" y="196" width="290" height="42" rx="21" class="bubble"/>
-<text x="148" y="222" font-size="15" class="ink">I'll check the disk on my computer.</text>
-<rect x="128" y="246" width="430" height="62" rx="20" class="bubble"/>
-<text x="148" y="272" font-size="15" class="ink">38 GB free of 75 GB, on barkbot-01 in Nuremberg.</text>
-<text x="148" y="294" font-size="15" class="ink">Here are the screenshots I saved today:</text>
-<use href="#thumb" transform="translate(128 320)"/>
-<use href="#thumb" transform="translate(306 320)"/>
-<use href="#thumb" transform="translate(484 320)"/>
-<rect x="484" y="320" width="170" height="104" rx="12" fill="#000" opacity=".55"/>
-<text x="569" y="382" font-size="28" font-weight="600" text-anchor="middle" class="ink">+2</text>
-<g class="tag" transform="translate(664 330)"><rect width="44" height="20" rx="10"/><text x="22" y="14" text-anchor="middle">J08</text></g>
-<use href="#mk" transform="translate(130 446) scale(0.6)"/>
-<text x="164" y="464" font-size="15" class="dim">Reading the logs on my computer</text>
-<circle cx="404" cy="459" r="2.5" fill="#8b8b90" opacity=".9"/><circle cx="414" cy="459" r="2.5" fill="#8b8b90" opacity=".6"/><circle cx="424" cy="459" r="2.5" fill="#8b8b90" opacity=".3"/>
-<g class="tag" transform="translate(440 449)"><rect width="44" height="20" rx="10"/><text x="22" y="14" text-anchor="middle">J01</text></g>
+<!-- transcript -->
+<rect x="140" y="204" width="332" height="80" rx="20" class="bot"/>
+<rect x="166" y="228" width="26" height="33" rx="5" fill="#2e2e2e"/>
+<path d="M172 238H186M172 244H186M172 250H182" stroke="#8e8e8e" stroke-width="2.2" stroke-linecap="round"/>
+<text x="213" y="240" font-size="16" class="ink">BARKBOT_HANDOV… .md</text>
+<text x="213" y="262" font-size="14" class="dim">11kB</text>
+<text x="471" y="316" font-size="13.5" text-anchor="middle" class="dim">Today 9:17 PM</text>
+<rect x="437" y="351" width="367" height="39" rx="19.5" class="me"/>
+<text x="452" y="376" font-size="16.5" class="ink">Please so us all the images in our memories</text>
+<rect x="140" y="408" width="531" height="63" rx="18" class="bot"/>
+<text x="157" y="433" font-size="16.5" class="ink">I’ll find the pictures we saved from our memories together and</text>
+<text x="157" y="457" font-size="16.5" class="ink">show them here.</text>
+<rect x="140" y="477" width="531" height="63" rx="18" class="bot"/>
+<text x="157" y="502" font-size="16.5" class="ink">I’m looking up the original screenshots from when you named</text>
+<text x="157" y="526" font-size="16.5" class="ink">me Grookie and when we revisited those first pictures.</text>
+<rect x="140" y="546" width="531" height="63" rx="18" class="bot"/>
+<text x="157" y="571" font-size="16.5" class="ink">I found our three memory screenshots from 7 November, plus</text>
+<text x="157" y="595" font-size="16.5" class="ink">another picture from that first meeting. ♥</text>
+<g>
+  <rect x="140" y="616" width="165" height="125" rx="10" fill="url(#shot)" stroke="#2b2b2b"/>
+  <rect x="152" y="634" width="70" height="7" rx="3.5" fill="#3a3a3a"/><rect x="152" y="650" width="120" height="14" rx="7" fill="#333"/><rect x="152" y="672" width="100" height="10" rx="5" fill="#2e2e2e"/><rect x="152" y="690" width="130" height="10" rx="5" fill="#2e2e2e"/>
+  <rect x="312" y="616" width="196" height="125" rx="10" fill="url(#shot)" stroke="#2b2b2b"/>
+  <rect x="400" y="630" width="96" height="16" rx="8" fill="#3d3d3d"/><rect x="324" y="656" width="110" height="12" rx="6" fill="#333"/><rect x="324" y="676" width="140" height="26" rx="8" fill="#2e2e2e"/><rect x="324" y="708" width="150" height="20" rx="8" fill="#2c2c2c"/>
+  <rect x="515" y="616" width="156" height="125" rx="10" fill="url(#shot)" stroke="#2b2b2b"/>
+  <rect x="527" y="632" width="90" height="10" rx="5" fill="#333"/><rect x="590" y="650" width="70" height="12" rx="6" fill="#3a3a3a"/><rect x="527" y="672" width="110" height="10" rx="5" fill="#2e2e2e"/>
+  <rect x="515" y="616" width="156" height="125" rx="10" fill="#000" opacity=".5"/>
+  <text x="593" y="690" font-size="26" font-weight="600" text-anchor="middle" class="ink">+2</text>
+</g>
 
 <!-- composer -->
-<rect x="128" y="556" width="716" height="58" rx="29" fill="#1c1c1f" stroke="#2e2e32"/>
-<circle cx="160" cy="585" r="17" fill="none" stroke="#3a3a3f"/>
-<path d="M153 585H167M160 578V592" stroke="#b5b5ba" stroke-width="2" stroke-linecap="round"/>
-<text x="190" y="591" font-size="16" class="faint">Message BarkBot</text>
-<g class="tag" transform="translate(138 528)"><rect width="44" height="20" rx="10"/><text x="22" y="14" text-anchor="middle">J07</text></g>
-<rect x="767" y="574" width="10" height="16" rx="5" fill="none" stroke="#9a9aa0" stroke-width="1.8"/><path d="M763 585C763 592 781 592 781 585M772 592V597" fill="none" stroke="#9a9aa0" stroke-width="1.8" stroke-linecap="round"/>
-<circle cx="815" cy="585" r="19" fill="#f2f2f0"/>
-<path d="M806 581V589M811 577V593M816 573V597M821 578V592M826 582V588" stroke="#141414" stroke-width="2.4" stroke-linecap="round"/>
+<rect x="140" y="801" width="664" height="47" rx="23.5" fill="#1d1d1d" stroke="#2b2b2b"/>
+<circle cx="164" cy="824.5" r="15" fill="#262626"/>
+<path d="M158 824.5H170M164 818.5V830.5" class="icon"/>
+<text x="189" y="830" font-size="16.5" class="faint">Message Grookie</text>
+<circle cx="739" cy="824.5" r="15" fill="#262626"/>
+<rect x="735" y="816" width="8" height="12" rx="4" class="icon"/><path d="M731.5 824.5C731.5 831 746.5 831 746.5 824.5M739 830.5V833.5" class="icon"/>
+<circle cx="779" cy="824.5" r="15.5" fill="#f4f4f4"/>
+<path d="M772 821.5V827.5M776 818V831M780 815.5V833.5M784 819V830M788 822V827" stroke="#151515" stroke-width="2" stroke-linecap="round"/>
 
 <!-- right panel -->
-<path d="M860 24V636" stroke="#222225"/>
-<circle cx="1140" cy="62" r="19" fill="none" stroke="#2d2d31"/><path d="M1133 55L1147 69M1147 55L1133 69" stroke="#b5b5ba" stroke-width="2" stroke-linecap="round"/>
-<use href="#mk" transform="translate(978 96) scale(2)"/>
-<text x="1018" y="206" font-size="21" font-weight="500" text-anchor="middle" class="ink">BarkBot</text>
-<rect x="948" y="222" width="82" height="32" rx="16" fill="#26262a"/>
-<text x="989" y="243" font-size="14" text-anchor="middle" class="ink">Activity</text>
-<text x="1066" y="243" font-size="14" text-anchor="middle" class="dim">Library</text>
-<g class="tag" transform="translate(1112 228)"><rect width="44" height="20" rx="10"/><text x="22" y="14" text-anchor="middle">J03</text></g>
+<path d="M822.5 24.5V866.5" class="line"/>
+<circle cx="1142" cy="58" r="19.5" fill="#1f1f1f" stroke="#2b2b2b"/>
+<path d="M1136 52L1148 64M1148 52L1136 64" class="icon"/>
+<circle cx="1001" cy="135" r="32.5" fill="#f4f4f4"/>
+<text x="1001" y="210" font-size="19" font-weight="500" text-anchor="middle" class="ink">Grookie</text>
+<rect x="933" y="238" width="68" height="29" rx="14.5" fill="#262626"/>
+<text x="967" y="258" font-size="14.5" text-anchor="middle" class="ink">Activity</text>
+<text x="1037" y="258" font-size="14.5" text-anchor="middle" class="dim">Library</text>
 
-<text x="882" y="292" font-size="13" class="dim">Coding</text>
-<g class="tag" transform="translate(1112 278)"><rect width="44" height="20" rx="10"/><text x="22" y="14" text-anchor="middle">J13</text></g>
-<rect x="880" y="304" width="276" height="62" rx="14" class="card"/>
-<g fill="none" stroke="#5a9cff" stroke-width="1.8"><circle cx="902" cy="326" r="3.5"/><circle cx="902" cy="344" r="3.5"/><circle cx="916" cy="344" r="3.5"/><path d="M902 329.5V340.5M916 340.5V334C916 330 913 328 909 328"/></g>
-<text x="930" y="330" font-size="14" class="ink">Bots table and /v1/bots</text>
-<text x="930" y="351" font-size="12" class="dim">Pull request · in review</text>
+<text x="853" y="304" font-size="14.5" class="dim">Coding</text>
+<rect x="840" y="320" width="318.5" height="64" rx="13" class="card"/>
+<g fill="none" stroke="#4d8ef7" stroke-width="1.8"><circle cx="862" cy="343" r="3.2"/><circle cx="862" cy="361" r="3.2"/><circle cx="874" cy="361" r="3.2"/><path d="M862 346.2V357.8M874 357.8V351C874 347.5 871.5 345.5 868 345.5"/></g>
+<text x="885" y="347" font-size="14.5" class="ink">Barkpark remote-agent cloud fe…</text>
+<text x="885" y="368" font-size="14" class="dim">Ready for review · <tspan text-decoration="underline">#25415</tspan></text>
+<path d="M1133 347l5 5-5 5" class="icon"/>
 
-<text x="882" y="396" font-size="13" class="dim">Computer</text>
-<g class="tag" transform="translate(1112 382)"><rect width="44" height="20" rx="10"/><text x="22" y="14" text-anchor="middle">J04</text></g>
-<rect x="880" y="408" width="276" height="76" rx="14" class="card"/>
-<text x="900" y="438" font-size="15" class="ink">barkbot-01</text>
-<circle cx="904" cy="458" r="4" fill="#4cc38a"/>
-<text x="914" y="463" font-size="13" class="dim">Working · Nuremberg</text>
-<rect x="1060" y="422" width="80" height="48" rx="9" fill="#26262b" stroke="#34343a"/>
-<use href="#mk" transform="translate(1088 434) scale(0.6)"/>
+<text x="853" y="424" font-size="14.5" class="dim">Suggested</text>
+<rect x="840" y="440" width="318.5" height="89" rx="13" class="card"/>
+<rect x="859" y="457" width="15" height="15" rx="4" fill="none" stroke="#b9b9b9" stroke-width="1.6" stroke-dasharray="2.5 2"/>
+<text x="887" y="470" font-size="14.5" class="ink">Add to Slack</text>
+<path d="M1133 459l5 5-5 5" class="icon"/>
+<path d="M856 485H1142" class="line"/>
+<circle cx="866.5" cy="506" r="7.5" class="icon"/><path d="M866.5 502V506L869 508" class="icon"/>
+<text x="887" y="511" font-size="14.5" class="ink">Create a routine</text>
+<path d="M1133 501l5 5-5 5" class="icon"/>
 
-<text x="882" y="514" font-size="13" class="dim">Grants</text>
-<g font-size="12" class="ink">
-  <rect x="880" y="526" width="94" height="28" rx="14" fill="#202024" stroke="#303035"/><text x="927" y="545" text-anchor="middle">work folder</text>
-  <rect x="982" y="526" width="68" height="28" rx="14" fill="#202024" stroke="#303035"/><text x="1016" y="545" text-anchor="middle">browser</text>
-  <rect x="1058" y="526" width="98" height="28" rx="14" fill="#202024" stroke="#303035"/><text x="1107" y="545" text-anchor="middle">one repo</text>
-  <rect x="880" y="562" width="120" height="28" rx="14" fill="none" stroke="#303035" stroke-dasharray="3 3"/><text x="940" y="581" text-anchor="middle" class="dim">+ grant access</text>
+<text x="853" y="569" font-size="14.5" class="dim">Computer</text>
+<rect x="840" y="585" width="318.5" height="67" rx="13" class="card"/>
+<text x="853" y="613" font-size="14.5" class="ink">Bot’s computer</text>
+<text x="853" y="634" font-size="14" class="dim">Asleep</text>
+<rect x="1074" y="597" width="71" height="43" rx="8" fill="#3a3a3a"/>
+<circle cx="1109.5" cy="619" r="11" fill="#6a6a6a"/>
+<text x="1131" y="607" font-size="9" class="dim">z</text>
+
+<text x="853" y="692" font-size="14.5" class="dim">Voice chat</text>
+<rect x="840" y="708" width="318.5" height="109" rx="13" class="card"/>
+<g font-size="14.5" class="ink">
+  <text x="853" y="735">Voice</text><text x="1121" y="735" text-anchor="end">Liora</text>
+  <text x="853" y="768">Speed</text><text x="1121" y="768" text-anchor="end">1x</text>
+  <text x="853" y="801">Language</text><text x="1121" y="801" text-anchor="end">Auto-detect</text>
 </g>
+<g class="icon" stroke-width="1.5"><path d="M1128 728l4 4 4-4"/><path d="M1128 761l4 4 4-4"/><path d="M1128 794l4 4 4-4"/></g>
 </svg>
