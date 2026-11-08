@@ -7,7 +7,7 @@ import { path, read, items, journeys, slices } from './lib/data.mjs';
 import { roadmapSvg } from './generate-roadmap.mjs';
 import { journeysSvg, parityMd } from './generate-parity.mjs';
 import { heroSvg } from './generate-hero.mjs';
-import { controls } from './lib/controls.mjs';
+import { controls, claims } from './lib/controls.mjs';
 
 const fails = [];
 const ran = {};
@@ -85,7 +85,7 @@ for (const f of stateFiles) {
   const state = JSON.parse(read('fixtures', 'states', f));
   for (const name of new Set(controls(state).map((c) => c.name))) {
     rule('controls tracked', 1);
-    if (!its.some((i) => (i.controls || []).includes(name))) fail(`inventory: ${f} has control "${name}" that no item in parity/items.json claims`);
+    if (!its.some((i) => claims(i, name))) fail(`inventory: ${f} has control "${name}" that no item in parity/items.json claims`);
   }
 }
 

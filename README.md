@@ -23,7 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 11 changes
+- **Today** · 1 change
+  - Prep for the long run: 10 more oracle states, Gate A over all of them, lane-sized files
+- **Yesterday** · 11 changes
   - S1: talk through Barkpark (server side, transcript, working line, composer)
   - S0 closed on the board; Gate B moves to S1 with the transcript it needs
 <!-- timeline:end -->

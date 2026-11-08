@@ -11,12 +11,14 @@ import { spawn } from 'node:child_process';
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { connect } from './oracle/cdp.mjs';
 import { collect } from './oracle/collect.mjs';
-import { controls, namedElements } from './lib/controls.mjs';
+import { controls, namedElements, claims } from './lib/controls.mjs';
 import { path, ROOT } from './lib/data.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
 const ACCEPT = args.includes('--accept');
+// --ci: compare against the recorded run, write nothing (a pull request's check).
+const CI = args.includes('--ci');
 const APP_PORT = 3170, CHROME_PORT = Number(opt('chrome-port') || 9334);
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const TOL = 1; // pt, each edge
@@ -52,10 +54,27 @@ if (!base) {
 }
 mkdirSync(path('.cache', 'gate-chrome'), { recursive: true });
 
+const items = JSON.parse(readFileSync(path('parity', 'items.json'), 'utf8')).items;
+const owner = (name) => items.find((i) => claims(i, name))?.id ?? null;
+// Every oracle control in a state, the item that owns it, and whether ours has one by that name.
+function inventoryOf(state, ours) {
+  const ourNames = new Set(ours ? controls(ours).map((c) => c.name) : []);
+  const ctl = [...new Map(controls(state).map((c) => [c.name, c])).values()].map((c) => ({ name: c.name, item: owner(c.name), ours: ourNames.has(c.name) }));
+  return { id: state.id, controls: ctl, missing: ctl.filter((c) => !c.ours).length, untracked: ctl.filter((c) => !c.item).map((c) => c.name) };
+}
+
 const report = { run: new Date().toISOString(), states: [] };
 const inventory = { run: report.run, states: [] };
 for (const state of states) {
   const [w, h, dpr] = state.viewport;
+  const theirs = namedElements(state);
+  // A captured state the app has no scene for yet scores 0: every case is open work.
+  if ((await fetch(`${base}/gate/${state.id}`)).status === 404) {
+    report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: theirs.length, pass: 0, scene: false, results: theirs.map(({ key }) => ({ key, pass: false, why: 'no scene' })) });
+    inventory.states.push(inventoryOf(state, null));
+    console.log(`Gate A · ${state.id} · 0/${theirs.length} pass (no scene yet)`);
+    continue;
+  }
   const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${path('.cache', 'gate-chrome')}`, `--window-size=${w},${h}`, `--force-device-scale-factor=${dpr}`, 'about:blank'], { stdio: 'ignore' });
   kids.push(chrome);
   await until(async () => (await fetch(`http://127.0.0.1:${CHROME_PORT}/json/version`)).ok, 15000, 'headless Chrome');
@@ -72,7 +91,6 @@ for (const state of states) {
   await wait(300);
 
   // Gate A: same name, box within 1 pt on every edge, the same look.
-  const theirs = namedElements(state);
   const mine = new Map(namedElements(ours).map((c) => [c.key, c]));
   const cases = theirs.map(({ key, e }) => {
     const m = mine.get(key);
@@ -90,19 +108,18 @@ for (const state of states) {
   const pass = cases.filter((c) => c.pass).length;
   report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: cases.length, pass, results: cases });
 
-  // Inventory: every oracle control, and whether ours has one by that name.
-  const ourNames = new Set(controls(ours).map((c) => c.name));
-  const items = JSON.parse(readFileSync(path('parity', 'items.json'), 'utf8')).items;
-  const owner = (name) => items.find((i) => (i.controls || []).includes(name))?.id ?? null;
-  const ctl = [...new Map(controls(state).map((c) => [c.name, c])).values()].map((c) => ({ name: c.name, item: owner(c.name), ours: ourNames.has(c.name) }));
-  inventory.states.push({ id: state.id, controls: ctl, missing: ctl.filter((c) => !c.ours).length, untracked: ctl.filter((c) => !c.item).map((c) => c.name) });
+  inventory.states.push(inventoryOf(state, ours));
 
   console.log(`Gate A · ${state.id} · ${pass}/${cases.length} pass`);
   for (const c of cases.filter((x) => !x.pass).slice(0, Number(opt('show') || 12))) console.log(`  ✗ ${c.key}: ${c.why}`);
-  console.log(`Inventory · ${state.id} · ours has ${ctl.length - inventory.states.at(-1).missing}/${ctl.length} controls${inventory.states.at(-1).untracked.length ? ` · untracked: ${inventory.states.at(-1).untracked.join(', ')}` : ''}`);
+  const inv = inventory.states.at(-1);
+  console.log(`Inventory · ${state.id} · ours has ${inv.controls.length - inv.missing}/${inv.controls.length} controls${inv.untracked.length ? ` · untracked: ${inv.untracked.join(', ')}` : ''}`);
 }
 
 const total = report.states.reduce((n, s) => n + s.cases, 0);
+const passed = report.states.reduce((n, s) => n + s.pass, 0);
+report.total = { cases: total, pass: passed };
+console.log(`Gate A · all ${report.states.length} states · ${passed}/${total} pass`);
 if (!total) { console.error('Gate A: zero cases: a gate with nothing to check fails'); process.exit(1); }
 const prevFile = path('parity', 'gate-a.json');
 const prev = existsSync(prevFile) ? JSON.parse(readFileSync(prevFile, 'utf8')) : null;
@@ -110,6 +127,13 @@ let lower = [];
 if (prev) for (const s of report.states) { const p = prev.states.find((x) => x.id === s.id); if (p && s.pass < p.pass) lower.push(`${s.id} ${p.pass} → ${s.pass}`); }
 if (lower.length && !ACCEPT) { console.error(`Gate A: the pass count went down (${lower.join(', ')}). Not recorded. A change that lowers it does not land; --accept records it on purpose.`); process.exit(1); }
 if (lower.length) console.log(`Gate A: recorded a LOWER count on purpose: ${lower.join(', ')}`);
+if (CI) {
+  const missing = prev ? report.states.filter((s) => !prev.states.some((p) => p.id === s.id)).map((s) => s.id) : report.states.map((s) => s.id);
+  if (missing.length) { console.error(`Gate A: no recorded run for ${missing.join(', ')}: run npm run gate and commit parity/gate-a.json`); process.exit(1); }
+  const higher = report.states.filter((s) => s.pass > (prev.states.find((p) => p.id === s.id)?.pass ?? 0));
+  if (higher.length) console.log(`Gate A: higher than recorded on ${higher.map((s) => s.id).join(', ')}: run npm run gate to record it`);
+  process.exit(0);
+}
 writeFileSync(prevFile, JSON.stringify(report, null, 1) + '\n');
 writeFileSync(path('parity', 'inventory.json'), JSON.stringify(inventory, null, 1) + '\n');
 const untracked = inventory.states.flatMap((s) => s.untracked);

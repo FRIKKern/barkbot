@@ -15,12 +15,17 @@ const isControl = (e) => (CONTROL_TAGS.has(e.tag) || CONTROL_ROLES.has(e.role)) 
 // picker is named by the label on its row ("Voice", not "Helix").
 export function controlName(els, e) {
   if (e.role === 'combobox') {
-    const row = els.filter((x) => x.text && !ancestors(els, x).includes(e) && x.box[0] < e.box[0] && Math.abs((x.box[1] + x.box[3] / 2) - (e.box[1] + e.box[3] / 2)) < 6);
+    // The row's own label: plain text left of the picker, never text inside a control or an
+    // open list, menu or dialog lying over the row.
+    const overlay = (x) => [x, ...ancestors(els, x)].some((a) => isControl(a) || ['listbox', 'option', 'menu', 'menuitem', 'dialog'].includes(a.role));
+    const row = els.filter((x) => x.text && !overlay(x) && x.box[0] < e.box[0] && Math.abs((x.box[1] + x.box[3] / 2) - (e.box[1] + e.box[3] / 2)) < 6);
     return row.sort((a, b) => b.box[0] - a.box[0])[0]?.text ?? null;
   }
+  // A label's tail after a comma is a status, not the name: "Open account menu, new update available".
+  const label = e.label?.split(', ')[0];
   const inRail = ancestors(els, e).some((a) => a.label === 'Bots');
-  if (inRail && e.tag === 'button' && e.box[2] === 54 && e.label !== 'Open account menu') return 'Bot tile';
-  return e.label || e.text || innerText(els, e) || null;
+  if (inRail && e.tag === 'button' && e.box[2] === 54 && label !== 'Open account menu') return 'Bot tile';
+  return label || e.text || innerText(els, e) || null;
 }
 
 export function controls(state) {
@@ -50,4 +55,10 @@ export function namedElements(state) {
     out.push({ key: n > 1 ? `${key}#${n}` : key, name, e });
   }
   return out;
+}
+
+// Does an item claim this control? An entry is a name, or a /pattern/ for a family of controls
+// whose names are data (a voice's preview button, a colour swatch).
+export function claims(item, name) {
+  return (item.controls || []).some((c) => (c.startsWith('/') && c.endsWith('/') ? new RegExp(c.slice(1, -1)).test(name) : c === name));
 }

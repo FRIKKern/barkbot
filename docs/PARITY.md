@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-7 of 36 items done, 5 partial, 8 open, 16 not yet read on the oracle.
+7 of 40 items done, 5 partial, 12 open, 16 not yet read on the oracle.
 Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Edit the JSON, never this page.
 
 ## S0 Harness
@@ -38,6 +38,10 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 | F2 | Header: the bot's name pill, centred over the transcript | J02 | ? unread | — |
 | F5 | Top bar: Share (the sidebar toggle shows on hover; not in the captured state) | J02 | ? unread | — |
 | F6 | Stand-in font picked by measured widths: Gate A's last misses are Inter running 1-3 pt wider than the oracle's own font | — | ○ open | — |
+| F7 | Composer actions menu: Attach files, Teach a task (oracle-composer-menu) | — | ○ open | — |
+| F8 | Account menu: Weekly usage, Get Grok Bot for mobile, Support, Settings, Add account, Log out (oracle-account-menu); each row's target is its own item | — | ○ open | — |
+| F9 | Library tab: the empty state 'Pages, files, and apps this Bot makes show up here' (oracle-library) | J03 | ○ open | — |
+| F10 | Every captured width matches: 1040, 1280, 1600 (oracle-main-*) | J02 | ○ open | — |
 | F3 | Right panel: mark, name, Activity and Library tabs, close | J03 | ? unread | — |
 | F4 | Computer card: asleep (zzz, breathing), waking up, unreachable, working; read from the host heartbeat | J04 | ? unread | — |
 

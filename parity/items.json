@@ -21,11 +21,15 @@
     {"id": "F2", "slice": "S2", "journey": "J02", "title": "Header: the bot's name pill, centred over the transcript", "status": "unknown", "controls": ["View conversation details"]},
     {"id": "F5", "slice": "S2", "journey": "J02", "title": "Top bar: Share (the sidebar toggle shows on hover; not in the captured state)", "status": "unknown", "controls": ["Share"]},
     {"id": "F6", "slice": "S2", "journey": null, "title": "Stand-in font picked by measured widths: Gate A's last misses are Inter running 1-3 pt wider than the oracle's own font", "status": "open"},
+    {"id": "F7", "slice": "S2", "journey": null, "title": "Composer actions menu: Attach files, Teach a task (oracle-composer-menu)", "status": "open", "controls": ["Teach a task"]},
+    {"id": "F8", "slice": "S2", "journey": null, "title": "Account menu: Weekly usage, Get Grok Bot for mobile, Support, Settings, Add account, Log out (oracle-account-menu); each row's target is its own item", "status": "open", "controls": ["Weekly usage", "Get Grok Bot for mobile", "Support", "Settings", "Add account", "Log out"]},
+    {"id": "F9", "slice": "S2", "journey": "J03", "title": "Library tab: the empty state 'Pages, files, and apps this Bot makes show up here' (oracle-library)", "status": "open"},
+    {"id": "F10", "slice": "S2", "journey": "J02", "title": "Every captured width matches: 1040, 1280, 1600 (oracle-main-*)", "status": "open"},
     {"id": "F3", "slice": "S2", "journey": "J03", "title": "Right panel: mark, name, Activity and Library tabs, close", "status": "unknown", "controls": ["Close", "Edit Bot avatar", "Bot name", "Activity", "Library"]},
     {"id": "F4", "slice": "S2", "journey": "J04", "title": "Computer card: asleep (zzz, breathing), waking up, unreachable, working; read from the host heartbeat", "status": "unknown", "controls": ["Bot's computer"]},
     {"id": "C1", "slice": "S3", "journey": "J05", "title": "Cancel a reply: it stops at once and nothing is left running", "status": "unknown"},
     {"id": "C2", "slice": "S3", "journey": "J06", "title": "Come back later: transcript and Claude session resume after a restart", "status": "open"},
-    {"id": "A1", "slice": "S4", "journey": "J07", "title": "File card: name and size, readable by the bot", "status": "unknown"},
+    {"id": "A1", "slice": "S4", "journey": "J07", "title": "File card: name and size, readable by the bot", "status": "unknown", "controls": ["Attach files"]},
     {"id": "A2", "slice": "S4", "journey": "J08", "title": "Picture grid with a +N tile; each opens large", "status": "unknown"},
     {"id": "A3", "slice": "S4", "journey": "J09", "title": "Library: what the bot saved, newest first", "status": "unknown"},
     {"id": "Q1", "slice": "S5", "journey": "J10", "title": "Approval card: nothing happens until I press", "status": "unknown"},
@@ -34,9 +38,9 @@
     {"id": "V1", "slice": "S6", "journey": null, "title": "The bot's host moves to its own VM; J01, J05 and J06 pass there", "status": "open"},
     {"id": "V2", "slice": "S6", "journey": null, "title": "The Claude token never reaches Barkpark: grep of DB and logs is empty", "status": "open"},
     {"id": "N1", "slice": "S7", "journey": "J12", "title": "First run: greeting, naming, a 'Renamed to' line", "status": "unknown"},
-    {"id": "N5", "slice": "S7", "journey": "J12", "title": "Create New Bot dialog: name, 13 shapes, 11 colours, Cancel and Create (Create stays disabled until named)", "status": "open"},
+    {"id": "N5", "slice": "S7", "journey": "J12", "title": "Create New Bot dialog: name, 13 shapes, 11 colours, Cancel and Create (Create stays disabled until named)", "status": "open", "controls": ["/ character (color|shape)$/", "Create", "Cancel", "Close dialog"]},
     {"id": "N2", "slice": "S7", "journey": null, "title": "Message actions on hover", "status": "unknown"},
     {"id": "N3", "slice": "S7", "journey": null, "title": "Suggested card: Add to Slack and Create a routine; each opens 1:1 and stops before acting outside the page", "status": "unknown", "controls": ["Add to Slack", "Create a routine"]},
-    {"id": "N4", "slice": "S7", "journey": null, "title": "Voice chat card: voice, speed and language pickers", "status": "unknown", "controls": ["Voice", "Speed", "Language"]}
+    {"id": "N4", "slice": "S7", "journey": null, "title": "Voice chat card: voice, speed and language pickers", "status": "unknown", "controls": ["Voice", "Speed", "Language", "/^Play the .+ preview$/"]}
   ]
 }

@@ -1,0 +1,21 @@
+name: gate
+# Gate A on every pull request: the app against every captured oracle state. Fails when a
+# pass count goes below parity/gate-a.json, or a captured state has no recorded run.
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  gate-a:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - run: pnpm install --frozen-lockfile
+        working-directory: app
+      - run: node scripts/gate.mjs --ci
