@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 4 changes
+- **Today** · 5 changes
+  - Overlay mount point for the overlays lane; runbook linked from AGENTS.md
   - One scene file per gated state; Gate A on CI is green
-  - Gate A: the app is up when it answers, not when its home page is 200
 - **Yesterday** · 11 changes
   - S1: talk through Barkpark (server side, transcript, working line, composer)
   - S0 closed on the board; Gate B moves to S1 with the transcript it needs

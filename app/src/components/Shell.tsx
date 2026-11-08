@@ -6,6 +6,7 @@ import {Composer} from './Composer'
 import {Rail} from './Rail'
 import {Details} from './Details'
 import {Face} from './parts'
+import {Overlay} from './overlays'
 
 export type Scene = {
   bots: {name: string; main?: boolean}[]
@@ -14,6 +15,8 @@ export type Scene = {
   computer?: string
   voice?: {voice: string; speed: string; language: string}
   tab?: 'activity' | 'library'
+  /** An open menu, picker or dialog, by name (components/overlays). */
+  overlay?: string
 }
 
 export function Shell({scene, transcript, composer}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode}) {
@@ -41,6 +44,7 @@ export function Shell({scene, transcript, composer}: {scene: Scene; transcript?:
       </main>
 
       {scene.panelOpen && <Details scene={scene} />}
+      <Overlay name={scene.overlay} />
     </div>
   )
 }

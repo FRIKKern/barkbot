@@ -20,7 +20,7 @@ the app       ─► app/ (TanStack Start); /gate/<state> is Gate A's stage
 2. An unread item is captured on the oracle first (O1), then built.
 3. Work in a worktree. The main checkout stays on `main`.
 4. Name the item in the commit: `T3: working line with the bot's mark`.
-5. `npm run check` before every commit; `npm run gate` after any change in `app/`.
+5. `npm run check` before every commit; `npm run gate` after any change in `app/`; `npm run land` to land a branch. Long runs: [BarkBot 24h Run](https://guerrilla.barkpark.cloud/papers/barkbot-24h-run).
 6. Set the item in `parity/items/<id>.json` with gate and evidence, then `npm run docs`.
 7. Evidence (clips, screenshots) goes on the task, never in git.
 
