@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 9 changes
+- **Today** · 10 changes
+  - S0 closed on the board; Gate B moves to S1 with the transcript it needs
   - S0 harness: Gate A, inventory, feel budgets, and the app skeleton
-  - Hero motion pass: the working face moves, eases match the oracle
 <!-- timeline:end -->
 
 ## Where things live (one fact, one home)

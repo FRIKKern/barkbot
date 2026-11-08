@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="704" viewBox="0 0 1200 704" role="img" aria-labelledby="t d">
 <title id="t">BarkBot roadmap</title>
-<desc id="d">0 of 8 slices delivered. S0 Harness: now, reward: 1:1 becomes a number, 5 of 8 items done. S1 Talk: later, reward: A BarkBot you can talk to, 0 of 6 items done. S2 Frame: later, reward: It looks like the real thing, 0 of 5 items done. S3 Control: later, reward: Trusted with long work, 0 of 2 items done. S4 Things: later, reward: It shows its work, 0 of 3 items done. S5 Ask: later, reward: It asks before it acts, 0 of 3 items done. S6 Own computer: later, reward: It works while you are away, 0 of 2 items done. S7 Hello: later, reward: Nothing left to tell apart, 0 of 5 items done.</desc>
+<desc id="d">1 of 8 slices delivered. S0 Harness: done, reward: 1:1 becomes a number, 7 of 7 items done. S1 Talk: now, reward: A BarkBot you can talk to, 0 of 8 items done. S2 Frame: later, reward: It looks like the real thing, 0 of 6 items done. S3 Control: later, reward: Trusted with long work, 0 of 2 items done. S4 Things: later, reward: It shows its work, 0 of 3 items done. S5 Ask: later, reward: It asks before it acts, 0 of 3 items done. S6 Own computer: later, reward: It works while you are away, 0 of 2 items done. S7 Hello: later, reward: Nothing left to tell apart, 0 of 5 items done.</desc>
 <style>
   svg { --bg:#f7f6f3; --card:#ffffff; --line:#e4e1da; --ink:#1c1b19; --muted:#6e6b64; --done:#2f7d52; --now:#c27a12; --todo:#a29f97; --unk:#8569b3; --nowbg:#fff5e3; --accent:#e8962e; }
   @media (prefers-color-scheme: dark) {
@@ -17,37 +17,37 @@
 <rect class="bg" width="1200" height="704" rx="16"/>
 <text x="40" y="70" font-size="36" font-weight="700" letter-spacing="-0.8">BarkBot</text>
 <text x="40" y="102" font-size="19" class="muted">An agent with its own computer, built slice by slice against a live oracle.</text>
-<text x="1160" y="70" font-size="40" font-weight="700" text-anchor="end">0<tspan class="muted" font-weight="400"> / 8</tspan></text>
+<text x="1160" y="70" font-size="40" font-weight="700" text-anchor="end">1<tspan class="muted" font-weight="400"> / 8</tspan></text>
 <text x="1160" y="102" font-size="16" text-anchor="end" class="muted">slices delivered</text>
 <rect x="40" y="124" width="1120" height="8" rx="4" class="track"/>
-<rect x="40" y="124" width="0" height="8" rx="4" class="bar"/>
+<rect x="40" y="124" width="140" height="8" rx="4" class="bar"/>
 <text x="40" y="168" font-size="16"><tspan class="done">✓ delivered</tspan><tspan class="now" dx="24">◐ in progress</tspan><tspan class="todo" dx="24">○ to do</tspan></text>
 <text x="1160" y="168" font-size="16" text-anchor="end" class="muted">every slice runs real Barkpark and real claude</text>
 <g data-slice="S0">
-<rect x="40" y="196" width="268" height="212" rx="12" class="card on"/>
+<rect x="40" y="196" width="268" height="212" rx="12" class="card"/>
 <text x="60" y="228" font-size="13" font-weight="700" letter-spacing="1.5" class="muted">S0</text>
-<text x="288" y="228" font-size="13" font-weight="700" letter-spacing="1.5" text-anchor="end" class="now">NOW</text>
+<text x="288" y="228" font-size="13" font-weight="700" letter-spacing="1.5" text-anchor="end" class="done">DONE</text>
 <text x="60" y="262" font-size="23" font-weight="600">Harness</text>
 <path d="M60 282H288" class="rule"/>
 <text x="60" y="312" font-size="16">1:1 becomes a number</text>
 <rect x="60" y="346" width="228" height="5" rx="2.5" class="track"/>
-<rect x="60" y="346" width="142.5" height="5" rx="2.5" class="bar"/>
-<clipPath id="track-S0"><rect x="60" y="346" width="228" height="5" rx="2.5"/></clipPath>
-<g clip-path="url(#track-S0)"><rect class="sweep" x="-60" y="346" width="120" height="5" fill="url(#shimmer)"/></g>
-<text x="60" y="366" font-size="13" class="muted">5 of 8 items done · 0 of 4 criteria met</text>
-<text x="60" y="392" font-size="15" class="now">◐ in progress</text>
+<rect x="60" y="346" width="228" height="5" rx="2.5" class="bar"/>
+<text x="60" y="366" font-size="13" class="muted">7 of 7 items done · 4 of 4 criteria met</text>
+<text x="60" y="392" font-size="15" class="done">✓ delivered</text>
 </g>
 <g data-slice="S1">
-<rect x="324" y="196" width="268" height="212" rx="12" class="card"/>
+<rect x="324" y="196" width="268" height="212" rx="12" class="card on"/>
 <text x="344" y="228" font-size="13" font-weight="700" letter-spacing="1.5" class="muted">S1 · J01</text>
-<text x="572" y="228" font-size="13" font-weight="700" letter-spacing="1.5" text-anchor="end" class="todo">LATER</text>
+<text x="572" y="228" font-size="13" font-weight="700" letter-spacing="1.5" text-anchor="end" class="now">NOW</text>
 <text x="344" y="262" font-size="23" font-weight="600">Talk</text>
 <path d="M344 282H572" class="rule"/>
 <text x="344" y="312" font-size="16">A BarkBot you can talk to</text>
 <rect x="344" y="346" width="228" height="5" rx="2.5" class="track"/>
 <rect x="344" y="346" width="0" height="5" rx="2.5" class="bar"/>
-<text x="344" y="366" font-size="13" class="muted">0 of 6 items done · 0 of 3 criteria met</text>
-<text x="344" y="392" font-size="15" class="todo">○ to do</text>
+<clipPath id="track-S1"><rect x="344" y="346" width="228" height="5" rx="2.5"/></clipPath>
+<g clip-path="url(#track-S1)"><rect class="sweep" x="224" y="346" width="120" height="5" fill="url(#shimmer)"/></g>
+<text x="344" y="366" font-size="13" class="muted">0 of 8 items done · 0 of 3 criteria met</text>
+<text x="344" y="392" font-size="15" class="now">◐ in progress</text>
 </g>
 <g data-slice="S2">
 <rect x="608" y="196" width="268" height="212" rx="12" class="card"/>
@@ -59,7 +59,7 @@
 <text x="628" y="334" font-size="16">thing</text>
 <rect x="628" y="346" width="228" height="5" rx="2.5" class="track"/>
 <rect x="628" y="346" width="0" height="5" rx="2.5" class="bar"/>
-<text x="628" y="366" font-size="13" class="muted">0 of 5 items done · 0 of 3 criteria met</text>
+<text x="628" y="366" font-size="13" class="muted">0 of 6 items done · 0 of 3 criteria met</text>
 <text x="628" y="392" font-size="15" class="todo">○ to do</text>
 </g>
 <g data-slice="S3">

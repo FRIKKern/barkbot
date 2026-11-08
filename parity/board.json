@@ -3,9 +3,9 @@
   "slices": {
     "S0": {
       "task": "task-3edafaf95ea3f1d0",
-      "status": "open",
+      "status": "done",
       "criteria": {
-        "met": 0,
+        "met": 4,
         "total": 4
       }
     },
