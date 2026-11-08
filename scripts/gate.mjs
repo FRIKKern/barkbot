@@ -53,7 +53,8 @@ if (!base) {
   let log = '';
   app.stdout.on('data', (d) => (log += d)); app.stderr.on('data', (d) => (log += d));
   app.on('exit', (c) => { if (c) console.error(log.slice(-2000)); });
-  await until(async () => (await fetch(base)).ok, 60000, `the app on ${base}`);
+  // Up = it answers at all. The home page needs a Barkpark login, which CI does not have; the gate pages do not.
+  await until(async () => (await fetch(base)).status > 0, 90000, `the app on ${base}`);
 }
 mkdirSync(path('.cache', 'gate-chrome'), { recursive: true });
 
