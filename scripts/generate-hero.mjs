@@ -14,10 +14,18 @@ const [VW, VH] = STATE.viewport;
 
 // ---------- the oracle, measured ----------
 export const ORACLE = {
-  source: 'fixtures/states/oracle-turn-1040.json, fixtures/text-metrics.json, traces/2026-11-08-storage.json, traces/2026-11-08-say-hi.json',
+  source: 'fixtures/states/oracle-turn-1040.json, fixtures/text-metrics.json, traces/2026-11-08-storage.json, traces/2026-11-08-say-hi.json, traces/2026-11-08-mark.json',
   userIn: 0.44, workIn: 2.03, ackIn: 3.53, typing: 9.0, replyIn: 9.84, workOut: 9.95,   // s after send
   enter: { px: 12, ms: 240, ease: 'cubic-bezier(.23,1,.32,1)' },                      // bubbles slide, no fade
-  work: { rowMs: 180, rowScale: 0.92, rowEase: 'cubic-bezier(.23,1,.32,1)', markMs: 340, markScale: 0.6, markEase: 'cubic-bezier(.34,1.56,.64,1)', labelMs: 180, labelDelay: 0.22, labelPx: 4 },
+  work: { rowMs: 180, rowScale: 0.92, rowEase: 'cubic-bezier(.22,1,.36,1)', markMs: 340, markScale: 0.6, markEase: 'cubic-bezier(.34,1.56,.64,1)', labelMs: 180, labelDelay: 0.22, labelPx: 4, labelEase: 'cubic-bezier(.22,1,.36,1)' },
+  // The working mark is the bot's own face, upright, 20 pt, centred at x 126 on the label's line.
+  // It is never still: traces/2026-11-08-mark.json caught two moves, frame by frame.
+  face: {
+    size: 20, cx: 126,
+    squash: { downS: 0.4, upS: 0.55, min: 0.33, ease: 'cubic-bezier(.22,1,.36,1)' },   // shrinks to a third, springs back
+    tilt: { deg: -15, outS: 0.3, holdS: 0.2, backS: 0.35, ease: 'cubic-bezier(.65,0,.35,1)' }, // leans left, comes back
+    firstS: 0.45,                                                                        // first move after the label lands
+  },
   workExit: { ms: 140, scale: 0.92, ease: 'cubic-bezier(.22,1,.36,1)' },
   // background-position 200% -> -200% over a 200%-wide gradient, steps(60): the bright band
   // crosses left to right twice per cycle. Dim = 40% ink; peak ink at 60%, back to dim by 75%.
@@ -28,6 +36,10 @@ export const ORACLE = {
 };
 // ---------- ours ----------
 export const TIMING = { loop: 24, focus: 0.6, typeStart: 1.0, send: 4.2, hold: 19.6, blur: 21.1 };
+// Ours: the order and spacing of the face's moves (the oracle picks them; a turn shows one or two).
+const FACE_MOVES = [['squash', 0], ['tilt', 1.9], ['squash', 3.8], ['tilt', 5.5]];
+// Ours: the reset leaves gently, newest first.
+const RESET = { s: 0.6, lift: 6, stagger: 0.1, ease: 'cubic-bezier(.65,0,.35,1)' };
 const L = TIMING.loop;
 const at = (k) => TIMING.send + ORACLE[k];
 const EPS = 0.002;
@@ -88,7 +100,7 @@ const shown = (a, b, base = HID) => anim([[0, HID], [a - EPS, HID], [a, VIS], [b
 const ty = (v) => `transform:translateY(${f1(v)}px)`;
 // Present from a to the reset; enters with the oracle's slide (no fade), leaves with our reset fade.
 const slideIn = (a, x) => anim([[0, `opacity:0;${ty(0)}`], [a - EPS, `opacity:0;${ty(0)}`], [a, `opacity:1;${ty(ORACLE.enter.px)}`, ORACLE.enter.ease],
-  [a + ORACLE.enter.ms / 1000, `opacity:1;${ty(0)}`], [x, `opacity:1;${ty(0)}`, IN], [x + 0.35, `opacity:0;${ty(0)}`]], `opacity:1;${ty(0)}`);
+  [a + ORACLE.enter.ms / 1000, `opacity:1;${ty(0)}`], [x, `opacity:1;${ty(0)}`, RESET.ease], [x + RESET.s, `opacity:0;${ty(-RESET.lift)}`]], `opacity:1;${ty(0)}`);
 
 // ---------- transcript (top-aligned, as a short conversation is) ----------
 const time = byText(STATE.elements.find((e) => e.tag === 'time').text);   // the oracle's time row: box and type
@@ -122,7 +134,7 @@ function bubble(r, i) {
     : shape(corners(i));
   const lines = r.m.lines.map((l, k) => text(x + BUBBLE.padX, r.y + BUBBLE.padY + k * BUBBLE.lh, BUBBLE.lh, l, { w: r.m.lineWidths[k], ls: 0.15 })).join('');
   const inner = body + lines;
-  return r.t === null ? inner : `<g class="${slideIn(r.t, TIMING.hold + (r.id === 'user' ? 0.16 : r.id === 'ack' ? 0.08 : 0))}">${inner}</g>`;
+  return r.t === null ? inner : `<g class="${slideIn(r.t, TIMING.hold + RESET.stagger * (r.id === 'user' ? 2 : r.id === 'ack' ? 1 : 0))}">${inner}</g>`;
 }
 
 // ---------- the working line ----------
@@ -136,14 +148,14 @@ function workingLine() {
   // The row moves at once when a bubble lands above it, as the oracle's layout does.
   const move = anim([[0, ty(0)], [at('ackIn') - EPS, ty(0)], [at('ackIn'), ty(workTop('ack') - top0)], [at('replyIn') - EPS, ty(workTop('ack') - top0)], [at('replyIn'), ty(workTop('reply') - top0)], [tGone + 0.05, ty(workTop('reply') - top0)], [tGone + 0.06, ty(0)]], ty(0));
   const row = anim([[0, `opacity:0;transform:scale(${w.rowScale})`], [t0, `opacity:0;transform:scale(${w.rowScale})`, w.rowEase], [t0 + w.rowMs / 1000, 'opacity:1;transform:scale(1)'],
-    [tOut, 'opacity:1;transform:scale(1)', ORACLE.workExit.ease], [tGone, `opacity:0;transform:scale(${ORACLE.workExit.scale})`]], 'opacity:0;transform-origin:104px 0');
+    [tOut, 'opacity:1;transform:scale(1)', ORACLE.workExit.ease], [tGone, `opacity:0;transform:scale(${ORACLE.workExit.scale})`]], `opacity:0;${FB}`);
   const mark = anim([[0, `opacity:0;transform:scale(${w.markScale})`], [t0, `opacity:0;transform:scale(${w.markScale})`, w.markEase], [t0 + w.markMs / 1000, 'opacity:1;transform:scale(1)']], `opacity:1;${FB}`);
   const lab = (s, from, to) => {
     const m = metric(s), lx = 149, ltop = top0 + 6, lh = 22;
     const id = `c${++clipN}`;
     clips.push(`<clipPath id="${id}">${text(lx, ltop, lh, s, { w: m.width, ls: 0.15 })}</clipPath>`);
     const a = from + (from === t0 ? w.labelDelay : 0);
-    const show = anim([[0, `opacity:0;${ty(w.labelPx)}`], [a, `opacity:0;${ty(w.labelPx)}`, 'cubic-bezier(.23,1,.32,1)'], [a + w.labelMs / 1000, `opacity:1;${ty(0)}`], [to - EPS, `opacity:1;${ty(0)}`], [to, `opacity:0;${ty(0)}`]], HID);
+    const show = anim([[0, `opacity:0;${ty(w.labelPx)}`], [a, `opacity:0;${ty(w.labelPx)}`, w.labelEase], [a + w.labelMs / 1000, `opacity:1;${ty(0)}`], [to - EPS, `opacity:1;${ty(0)}`], [to, `opacity:0;${ty(0)}`]], HID);
     // The bright band: a gradient twice the label's width, tiled, sliding one tile per half cycle.
     const W = m.width, half = ORACLE.shimmer.cycleS / 2, st = `steps(${ORACLE.shimmer.steps / 2},end)`;
     const pts = [[0, 'transform:translateX(0)']];
@@ -153,7 +165,18 @@ function workingLine() {
     const band = `<g class="${slide}"><rect x="${f1(lx - 2 * W)}" y="${ltop}" width="${f1(2 * W)}" height="${lh}" fill="url(#band)"/><rect x="${lx}" y="${ltop}" width="${f1(2 * W)}" height="${lh}" fill="url(#band)"/></g>`;
     return `<g class="${show}">${text(lx, ltop, lh, s, { w: m.width, ls: 0.15, fill: ink(ORACLE.shimmer.dim) })}<g clip-path="url(#${id})">${band}</g></g>`;
   };
-  return `<g class="${move}"><g class="${row}"><g class="${mark}"><circle cx="124.5" cy="${top0 + 15.5}" r="7.5" fill="none" stroke="${ink(0.5)}" stroke-width="1.5" stroke-dasharray="30 17.1" stroke-linecap="round"/></g>${lab(copy.LABELS[0], t0, at('typing'))}${lab(copy.LABELS[1], at('typing'), tGone)}</g></g>`;
+  // The face: one group squashes, one tilts, each driven by the move list.
+  const fc = ORACLE.face, sq = fc.squash, tl = fc.tilt, start = t0 + w.labelDelay + fc.firstS;
+  const squashPts = [[0, 'transform:scale(1)']], tiltPts = [[0, 'transform:rotate(0deg)']];
+  for (const [kind, off] of FACE_MOVES) {
+    const s0 = start + off;
+    if (kind === 'squash' && s0 + sq.downS + sq.upS < tOut) squashPts.push([s0, 'transform:scale(1)', sq.ease], [s0 + sq.downS, `transform:scale(${sq.min})`, sq.ease], [s0 + sq.downS + sq.upS, 'transform:scale(1)']);
+    if (kind === 'tilt' && s0 + tl.outS + tl.holdS + tl.backS < tOut) tiltPts.push([s0, 'transform:rotate(0deg)', tl.ease], [s0 + tl.outS, `transform:rotate(${tl.deg}deg)`], [s0 + tl.outS + tl.holdS, `transform:rotate(${tl.deg}deg)`, tl.ease], [s0 + tl.outS + tl.holdS + tl.backS, 'transform:rotate(0deg)']);
+  }
+  const squash = anim(squashPts, `transform:scale(1);${FB}`), tilt = anim(tiltPts, `transform:rotate(0deg);${FB}`);
+  const cy = top0 + 17, h = fc.size / 2;
+  const face = `<rect x="${fc.cx - h}" y="${cy - h}" width="${fc.size}" height="${fc.size}" rx="${fc.size * 0.22}" fill="rgb(108,108,108)"/>`;
+  return `<g class="${move}"><g class="${row}"><rect x="104" y="${top0}" width="578" height="35" fill="none"/><g class="${mark}"><g class="${squash}"><g class="${tilt}">${face}</g></g></g>${lab(copy.LABELS[0], t0, at('typing'))}${lab(copy.LABELS[1], at('typing'), tGone)}</g></g>`;
 }
 
 // ---------- composer (typing is ours: a person writing) ----------
@@ -167,6 +190,7 @@ function composer() {
   let t = TIMING.typeStart;
   for (const c of copy.DRAFT) { times.push(t); t += 0.034 + rnd() * 0.036 + (c === ' ' ? 0.06 : 0) + (c === ',' ? 0.18 : 0); }
   if (t > TIMING.send - 0.25) throw new Error('typing runs into the send');
+  if (METRICS.prefixes?.length !== copy.DRAFT.length) throw new Error('caret widths are stale: run node scripts/oracle/measure-text.mjs');
   const T = TIMING, si = ORACLE.sendIcon, fo = ORACLE.focus, fm = fo.ms / 1000;
   const border = anim([[0, `stroke:${ink(fo.rest)}`], [T.focus, `stroke:${ink(fo.rest)}`, 'ease'], [T.focus + fm, `stroke:${ink(fo.on)}`], [T.blur, `stroke:${ink(fo.on)}`, 'ease'], [T.blur + fm, `stroke:${ink(fo.rest)}`]], `stroke:${ink(fo.rest)}`);
   const ph = anim([[0, VIS], [T.typeStart - EPS, VIS], [T.typeStart, HID], [T.send - EPS, HID], [T.send, VIS]], VIS);
@@ -178,7 +202,8 @@ function composer() {
   const typed = [...copy.DRAFT].map((_, i) => {
     const a = times[i], b = i + 1 < copy.DRAFT.length ? times[i + 1] : T.send;
     const s = copy.DRAFT.slice(0, i + 1);
-    return `<g class="${shown(a, b)}">${text(tx, cy - 11, 22, s, { ls: 0.15 })}</g>`;
+    const pw = METRICS.prefixes[i];
+    return `<g class="${shown(a, b)}">${text(tx, cy - 11, 22, s, { ls: 0.15, w: pw })}<path d="M${f1(tx + pw + 1)} ${cy - 9}V${cy + 9}" stroke="${ink()}" stroke-width="1.5"/></g>`;
   }).join('');
   const caretX = tx - 1;
   const icon = (a, b, base) => anim([[0, `opacity:0;transform:scale(${si.scale})`], [a, `opacity:0;transform:scale(${si.scale})`, si.ease], [a + si.ms / 1000, 'opacity:1;transform:scale(1)'], [b, 'opacity:1;transform:scale(1)', si.ease], [b + si.ms / 1000, `opacity:0;transform:scale(${si.scale})`]], `${base};${FB}`);

@@ -8,7 +8,7 @@ import * as copy from '../lib/hero-copy.mjs';
 
 const page = await connect();
 const strings = [...copy.BUBBLE_TEXT, ...copy.LABELS, copy.PLACEHOLDER, copy.TIME, copy.BOT];
-const out = await page.evaluate((strings) => {
+const out = await page.evaluate((strings, draft) => {
   const p = document.querySelector('[role=article][data-role] p');
   if (!p) return { error: 'no bubble paragraph on screen to copy the font from' };
   const cs = getComputedStyle(p);
@@ -41,9 +41,12 @@ const out = await page.evaluate((strings) => {
     const lineWidths = lines.map((l) => { box.style.whiteSpace = 'nowrap'; box.textContent = l; const q = document.createRange(); q.selectNodeContents(box); return Math.round(q.getBoundingClientRect().width * 10) / 10; });
     res[s] = { width, lines, lineWidths };
   }
+  // Where the caret sits after each typed letter of the draft.
+  box.style.whiteSpace = 'pre';
+  const prefixes = [...draft].map((_, i) => { box.textContent = draft.slice(0, i + 1); const q = document.createRange(); q.selectNodeContents(box); return Math.round(q.getBoundingClientRect().width * 10) / 10; });
   box.remove();
-  return { font, control: Math.round(Math.abs(control.live - control.clone) * 100) / 100, strings: res };
-}, strings);
+  return { prefixes, font, control: Math.round(Math.abs(control.live - control.clone) * 100) / 100, strings: res };
+}, strings, copy.DRAFT);
 if (out.error) throw new Error(out.error);
 writeFileSync(path('fixtures', 'text-metrics.json'), JSON.stringify({ measured: new Date().toISOString().slice(0, 10), wrapWidth: 456, ...out }, null, 1) + '\n');
 console.log(`fixtures/text-metrics.json: ${Object.keys(out.strings).length} strings in ${out.font.size} ${out.font.weight}`);

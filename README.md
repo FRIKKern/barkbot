@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 7 changes
+- **Today** · 8 changes
+  - Hero motion pass: the working face moves, eases match the oracle
   - Hero rebuilt from a captured oracle state
-  - Oracle harness and a hero timed from Grok Bot's real turn
 <!-- timeline:end -->
 
 ## Where things live (one fact, one home)

@@ -11,7 +11,7 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 |---|---|---|---|---|
 | H1 | Oracle access: headless Chrome with the owner's login copied from their tab, one lane at a time | — | ✓ done | Gate: recipes guard + 4 recorded recipes. Evidence: Grok Bot.app relaunched with --remote-debugging-port=9333 (127.0.0.1); traces/2026-11-08-*.json; the send guard refused Grookie |
 | H2 | State capture: element boxes, tokens and labels to fixtures/states/<id>.json, dated | — | ◐ partial | Evidence: scripts/oracle/capture.mjs -> fixtures/states/oracle-turn-1040.json (289 elements: box, colour, radius, type; UI labels only); scripts/oracle/measure-text.mjs -> fixtures/text-metrics.json (control: clone vs live paragraph, 0 px). One state so far. |
-| H3 | Turn recorder: the oracle's DOM over time to traces/<id>.json | — | ◐ partial | Evidence: scripts/oracle/record.mjs: DOM events, engine animations with keyframes and timing, scroll; missing: status label styles (shimmer direction, colours) |
+| H3 | Turn recorder: the oracle's DOM over time to traces/<id>.json | — | ◐ partial | Evidence: scripts/oracle/record.mjs: DOM events, engine animations with keyframes, timing and look, scroll. traces/2026-11-08-mark.json: the scripted working face (squash, tilt), which the Animation domain cannot see. Missing: layout shifts sampled while the window is in front. |
 | H4 | Gate A: box and token diff, ours against the oracle, report in parity/gate-a.json | — | ○ open | — |
 | H5 | Gate B: a recorded turn replayed in ours, report in parity/gate-b.json | — | ○ open | — |
 | H6 | Inventory: every visible control, ours against the oracle, to docs/MISSING.md | — | ○ open | — |
