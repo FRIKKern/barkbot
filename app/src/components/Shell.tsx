@@ -2,6 +2,7 @@
 // oracle state fixtures/states/oracle-turn-1040.json (see styles.css). The bots' faces are
 // plain stand-ins of the same size (O2): never the oracle's mascot art.
 import type {ReactNode} from 'react'
+import {Composer, Icon} from './Composer'
 
 export type Scene = {
   bots: {name: string; main?: boolean}[]
@@ -11,7 +12,7 @@ export type Scene = {
   voice?: {voice: string; speed: string; language: string}
 }
 
-export function Shell({scene}: {scene: Scene}) {
+export function Shell({scene, transcript, composer}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode}) {
   const main = scene.bots.find((b) => b.main)
   const others = scene.bots.filter((b) => !b.main)
   const active = scene.active ?? ''
@@ -69,21 +70,8 @@ export function Shell({scene}: {scene: Scene}) {
             <span>Share</span>
           </button>
         </header>
-        <div className="transcript" />
-        <div className="composer-wrap">
-          <div className="composer">
-            <button className="round" aria-label="Composer actions">
-              <Icon d="M8 3v10M3 8h10" />
-            </button>
-            <div className="prompt" role="textbox" aria-label="Prompt" aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder={active ? `Message ${active}` : 'Message'} />
-            <button className="round" aria-label="Start voice input">
-              <Icon d="M8 2.5a2 2 0 0 1 2 2v3a2 2 0 0 1-4 0v-3a2 2 0 0 1 2-2zM4.5 7.5a3.5 3.5 0 0 0 7 0M8 11v2" />
-            </button>
-            <button className="round voice" aria-label="Start voice chat">
-              <Icon d="M3 6.5v3M5.5 4.5v7M8 3v10M10.5 5v6M13 6.5v3" />
-            </button>
-          </div>
-        </div>
+        {transcript ?? <div className="transcript" />}
+        {composer ?? <Composer placeholder={active ? `Message ${active}` : 'Message'} />}
       </main>
 
       {scene.panelOpen && (
@@ -195,12 +183,4 @@ function Pick({label, value}: {label: string; value: string}) {
 // The bot's face: a plain tilted rounded square (O2 stand-in for the oracle's mascot).
 function Face({size}: {size: number}) {
   return <span className="face" style={{width: size, height: size * 0.88}} />
-}
-
-function Icon({d}: {d: string}) {
-  return (
-    <svg className="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-      <path d={d} />
-    </svg>
-  )
 }

@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 10 changes
+- **Today** · 11 changes
+  - S1: talk through Barkpark (server side, transcript, working line, composer)
   - S0 closed on the board; Gate B moves to S1 with the transcript it needs
-  - S0 harness: Gate A, inventory, feel budgets, and the app skeleton
 <!-- timeline:end -->
 
 ## Where things live (one fact, one home)
@@ -49,5 +49,7 @@ npm run check    # doc caps, links, items, fresh pictures, no secrets
 npm run board    # snapshot the Barkpark board (needs bp)
 npm run docs     # redraw the pictures, PARITY.md and the timeline
 npm run gate     # Gate A and the inventory: the app against every captured oracle state
+npm run host:enroll  # once: make this Mac the bot's computer (token from Studio > Chat hosts)
+npm run host         # keep running while the bot works
 cd app && pnpm install && pnpm dev   # the app on http://localhost:3170
 ```

@@ -41,6 +41,8 @@ process.on('SIGINT', () => process.exit(130));
 let base = opt('url');
 if (!base) {
   base = `http://localhost:${APP_PORT}`;
+  // Measure only the app this run started: a busy port could be anything.
+  if (await fetch(base).then(() => true, () => false)) { console.error(`Gate A: port ${APP_PORT} is already in use. Stop that server, or pass --url to measure it on purpose.`); process.exit(1); }
   const app = spawn('pnpm', ['-s', 'dev'], { cwd: path('app'), stdio: ['ignore', 'pipe', 'pipe'] });
   kids.push(app);
   let log = '';

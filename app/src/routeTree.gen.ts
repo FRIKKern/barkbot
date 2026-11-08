@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GateStateRouteImport } from './routes/gate.$state'
+import { Route as ApiChatIdEventsRouteImport } from './routes/api/chat.$id.events'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const GateStateRoute = GateStateRouteImport.update({
   path: '/gate/$state',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatIdEventsRoute = ApiChatIdEventsRouteImport.update({
+  id: '/api/chat/$id/events',
+  path: '/api/chat/$id/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gate/$state': typeof GateStateRoute
+  '/api/chat/$id/events': typeof ApiChatIdEventsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/gate/$state': typeof GateStateRoute
+  '/api/chat/$id/events': typeof ApiChatIdEventsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/gate/$state': typeof GateStateRoute
+  '/api/chat/$id/events': typeof ApiChatIdEventsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/gate/$state'
+  fullPaths: '/' | '/gate/$state' | '/api/chat/$id/events'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/gate/$state'
-  id: '__root__' | '/' | '/gate/$state'
+  to: '/' | '/gate/$state' | '/api/chat/$id/events'
+  id: '__root__' | '/' | '/gate/$state' | '/api/chat/$id/events'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GateStateRoute: typeof GateStateRoute
+  ApiChatIdEventsRoute: typeof ApiChatIdEventsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GateStateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/$id/events': {
+      id: '/api/chat/$id/events'
+      path: '/api/chat/$id/events'
+      fullPath: '/api/chat/$id/events'
+      preLoaderRoute: typeof ApiChatIdEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GateStateRoute: GateStateRoute,
+  ApiChatIdEventsRoute: ApiChatIdEventsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
