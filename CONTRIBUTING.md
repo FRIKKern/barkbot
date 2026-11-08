@@ -2,7 +2,7 @@
 
 ```
 claim slice task ─► capture unread items ─► build in a worktree ─► npm run check
-       ─► items.json + npm run docs ─► review (risky code) ─► land ─► someone else signs
+       ─► parity/items/ + npm run docs ─► review (risky code) ─► land ─► someone else signs
 ```
 
 - Read [`AGENTS.md`](AGENTS.md) first; it routes everything else.
@@ -11,4 +11,4 @@ claim slice task ─► capture unread items ─► build in a worktree ─► n
 - A pull request carries `Task: task-…`, the oracle numbers it matched, and red-before, green-after.
 - Handoffs are one screen: Why, Fix, Evidence, Limits, Next. They go on the task.
 - Evidence lives on the task and in Barkpark media, never in git.
-- Generated files are never edited by hand: `docs/images/hero.svg`, `docs/images/roadmap.svg`, `docs/images/journeys.svg`, `docs/PARITY.md`, the README timeline, `parity/gate-a.json` and `parity/inventory.json` (`npm run gate`).
+- Generated files are never edited by hand: `docs/images/hero.svg`, `docs/images/roadmap.svg`, `docs/images/journeys.svg`, `docs/PARITY.md`, the README timeline, `parity/gate-a/` (`npm run gate`).

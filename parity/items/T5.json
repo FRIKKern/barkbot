@@ -1,0 +1,8 @@
+{
+ "id": "T5",
+ "slice": "S1",
+ "journey": "J01",
+ "title": "Live reply from /v1/chat/sessions/:id/events",
+ "status": "partial",
+ "evidence": "useConversation.ts reads event: message (history), event: chat (claude frames, managed) and event: runtime (registered host). Not yet seen live: no host enrolled."
+}

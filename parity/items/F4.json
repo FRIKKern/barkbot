@@ -1,0 +1,10 @@
+{
+ "id": "F4",
+ "slice": "S2",
+ "journey": "J04",
+ "title": "Computer card: asleep (zzz, breathing), waking up, unreachable, working; read from the host heartbeat",
+ "status": "unknown",
+ "controls": [
+  "Bot's computer"
+ ]
+}

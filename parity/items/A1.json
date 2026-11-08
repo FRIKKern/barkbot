@@ -1,0 +1,10 @@
+{
+ "id": "A1",
+ "slice": "S4",
+ "journey": "J07",
+ "title": "File card: name and size, readable by the bot",
+ "status": "unknown",
+ "controls": [
+  "Attach files"
+ ]
+}

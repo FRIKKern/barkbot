@@ -2,8 +2,8 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-7 of 40 items done, 5 partial, 12 open, 16 not yet read on the oracle.
-Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Edit the JSON, never this page.
+7 of 40 items done, 6 partial, 11 open, 16 not yet read on the oracle.
+Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an item file, never this page.
 
 ## S0 Harness
 
@@ -21,14 +21,14 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 
 | Id | Item | Journey | Status | Gate or evidence |
 |---|---|---|---|---|
+| H5 | Gate B: a recorded turn replayed in ours (needs the S1 transcript), report in parity/gate-b.json | — | ○ open | — |
+| H9 | Gate A in CI: build the app and run npm run gate in headless Chrome on every pull request | — | ◐ partial | Evidence: .github/workflows/gate.yml runs node scripts/gate.mjs --ci on macos-15 for every pull request and push to main. Done when a run is green on GitHub. |
 | T1 | App shell: TanStack Start; the Barkpark token lives only in server functions | J01 | ◐ partial | Evidence: app/src/server/barkpark.ts (server-only; token from .env or the owner's bp login); app/src/chat/api.ts loadChat/startChat/sendMessage; /api/chat/$id/events passes Barkpark's stream through. Browser bundle has no token code (build checked). Missing: a real turn end to end (T6). |
 | T2 | Transcript: user and bot bubbles, grouping, the day and time line | J01 | ◐ partial | Evidence: app/src/components/Transcript.tsx: bubbles 15/22, 7x12, radius 18, max 480, user .18 / bot .04, +12 on a change of speaker, time row 12/16 (fixture articles 71-86); slide-in 12 pt 240 ms. Not yet gated: Gate B (H5) needs a live turn. |
 | T3 | Working line: the bot's mark and what it is doing now | J01 | ◐ partial | Evidence: Working line in Transcript.tsx + styles.css: row 180 ms, mark 340 ms spring, label 180 ms (+220 ms first), shimmer steps(60) 2.2 s, face squash and tilt, exit 140 ms. Labels: Thinking, Typing…, a tool's own description. The oracle's summary labels ("Checking system storage") need tool events from the host: task-f13fc4b4dc2af6de. |
 | T4 | Composer: attach, text, Enter sends, Shift+Enter breaks, focus after send | J01 | ◐ partial | Evidence: app/src/components/Composer.tsx: Enter sends and clears at once, Shift+Enter adds a line, focus stays in Prompt, the voice button turns into Send while there is a draft (200 ms, scale .5). Attach is S4. |
 | T5 | Live reply from /v1/chat/sessions/:id/events | J01 | ◐ partial | Evidence: useConversation.ts reads event: message (history), event: chat (claude frames, managed) and event: runtime (registered host). Not yet seen live: no host enrolled. |
 | T6 | A registered chat host on the owner's Mac runs real claude -p | J01 | ○ open | Evidence: npm run host:enroll / npm run host (scripts/host.sh): one locked folder ~/BarkBot/home, claude in plan mode. Enrollment is owner-only: the owner issues it in Studio > Chat hosts. |
-| H5 | Gate B: a recorded turn replayed in ours (needs the S1 transcript), report in parity/gate-b.json | — | ○ open | — |
-| H9 | Gate A in CI: build the app and run npm run gate in headless Chrome on every pull request | — | ○ open | — |
 
 ## S2 Frame
 
@@ -36,14 +36,14 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 |---|---|---|---|---|
 | F1 | Left rail: bots, the active one, badge, new chat, apps grid, my avatar | J02 | ? unread | — |
 | F2 | Header: the bot's name pill, centred over the transcript | J02 | ? unread | — |
+| F3 | Right panel: mark, name, Activity and Library tabs, close | J03 | ? unread | — |
+| F4 | Computer card: asleep (zzz, breathing), waking up, unreachable, working; read from the host heartbeat | J04 | ? unread | — |
 | F5 | Top bar: Share (the sidebar toggle shows on hover; not in the captured state) | J02 | ? unread | — |
 | F6 | Stand-in font picked by measured widths: Gate A's last misses are Inter running 1-3 pt wider than the oracle's own font | — | ○ open | — |
 | F7 | Composer actions menu: Attach files, Teach a task (oracle-composer-menu) | — | ○ open | — |
 | F8 | Account menu: Weekly usage, Get Grok Bot for mobile, Support, Settings, Add account, Log out (oracle-account-menu); each row's target is its own item | — | ○ open | — |
 | F9 | Library tab: the empty state 'Pages, files, and apps this Bot makes show up here' (oracle-library) | J03 | ○ open | — |
 | F10 | Every captured width matches: 1040, 1280, 1600 (oracle-main-*) | J02 | ○ open | — |
-| F3 | Right panel: mark, name, Activity and Library tabs, close | J03 | ? unread | — |
-| F4 | Computer card: asleep (zzz, breathing), waking up, unreachable, working; read from the host heartbeat | J04 | ? unread | — |
 
 ## S3 Control
 
@@ -80,7 +80,7 @@ Generated from [`parity/items.json`](../parity/items.json) by `npm run docs`. Ed
 | Id | Item | Journey | Status | Gate or evidence |
 |---|---|---|---|---|
 | N1 | First run: greeting, naming, a 'Renamed to' line | J12 | ? unread | — |
-| N5 | Create New Bot dialog: name, 13 shapes, 11 colours, Cancel and Create (Create stays disabled until named) | J12 | ○ open | — |
 | N2 | Message actions on hover | — | ? unread | — |
 | N3 | Suggested card: Add to Slack and Create a routine; each opens 1:1 and stops before acting outside the page | — | ? unread | — |
 | N4 | Voice chat card: voice, speed and language pickers | — | ? unread | — |
+| N5 | Create New Bot dialog: name, 13 shapes, 11 colours, Cancel and Create (Create stays disabled until named) | J12 | ○ open | — |

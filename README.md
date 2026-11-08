@@ -23,7 +23,8 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 1 change
+- **Today** · 2 changes
+  - Merge-proof the repo for parallel lanes: one file per item and per gated state, npm run land
   - Prep for the long run: 10 more oracle states, Gate A over all of them, lane-sized files
 - **Yesterday** · 11 changes
   - S1: talk through Barkpark (server side, transcript, working line, composer)
@@ -35,13 +36,13 @@ read · one gesture · read ─────► fixtures/ and traces/
 | What | Where |
 |---|---|
 | Slices and who does what | Barkpark goal `task-e7970acf9582cad2` and its children; snapshot in `parity/board.json` |
-| Every item and its status, with evidence | [`parity/items.json`](parity/items.json), listed in [`docs/PARITY.md`](docs/PARITY.md) |
+| Every item and its status, with evidence | [`parity/items/`](parity/items/), one file per item, listed in [`docs/PARITY.md`](docs/PARITY.md) |
 | The spec of "works" | [`JOURNEYS.md`](JOURNEYS.md) |
 | The gates, the oracle rules, the pace rules | [`QUALITY.md`](QUALITY.md) |
 | Why | [`docs/decisions/`](docs/decisions/), one page each, superseded never edited |
 | Captured oracle states (numbers only) | `fixtures/states/` |
 | Recorded oracle turns (order and timing only) | `traces/` |
-| The app | `app/` (TanStack Start + React); Gate A's results in `parity/gate-a.json` and `parity/inventory.json` |
+| The app | `app/` (TanStack Start + React); Gate A and the inventory, one file per captured state, in `parity/gate-a/` |
 | How we work | [`AGENTS.md`](AGENTS.md), [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
 ## Run it

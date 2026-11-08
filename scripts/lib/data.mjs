@@ -1,6 +1,6 @@
 // Reads the repo's single sources of truth. Every generator and check goes
 // through here, so a table means the same thing everywhere.
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -8,8 +8,13 @@ export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const path = (...p) => join(ROOT, ...p);
 export const read = (...p) => readFileSync(path(...p), 'utf8');
 
+// One file per item in parity/items/ (decision 0007), ordered by slice, then id (F2 before F10).
 export function items() {
-  return JSON.parse(read('parity', 'items.json')).items;
+  const num = (id) => [id.replace(/\d+$/, ''), Number(id.match(/\d+$/)?.[0] ?? 0)];
+  return readdirSync(path('parity', 'items'))
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => ({ file: f, ...JSON.parse(read('parity', 'items', f)) }))
+    .sort((a, b) => a.slice.localeCompare(b.slice) || num(a.id)[0].localeCompare(num(b.id)[0]) || num(a.id)[1] - num(b.id)[1]);
 }
 
 // Markdown table rows after the header separator: [[cell, cell, ...], ...]

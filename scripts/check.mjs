@@ -44,6 +44,7 @@ const seen = new Set();
 for (const i of its) {
   rule('items', 1);
   if (seen.has(i.id)) fail(`items: duplicate id ${i.id}`);
+  if (i.file !== `${i.id}.json`) fail(`items: ${i.file} holds ${i.id}; the file is named for its id`);
   seen.add(i.id);
   if (!statuses.has(i.status)) fail(`items: ${i.id} has status "${i.status}"`);
   if (!sIds.has(i.slice)) fail(`items: ${i.id} names unknown slice ${i.slice}`);
@@ -56,7 +57,7 @@ for (const i of its) {
 }
 for (const j of jIds) {
   rule('journeys covered', 1);
-  if (!its.some((i) => i.journey === j)) fail(`journeys: ${j} has no item in parity/items.json`);
+  if (!its.some((i) => i.journey === j)) fail(`journeys: ${j} has no item in parity/items/`);
 }
 
 // 4. Generated files match their sources.
@@ -74,7 +75,7 @@ for (const [f, want] of gen) {
 // 5. No secrets in tracked files.
 const SECRET = /(sk-ant-[A-Za-z0-9_-]{10,}|CLAUDE_CODE_OAUTH_TOKEN\s*=\s*\S{8,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)/;
 for (const f of tracked) {
-  if (/\.(png|jpe?g|webp|gif)$/i.test(f)) continue;
+  if (/\.(png|jpe?g|webp|gif)$/i.test(f) || !existsSync(path(f))) continue; // a deleted file has nothing to leak
   rule('secrets', 1);
   if (SECRET.test(readFileSync(path(f), 'utf8'))) fail(`${f}: looks like a secret`);
 }
@@ -85,17 +86,16 @@ for (const f of stateFiles) {
   const state = JSON.parse(read('fixtures', 'states', f));
   for (const name of new Set(controls(state).map((c) => c.name))) {
     rule('controls tracked', 1);
-    if (!its.some((i) => claims(i, name))) fail(`inventory: ${f} has control "${name}" that no item in parity/items.json claims`);
+    if (!its.some((i) => claims(i, name))) fail(`inventory: ${f} has control "${name}" that no item in parity/items/ claims`);
   }
 }
 
 // 7. Gate A has a recorded run for every captured state, and it checked something.
-const gateFile = path('parity', 'gate-a.json');
-const gate = existsSync(gateFile) ? JSON.parse(readFileSync(gateFile, 'utf8')) : { states: [] };
 for (const f of stateFiles) {
   rule('gate records', 1);
   const id = f.replace(/\.json$/, '');
-  const s = gate.states.find((x) => x.id === id);
+  const file = path('parity', 'gate-a', `${id}.json`);
+  const s = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
   if (!s) fail(`gate: no Gate A run for ${id}: run npm run gate`);
   else if (!s.cases) fail(`gate: the Gate A run for ${id} checked nothing`);
 }

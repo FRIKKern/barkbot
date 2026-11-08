@@ -1,0 +1,437 @@
+{
+ "id": "oracle-new-bot-dialog",
+ "captured": "2026-11-08",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 45,
+ "pass": 0,
+ "scene": false,
+ "results": [
+  {
+   "key": "aside:Bots",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:New Bot",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect apps",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open account menu",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Oracle",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Prompt",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Composer actions",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice input",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Close dialog",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "h2:Create New Bot",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot name",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:blob character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:cloud character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:square character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:sparkle character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:clover character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:heart character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:flower character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:teardrop character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:tablet character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:wedge character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:house character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:star character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:hex character shape",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Black character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Brown character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Red character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Orange character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Yellow character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Green character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Cyan character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Blue character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Violet character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Magenta character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Gray character color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Cancel",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Cancel",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Create",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Create",
+   "pass": false,
+   "why": "no scene"
+  }
+ ],
+ "run": "2026-11-08T23:15:14.839Z",
+ "inventory": {
+  "id": "oracle-new-bot-dialog",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": false
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": false
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Close dialog",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "blob character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "cloud character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "square character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "sparkle character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "clover character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "heart character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "flower character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "teardrop character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "tablet character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "wedge character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "house character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "star character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "hex character shape",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Black character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Brown character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Red character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Orange character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Yellow character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Green character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Cyan character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Blue character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Violet character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Magenta character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Gray character color",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Cancel",
+    "item": "N5",
+    "ours": false
+   },
+   {
+    "name": "Create",
+    "item": "N5",
+    "ours": false
+   }
+  ],
+  "missing": 38,
+  "untracked": []
+ }
+}

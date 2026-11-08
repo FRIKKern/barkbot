@@ -1,0 +1,8 @@
+{
+ "id": "H9",
+ "slice": "S1",
+ "journey": null,
+ "title": "Gate A in CI: build the app and run npm run gate in headless Chrome on every pull request",
+ "status": "partial",
+ "evidence": ".github/workflows/gate.yml runs node scripts/gate.mjs --ci on macos-15 for every pull request and push to main. Done when a run is green on GitHub."
+}

@@ -7,7 +7,7 @@
 | A · Look | Each named element in each captured oracle state against ours in the same scene (`/gate/<state>`), at the width it was captured | Box within 1 pt on every edge; color, background, radius, font size, weight and line height equal |
 | B · Turn | A recorded oracle turn (what appears, in what order) against ours playing the same event script | Same element kinds, same order, same grouping into bubbles |
 | C · Feel | Budgets measured on the oracle first | Within the budget below |
-| Inventory | Every visible control and label in each oracle state against ours | Every gap is an item in `parity/items.json` or a named `outOfScope` entry |
+| Inventory | Every visible control and label in each oracle state against ours | Every gap is an item in `parity/items/` or a named `outOfScope` entry |
 
 `npm run gate` runs A and the inventory; `scripts/oracle/collect.mjs` measures both sides, so one instrument reads both. The oracle's DOM is watched over time, never its network. A gate run with zero cases fails. A change that lowers a pass count does not land.
 
@@ -39,7 +39,7 @@ Measured on the oracle on 2026-11-08 (`traces/2026-11-08-*.json`). Ours must sta
 
 | Rule | Check |
 |---|---|
-| An item is done only with its gate and evidence named in `parity/items.json` | `npm run check` |
+| An item is done only with its gate and evidence named in `parity/items/` | `npm run check` |
 | An `outOfScope` entry names the decision that says so | `npm run check` |
 | Generated pictures and `docs/PARITY.md` match their sources | `npm run check` |
 | A journey is signed by someone other than its builder, naming the sha | criterion on the slice task |

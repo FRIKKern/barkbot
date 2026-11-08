@@ -1,0 +1,562 @@
+{
+ "id": "oracle-voice-picker",
+ "captured": "2026-11-08",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 71,
+ "pass": 0,
+ "scene": false,
+ "results": [
+  {
+   "key": "aside:Bots",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:New Bot",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect apps",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open account menu",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Oracle",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Prompt",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Composer actions",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice input",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "aside:Conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Close",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Edit Bot avatar",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot name",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Activity",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Library",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Suggested",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Add to Slack",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Add to Slack",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Create a routine",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Create a routine",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot's computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bdi:Bot's computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bdi:Asleep",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Voice",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Voice",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Helix",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Speed",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Speed",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:1x",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Language",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Language",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Auto-detect",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Altair",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Altair preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Ara",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Ara preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Atlas",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Atlas preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Aurora",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Aurora preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Carina",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Carina preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Castor",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Castor preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Celeste",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Celeste preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Cosmo",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Cosmo preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Eve",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Eve preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Helios",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Helios preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Helix#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Helix preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Iris",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Iris preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Kepler",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Kepler preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Leo",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Leo preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Liora",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Liora preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Lumen",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Lumen preview",
+   "pass": false,
+   "why": "no scene"
+  }
+ ],
+ "run": "2026-11-08T23:15:14.839Z",
+ "inventory": {
+  "id": "oracle-voice-picker",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": false
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": false
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Close",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Add to Slack",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": false
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Speed",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Altair preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Ara preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Atlas preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Aurora preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Carina preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Castor preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Celeste preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Cosmo preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Eve preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Helios preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Helix preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Iris preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Kepler preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Leo preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Liora preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Lumen preview",
+    "item": "N4",
+    "ours": false
+   }
+  ],
+  "missing": 37,
+  "untracked": []
+ }
+}

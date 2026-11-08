@@ -1,0 +1,9 @@
+{
+ "id": "H8",
+ "slice": "S0",
+ "journey": null,
+ "title": "Hero motion: the guessed TIMING in scripts/generate-hero.mjs replaced by the oracle's recorded turn",
+ "status": "done",
+ "gate": "npm run check (hero fresh), seam diff under 1 px",
+ "evidence": "scripts/generate-hero.mjs draws rail, header, transcript, composer and panel from fixtures/states/oracle-turn-1040.json; text held to oracle-measured widths; motion from traces/2026-11-08-*.json. Region diff vs the live capture: rail 1.4%, header 0.9%, composer 1.4%, panel 1.3%."
+}

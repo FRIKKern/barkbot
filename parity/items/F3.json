@@ -1,0 +1,14 @@
+{
+ "id": "F3",
+ "slice": "S2",
+ "journey": "J03",
+ "title": "Right panel: mark, name, Activity and Library tabs, close",
+ "status": "unknown",
+ "controls": [
+  "Close",
+  "Edit Bot avatar",
+  "Bot name",
+  "Activity",
+  "Library"
+ ]
+}

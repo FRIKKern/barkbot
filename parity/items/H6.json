@@ -1,0 +1,9 @@
+{
+ "id": "H6",
+ "slice": "S0",
+ "journey": null,
+ "title": "Inventory: every visible control, ours against the oracle, to parity/inventory.json; each control belongs to an item (controls)",
+ "status": "done",
+ "gate": "npm run check (every oracle control claimed by an item); npm run gate (ours has 21/21)",
+ "evidence": "scripts/lib/controls.mjs, parity/inventory.json, controls on F1 F2 F3 F4 F5 T4 N3 N4"
+}

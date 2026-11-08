@@ -1,0 +1,13 @@
+{
+ "id": "N4",
+ "slice": "S7",
+ "journey": null,
+ "title": "Voice chat card: voice, speed and language pickers",
+ "status": "unknown",
+ "controls": [
+  "Voice",
+  "Speed",
+  "Language",
+  "/^Play the .+ preview$/"
+ ]
+}

@@ -1,0 +1,9 @@
+{
+ "id": "H4",
+ "slice": "S0",
+ "journey": null,
+ "title": "Gate A: box and look diff, ours against the oracle, report in parity/gate-a.json",
+ "status": "done",
+ "gate": "npm run gate: 27/39 on oracle-turn-1040; zero cases fails; a lower count fails unless --accept",
+ "evidence": "scripts/gate.mjs + scripts/oracle/collect.mjs (one instrument both sides) + app/src/routes/gate.$state.tsx; parity/gate-a.json"
+}

@@ -1,0 +1,14 @@
+{
+ "id": "T4",
+ "slice": "S1",
+ "journey": "J01",
+ "title": "Composer: attach, text, Enter sends, Shift+Enter breaks, focus after send",
+ "status": "partial",
+ "controls": [
+  "Prompt",
+  "Composer actions",
+  "Start voice input",
+  "Start voice chat"
+ ],
+ "evidence": "app/src/components/Composer.tsx: Enter sends and clears at once, Shift+Enter adds a line, focus stays in Prompt, the voice button turns into Send while there is a draft (200 ms, scale .5). Attach is S4."
+}

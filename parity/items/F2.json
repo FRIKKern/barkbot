@@ -1,0 +1,10 @@
+{
+ "id": "F2",
+ "slice": "S2",
+ "journey": "J02",
+ "title": "Header: the bot's name pill, centred over the transcript",
+ "status": "unknown",
+ "controls": [
+  "View conversation details"
+ ]
+}

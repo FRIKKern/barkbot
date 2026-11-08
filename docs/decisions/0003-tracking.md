@@ -1,6 +1,6 @@
 # 0003 Slices on the Barkpark board, items in one JSON, pictures generated
 
-Date: 2026-11-08 · Status: accepted
+Date: 2026-11-08 · Status: accepted · Superseded in part by [0007](0007-one-file-per-item-and-state.md)
 
 ```
 Barkpark goal ── S0–S7 tasks ──► npm run board ─► parity/board.json ─┐

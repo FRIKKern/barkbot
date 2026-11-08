@@ -16,6 +16,7 @@
     "gate": "node scripts/gate.mjs",
     "host": "sh scripts/host.sh run",
     "host:enroll": "sh scripts/host.sh enroll",
-    "gate:ci": "node scripts/gate.mjs --ci"
+    "gate:ci": "node scripts/gate.mjs --ci",
+    "land": "sh scripts/land.sh"
   }
 }

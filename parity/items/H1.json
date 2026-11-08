@@ -1,0 +1,9 @@
+{
+ "id": "H1",
+ "slice": "S0",
+ "journey": null,
+ "title": "Oracle access: Grok Bot.app on the owner's Mac, watched over its own local DevTools port, one lane at a time",
+ "status": "done",
+ "gate": "recipes guard + 4 recorded recipes",
+ "evidence": "Grok Bot.app relaunched with --remote-debugging-port=9333 (127.0.0.1); decision 0006; the send guard refused Grookie"
+}

@@ -1,0 +1,352 @@
+{
+ "id": "oracle-speed-picker",
+ "captured": "2026-11-08",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 45,
+ "pass": 0,
+ "scene": false,
+ "results": [
+  {
+   "key": "aside:Bots",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:New Bot",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect apps",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open account menu",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Oracle",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Prompt",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Composer actions",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice input",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "aside:Conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Close",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Edit Bot avatar",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot name",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Activity",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Library",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Suggested",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Add to Slack",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Add to Slack",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Create a routine",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Create a routine",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot's computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bdi:Bot's computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bdi:Asleep",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Voice",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Voice",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Helix",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Speed",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Speed",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:1x",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Language",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Language",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Auto-detect",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:0.5x",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:0.75x",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:1x#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:1.25x",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:1.5x",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:2x",
+   "pass": false,
+   "why": "no scene"
+  }
+ ],
+ "run": "2026-11-08T23:15:14.839Z",
+ "inventory": {
+  "id": "oracle-speed-picker",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": false
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": false
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Close",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Add to Slack",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": false
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Speed",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": false
+   }
+  ],
+  "missing": 21,
+  "untracked": []
+ }
+}

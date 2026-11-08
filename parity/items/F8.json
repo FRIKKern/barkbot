@@ -1,0 +1,15 @@
+{
+ "id": "F8",
+ "slice": "S2",
+ "journey": null,
+ "title": "Account menu: Weekly usage, Get Grok Bot for mobile, Support, Settings, Add account, Log out (oracle-account-menu); each row's target is its own item",
+ "status": "open",
+ "controls": [
+  "Weekly usage",
+  "Get Grok Bot for mobile",
+  "Support",
+  "Settings",
+  "Add account",
+  "Log out"
+ ]
+}

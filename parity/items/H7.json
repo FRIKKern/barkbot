@@ -1,0 +1,9 @@
+{
+ "id": "H7",
+ "slice": "S0",
+ "journey": null,
+ "title": "Feel budgets measured on the oracle and written in QUALITY.md",
+ "status": "done",
+ "gate": "QUALITY.md feel budgets table",
+ "evidence": "traces/2026-11-08-feel.json, -feel-shift.json, -feel-panel.json, -storage.json, -say-hi.json"
+}

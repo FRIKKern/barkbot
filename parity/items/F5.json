@@ -1,0 +1,10 @@
+{
+ "id": "F5",
+ "slice": "S2",
+ "journey": "J02",
+ "title": "Top bar: Share (the sidebar toggle shows on hover; not in the captured state)",
+ "status": "unknown",
+ "controls": [
+  "Share"
+ ]
+}

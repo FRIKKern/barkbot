@@ -1,0 +1,8 @@
+{
+ "id": "T2",
+ "slice": "S1",
+ "journey": "J01",
+ "title": "Transcript: user and bot bubbles, grouping, the day and time line",
+ "status": "partial",
+ "evidence": "app/src/components/Transcript.tsx: bubbles 15/22, 7x12, radius 18, max 480, user .18 / bot .04, +12 on a change of speaker, time row 12/16 (fixture articles 71-86); slide-in 12 pt 240 ms. Not yet gated: Gate B (H5) needs a live turn."
+}

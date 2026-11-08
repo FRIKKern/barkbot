@@ -1,0 +1,8 @@
+{
+ "id": "T6",
+ "slice": "S1",
+ "journey": "J01",
+ "title": "A registered chat host on the owner's Mac runs real claude -p",
+ "status": "open",
+ "evidence": "npm run host:enroll / npm run host (scripts/host.sh): one locked folder ~/BarkBot/home, claude in plan mode. Enrollment is owner-only: the owner issues it in Studio > Chat hosts."
+}

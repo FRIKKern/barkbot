@@ -2,7 +2,9 @@
 // measured by the same instrument (scripts/oracle/collect.mjs), compared case by case.
 // Starts the app (vite dev) and a headless Chrome of its own, then stops both.
 //
-//   npm run gate               every state in fixtures/states, writes parity/gate-a.json and parity/inventory.json
+//   npm run gate               every state in fixtures/states; writes parity/gate-a/<state>.json (Gate A and the
+//                              inventory for that state). One file per state, so lanes on different states never collide.
+//   npm run gate -- --only <state>   one state
 //   npm run gate -- --url http://localhost:3170   use an app that is already running
 //
 // A run with zero cases fails. A pass count lower than the recorded one fails (QUALITY.md);
@@ -12,7 +14,7 @@ import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from 
 import { connect } from './oracle/cdp.mjs';
 import { collect } from './oracle/collect.mjs';
 import { controls, namedElements, claims } from './lib/controls.mjs';
-import { path, ROOT } from './lib/data.mjs';
+import { path, ROOT, items as allItems } from './lib/data.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -32,7 +34,8 @@ async function until(fn, ms, what) {
   throw new Error(`timed out waiting for ${what}`);
 }
 
-const states = readdirSync(path('fixtures', 'states')).filter((f) => f.endsWith('.json')).map((f) => JSON.parse(readFileSync(path('fixtures', 'states', f), 'utf8')));
+const ONLY = opt('only');
+const states = readdirSync(path('fixtures', 'states')).filter((f) => f.endsWith('.json') && (!ONLY || f === `${ONLY}.json`)).map((f) => JSON.parse(readFileSync(path('fixtures', 'states', f), 'utf8')));
 if (!states.length) { console.error('Gate A: no captured states in fixtures/states: nothing to compare is a failure'); process.exit(1); }
 
 const kids = [];
@@ -54,7 +57,7 @@ if (!base) {
 }
 mkdirSync(path('.cache', 'gate-chrome'), { recursive: true });
 
-const items = JSON.parse(readFileSync(path('parity', 'items.json'), 'utf8')).items;
+const items = allItems();
 const owner = (name) => items.find((i) => claims(i, name))?.id ?? null;
 // Every oracle control in a state, the item that owns it, and whether ours has one by that name.
 function inventoryOf(state, ours) {
@@ -121,21 +124,30 @@ const passed = report.states.reduce((n, s) => n + s.pass, 0);
 report.total = { cases: total, pass: passed };
 console.log(`Gate A · all ${report.states.length} states · ${passed}/${total} pass`);
 if (!total) { console.error('Gate A: zero cases: a gate with nothing to check fails'); process.exit(1); }
-const prevFile = path('parity', 'gate-a.json');
-const prev = existsSync(prevFile) ? JSON.parse(readFileSync(prevFile, 'utf8')) : null;
-let lower = [];
-if (prev) for (const s of report.states) { const p = prev.states.find((x) => x.id === s.id); if (p && s.pass < p.pass) lower.push(`${s.id} ${p.pass} → ${s.pass}`); }
+const dir = path('parity', 'gate-a');
+mkdirSync(dir, { recursive: true });
+const recorded = (id) => (existsSync(`${dir}/${id}.json`) ? JSON.parse(readFileSync(`${dir}/${id}.json`, 'utf8')) : null);
+const lower = [], higher = [], unrecorded = [];
+for (const s of report.states) {
+  const p = recorded(s.id);
+  if (!p) unrecorded.push(s.id);
+  else if (s.pass < p.pass) lower.push(`${s.id} ${p.pass} → ${s.pass}`);
+  else if (s.pass > p.pass) higher.push(`${s.id} ${p.pass} → ${s.pass}`);
+}
 if (lower.length && !ACCEPT) { console.error(`Gate A: the pass count went down (${lower.join(', ')}). Not recorded. A change that lowers it does not land; --accept records it on purpose.`); process.exit(1); }
-if (lower.length) console.log(`Gate A: recorded a LOWER count on purpose: ${lower.join(', ')}`);
 if (CI) {
-  const missing = prev ? report.states.filter((s) => !prev.states.some((p) => p.id === s.id)).map((s) => s.id) : report.states.map((s) => s.id);
-  if (missing.length) { console.error(`Gate A: no recorded run for ${missing.join(', ')}: run npm run gate and commit parity/gate-a.json`); process.exit(1); }
-  const higher = report.states.filter((s) => s.pass > (prev.states.find((p) => p.id === s.id)?.pass ?? 0));
-  if (higher.length) console.log(`Gate A: higher than recorded on ${higher.map((s) => s.id).join(', ')}: run npm run gate to record it`);
+  if (unrecorded.length) { console.error(`Gate A: no recorded run for ${unrecorded.join(', ')}: run npm run gate and commit parity/gate-a/`); process.exit(1); }
+  if (higher.length) console.log(`Gate A: higher than recorded (${higher.join(', ')}): run npm run gate to record it`);
   process.exit(0);
 }
-writeFileSync(prevFile, JSON.stringify(report, null, 1) + '\n');
-writeFileSync(path('parity', 'inventory.json'), JSON.stringify(inventory, null, 1) + '\n');
+if (lower.length) console.log(`Gate A: recorded a LOWER count on purpose: ${lower.join(', ')}`);
+// Only a state whose numbers changed is rewritten: an unchanged state's file stays byte-identical.
+for (const s of report.states) {
+  const inv = inventory.states.find((x) => x.id === s.id);
+  const p = recorded(s.id);
+  const same = p && p.pass === s.pass && p.cases === s.cases && JSON.stringify(p.results) === JSON.stringify(s.results) && JSON.stringify(p.inventory) === JSON.stringify(inv);
+  if (!same) writeFileSync(`${dir}/${s.id}.json`, JSON.stringify({ ...s, run: report.run, inventory: inv }, null, 1) + '\n');
+}
 const untracked = inventory.states.flatMap((s) => s.untracked);
 if (untracked.length) { console.error(`Inventory: ${untracked.length} oracle control(s) belong to no item: ${[...new Set(untracked)].join(', ')}`); process.exit(1); }
 process.exit(0);

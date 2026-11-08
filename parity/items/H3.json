@@ -1,0 +1,9 @@
+{
+ "id": "H3",
+ "slice": "S0",
+ "journey": null,
+ "title": "Turn recorder: the oracle's DOM over time to traces/<id>.json",
+ "status": "done",
+ "evidence": "scripts/oracle/record.mjs, feel.mjs; traces/2026-11-08-storage.json, -say-hi.json, -mark.json. Limit: layout shifts need the app in front (0006).",
+ "gate": "traces carry DOM order, engine animations with keyframes, and per-frame samples of scripted motion"
+}

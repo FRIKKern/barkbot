@@ -1,0 +1,13 @@
+{
+ "id": "F1",
+ "slice": "S2",
+ "journey": "J02",
+ "title": "Left rail: bots, the active one, badge, new chat, apps grid, my avatar",
+ "status": "unknown",
+ "controls": [
+  "Bot tile",
+  "New Bot",
+  "Connect apps",
+  "Open account menu"
+ ]
+}
