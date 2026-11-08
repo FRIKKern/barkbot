@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 3 changes
+- **Today** · 4 changes
+  - Hero: calmer timing, softer fades and shimmer
   - Hero: a minimal wireframe of the oracle screen that plays one turn
-  - Recreate first: the hero is the oracle's screen, 1:1, with plain stand-ins
 <!-- timeline:end -->
 
 ## Where things live (one fact, one home)
