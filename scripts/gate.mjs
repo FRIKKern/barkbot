@@ -91,6 +91,8 @@ for (const state of states) {
   const page = await connect(undefined, CHROME_PORT);
   await page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: dpr, mobile: false });
   await page.send('Page.enable');
+  // --throttle <n>: slow this Chrome's CPU n times, to rehearse a slow CI runner.
+  if (opt('throttle')) await page.send('Emulation.setCPUThrottlingRate', { rate: Number(opt('throttle')) });
   await page.send('Page.navigate', { url: `${base}/gate/${state.id}` });
   await until(() => page.evaluate(() => document.readyState === 'complete' && !!document.querySelector('.app') && document.fonts.status === 'loaded'), 30000, `/gate/${state.id}`);
   await wait(300);
@@ -112,6 +114,13 @@ for (const state of states) {
       else for (let i = 0; i < 10; i++) await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + bw / 2, y: y + bh / 2, deltaX: 0, deltaY: 400 });
       await wait(600);
     }
+  }
+  // Tooltips and hover cards arrive after a delay that a slow runner stretches: when a state lists
+  // what it changed, wait (up to 3 s) until ours shows every one of those keys before measuring.
+  if (state.changed) {
+    const want = new Set(state.changed);
+    for (let t = 0; t < 30; t++) { const have = new Set(namedElements(await page.evaluate(collect)).map((c) => c.key)); if ([...want].every((k) => have.has(k))) break; await wait(100); }
+    await wait(150);
   }
   const ours = await page.evaluate(collect);
   page.close();

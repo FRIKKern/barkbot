@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 25 changes
+- **Today** · 26 changes
+  - Gate A waits for a state's hover changes; avatar editor recaptured clean
   - Oracle: widths 720, 880, 2000; the base is re-established before a sweep
-  - Frame behaves like the oracle: panel toggle with its curve, tabs, bot switching ([#8](https://github.com/FRIKKern/barkbot/pull/8))
 - **Yesterday** · 11 changes
   - S1: talk through Barkpark (server side, transcript, working line, composer)
   - S0 closed on the board; Gate B moves to S1 with the transcript it needs

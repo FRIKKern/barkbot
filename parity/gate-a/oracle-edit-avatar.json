@@ -6,7 +6,7 @@
   760,
   2
  ],
- "cases": 69,
+ "cases": 68,
  "pass": 0,
  "scene": false,
  "results": [
@@ -349,14 +349,9 @@
    "key": "span:Auto-detect",
    "pass": false,
    "why": "no scene"
-  },
-  {
-   "key": "div:Connect apps",
-   "pass": false,
-   "why": "no scene"
   }
  ],
- "run": "2026-11-09T07:30:05.611Z",
+ "run": "2026-11-09T07:52:50.728Z",
  "inventory": {
   "id": "oracle-edit-avatar",
   "controls": [
