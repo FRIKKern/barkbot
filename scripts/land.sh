@@ -17,10 +17,13 @@ branch=$(git rev-parse --abbrev-ref HEAD)
 [ -z "$(git status --porcelain)" ] || { echo "land: commit first, the tree is not clean" >&2; exit 2; }
 BASE=${BASE:-origin/main}   # BASE=main: rebase onto the local main (testing this script)
 [ "$BASE" = origin/main ] && git fetch -q origin main
-if ! git rebase -q "$BASE"; then
-  while :; do
-    conflicted=$(git diff --name-only --diff-filter=U)
-    [ -z "$conflicted" ] && break
+in_rebase() { [ -d "$(git rev-parse --git-path rebase-merge)" ] || [ -d "$(git rev-parse --git-path rebase-apply)" ]; }
+git rebase -q "$BASE" >/dev/null 2>&1 || true
+n=0
+while in_rebase; do
+  n=$((n + 1)); [ $n -gt 50 ] && { echo "land: the rebase is still going after 50 steps; stopping (git rebase --abort to undo)" >&2; exit 1; }
+  conflicted=$(git diff --name-only --diff-filter=U)
+  if [ -n "$conflicted" ]; then
     other=$(printf '%s\n' "$conflicted" | grep -Ev "$GEN" | grep -Ev "$REC" || true)
     if [ -n "$other" ]; then echo "land: conflicts a person must settle:" >&2; printf '  %s\n' $other >&2; echo "(fix, git add, git rebase --continue, then npm run land again)" >&2; exit 1; fi
     # In a rebase, --ours is main. Records: main's numbers are the bar the re-measure must meet.
@@ -28,10 +31,16 @@ if ! git rebase -q "$BASE"; then
     printf '%s\n' "$conflicted" | grep -E "$GEN" | xargs git checkout --theirs -- 2>/dev/null || true
     npm run -s docs
     git checkout -q -- README.md 2>/dev/null || true
+    # docs rewrites every generated file, conflicted or not: stage them all, or --continue refuses.
     printf '%s\n' "$conflicted" | xargs git add --
-    GIT_EDITOR=true git rebase --continue || true
-  done
-fi
+    git add docs/PARITY.md docs/images
+  fi
+  if GIT_EDITOR=true git rebase --continue >/dev/null 2>&1; then continue; fi
+  [ -n "$(git diff --name-only --diff-filter=U)" ] && continue          # the next commit conflicts: settle it
+  if git diff --cached --quiet; then git rebase --skip >/dev/null 2>&1 || true; continue; fi   # settled to nothing: drop it
+  echo "land: the rebase stopped and the reason is not a conflict; see git status (git rebase --abort to undo)" >&2; exit 1
+done
+[ "$(git merge-base HEAD "$BASE")" = "$(git rev-parse "$BASE")" ] || { echo "land: the branch is not on $BASE after the rebase; stopping" >&2; exit 1; }
 node scripts/gate.mjs --show 0   # records the rebased tree; exits 1 if any state fell below its record
 npm run -s docs
 git checkout -q -- README.md   # the timeline is main's to refresh
