@@ -5,7 +5,10 @@ import {Icon} from './Composer'
 import {Face} from './parts'
 import {Preview, Tooltip, useHover} from './tips'
 
-export function Rail({scene, onPick}: {scene: Scene; onPick?: (name: string) => void}) {
+// A working bot's tile says so in its name, last: "Oracle, Working", "Oracle, Unread activity,
+// Working" (traces say-hi, storage). Nothing else on the tile changes while it works.
+export function Rail({scene, onPick, working = []}: {scene: Scene; onPick?: (name: string) => void; working?: string[]}) {
+  const busy = (name: string, label: string) => (working.includes(name) ? `${label}, Working` : label)
   const main = scene.bots.find((b) => b.main)
   const others = scene.bots.filter((b) => !b.main)
   const active = scene.active ?? ''
@@ -13,7 +16,7 @@ export function Rail({scene, onPick}: {scene: Scene; onPick?: (name: string) => 
     <aside className="rail" aria-label="Bots">
       <div className="rail-main">
         {main && (
-          <Tile name={main.name} label={`${main.name}, Main Bot`} current={main.name === active} line={scene.previews?.[main.name]} onPick={onPick}>
+          <Tile name={main.name} label={busy(main.name, `${main.name}, Main Bot`)} current={main.name === active} line={scene.previews?.[main.name]} onPick={onPick}>
             <span className="face face-main" />
             <span className="badge" role="img" aria-label="Main Bot" />
           </Tile>
@@ -23,7 +26,7 @@ export function Rail({scene, onPick}: {scene: Scene; onPick?: (name: string) => 
       <div className="rail-list" role="list" aria-label="Pinned Bots">
         {others.map((b) => (
           <div role="listitem" key={b.name}>
-            <Tile name={b.name} label={b.name} current={b.name === active} line={scene.previews?.[b.name]} onPick={onPick}>
+            <Tile name={b.name} label={busy(b.name, b.name)} current={b.name === active} line={scene.previews?.[b.name]} onPick={onPick}>
               <Face size={34} />
             </Tile>
           </div>

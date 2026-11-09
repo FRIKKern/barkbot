@@ -31,7 +31,9 @@ export type Scene = {
 // (measured on the oracle: 790 closed, 800 open; oracle-main-790, -800).
 const NARROW = '(max-width: 799.98px)'
 
-export function Shell({scene: start, transcript, composer, onPickBot}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (name: string) => void}) {
+// `workingBots`: the bots whose run is in progress, from the chat stream (the same signal as the
+// transcript's working row; both flip at the same ms in traces say-hi, say-hi-2, storage).
+export function Shell({scene: start, transcript, composer, onPickBot, workingBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (name: string) => void; workingBots?: string[]}) {
   const [panelOpen, setPanelOpen] = useState(start.panelOpen)
   const [picked, setPicked] = useState<string | undefined>(undefined)
   // The overlay that is up, whether the scene holds it or a click opened it (Overlay's
@@ -58,7 +60,7 @@ export function Shell({scene: start, transcript, composer, onPickBot}: {scene: S
   }
   return (
     <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-instant={instant || undefined}>
-      <Rail scene={scene} onPick={pick} />
+      <Rail scene={scene} onPick={pick} working={workingBots} />
 
       <main className="convo" aria-label="Conversation transcript">
         <header className="convo-head">
