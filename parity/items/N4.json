@@ -10,6 +10,6 @@
   "Language",
   "/^Play the .+ preview$/"
  ],
- "gate": "Gate A oracle-voice-picker 59/71 (own 32/32), oracle-speed-picker 33/45 (own 6/6), oracle-language-picker 44/56 (own 17/17); the 12 misses in each are the frame",
+ "gate": "Gate A oracle-voice-picker 71/71, oracle-speed-picker 45/45, oracle-language-picker 56/56",
  "evidence": "app/src/components/overlays/Pickers.tsx; each opens 4 pt above its row with the row's value checked, a pick closes it. Left: 12 more voices and 12 more languages need a capture scrolled to the end; a pick does not yet change the row (Details owns the value); preview buttons play nothing."
 }
