@@ -55,11 +55,6 @@
 .play > span { width: 18px; height: 18px; display: grid; place-items: center; }
 .play .icon { width: 14px; height: 14px; fill: currentColor; }
 
-/* The row whose picker is open shows a pressed button (rgba 245 / .04) in the details panel. */
-.app:has([data-overlay='voice-picker']) .pick-value[aria-label='Voice'],
-.app:has([data-overlay='speed-picker']) .pick-value[aria-label='Speed'],
-.app:has([data-overlay='language-picker']) .pick-value[aria-label='Language'] { background-color: var(--wash-04); }
-
 /* ── Create New Bot: 440 x 579 centred, 70% black scrim ── */
 .scrim { position: fixed; inset: 0; z-index: 30; background: rgb(0 0 0 / 0.698); }
 .dialog { position: fixed; z-index: 31; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 440px; background: var(--bg-raised); border: 0.5px solid var(--wash-10); border-radius: 14px; font-size: 13px; letter-spacing: normal; color: var(--ink); }
