@@ -19,7 +19,8 @@
 //                       replays (Barkpark's shape, server/replay.ts) leave the same bubbles
 //   budgets (QUALITY.md) composer clears in 1 frame; focus stays in Prompt; working line gone
 //                       ≤ 250 ms after the reply; own bubble ≤ 440 ms and working line ≤ 2 s
-//                       where the oracle's own send and run met them (else the network, not the UI)
+//                       where the oracle's own bubble and row met them (else the network or the
+//                       bot, not the UI); each one not judged is printed with the oracle's time
 // A run with zero cases fails. A pass count lower than the recorded one fails (--accept records it).
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
@@ -27,7 +28,7 @@ import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync
 import { connect } from './oracle/cdp.mjs';
 import { RECIPES as recipes } from './oracle/recipes.mjs';
 import { path } from './lib/data.mjs';
-import { oracleTurn, replayScript, filler } from '../app/src/chat/turn.ts';
+import { oracleTurn, replayScript, stateScript, filler } from '../app/src/chat/turn.ts';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -119,7 +120,7 @@ function armAndSend() {
   return true;
 }
 
-function compare(oracle, ours, focusAtEnd) {
+function compare(oracle, ours, focusAtEnd, skipped = []) {
   const cases = [];
   const nth = (list, kind, k) => list.filter((m) => m.kind === kind)[k];
   const matched = [];
@@ -143,17 +144,20 @@ function compare(oracle, ours, focusAtEnd) {
   cases.push({ key: 'nothing extra', pass: !extra.length, why: extra.length ? extra.map((o) => `${o.kind}${o.text ? ` "${o.text}"` : ''} at ${o.t}`).join(', ') : undefined });
 
   const first = (list, kind) => list.find((m) => m.kind === kind);
-  const budget = (key, value, limit, applies = true) => {
-    if (!applies) return;
+  // A budget is judged only where the oracle itself meets it; a skip is printed, never silent.
+  const budget = (key, value, limit, applies = true, oracleAt) => {
+    if (!applies) return skipped.push(`${key}: not judged, the oracle's own is ${oracleAt} ms`);
     cases.push({ key, pass: value !== undefined && value <= limit, ours: value, why: value === undefined ? 'never happened' : value > limit ? `${Math.round(value)} ms > ${Math.round(limit)} ms` : undefined });
   };
   budget('budget: composer clears in 1 frame', first(ours, 'clear')?.t, FRAME);
   cases.push({ key: 'budget: focus stays in Prompt', pass: focusAtEnd && !first(ours, 'blur'), why: focusAtEnd && !first(ours, 'blur') ? undefined : 'focus left Prompt' });
   const lastReply = ours.filter((o) => o.kind === 'assistant').at(-1), gone = ours.filter((o) => o.kind === 'working-gone').at(-1);
   budget('budget: working line gone ≤ 250 ms after the reply', lastReply && gone && gone.t >= lastReply.t ? gone.t - lastReply.t : undefined, 250);
-  budget('budget: own bubble ≤ 440 ms', first(ours, 'user')?.t, 440, (first(oracle, 'user')?.t ?? Infinity) <= 440);
-  const runStart = Math.min(first(oracle, 'working')?.t ?? Infinity, first(oracle, 'status:working')?.t ?? Infinity);
-  budget('budget: working line ≤ 2.0 s', first(ours, 'working')?.t, 2000, runStart <= 2000);
+  const oracleUser = first(oracle, 'user')?.t, oracleRow = first(oracle, 'working')?.t;
+  budget('budget: own bubble ≤ 440 ms', first(ours, 'user')?.t, 440, (oracleUser ?? Infinity) <= 440, oracleUser);
+  // Like with like: the oracle's own row, not its run start (storage: "is working" at 1235 ms,
+  // the row with the rail's Working at 2014 ms, so the oracle misses this budget there itself).
+  budget('budget: working line ≤ 2.0 s', first(ours, 'working')?.t, 2000, (oracleRow ?? Infinity) <= 2000, oracleRow);
   return cases;
 }
 
@@ -187,15 +191,20 @@ async function play(trace, sent, query = '') {
 // arrival's scripted time. The stand-in is a Node server on a shared machine; under load its
 // answers come late (storage's own bubble: 562 ms once, the send answered ~140 ms late), and
 // that lateness is not the UI's. A moment with no arrival before it (the composer clearing)
-// keeps its own time. Precondition: the stream delivered every scripted event, in order.
-function uiTime(milestones, log, arrivals) {
+// keeps its own time. Precondition: the streams delivered every scripted event, in order: the
+// runtime events, and the bot's state flips (the fleet stream, at the oracle rail's times).
+function uiTime(milestones, rail, log, arrivals) {
   const { accept, steps } = replayScript(milestones);
+  const states = stateScript(rail);
   const send = arrivals.find((a) => a.type === 'send');
   const events = arrivals.filter((a) => a.type === 'runtime');
-  const kinds = (list) => list.map((x) => x.kind ?? x.data?.kind).join(',');
-  if (!send || events.length < steps.length || kinds(events.slice(0, steps.length)) !== kinds(steps))
-    return { log, precondition: { pass: false, why: `the page got ${send ? 'the send answer' : 'no send answer'} and ${events.length}/${steps.length} scripted events (${kinds(events)})` } };
-  const causes = [{ t: send.t, at: accept }, ...events.slice(0, steps.length).map((a, i) => ({ t: a.t, at: steps[i].t }))].sort((a, b) => a.t - b.t);
+  const flips = arrivals.filter((a) => a.type === 'state');
+  const kinds = (list) => list.map((x) => x.kind ?? x.data?.kind ?? x.data?.agent_state).join(',');
+  const got = (a, want) => a.length >= want.length && kinds(a.slice(0, want.length)) === kinds(want);
+  if (!send || !got(events, steps) || !got(flips, states))
+    return { log, precondition: { pass: false, why: `the page got ${send ? 'the send answer' : 'no send answer'}, ${events.length}/${steps.length} scripted events (${kinds(events)}) and ${flips.length}/${states.length} state flips (${kinds(flips)})` } };
+  const at = (a, script) => a.slice(0, script.length).map((x, i) => ({ t: x.t, at: script[i].t }));
+  const causes = [{ t: send.t, at: accept }, ...at(events, steps), ...at(flips, states)].sort((a, b) => a.t - b.t);
   const timed = log.map((m) => {
     const c = causes.filter((x) => x.t <= m.t).at(-1);
     return c ? { ...m, t: Math.round((c.at + m.t - c.t) * 10) / 10, raw: m.t } : m;
@@ -214,19 +223,21 @@ function historyCase(key, milestones, { final, status }) {
 
 const report = [];
 for (const trace of traces) {
-  const { milestones } = oracleTurn(trace);
+  const { milestones, rail } = oracleTurn(trace);
   const sent = recipes[trace.recipe].text.length;
   const own = milestones.find((m) => m.kind === 'user');
   if (own && own.len !== sent) { console.error(`Gate B: ${trace.id}: the own bubble holds ${own.len} characters, the recipe sent ${sent}: ARTICLE_CHROME in app/src/chat/turn.ts no longer holds`); process.exit(1); }
   const live = await play(trace, sent);
-  const ui = uiTime(milestones, live.log, live.arrivals);
-  const cases = [{ key: 'replay: every scripted event reached the page', pass: ui.precondition.pass, why: ui.precondition.why }, ...compare(milestones, ui.log, live.focus)];
+  const ui = uiTime(milestones, rail, live.log, live.arrivals);
+  const skipped = [];
+  const cases = [{ key: 'replay: every scripted event reached the page', pass: ui.precondition.pass, why: ui.precondition.why }, ...compare(milestones, ui.log, live.focus, skipped)];
   cases.push(historyCase('history after a reconnect (stored as today: the last message)', milestones, live));
   // A turn of several messages, stored as one joined text (if Barkpark keeps them all).
   if (milestones.filter((m) => m.kind === 'assistant').length > 1) cases.push(historyCase('history after a reconnect (stored joined)', milestones, await play(trace, sent, '?history=joined')));
   const pass = cases.filter((c) => c.pass).length;
-  report.push({ id: trace.id, captured: trace.captured, cases: cases.length, pass, results: cases, oracle: milestones.map(({ text, ...m }) => m), ours: ui.log.map(({ text, ...m }) => m), standInLate: ui.precondition.late });
+  report.push({ id: trace.id, captured: trace.captured, cases: cases.length, pass, results: cases, oracle: milestones.map(({ text, ...m }) => m), ours: ui.log.map(({ text, ...m }) => m), standInLate: ui.precondition.late, skipped });
   console.log(`Gate B · ${trace.id} · ${pass}/${cases.length} pass`);
+  for (const k of skipped) console.log(`  · ${k}`);
   for (const c of cases.filter((x) => !x.pass).slice(0, Number(opt('show') ?? 20))) console.log(`  ✗ ${c.key}: ${c.why}`);
 }
 page.close();

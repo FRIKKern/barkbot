@@ -52,6 +52,7 @@ function Home() {
   return (
     <Shell
       scene={{bots: [{name: chat.bot}], active: chat.bot, panelOpen: true, computer, voice: VOICE}}
+      workingBots={convo.botState === 'working' ? [chat.bot] : []}
       transcript={
         chat.host ? (
           <Transcript bot={chat.bot} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error} />

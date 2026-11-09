@@ -6,6 +6,9 @@
 // How the script is read off the oracle's DOM (its network is never watched, O2):
 //   own bubble lands      → the send is accepted then (our bubble lands on acceptance)
 //   "is working" / row    → turn_started (the first of the two)
+//   the rail says Working → the bot's state flips (fleet stream, event: state; stateScript).
+//                           The row waits for it: in storage the row came with the rail,
+//                           779 ms after "is working", not with the turn's start.
 //   "Typing…" label       → text_delta from then until the bubble, in ~50 ms chunks
 //   reply bubble          → the text ends: turn_completed for the last bubble; for an earlier
 //                           one, turn_started (Claude's host sends one per model message, so
@@ -16,9 +19,11 @@
 
 export type Kind = 'user' | 'working' | 'label:status' | 'label:typing' | 'assistant' | 'status:working' | 'status:replied'
 export type Milestone = {kind: Kind; t: number; len?: number; text?: string}
-export type TraceEvent = {t: number; type: string; kind: string; tag?: string; role?: string; data?: string; text?: string; textLength?: number}
+export type TraceEvent = {t: number; type: string; kind: string; tag?: string; role?: string; data?: string; text?: string; textLength?: number; name?: string; value?: string}
 export type Trace = {id: string; recipe: string; bot: string; viewport: [number, number, number]; events: TraceEvent[]}
 export type Step = {t: number; data: Record<string, unknown>}
+/** The bot's state as the oracle's rail shows it ("Oracle, Working"), in ms after the send. */
+export type RailState = {t: number; state: 'working' | 'idle'}
 
 /** An oracle article's text is the message plus 15 characters of name and time (say-hi 29 → 44, storage 40 → 55). */
 export const ARTICLE_CHROME = 15
@@ -26,7 +31,7 @@ export const ARTICLE_CHROME = 15
 const round = (t: number) => Math.round(t * 10) / 10
 const labelKind = (text: string): Kind => (/^Typing/.test(text) ? 'label:typing' : 'label:status')
 
-export function oracleTurn(trace: Trace): {clear: number; milestones: Milestone[]} {
+export function oracleTurn(trace: Trace): {clear: number; milestones: Milestone[]; rail: RailState[]} {
   const clear = trace.events.find((e) => e.type === 'remove' && e.kind === 'main' && e.tag === 'br')
   if (!clear) throw new Error(`${trace.id}: no send (the composer never cleared)`)
   const out: Milestone[] = []
@@ -42,7 +47,13 @@ export function oracleTurn(trace: Trace): {clear: number; milestones: Milestone[
     else if (e.kind === 'other' && e.tag === 'span' && e.text?.endsWith(' is working')) out.push({kind: 'status:working', t: at(e)})
     else if (e.kind === 'other' && e.tag === 'span' && e.text?.endsWith(' replied')) out.push({kind: 'status:replied', t: at(e)})
   }
-  return {clear: clear.t, milestones: out}
+  const rail: RailState[] = []
+  for (const e of trace.events) {
+    if (e.type !== 'attr' || e.kind !== 'rail' || e.name !== 'aria-label' || e.t < clear.t || typeof e.value !== 'string') continue
+    const state = e.value.split(', ').includes('Working') ? 'working' : 'idle'
+    if (rail.at(-1)?.state !== state) rail.push({t: at(e), state})
+  }
+  return {clear: clear.t, milestones: out, rail}
 }
 
 /** Neutral words of exactly n characters, no space at either end (O2: no conversation text). */
@@ -86,4 +97,9 @@ export function replayScript(milestones: Milestone[]): {accept: number; steps: S
     from = b.t
   })
   return {accept, steps}
+}
+
+/** The fleet stream's state flips (event: state) at the oracle rail's times; replay.ts adds the run's session id. */
+export function stateScript(rail: RailState[]): Step[] {
+  return rail.map((r) => ({t: r.t, data: {agent_state: r.state, title: null}}))
 }

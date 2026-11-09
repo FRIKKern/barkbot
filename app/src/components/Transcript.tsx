@@ -100,7 +100,8 @@ export function Transcript({bot, startedAt, bubbles, working, error}: {bot: stri
             </div>
           </div>
         ))}
-        {working && (
+        {/* The row waits for the bot's Working state (held); the status line below does not. */}
+        {working && !working.held && (
           <div className={`working${working.leaving ? ' leaving' : ''}`} aria-hidden="true">
             <span className="work-mark">
               <span className="work-squash">

@@ -5,6 +5,9 @@
 //   POST /api/gate-b/<trace>?run=<id>   the send: answers when the oracle's send was accepted,
 //                                        and starts the stream's clock (t = 0 is this request)
 //   GET  …&status                       what this run has done (for the gate's preconditions)
+//   GET  …&fleet                        the fleet stream (Barkpark's /v1/chat/events): a snapshot
+//                                        with this run's session idle, then `event: state` flips
+//                                        at the oracle rail's times (Working, then not)
 // After the turn the stream closes, as a dropped connection would. The browser reconnects and,
 // as Barkpark does on every connect, the stream replays the stored rows as `event: message`
 // (seq-ascending, `id: <seq>`): the user's row, then the turn's ONE assistant row. `history`
@@ -14,14 +17,17 @@
 import '@tanstack/react-start/server-only'
 import {readFileSync} from 'node:fs'
 import {resolve} from 'node:path'
-import {filler, oracleTurn, replayScript, type Milestone, type Step, type Trace} from '../chat/turn'
+import {filler, oracleTurn, replayScript, stateScript, type Milestone, type Step, type Trace} from '../chat/turn'
 
 type Run = {
   steps: Step[]
+  states: Step[]
   accept: number
   milestones: Milestone[]
   write: (s: string) => void
   close: () => void
+  fleet: (s: string) => void
+  state: string
   timers: ReturnType<typeof setTimeout>[]
   sent: boolean
   connects: number
@@ -45,6 +51,43 @@ const sse = (s: Step) => `event: runtime\ndata: ${JSON.stringify(s.data)}\n\n`
 const row = (seq: number, role: string, text: string) =>
   `id: ${seq}\nevent: message\ndata: ${JSON.stringify({seq, role, source_markdown: text, metadata: {}, inserted_at: new Date().toISOString()})}\n\n`
 
+const nothing = () => {}
+function runFor(run: string, trace: Trace): Run {
+  let r = runs.get(run)
+  if (!r) {
+    const {milestones, rail} = oracleTurn(trace)
+    const {accept, steps} = replayScript(milestones)
+    r = {steps, states: stateScript(rail), accept, milestones, write: nothing, close: nothing, fleet: nothing, state: 'idle', timers: [], sent: false, connects: 0, rows: 0}
+    runs.set(run, r)
+    setTimeout(() => runs.delete(run), 5 * 60 * 1000)
+  }
+  return r
+}
+let fleetSeq = 0
+// Barkpark's fleet frames (ChatController.fleet_*_frame): `id: <epoch>:<seq>`, no message content.
+const fleetFrame = (event: string, data: unknown) => `id: 1:${++fleetSeq}\nevent: ${event}\ndata: ${JSON.stringify(data)}\n\n`
+
+function sseResponse(start: (write: (s: string) => void, close: () => void) => void, signal: AbortSignal): Response {
+  const enc = new TextEncoder()
+  const body = new ReadableStream<Uint8Array>({
+    start(c) {
+      const write = (s: string) => {
+        try {
+          c.enqueue(enc.encode(s))
+        } catch {}
+      }
+      const close = () => {
+        try {
+          c.close()
+        } catch {}
+      }
+      start(write, close)
+      signal.addEventListener('abort', close)
+    },
+  })
+  return new Response(body, {headers: {'content-type': 'text/event-stream', 'cache-control': 'no-cache', connection: 'keep-alive'}})
+}
+
 /** The stored rows after the turn, as Barkpark replays them on connect. */
 function history(m: Milestone[], shape: string, since: number): string {
   const user = m.find((x) => x.kind === 'user')
@@ -65,42 +108,25 @@ export function replayStream(id: string, request: Request): Response {
   }
   const trace = loadTrace(id)
   if (!trace) return new Response('no such trace', {status: 404})
+  const r = runFor(run, trace)
+  if (url.searchParams.has('fleet'))
+    return sseResponse((write) => {
+      r.fleet = write
+      write('retry: 50\n\n')
+      write(fleetFrame('snapshot', {sessions: [{session_id: run, agent_state: r.state, ts: new Date().toISOString(), title: null}]}))
+    }, request.signal)
   const shape = url.searchParams.get('history') ?? 'last'
-  const enc = new TextEncoder()
-  const body = new ReadableStream<Uint8Array>({
-    start(c) {
-      const write = (s: string) => {
-        try {
-          c.enqueue(enc.encode(s))
-        } catch {}
-      }
-      const close = () => {
-        try {
-          c.close()
-        } catch {}
-      }
-      let r = runs.get(run)
-      if (!r) {
-        const milestones = oracleTurn(trace).milestones
-        const {accept, steps} = replayScript(milestones)
-        r = {steps, accept, milestones, write, close, timers: [], sent: false, connects: 0, rows: 0}
-        runs.set(run, r)
-        setTimeout(() => runs.delete(run), 5 * 60 * 1000)
-      } else {
-        r.write = write
-        r.close = close
-      }
-      r.connects++
-      write('retry: 50\n\n') // reconnect soon after a drop; the first bytes also open the EventSource
-      if (r.sent) {
-        const h = history(r.milestones, shape, since)
-        r.rows += (h.match(/^event: message$/gm) ?? []).length
-        write(h)
-      }
-      request.signal.addEventListener('abort', close)
-    },
-  })
-  return new Response(body, {headers: {'content-type': 'text/event-stream', 'cache-control': 'no-cache', connection: 'keep-alive'}})
+  return sseResponse((write, close) => {
+    r.write = write
+    r.close = close
+    r.connects++
+    write('retry: 50\n\n') // reconnect soon after a drop; the first bytes also open the EventSource
+    if (r.sent) {
+      const h = history(r.milestones, shape, since)
+      r.rows += (h.match(/^event: message$/gm) ?? []).length
+      write(h)
+    }
+  }, request.signal)
 }
 
 export async function replaySend(run: string | null): Promise<Response> {
@@ -113,6 +139,13 @@ export async function replaySend(run: string | null): Promise<Response> {
   for (const s of r.steps) at.set(s.t, [...(at.get(s.t) ?? []), s])
   const run_ = r
   for (const [t, group] of at) r.timers.push(setTimeout(() => run_.write(group.map(sse).join('')), t))
+  for (const st of r.states)
+    r.timers.push(
+      setTimeout(() => {
+        run_.state = String(st.data.agent_state)
+        run_.fleet(fleetFrame('state', {session_id: run, ...st.data, ts: new Date().toISOString()}))
+      }, st.t),
+    )
   const last = Math.max(0, ...r.steps.map((s) => s.t))
   r.timers.push(setTimeout(() => run_.close(), last + CLOSE_AFTER))
   await new Promise((ok) => setTimeout(ok, r.accept))
