@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 40,
- "pass": 40,
+ "cases": 70,
+ "pass": 70,
  "results": [
   {
    "key": "aside:Bots",
@@ -168,9 +168,129 @@
   {
    "key": "span:Auto-detect",
    "pass": true
+  },
+  {
+   "key": "bubble:assistant#1 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#1 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": true
+  },
+  {
+   "key": "strong#1",
+   "pass": true
+  },
+  {
+   "key": "strong#2",
+   "pass": true
+  },
+  {
+   "key": "code#1",
+   "pass": true
+  },
+  {
+   "key": "code#2",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": true
+  },
+  {
+   "key": "strong#3",
+   "pass": true
+  },
+  {
+   "key": "strong#4",
+   "pass": true
+  },
+  {
+   "key": "code#3",
+   "pass": true
+  },
+  {
+   "key": "code#4",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": true
+  },
+  {
+   "key": "strong#5",
+   "pass": true
+  },
+  {
+   "key": "strong#6",
+   "pass": true
+  },
+  {
+   "key": "code#5",
+   "pass": true
+  },
+  {
+   "key": "code#6",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#4 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#5 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#5 place",
+   "pass": true
   }
  ],
- "run": "2026-11-09T07:53:50.263Z",
+ "run": "2026-11-09T08:04:30.318Z",
  "inventory": {
   "id": "oracle-main-2000",
   "controls": [
