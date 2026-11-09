@@ -22,8 +22,13 @@ export function Details({scene, onClose}: {scene: Scene; onClose?: () => void}) 
       </header>
       <div className={library ? 'details-body lib' : 'details-body'}>
         <div className="who">
-          <button className="who-face" aria-label="Edit Bot avatar" {...avatar.on}>
+          <button className="who-face" aria-label="Edit Bot avatar" data-editing={scene.overlay === 'edit-avatar' || undefined} {...avatar.on}>
             <Face size={52} />
+            {/* The pencil's 14 pt box sits at the face's centre in every capture; it draws on
+                hover and while the avatar editor is open (oracle-edit-avatar). */}
+            <i className="who-pencil" aria-hidden="true">
+              <Icon d="M10.5 2.5l3 3-7.5 7.5H3v-3z" />
+            </i>
           </button>
           <Tooltip box={avatar.box} side="bottom">
             Edit Avatar
