@@ -9,6 +9,7 @@
 #      npm run check must pass.
 #   3. push the branch; open or update its pull request.
 set -eu
+SELF=$(git hash-object "$0")   # this run's own script, to notice a newer one after the rebase
 # README.md is NOT here: its timeline is generated but its prose is not, and a lane never
 # rewrites the timeline (only main does), so a README conflict is a real one.
 GEN='^(docs/PARITY\.md|docs/images/(roadmap|journeys|hero)\.svg)$'
@@ -42,6 +43,8 @@ while in_rebase; do
   echo "land: the rebase stopped and the reason is not a conflict; see git status (git rebase --abort to undo)" >&2; exit 1
 done
 [ "$(git merge-base HEAD "$BASE")" = "$(git rev-parse "$BASE")" ] || { echo "land: the branch is not on $BASE after the rebase; stopping" >&2; exit 1; }
+# The rebase may have brought a newer land.sh: run the new one, once (it finds the branch already on main).
+if [ -z "${LAND_RESTARTED:-}" ] && [ "$(git hash-object "$0")" != "$SELF" ]; then echo "land: land.sh changed in the rebase; running the new one"; LAND_RESTARTED=1 exec sh "$0"; fi
 node scripts/gate.mjs --show 0   # records the rebased tree; exits 1 if any state fell below its record
 # Gate B (feel) is judged here, on the Mac the oracle's timings were recorded on; CI only reports it.
 if [ -f scripts/gate-b.mjs ]; then node scripts/gate-b.mjs --show 0; fi
