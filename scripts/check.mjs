@@ -90,6 +90,20 @@ for (const f of stateFiles) {
   }
 }
 
+// 6b. Every captured state comes from ONE oracle version. A Grok update moves numbers, so a
+// mix means some states were measured on a different app: re-capture the stale ones.
+const versions = new Map();
+for (const f of stateFiles) {
+  rule('one oracle version', 1);
+  const v = JSON.parse(read('fixtures', 'states', f)).version;
+  if (!v) fail(`fixtures: ${f} names no oracle version: re-capture it`);
+  else versions.set(v, [...(versions.get(v) || []), f]);
+}
+if (versions.size > 1) {
+  const [main] = [...versions].sort((a, b) => b[1].length - a[1].length)[0];
+  for (const [v, fs] of versions) if (v !== main) fail(`fixtures: ${fs.length} state(s) captured on ${v}, the rest on ${main}: re-capture ${fs.slice(0, 4).join(', ')}${fs.length > 4 ? ', …' : ''}`);
+}
+
 // 7. Gate A has a recorded run for every captured state, and it checked something.
 for (const f of stateFiles) {
   rule('gate records', 1);
@@ -101,7 +115,7 @@ for (const f of stateFiles) {
 }
 
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'gate records']) {
+for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

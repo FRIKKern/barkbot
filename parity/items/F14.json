@@ -1,0 +1,16 @@
+{
+ "id": "F14",
+ "slice": "S2",
+ "journey": null,
+ "title": "Settings, Computer / Permissions / Updates pages (oracle-settings-computer, -permissions, -updates). Look only: the device name is the owner's Mac (length only); Usage & Billing and Vault are never captured (O2)",
+ "status": "open",
+ "controls": [
+  "Route traffic through this computer",
+  "Reset Bot's Computer",
+  "Auto-Review",
+  "Add Rule to Always Ask",
+  "Add Rule to Allow without Asking",
+  "Automatic Updates",
+  "Check for Updates"
+ ]
+}

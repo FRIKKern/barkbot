@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-19 of 43 items done, 11 partial, 4 open, 9 not yet read on the oracle.
+19 of 44 items done, 11 partial, 5 open, 9 not yet read on the oracle.
 Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an item file, never this page.
 
 ## S0 Harness
@@ -47,6 +47,7 @@ Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an it
 | F11 | Connect Apps view: header with the connected count, Your plugins, Bot templates, category filters, Recommended for you with each app's Open and Connect (oracle-connect-apps). Look only: Connect and Open act outside the page and are their own items | — | ✓ done | Gate: Gate A oracle-connect-apps 100/100. Evidence: app/src/components/overlays/Views.tsx (ConnectApps), styles/views.css; opens from Connect apps in the rail, Close and Escape close it, filters toggle. App logos are neutral tiles and the connected count a placeholder bar (O2, lengths only); Connect and Open act nowhere yet (0005). |
 | F12 | Bot avatar editor: Bot, Generate, Upload, Reset character to default (oracle-edit-avatar). Look only: Generate and Upload change the bot and are their own items | — | ✓ done | Gate: Gate A oracle-edit-avatar 68/68. Evidence: app/src/components/overlays/Views.tsx (AvatarEditor), shapes and colours shared with Create New Bot (CharacterLooks); opens under the details avatar from Edit Bot avatar. Generate and Upload show their tab only (0005). |
 | F13 | Settings, General page: General, Computer, Permissions, Vault, Usage & Billing, Updates; Account (name and e-mail are the owner's: lengths only), Add account, Sign Out; Appearance; Spelling; Microphone (oracle-settings). Look only | — | ✓ done | Gate: Gate A oracle-settings 78/78. Evidence: app/src/components/overlays/Views.tsx (Settings); opens from Settings in the account menu, Close and Escape close it, the spelling switch toggles. Name, e-mail, promo copy and art are placeholders of the captured size (lengths only); other sections highlight but show General. |
+| F14 | Settings, Computer / Permissions / Updates pages (oracle-settings-computer, -permissions, -updates). Look only: the device name is the owner's Mac (length only); Usage & Billing and Vault are never captured (O2) | — | ○ open | — |
 
 ## S3 Control
 

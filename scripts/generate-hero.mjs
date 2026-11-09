@@ -1,5 +1,5 @@
 // docs/images/hero.svg: the oracle window, rebuilt from measurements, playing one real turn.
-// Geometry and colours: fixtures/states/oracle-turn-1040.json (every box, in oracle points).
+// Geometry and colours: fixtures/hero/oracle-turn-1040-2026-11-08.json (every box, in oracle points).
 // Text widths and line breaks: fixtures/text-metrics.json (our own words in the oracle's font).
 // Motion: traces/2026-11-08-storage.json (order, times) and -say-hi*.json (curves, offsets).
 // Ours, not the oracle's: the words, the typing, the hold and the loop reset. Art is stand-ins.
@@ -8,13 +8,16 @@ import { writeFileSync, readFileSync } from 'node:fs';
 import { path } from './lib/data.mjs';
 import * as copy from './lib/hero-copy.mjs';
 
-const STATE = JSON.parse(readFileSync(path('fixtures', 'states', 'oracle-turn-1040.json'), 'utf8'));
+// The hero draws the first captured turn (2026-11-08), kept frozen in fixtures/hero/: the gated
+// fixtures/states/ copy is re-captured as the Oracle chat grows and Grok updates, and the picture
+// would move with it (its first bubble sits under the time row, which a longer chat scrolls away).
+const STATE = JSON.parse(readFileSync(path('fixtures', 'hero', 'oracle-turn-1040-2026-11-08.json'), 'utf8'));
 const METRICS = JSON.parse(readFileSync(path('fixtures', 'text-metrics.json'), 'utf8'));
 const [VW, VH] = STATE.viewport;
 
 // ---------- the oracle, measured ----------
 export const ORACLE = {
-  source: 'fixtures/states/oracle-turn-1040.json, fixtures/text-metrics.json, traces/2026-11-08-storage.json, traces/2026-11-08-say-hi.json, traces/2026-11-08-mark.json',
+  source: 'fixtures/hero/oracle-turn-1040-2026-11-08.json, fixtures/text-metrics.json, traces/2026-11-08-storage.json, traces/2026-11-08-say-hi.json, traces/2026-11-08-mark.json',
   userIn: 0.44, workIn: 2.03, ackIn: 3.53, typing: 9.0, replyIn: 9.84, workOut: 9.95,   // s after send
   enter: { px: 12, ms: 240, ease: 'cubic-bezier(.23,1,.32,1)' },                      // bubbles slide, no fade
   work: { rowMs: 180, rowScale: 0.92, rowEase: 'cubic-bezier(.22,1,.36,1)', markMs: 340, markScale: 0.6, markEase: 'cubic-bezier(.34,1.56,.64,1)', labelMs: 180, labelDelay: 0.22, labelPx: 4, labelEase: 'cubic-bezier(.22,1,.36,1)' },
