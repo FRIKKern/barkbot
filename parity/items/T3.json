@@ -4,5 +4,5 @@
  "journey": "J01",
  "title": "Working line: the bot's mark and what it is doing now",
  "status": "partial",
- "evidence": "Working line in Transcript.tsx + styles.css: row 180 ms, mark 340 ms spring, label 180 ms (+220 ms first), shimmer steps(60) 2.2 s, face squash and tilt, exit 140 ms. Labels: Thinking, Typing…, a tool's own description. The oracle's summary labels (\"Checking system storage\") need tool events from the host: task-f13fc4b4dc2af6de."
+ "evidence": "Working line in Transcript.tsx + styles.css: row 180 ms, mark 340 ms spring, label 180 ms (+220 ms first), shimmer steps(60) 2.2 s, face squash and tilt, exit 140 ms. Starts with the mark alone, like the oracle; \"Typing…\" while text streams (not for text that lands within a frame). Gate B: \"replied\" and the exit inside budget on 3 turns. Missing: the oracle's summary labels (\"Saying hello\", \"Checking system storage\") need host events: task-f13fc4b4dc2af6de; and in the storage turn the oracle shows the row 0.8 s after \"is working\", ours at once."
 }

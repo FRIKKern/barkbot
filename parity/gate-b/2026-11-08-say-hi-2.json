@@ -2,60 +2,57 @@
  "id": "2026-11-08-say-hi-2",
  "captured": "2026-11-08T21:39:32.645Z",
  "cases": 10,
- "pass": 8,
+ "pass": 9,
  "results": [
   {
    "key": "user#1",
    "pass": true,
    "oracle": 1561.5,
-   "ours": 1568.2,
-   "lag": 7
+   "ours": 1570.1,
+   "lag": 9
   },
   {
    "key": "status:working#1",
    "pass": true,
    "oracle": 2231,
-   "ours": 2237.1,
-   "lag": 6
+   "ours": 2235.2,
+   "lag": 4
   },
   {
    "key": "working#1",
    "pass": true,
    "oracle": 2231,
-   "ours": 2237.1,
-   "lag": 6
+   "ours": 2235.2,
+   "lag": 4
   },
   {
    "key": "label:status#1",
    "pass": false,
    "oracle": 3999.7,
-   "ours": 2237.1,
-   "lag": -1763,
-   "why": "early by 1763 ms"
+   "why": "ours never shows it: no Barkpark event carries the oracle's summary label (task-f13fc4b4dc2af6de)"
   },
   {
    "key": "assistant#1",
    "pass": true,
    "oracle": 4642.7,
-   "ours": 4647.2,
-   "lag": 5
+   "ours": 4649.9,
+   "lag": 7
   },
   {
    "key": "status:replied#1",
    "pass": true,
    "oracle": 4743.9,
-   "ours": 4889.5,
-   "lag": 146
+   "ours": 4751.4,
+   "lag": 8
   },
   {
    "key": "nothing extra",
-   "pass": false,
-   "why": "label:typing \"Typing…\" at 4647.2"
+   "pass": true
   },
   {
    "key": "budget: composer clears in 1 frame",
    "pass": true,
-   "ours": 0.7
+   "ours": 0.5
   },
   {
    "key": "budget: focus stays in Prompt",
@@ -64,7 +61,7 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 242.30000000000018
+   "ours": 241.5
   }
  ],
  "oracle": [
@@ -98,42 +95,34 @@
  "ours": [
   {
    "kind": "clear",
-   "t": 0.7
+   "t": 0.5
   },
   {
    "kind": "user",
-   "t": 1568.2,
+   "t": 1570.1,
    "len": 29
   },
   {
    "kind": "working",
-   "t": 2237.1
-  },
-  {
-   "kind": "label:status",
-   "t": 2237.1
+   "t": 2235.2
   },
   {
    "kind": "status:working",
-   "t": 2237.1
-  },
-  {
-   "kind": "label:typing",
-   "t": 4647.2
+   "t": 2235.2
   },
   {
    "kind": "assistant",
-   "t": 4647.2,
+   "t": 4649.9,
    "len": 12
   },
   {
    "kind": "working-gone",
-   "t": 4889.5
+   "t": 4891.4
   },
   {
    "kind": "status:replied",
-   "t": 4889.5
+   "t": 4751.4
   }
  ],
- "run": "2026-11-09T07:04:37.045Z"
+ "run": "2026-11-09T07:09:43.346Z"
 }

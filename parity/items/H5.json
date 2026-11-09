@@ -2,6 +2,8 @@
  "id": "H5",
  "slice": "S1",
  "journey": null,
- "title": "Gate B: a recorded turn replayed in ours (needs the S1 transcript), report in parity/gate-b.json",
- "status": "open"
+ "title": "Gate B: a recorded turn replayed in ours, report in parity/gate-b/<trace>.json",
+ "status": "done",
+ "gate": "npm run gate:b (CI: gate.yml); 33/37 over 3 turns, a lower count fails",
+ "evidence": "scripts/gate-b.mjs plays traces/2026-11-08-{say-hi,say-hi-2,storage} through /gate-b/<trace> (server/replay.ts as Barkpark's runtime stream, the real hook and transcript); moments timed in-page. Proof it fails: the working line's exit delayed 100 -> 300 ms took it to 27/37 and --ci exited 1."
 }

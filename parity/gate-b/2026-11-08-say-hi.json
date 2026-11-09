@@ -2,58 +2,55 @@
  "id": "2026-11-08-say-hi",
  "captured": "2026-11-08T21:28:09.048Z",
  "cases": 13,
- "pass": 11,
+ "pass": 12,
  "results": [
   {
    "key": "user#1",
    "pass": true,
    "oracle": 304.3,
-   "ours": 309,
-   "lag": 5
+   "ours": 310.7,
+   "lag": 6
   },
   {
    "key": "status:working#1",
    "pass": true,
    "oracle": 939.8,
-   "ours": 942.9,
-   "lag": 3
+   "ours": 943.3,
+   "lag": 4
   },
   {
    "key": "working#1",
    "pass": true,
    "oracle": 939.8,
-   "ours": 942.9,
-   "lag": 3
+   "ours": 943.3,
+   "lag": 4
   },
   {
    "key": "label:status#1",
    "pass": false,
    "oracle": 2390.8,
-   "ours": 942.9,
-   "lag": -1448,
-   "why": "early by 1448 ms"
+   "why": "ours never shows it: no Barkpark event carries the oracle's summary label (task-f13fc4b4dc2af6de)"
   },
   {
    "key": "label:typing#1",
    "pass": true,
    "oracle": 3293,
-   "ours": 3302.3,
-   "lag": 9
+   "ours": 3299.3,
+   "lag": 6
   },
   {
    "key": "assistant#1",
    "pass": true,
    "oracle": 3351.7,
-   "ours": 3356,
+   "ours": 3355.2,
    "lag": 4
   },
   {
    "key": "status:replied#1",
-   "pass": false,
+   "pass": true,
    "oracle": 3437.6,
-   "ours": 3597.4,
-   "lag": 160,
-   "why": "late by 160 ms"
+   "ours": 3456,
+   "lag": 18
   },
   {
    "key": "nothing extra",
@@ -62,7 +59,7 @@
   {
    "key": "budget: composer clears in 1 frame",
    "pass": true,
-   "ours": 0.3
+   "ours": 0.2
   },
   {
    "key": "budget: focus stays in Prompt",
@@ -71,17 +68,17 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 241.4000000000001
+   "ours": 240.80000000000018
   },
   {
    "key": "budget: own bubble ≤ 440 ms",
    "pass": true,
-   "ours": 309
+   "ours": 310.7
   },
   {
    "key": "budget: working line ≤ 2.0 s",
    "pass": true,
-   "ours": 942.9
+   "ours": 943.3
   }
  ],
  "oracle": [
@@ -119,42 +116,38 @@
  "ours": [
   {
    "kind": "clear",
-   "t": 0.3
+   "t": 0.2
   },
   {
    "kind": "user",
-   "t": 309,
+   "t": 310.7,
    "len": 29
   },
   {
    "kind": "working",
-   "t": 942.9
-  },
-  {
-   "kind": "label:status",
-   "t": 942.9
+   "t": 943.3
   },
   {
    "kind": "status:working",
-   "t": 942.9
+   "t": 943.3
   },
   {
    "kind": "label:typing",
-   "t": 3302.3
+   "t": 3299.3
   },
   {
    "kind": "assistant",
-   "t": 3356,
+   "t": 3355.2,
    "len": 29
   },
   {
    "kind": "working-gone",
-   "t": 3597.4
+   "t": 3596
   },
   {
    "kind": "status:replied",
-   "t": 3597.4
+   "t": 3456
   }
  ],
- "run": "2026-11-09T07:04:37.046Z"
+ "run": "2026-11-09T07:09:43.350Z"
 }
