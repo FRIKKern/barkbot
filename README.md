@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 26 changes
-  - Gate A waits for a state's hover changes; avatar editor recaptured clean
-  - Oracle: widths 720, 880, 2000; the base is re-established before a sweep
+- **Today** · 28 changes
+  - Oracle: the width edges, measured — five widths kept
+  - Narrow and wide windows: the panel closes itself below 800, compact Share ([#9](https://github.com/FRIKKern/barkbot/pull/9))
 - **Yesterday** · 11 changes
   - S1: talk through Barkpark (server side, transcript, working line, composer)
   - S0 closed on the board; Gate B moves to S1 with the transcript it needs

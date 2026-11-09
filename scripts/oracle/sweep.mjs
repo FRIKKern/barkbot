@@ -36,6 +36,14 @@ const SWEEP = [
   ['oracle-main-720', 'the main view, 720 wide (the panel closes itself)', [{ width: 720 }], [{ width: null }, { panelOpen: true }]],
   ['oracle-main-880', 'the main view, 880 wide', [{ width: 880 }], [{ width: null }]],
   ['oracle-main-2000', 'the main view, 2000 wide', [{ width: 2000 }], [{ width: null }]],
+  // The edges, measured 2026-11-09: the panel closes itself below 800 (790 closed, 800 open); from 800 to 840
+  // the column holds at 424 and the panel gives way (288, 308, then 320); Share shows its icon alone while the
+  // column is under 592 (980: 572 icon only, 1000: 592 labelled). 760-1030 in steps were looked at; these five are kept.
+  ['oracle-main-790', 'the main view, 790 wide', [{ width: 790 }], [{ width: null }, { panelOpen: true }]],
+  ['oracle-main-1000', 'the main view, 1000 wide', [{ width: 1000 }], [{ width: null }, { panelOpen: true }]],
+  ['oracle-main-800', 'the main view, 800 wide', [{ width: 800 }], [{ width: null }, { panelOpen: true }]],
+  ['oracle-main-820', 'the main view, 820 wide', [{ width: 820 }], [{ width: null }, { panelOpen: true }]],
+  ['oracle-main-980', 'the main view, 980 wide', [{ width: 980 }], [{ width: null }, { panelOpen: true }]],
   ['oracle-panel-closed', 'details panel closed', [{ press: 'View conversation details' }], [{ press: 'View conversation details' }]],
   ['oracle-library', 'details panel, Library tab', [{ press: 'Library' }], [{ press: 'Activity' }]],
   ['oracle-composer-menu', 'the composer actions menu', [{ press: 'Composer actions' }], [{ key: 'Escape' }]],
