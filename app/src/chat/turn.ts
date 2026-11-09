@@ -7,6 +7,7 @@
 //   own bubble lands      → the send is accepted then (our bubble lands on acceptance)
 //   "is working" / row    → turn_started (the first of the two)
 //   the rail says Working → the bot's state flips (fleet stream, event: state; stateScript);
+//                           0.79.3 never says it on the open bot: the line is the witness (fromRow);
 //                           a moment of its own (rail:working), judged like the others.
 //                           The row waits for it: in storage the row came with the rail,
 //                           779 ms after "is working", not with the turn's start.
@@ -33,7 +34,7 @@ export const ARTICLE_CHROME = 15
 const round = (t: number) => Math.round(t * 10) / 10
 const labelKind = (text: string): Kind => (/^Typing/.test(text) ? 'label:typing' : 'label:status')
 
-export function oracleTurn(trace: Trace): {clear: number; milestones: Milestone[]; rail: RailState[]} {
+export function oracleTurn(trace: Trace): {clear: number; milestones: Milestone[]; rail: RailState[]; fleet: RailState[]} {
   const clear = trace.events.find((e) => e.type === 'remove' && e.kind === 'main' && e.tag === 'br')
   if (!clear) throw new Error(`${trace.id}: no send (the composer never cleared)`)
   const out: Milestone[] = []
@@ -42,7 +43,8 @@ export function oracleTurn(trace: Trace): {clear: number; milestones: Milestone[
     if (e.type !== 'add' || e.t < clear.t) continue
     if (e.kind === 'bubble:user' && e.role === 'article') out.push({kind: 'user', t: at(e), len: (e.textLength ?? 0) - ARTICLE_CHROME})
     else if (e.kind === 'bubble:assistant' && e.role === 'article') out.push({kind: 'assistant', t: at(e), len: (e.textLength ?? 0) - ARTICLE_CHROME})
-    else if (e.kind === 'main' && e.tag === 'div' && !e.role && e.data?.split(' ').includes('rowKey')) {
+    // The transcript's time row ("Today 11:04 PM", data `index rowKey`) is a row too, not the working line.
+    else if (e.kind === 'main' && e.tag === 'div' && !e.role && e.data?.split(' ').includes('rowKey') && !e.data.split(' ').includes('index')) {
       out.push({kind: 'working', t: at(e)})
       if (e.text) out.push({kind: labelKind(e.text), t: at(e), text: e.text})
     } else if (e.kind === 'main' && e.tag === 'span' && e.text) out.push({kind: labelKind(e.text), t: at(e), text: e.text})
@@ -58,7 +60,17 @@ export function oracleTurn(trace: Trace): {clear: number; milestones: Milestone[
   // The rail turning to Working is a moment too: it comes with the bot's state, not the turn.
   for (const r of rail) if (r.state === 'working') out.push({kind: 'rail:working', t: r.t})
   out.sort((a, b) => a.t - b.t) // stable: same-ms moments keep the trace's order
-  return {clear: clear.t, milestones: out, rail}
+  return {clear: clear.t, milestones: out, rail, fleet: rail.length ? rail : fromRow(out)}
+}
+
+/** The bot's state as Barkpark's fleet stream sends it. Up to Grok 0.79.2 the open bot's tile said
+ *  Working, so the rail's times are the state's. 0.79.3 never says Working on the open bot
+ *  (long-answer), so the working line, which shows with the state, is its only witness: Working at
+ *  the line, idle at the reply. */
+function fromRow(m: Milestone[]): RailState[] {
+  const line = m.find((x) => x.kind === 'working')
+  const reply = m.filter((x) => x.kind === 'assistant').at(-1)
+  return line ? [{t: line.t, state: 'working'}, ...(reply ? [{t: reply.t, state: 'idle' as const}] : [])] : []
 }
 
 /** Neutral words of exactly n characters, no space at either end (O2: no conversation text). */
@@ -120,7 +132,7 @@ export function replayScript(milestones: Milestone[], shape: Shape = 'items'): {
   return {accept, steps}
 }
 
-/** The fleet stream's state flips (event: state) at the oracle rail's times; replay.ts adds the run's session id. */
+/** The fleet stream's state flips (event: state) at oracleTurn's `fleet` times; replay.ts adds the run's session id. */
 export function stateScript(rail: RailState[]): Step[] {
   return rail.map((r) => ({t: r.t, data: {agent_state: r.state, title: null}}))
 }
