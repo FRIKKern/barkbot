@@ -5,7 +5,7 @@
 #      A Gate A record (parity/gate-a/<state>.json) is settled the same way: keep main's, then
 #      measure the rebased tree. Two lanes often lift the same state (a frame fix lifts the menus).
 #   2. Gate A (and Gate B, once it exists) re-measure the rebased tree and record it (a count
-#      below the record stops here);
+#      below the record stops here); scripts/behaviour.mjs runs every behaviour rule;
 #      npm run check must pass.
 #   3. push the branch; open or update its pull request.
 set -eu
@@ -48,6 +48,7 @@ if [ -z "${LAND_RESTARTED:-}" ] && [ "$(git hash-object "$0")" != "$SELF" ]; the
 node scripts/gate.mjs --show 0   # records the rebased tree; exits 1 if any state fell below its record
 # Gate B (feel) is judged here, on the Mac the oracle's timings were recorded on; CI only reports it.
 if [ -f scripts/gate-b.mjs ]; then node scripts/gate-b.mjs --show 0; fi
+node scripts/behaviour.mjs   # what the frame does, rule by rule with controls; exits 1 if any rule fails
 npm run -s docs
 git checkout -q -- README.md   # the timeline is main's to refresh
 if [ -n "$(git status --porcelain)" ]; then git add -A docs parity && git commit -q -m "Re-record the gates and regenerate docs after rebase"; fi

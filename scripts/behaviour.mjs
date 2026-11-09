@@ -1,0 +1,142 @@
+// Behaviour: what the frame DOES, rule by rule, as the oracle traces show it. Gate A measures a
+// still screen; this drives ours with real CDP mouse, key and focus events and checks each rule.
+// Every rule is checked next to a control, which shows the check can fail: the rule's effect is
+// absent before the gesture, or a near-miss gesture does not cause it.
+//
+//   node scripts/behaviour.mjs          start the app and a headless Chrome, run every rule, stop both
+//   node scripts/behaviour.mjs --url http://localhost:3170   use an app that is already running
+//
+// Exits 1 if any rule fails, or if a precondition does not hold (then nothing was measured).
+// Sources: traces/2026-11-09-rename.json, traces/2026-11-09-unread.json,
+// traces/2026-11-09-long-answer.json (all Grok 0.79.3).
+import { spawn } from 'node:child_process';
+import { createServer } from 'node:net';
+import { mkdirSync, rmSync } from 'node:fs';
+import { connect } from './oracle/cdp.mjs';
+import { path } from './lib/data.mjs';
+
+const args = process.argv.slice(2);
+const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
+const freePort = () => new Promise((ok, no) => { const s = createServer().once('error', no).listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => ok(port)); }); });
+const APP_PORT = await freePort(), CHROME_PORT = await freePort();
+const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const PROFILE = path('.cache', `behaviour-chrome-${CHROME_PORT}`);
+const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
+async function until(fn, ms, what) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) { try { if (await fn()) return; } catch {} await wait(200); }
+  throw new Error(`timed out waiting for ${what}`);
+}
+const kids = [];
+process.on('exit', () => { kids.forEach((k) => { try { k.kill('SIGTERM'); } catch {} }); try { rmSync(PROFILE, { recursive: true, force: true }); } catch {} });
+process.on('SIGINT', () => process.exit(130));
+
+let base = opt('url');
+if (!base) {
+  base = `http://localhost:${APP_PORT}`;
+  kids.push(spawn('pnpm', ['-s', 'dev', '--port', String(APP_PORT), '--strictPort'], { cwd: path('app'), stdio: 'ignore' }));
+  await until(async () => (await fetch(base)).status > 0, 90000, `the app on ${base}`);
+}
+mkdirSync(PROFILE, { recursive: true });
+kids.push(spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, '--window-size=1040,760', 'about:blank'], { stdio: 'ignore' }));
+await until(async () => (await fetch(`http://127.0.0.1:${CHROME_PORT}/json/version`)).ok, 30000, 'Chrome');
+const page = await connect(undefined, CHROME_PORT);
+const ev = (f, ...a) => page.evaluate(f, ...a);
+
+let failed = 0, ran = 0;
+const check = (rule, ok, detail) => { ran++; if (!ok) failed++; console.log(`${ok ? '  ✓' : '  ✗'} ${rule}${ok ? '' : `  ${JSON.stringify(detail)}`}`); };
+const precondition = (what, ok, detail) => { if (!ok) { console.error(`Behaviour: precondition failed, nothing measured: ${what} ${JSON.stringify(detail)}`); process.exit(1); } };
+
+// Real input, as a person gives it.
+const mouse = (type, x, y) => page.send('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 });
+const click = async (x, y) => { await mouse('mouseMoved', x, y); await mouse('mousePressed', x, y); await mouse('mouseReleased', x, y); await wait(60); };
+const KEYS = { Escape: [27, ''], Enter: [13, '\r'], Backspace: [8, ''], End: [35, ''] };
+const key = async (k) => { const [vk, text] = KEYS[k]; await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: k, code: k, windowsVirtualKeyCode: vk, text }); await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: k, code: k, windowsVirtualKeyCode: vk }); await wait(30); };
+const type = async (t) => { await page.send('Input.insertText', { text: t }); await wait(30); };
+// The window's focus. CDP focus emulation flips document.hasFocus() and fires real window blur/focus.
+const windowFocus = async (on) => { await page.send('Emulation.setFocusEmulationEnabled', { enabled: on }); await wait(300); };
+
+async function open(url) {
+  await page.send('Page.navigate', { url });
+  await until(() => ev(() => document.readyState === 'complete' && !!document.querySelector('.app')), 30000, url);
+  await wait(500);
+}
+
+// ── Rename: the details panel's Bot name field (traces/2026-11-09-rename.json) ──────────────────
+console.log('Behaviour · rename (traces/2026-11-09-rename.json)');
+await open(`${base}/gate/oracle-turn-1040`);
+await windowFocus(true);
+const name = () => ev(() => {
+  const i = document.querySelector('.who-name'), a = document.activeElement, cs = getComputedStyle(i), r = i.getBoundingClientRect();
+  return { value: i.value, header: document.querySelector('.bot-pill [role=heading]')?.textContent, tile: document.querySelectorAll('.rail-tile')[1]?.getAttribute('aria-label'),
+    placeholder: document.querySelector('[data-placeholder]')?.getAttribute('data-placeholder'), active: a === document.body ? 'body' : a.getAttribute('aria-label') || a.tagName,
+    sel: a === i ? [i.selectionStart, i.selectionEnd] : null, bg: cs.backgroundColor, transition: cs.transition, rect: [r.x, r.y, r.width, r.height] };
+});
+const nextFrame = () => ev(() => new Promise((r) => requestAnimationFrame(() => r())));
+const clear = async () => { await ev(() => document.querySelector('.who-name').select()); await key('Backspace'); };
+await mouse('mouseMoved', 400, 740); await wait(300);
+let s = await name();
+precondition('the Bot name field holds "Oracle", the header and tile agree', s.value === 'Oracle' && s.header === 'Oracle' && s.tile === 'Oracle' && s.placeholder === 'Message Oracle', s);
+check('rest: transparent, border-color and background-color transitions of 0.12 s', s.bg === 'rgba(0, 0, 0, 0)' && /border-color 0\.12s.*background-color 0\.12s/.test(s.transition), s);
+let [x, y, w, h] = s.rect;
+await mouse('mouseMoved', x + w / 2, y + h / 2); await wait(60);
+const early = (await name()).bg; await wait(250); s = await name();
+check('hover: fills to rgba(245,245,245,0.08), through the transition (control: not there at 60 ms)', s.bg === 'rgba(245, 245, 245, 0.08)' && early !== s.bg, { at60ms: early, settled: s.bg });
+await click(x + w / 2, y + h / 2); const middle = (await name()).sel;
+await key('Escape'); await click(x + w - 12, y + h / 2); const right = (await name()).sel;
+check('click: the caret goes where it lands, no select-all (control: a click further right lands further right)', middle && middle[0] === middle[1] && middle[0] > 0 && middle[0] < 6 && right && right[0] === 6 && right[1] === 6, { middle, right });
+await key('End'); await type(' Two'); await wait(3000); const typed = await name();
+check('no autosave: 3 s after typing, nothing has saved', typed.value === 'Oracle Two' && typed.header === 'Oracle' && typed.tile === 'Oracle' && typed.placeholder === 'Message Oracle', typed);
+await key('Escape'); s = await name();
+check('Escape: puts the old name back, focus on body (control: the field held the typed name)', typed.value === 'Oracle Two' && s.value === 'Oracle' && s.active === 'body' && s.header === 'Oracle', s);
+await click(x + w / 2, y + h / 2); await key('End'); await type(' Two'); const before = await name();
+await key('Enter'); await nextFrame(); s = await name();
+check('Enter: saves, focus on body; header, tile label and placeholder follow in the next frame (control: all old while typing)',
+  before.header === 'Oracle' && before.tile === 'Oracle' && before.placeholder === 'Message Oracle' &&
+  s.value === 'Oracle Two' && s.active === 'body' && s.header === 'Oracle Two' && s.tile === 'Oracle Two' && s.placeholder === 'Message Oracle Two', { before, after: s });
+[x, y, w, h] = s.rect;
+await click(x + w / 2, y + h / 2); await clear(); const empty = await name();
+await key('Enter'); s = await name();
+check('empty + Enter: keeps the old name (control: a non-empty Enter saved above)', empty.value === '' && s.value === 'Oracle Two' && s.header === 'Oracle Two' && s.active === 'body', s);
+await click(x + w / 2, y + h / 2); await clear(); await type('Oracle'); const away = await name();
+await click(400, 300); s = await name();
+check('click away on the transcript: saves, focus on the transcript (control: old name until then)', away.header === 'Oracle Two' && s.value === 'Oracle' && s.header === 'Oracle' && s.tile === 'Oracle' && s.active === 'Conversation transcript', s);
+await click(400, 300); s = await name();
+check('control: a click on the transcript alone renames nothing', s.header === 'Oracle' && s.value === 'Oracle', s);
+[x, y, w, h] = s.rect;
+await click(x + w / 2, y + h / 2); await key('End'); await type('X'); await click(44, 155); s = await name();
+check('click away on a rail tile: saves, focus goes to what was clicked', s.header === 'OracleX' && s.active === 'OracleX', s);
+
+// ── Unread dot and the Working label (traces/2026-11-09-unread.json, -long-answer.json) ──────────
+console.log('Behaviour · unread and working (traces/2026-11-09-unread.json, -long-answer.json)');
+const mountWith = async (overlay) => {
+  await open(`${base}/gate/oracle-turn-1040`);
+  await ev(async (o) => { const m = await import('/src/gate/behaviour.tsx'); document.body.innerHTML = '<div id="t"></div>'; window.__drive = m.mount(document.getElementById('t'), o); }, overlay);
+  await wait(300);
+};
+const rail = () => ev(async () => { await new Promise((r) => setTimeout(r, 50)); const tiles = [...document.querySelectorAll('.rail-tile:not(.rail-me)')].map((b) => b.getAttribute('aria-label'));
+  return { focus: document.hasFocus(), tiles, dot: !!document.querySelector('.unread'), settings: !!document.querySelector('[role=dialog]'), open: document.querySelector('[aria-current=page]')?.getAttribute('aria-label') }; });
+const drive = (w) => ev((w) => window.__drive(w), w);
+const turn = async () => { await drive(['Oracle']); await wait(50); await drive([]); };
+await mountWith(undefined); await windowFocus(true);
+s = await rail();
+precondition('the window has focus, Oracle is open, no dot', s.focus && s.open === 'Oracle' && !s.dot, s);
+await turn(); s = await rail();
+check('a reply in a focused window sets no dot', s.focus && !s.dot && s.tiles[1] === 'Oracle', s);
+await mountWith('settings'); await windowFocus(false);
+const pre = await rail();
+precondition('the window has no focus, Settings is up, no dot', !pre.focus && pre.settings && !pre.dot, pre);
+await turn(); s = await rail();
+check('a reply while the window has no focus sets the dot and ", Unread activity", even on the open bot with Settings up (control: none before)', !s.focus && s.dot && s.tiles[1] === 'Oracle, Unread activity' && s.open?.startsWith('Oracle') && s.settings, s);
+await wait(1200); s = await rail();
+check('control: while the window stays unfocused the dot stays (1.2 s later)', !s.focus && s.dot, s);
+await windowFocus(true); s = await rail();
+check('the window getting focus clears the dot at once, Settings still up', s.focus && !s.dot && s.tiles[1] === 'Oracle' && s.settings, s);
+await turn(); s = await rail();
+check('control: focused again, the next reply sets no dot', s.focus && !s.dot, s);
+await drive(['Oracle', 'Grookie']); s = await rail();
+check('Working: not on the open bot; still on a bot that is not open (control)', s.tiles[1] === 'Oracle' && s.tiles[0] === 'Grookie, Main Bot, Working', s);
+await drive([]);
+
+console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
+process.exit(failed ? 1 : 0);
