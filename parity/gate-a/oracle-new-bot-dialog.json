@@ -7,7 +7,7 @@
   2
  ],
  "cases": 45,
- "pass": 39,
+ "pass": 43,
  "results": [
   {
    "key": "aside:Bots",
@@ -51,23 +51,19 @@
   },
   {
    "key": "control:Prompt",
-   "pass": false,
-   "why": "box off by 160,0,-320,0"
+   "pass": true
   },
   {
    "key": "control:Composer actions",
-   "pass": false,
-   "why": "box off by 160,0.5,0,0"
+   "pass": true
   },
   {
    "key": "control:Start voice input",
-   "pass": false,
-   "why": "box off by -160,0.5,0,0"
+   "pass": true
   },
   {
    "key": "control:Start voice chat",
-   "pass": false,
-   "why": "box off by -160,0.5,0,0"
+   "pass": true
   },
   {
    "key": "control:Close dialog",
@@ -196,7 +192,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:05:51.676Z",
+ "run": "2026-11-09T07:24:04.321Z",
  "inventory": {
   "id": "oracle-new-bot-dialog",
   "controls": [
