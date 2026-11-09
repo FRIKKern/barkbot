@@ -3,7 +3,7 @@
 // captures it, and puts the screen back; the sweep checks the screen came back before the next.
 // Nothing here sends, shares, connects, creates, approves or wakes a computer (O1, O3).
 //
-//   node scripts/oracle/sweep.mjs [--only <id>] [--hovers] [--list] [--settle <ms>]
+//   node scripts/oracle/sweep.mjs [--only <id>] [--hovers] [--followups] [--list] [--settle <ms>]
 //
 // Personal data never lands in a fixture (O2): any text that looks like an e-mail address,
 // and everything in the account menu that is not a menu item, is kept as a length only.
@@ -47,8 +47,17 @@ const HOVER = ['New Bot', 'Connect apps', 'Open account menu', 'View conversatio
 const slug = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 // Bot tile #2 is Oracle's. #1 is the owner's real bot and is never touched, not even hovered (O1).
 for (const [name, nth] of [...HOVER.map((n) => [n, 0]), ['Bot tile', 1]])
-  SWEEP.push([`oracle-hover-${slug(name)}${name === 'Bot tile' ? `-${nth + 1}` : ''}`, `pointer over ${name}${name === 'Bot tile' ? ` #${nth + 1}` : ''}`, [{ hover: name, nth }], [{ park: true }], { keepPointer: true, pointer: { over: name, nth } }]);
+  SWEEP.push([`oracle-hover-${slug(name)}${name === 'Bot tile' ? `-${nth + 1}` : ''}`, `pointer over ${name}${name === 'Bot tile' ? ` #${nth + 1}` : ''}`, [{ hover: name, nth }], [{ park: true }], { keepPointer: true, diff: true, pointer: { over: name, nth } }]);
+// Overlay follow-ups. A recipe with { diff: true } keeps `changed`: the keys its LAST step changed.
+// Not here, on purpose: the account menu's first row opens a usage submenu with the owner's spend
+// (never captured, O2); the pickers did not scroll for a wheel over the listbox, and the composer
+// menu's first row and the Speed picker's first option show no hover to a pointer move: all need a better recipe before they are tried again.
+SWEEP.push(
+  // A typed name, never Create: Escape discards it.
+  ['oracle-new-bot-named', 'Create New Bot with a name typed', [{ press: 'New Bot' }, { type: 'Test' }], [{ key: 'Escape' }], { diff: true }],
+);
 const only2 = args.includes('--hovers');
+const only3 = args.includes('--followups');
 
 if (args.includes('--list')) { for (const [id, what] of SWEEP) console.log(`${id}  ${what}`); process.exit(0); }
 
@@ -82,6 +91,17 @@ async function press(name) {
 // sweep stops: a press that did not take would capture the wrong state under the right name.
 async function step(s) {
   if (s.park) return park();
+  if (s.type) { await page.send('Input.insertText', { text: s.type }); return wait(SETTLE); }
+  if (s.wheel || s.hoverRole) {
+    const el = (await page.evaluate(collect)).elements.find((e) => e.role === (s.wheel || s.hoverRole) && e.box[2] > 0 && e.box[3] > 0);
+    if (!el) throw new Error(`no ${s.wheel || s.hoverRole} on screen`);
+    const [x, y, w, h] = el.box;
+    execFileSync('open', ['-a', 'Grok Bot']);
+    await page.send('Page.bringToFront');
+    if (s.hoverRole) await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + w / 2, y: y + Math.min(h, 32) / 2 });
+    else for (let i = 0; i < 10; i++) { await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + w / 2, y: y + h / 2, deltaX: 0, deltaY: 400 }); await wait(80); }
+    return wait(SETTLE);
+  }
   if (s.hover) {
     const hit = controls(await page.evaluate(collect)).filter((c) => c.name === s.hover);
     if (!hit[s.nth ?? 0]) throw new Error(`"${s.hover}" #${(s.nth ?? 0) + 1}: no such control`);
@@ -135,20 +155,20 @@ let done = 0;
 for (const [id, what, open, close, opts = {}] of SWEEP) {
   if (only && id !== only) continue;
   if (only2 && !id.startsWith('oracle-hover-')) continue;
-  for (const s of open) await step(s);
+  if (only3 && !/-(end|named|hover)$/.test(id)) continue;
+  // diff recipes: capture the screen just before the last step, so `changed` names what it changed.
+  for (const s of opts.diff ? open.slice(0, -1) : open) await step(s);
+  let rest = null;
+  if (opts.diff) { await park(); rest = new Map(namedElements(redact(await page.evaluate(collect), opts.privateMenu)).map((c) => [c.key, c.e])); await step(open.at(-1)); }
   if (!opts.keepPointer) await park();
   const state = redact(await page.evaluate(collect), opts.privateMenu);
   const out = { id, what, captured: new Date().toISOString().slice(0, 10), engine: 'electron', version, bot, ...state };
-  if (opts.pointer) {
-    // What the hover changed: compare with the same screen, pointer parked, captured just before.
-    for (const s of close) await step(s);
-    const rest = new Map(namedElements(await page.evaluate(collect)).map((c) => [c.key, c.e]));
-    for (const s of open) await step(s);
-    const now = namedElements(redact(await page.evaluate(collect), opts.privateMenu));
+  if (opts.pointer) out.pointer = opts.pointer;
+  if (opts.diff && !opts.pointer) out.act = open.at(-1); // Gate A replays it on ours: { wheel | type | hoverRole }
+  if (rest) {
     const look = (e) => JSON.stringify([e.box.map((v) => Math.round(v * 10) / 10), e.style]);
-    out.pointer = opts.pointer;
-    out.changed = now.filter((c) => !rest.has(c.key) || look(rest.get(c.key)) !== look(c.e)).map((c) => c.key);
-    if (!out.changed.length) { console.log(`${id}: the hover changes nothing visible; not kept`); for (const s of close) await step(s); continue; }
+    out.changed = namedElements(state).filter((c) => !rest.has(c.key) || look(rest.get(c.key)) !== look(c.e)).map((c) => c.key);
+    if (!out.changed.length) { console.log(`${id}: the last step changes nothing visible; not kept`); for (const s of close) await step(s); continue; }
   }
   writeFileSync(path('fixtures', 'states', `${id}.json`), JSON.stringify(out) + '\n');
   if (shots) { const s = await page.send('Page.captureScreenshot', { format: 'png' }); writeFileSync(`${shots}/${id}.png`, Buffer.from(s.data, 'base64')); }

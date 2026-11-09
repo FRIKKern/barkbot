@@ -99,6 +99,18 @@ for (const state of states) {
     const hit = controls(await page.evaluate(collect)).filter((c) => c.name === state.pointer.over)[state.pointer.nth ?? 0];
     if (hit) { const [x, y, bw, bh] = hit.e.box; await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + bw / 2, y: y + bh / 2 }); await wait(400); }
   }
+  // The capture's last step (fixture `act`), replayed on ours the same way.
+  const act = state.act;
+  if (act?.type) { await page.send('Input.insertText', { text: act.type }); await wait(400); }
+  if (act?.wheel || act?.hoverRole) {
+    const el = (await page.evaluate(collect)).elements.find((e) => e.role === (act.wheel || act.hoverRole) && e.box[2] > 0 && e.box[3] > 0);
+    if (el) {
+      const [x, y, bw, bh] = el.box;
+      if (act.hoverRole) await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + bw / 2, y: y + Math.min(bh, 32) / 2 });
+      else for (let i = 0; i < 10; i++) await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + bw / 2, y: y + bh / 2, deltaX: 0, deltaY: 400 });
+      await wait(600);
+    }
+  }
   const ours = await page.evaluate(collect);
   page.close();
   chrome.kill('SIGTERM');

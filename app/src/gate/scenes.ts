@@ -11,4 +11,6 @@ export const scenes: Record<string, Scene> = Object.fromEntries(
 
 // A hover state is the main view with the pointer on one control: same scene as oracle-turn-1040
 // (the gate moves the pointer itself).
-export const sceneFor = (id: string): Scene | undefined => scenes[id] ?? (id.startsWith('oracle-hover-') ? scenes['oracle-turn-1040'] : undefined)
+// A follow-up state (-end, -named, -hover) is its overlay's scene; the gate replays the last step.
+export const sceneFor = (id: string): Scene | undefined =>
+  scenes[id] ?? scenes[id.replace(/-(end|named|hover)$/, '')] ?? (id.startsWith('oracle-hover-') ? scenes['oracle-turn-1040'] : undefined)
