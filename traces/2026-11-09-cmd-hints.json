@@ -1,0 +1,19 @@
+{
+ "id": "2026-11-09-cmd-hints",
+ "what": "The rail's key hints while the Meta key alone is held (no number pressed), read from the oracle on 0.79.3. Shown on keydown, gone on keyup; the active bot stayed Oracle. UI labels only (O2).",
+ "version": "GrokBot 0.79.3",
+ "hints": [
+  {"text": "⌘1", "box": [41.3, 53, 26.5, 19]},
+  {"text": "⌘2", "box": [41.3, 133.5, 26.5, 19]}
+ ],
+ "look": {
+  "color": "rgba(245, 245, 245, 0.66)",
+  "font": {"size": "11px", "weight": 425, "line-height": "16px", "letter-spacing": "0.11px"},
+  "background": "rgb(14, 14, 14)",
+  "border-radius": "4px",
+  "border": "0.5px solid rgba(245, 245, 245, 0.04)",
+  "box-shadow": "rgb(14, 14, 14) 0px 0px 0px 2px",
+  "padding": "1px 4px",
+  "opacity": 1
+ }
+}
