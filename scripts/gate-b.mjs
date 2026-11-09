@@ -12,7 +12,8 @@
 //   each oracle moment  own bubble, working line and status, the rail's Working, each label, each
 //                       reply bubble, "replied":
 //                       ours shows the same kind, in the same order, within ±150 ms (the
-//                       oracle's own spread between runs: "replied" 0–101 ms after the reply)
+//                       oracle's own spread between runs: "replied" 0–101 ms after the reply);
+//                       a label also says the same words
 //   nothing extra       ours shows no moment the oracle did not
 //   timing              ours is counted from the arrival that caused each moment (uiTime below):
 //                       what the UI adds is judged, the stand-in server's own lateness is not
@@ -139,6 +140,9 @@ function compare(oracle, ours, focusAtEnd, skipped = []) {
     const why = [];
     if (Math.abs(lag) > W) why.push(`${lag > 0 ? 'late' : 'early'} by ${Math.abs(lag)} ms`);
     if (m.len !== undefined && o.len !== m.len) why.push(`${o.len} characters, oracle ${m.len} (bubbles grouped differently)`);
+    // A label is its words: the right moment saying the wrong thing is a miss (UI labels, not
+    // conversation text, O2).
+    if (m.text !== undefined && o.text !== m.text) why.push(`says "${o.text}", the oracle "${m.text}"`);
     // Order: nothing the oracle showed strictly earlier may come later in ours.
     const before = matched.filter((x) => x.m.t < m.t && x.o.t > o.t);
     if (before.length) why.push(`out of order: after ${before.map((x) => x.key).join(', ')}`);
