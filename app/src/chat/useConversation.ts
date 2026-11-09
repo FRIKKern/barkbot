@@ -35,6 +35,7 @@ export function toolLabel(name: string, input: Frame | undefined): string {
 
 let n = 0
 const key = () => `local-${++n}`
+const flat = (s: string) => s.replace(/\s+/g, '')
 
 /** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay. */
 export type Transport = {events: (sessionId: string) => string; send: (sessionId: string, content: string) => Promise<unknown>}
@@ -72,11 +73,20 @@ export function useConversation(sessionId: string | null, transport: Transport =
   const land = useCallback((b: Omit<Bubble, 'key'>) => {
     if (b.role === 'assistant' && typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
     setBubbles((all) => {
-      // A history row that matches a bubble we already showed claims it, instead of doubling it.
+      // A history row (event: message, replayed on every connect) that matches what we already
+      // showed claims it, instead of doubling it. Barkpark stores a turn as ONE row: today the
+      // text of its last model message (the recorder resets at each turn_started), and if that
+      // is ever fixed, all of them joined. So a row claims one live bubble, or a run of them
+      // whose texts joined are its text. Gate B replays both shapes after a reconnect.
       if (b.seq !== undefined) {
         if (all.some((x) => x.seq === b.seq)) return all
-        const i = all.findIndex((x) => x.seq === undefined && x.role === b.role && x.text.trim() === b.text.trim())
-        if (i >= 0) return all.map((x, j) => (j === i ? {...x, seq: b.seq} : x))
+        const want = flat(b.text)
+        for (let i = 0; i < all.length; i++) {
+          let got = ''
+          let j = i
+          while (j < all.length && all[j].seq === undefined && all[j].role === b.role && got.length < want.length) got += flat(all[j++].text)
+          if (j > i && got === want) return all.map((x, k) => (k >= i && k < j ? {...x, seq: b.seq} : x))
+        }
       }
       return [...all, {...b, key: b.seq !== undefined ? `seq-${b.seq}` : key()}]
     })

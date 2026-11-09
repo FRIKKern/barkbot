@@ -13,6 +13,8 @@
 //                       ours shows the same kind, in the same order, within ±150 ms (the
 //                       oracle's own spread between runs: "replied" 0–101 ms after the reply)
 //   nothing extra       ours shows no moment the oracle did not
+//   history             after the turn the stream drops and reconnects; the stored rows it
+//                       replays (Barkpark's shape, server/replay.ts) leave the same bubbles
 //   budgets (QUALITY.md) composer clears in 1 frame; focus stays in Prompt; working line gone
 //                       ≤ 250 ms after the reply; own bubble ≤ 440 ms and working line ≤ 2 s
 //                       where the oracle's own send and run met them (else the network, not the UI)
@@ -152,26 +154,52 @@ function compare(oracle, ours, focusAtEnd) {
   return cases;
 }
 
+// One replayed turn: type, send, wait for the turn and the reconnect after it, read the page.
+async function play(trace, sent, query = '') {
+  const { milestones } = oracleTurn(trace);
+  const [w, h, dpr] = trace.viewport;
+  await page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: dpr, mobile: false });
+  await page.send('Page.navigate', { url: `${base}/gate-b/${trace.id}${query}` });
+  await until(() => page.evaluate(() => document.readyState === 'complete' && document.querySelector('[data-gate-b]')?.dataset.gateB === 'ready' && document.fonts.status === 'loaded'), 30000, `/gate-b/${trace.id}`);
+  const run = await page.evaluate(() => document.querySelector('[data-gate-b]').dataset.run);
+  // The draft: placeholder words of the sent message's length (O2), typed as an input event.
+  await page.evaluate((text) => { const p = document.querySelector('[role=textbox][aria-label=Prompt]'); p.focus(); document.execCommand('insertText', false, text); }, filler(sent));
+  await until(() => page.evaluate(() => !!document.querySelector('button[aria-label=Send]')), 5000, 'the draft');
+  await page.evaluate(armAndSend);
+  await wait(Math.max(...milestones.map((m) => m.t)) + 1500);
+  // After the turn the replay drops the stream; the browser reconnects and gets the stored rows.
+  const status = async () => (await fetch(`${base}/api/gate-b/${trace.id}?run=${run}&status`)).json().catch(() => null);
+  await until(async () => (await status())?.connects >= 2, 5000, 'the reconnect').catch(() => {});
+  await wait(500);
+  const { log, focus } = await page.evaluate(() => window.__gateB.stop());
+  const final = await page.evaluate(() => {
+    const len = (role) => [...document.querySelectorAll(`.transcript [role=article] [data-role=${role}], .transcript [role=article][data-role=${role}]`)].map((b) => (b.querySelector('.bubble-text') ?? b).textContent.trim().length);
+    return { user: len('user'), assistant: len('assistant') };
+  });
+  return { milestones, log, focus, final, status: await status() };
+}
+
+// After a reconnect, Barkpark's stored rows must claim the live bubbles, never add to them.
+function historyCase(key, milestones, { final, status }) {
+  const want = { user: milestones.filter((m) => m.kind === 'user').map((m) => m.len), assistant: milestones.filter((m) => m.kind === 'assistant').map((m) => m.len) };
+  if (!status || status.connects < 2 || status.rows < 1) return { key, pass: false, why: `no reconnect replayed history (${JSON.stringify(status)}): nothing was checked` };
+  const same = JSON.stringify(final) === JSON.stringify(want);
+  return { key, pass: same, why: same ? undefined : `after ${status.rows} stored rows ours shows ${JSON.stringify(final)}, the turn was ${JSON.stringify(want)}` };
+}
+
 const report = [];
 for (const trace of traces) {
   const { milestones } = oracleTurn(trace);
   const sent = recipes[trace.recipe].text.length;
   const own = milestones.find((m) => m.kind === 'user');
   if (own && own.len !== sent) { console.error(`Gate B: ${trace.id}: the own bubble holds ${own.len} characters, the recipe sent ${sent}: ARTICLE_CHROME in app/src/chat/turn.ts no longer holds`); process.exit(1); }
-  const [w, h, dpr] = trace.viewport;
-  await page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: dpr, mobile: false });
-  await page.send('Page.navigate', { url: `${base}/gate-b/${trace.id}` });
-  await until(() => page.evaluate(() => document.readyState === 'complete' && document.querySelector('[data-gate-b]')?.dataset.gateB === 'ready' && document.fonts.status === 'loaded'), 30000, `/gate-b/${trace.id}`);
-  // The draft: placeholder words of the sent message's length (O2), typed as an input event.
-  await page.evaluate((text) => { const p = document.querySelector('[role=textbox][aria-label=Prompt]'); p.focus(); document.execCommand('insertText', false, text); }, filler(sent));
-  await until(() => page.evaluate(() => !!document.querySelector('button[aria-label=Send]')), 5000, 'the draft');
-  await page.evaluate(armAndSend);
-  const end = Math.max(...milestones.map((m) => m.t)) + 1500;
-  await wait(end);
-  const { log, focus } = await page.evaluate(() => window.__gateB.stop());
-  const cases = compare(milestones, log, focus);
+  const live = await play(trace, sent);
+  const cases = compare(milestones, live.log, live.focus);
+  cases.push(historyCase('history after a reconnect (stored as today: the last message)', milestones, live));
+  // A turn of several messages, stored as one joined text (if Barkpark keeps them all).
+  if (milestones.filter((m) => m.kind === 'assistant').length > 1) cases.push(historyCase('history after a reconnect (stored joined)', milestones, await play(trace, sent, '?history=joined')));
   const pass = cases.filter((c) => c.pass).length;
-  report.push({ id: trace.id, captured: trace.captured, cases: cases.length, pass, results: cases, oracle: milestones.map(({ text, ...m }) => m), ours: log.map(({ text, ...m }) => m) });
+  report.push({ id: trace.id, captured: trace.captured, cases: cases.length, pass, results: cases, oracle: milestones.map(({ text, ...m }) => m), ours: live.log.map(({ text, ...m }) => m) });
   console.log(`Gate B · ${trace.id} · ${pass}/${cases.length} pass`);
   for (const c of cases.filter((x) => !x.pass).slice(0, Number(opt('show') ?? 20))) console.log(`  ✗ ${c.key}: ${c.why}`);
 }

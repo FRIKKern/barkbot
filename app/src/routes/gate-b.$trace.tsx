@@ -22,15 +22,17 @@ function Replay() {
   const scene = scenes['oracle-turn-1040']
   const bot = scene.active ?? 'Oracle'
   const [run] = useState(() => crypto.randomUUID())
+  // ?history=joined: after its reconnect the stream replays the turn stored as one joined text.
+  const [history] = useState(() => (typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('history')))
   const transport = useMemo<Transport>(
     () => ({
-      events: (id) => `/api/gate-b/${trace}?run=${id}`,
+      events: (id) => `/api/gate-b/${trace}?run=${id}${history ? `&history=${encodeURIComponent(history)}` : ''}`,
       send: async (id) => {
         const res = await fetch(`/api/gate-b/${trace}?run=${id}`, {method: 'POST'})
         if (!res.ok) throw new Error(await res.text())
       },
     }),
-    [trace],
+    [trace, history],
   )
   const convo = useConversation(run, transport)
   return (
@@ -40,7 +42,7 @@ function Replay() {
         transcript={<Transcript bot={bot} startedAt={null} bubbles={convo.bubbles} working={convo.working} error={convo.error} />}
         composer={<Composer placeholder={`Message ${bot}`} onSend={(text) => void convo.send(text)} disabled={!convo.ready} />}
       />
-      <span hidden data-gate-b={convo.ready ? 'ready' : 'waiting'} />
+      <span hidden data-gate-b={convo.ready ? 'ready' : 'waiting'} data-run={convo.ready ? run : undefined} />
     </>
   )
 }
