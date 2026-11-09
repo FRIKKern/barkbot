@@ -71,3 +71,17 @@ export const colours: [string, string][] = [
 
 // The account menu's usage line as captured; real usage replaces it when the menu is wired.
 export const weeklyUsage = '12% used'
+
+// oracle-connect-apps: the filters and the sections on screen when captured. App names are
+// third-party product names: text only, never their logos (neutral tiles stand in). Only
+// 1Password's Connect carries its own label in the oracle; the others are named by their text.
+export const appCategories = ['All', 'Password Managers', 'Productivity', 'Communication', 'Design', 'Code']
+export const appSections: {title: string; viewAll: boolean; apps: string[]}[] = [
+  {title: 'Recommended for you', viewAll: true, apps: ['Datadog', 'Vercel', 'Supabase', 'Cloudflare', 'Sentry', 'Firebase']},
+  {title: 'Password Managers', viewAll: false, apps: ['1Password']},
+  {title: 'Productivity', viewAll: true, apps: ['Notion', 'Atlassian', 'Google Docs', 'Canva']},
+]
+export const labelledConnect = new Set(['1Password'])
+
+// oracle-settings: the sections of the settings sidebar.
+export const settingsSections = ['General', 'Computer', 'Permissions', 'Vault', 'Usage & Billing', 'Updates']
