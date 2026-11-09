@@ -8,5 +8,5 @@
   "View conversation details"
  ],
  "gate": "Gate A: View conversation details and span Oracle pass at 1040, 1280, 1600 and with the panel closed",
- "evidence": "Shell.tsx + convo.css; parity/gate-a/oracle-{turn-1040,main-1280,main-1600,panel-closed}.json"
+ "evidence": "Shell.tsx + convo.css; parity/gate-a/oracle-{turn-1040,main-1280,main-1600,panel-closed}.json; behaviour: a press on the pill toggles the details panel, aria-expanded follows (headless click test in the frame/behave PR, on / and /gate)"
 }
