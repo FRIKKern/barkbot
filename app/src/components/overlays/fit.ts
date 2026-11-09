@@ -1,12 +1,14 @@
 // Words where the stand-in face runs more than Gate A's 1 pt off the oracle's carry their own
-// tracking, so the box matches (the same remedy as parts.tsx's fit, for the overlays' words).
+// tracking, so the box matches (the same remedy as parts.tsx's fit, for the views' words; a word that sits in one place only
+// goes in parts.tsx's table instead).
 // Each value is the base tracking minus the measured gap divided over the word's characters;
 // a word can sit in more than one place, so each place has its own table.
 type Table = Record<string, string>
 
 // App names, 13/18 weight 500 on 0.195px (oracle-connect-apps).
 export const APP: Table = {
-  Datadog: '-0.091px', Vercel: '-0.005px',
+  Datadog: '-0.091px',
+  Vercel: '-0.005px',
   Supabase: '-0.03px',
   Cloudflare: '-0.075px',
   Sentry: '-0.072px',
@@ -32,6 +34,3 @@ export const SETTINGS: Table = {
 }
 
 export const fit = (table: Table, word: string) => (table[word] ? {letterSpacing: table[word]} : undefined)
-// Account menu (oracle-account-menu) and Create New Bot (oracle-new-bot-dialog), 14/20 on 0.14px.
-export const MENU: Table = {'12% used': '-0.035px'}
-export const DIALOG: Table = {Cancel: '0.257px', Create: '0.207px'}

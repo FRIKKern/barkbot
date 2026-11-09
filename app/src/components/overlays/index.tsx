@@ -51,10 +51,18 @@ function triggered(el: Element | null): Open | null {
 
 // `scene` is optional so the frame can pass it when it wants the pickers to follow the scene's
 // voice settings; without it a picker opens on its row's value (or the oracle's captured pick).
-export function Overlay({name, scene}: {name?: string; scene?: Scene}) {
+// `onOpenChange` hears which overlay is shown (its name, or null when none), whether a scene holds
+// it or a click opened it, so the frame can mark the trigger (aria-expanded, a pressed look).
+export function Overlay({name, scene, onOpenChange}: {name?: string; scene?: Scene; onOpenChange?: (name: string | null) => void}) {
   const [open, setOpen] = useState<Open | null>(null)
   const layer = useRef<HTMLDivElement>(null)
   const held = !!name
+  const shownName = held ? name : (open?.name ?? null)
+  const tell = useRef(onOpenChange)
+  tell.current = onOpenChange
+  useEffect(() => {
+    tell.current?.(shownName ?? null)
+  }, [shownName])
   useEffect(() => {
     if (held) return
     const onClick = (e: MouseEvent) => {

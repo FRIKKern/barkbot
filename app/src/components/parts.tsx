@@ -9,6 +9,10 @@ const FIT: Record<string, string> = {
   "Bot's computer": '0.081px', // 1.6 pt too wide at 0.195px
   Speed: '0.435px', // 1.2 pt too narrow at 0.195px
   '1x': '-0.68px', // 1.2 pt too wide at -0.08px
+  // Overlays (fixtures/states/oracle-account-menu.json, oracle-new-bot-dialog.json), 14/20.
+  '12% used': '-0.035px', // 1.4 pt too wide at 0.14px; it squeezed Weekly usage 1.4 pt narrow
+  Cancel: '0.257px', // 0.7 pt too narrow at 0.14px
+  Create: '0.207px', // 0.4 pt too narrow at 0.14px; with Cancel it moved Cancel 1.1 pt
 }
 export const fit = (word: string) => (FIT[word] ? {letterSpacing: FIT[word]} : undefined)
 

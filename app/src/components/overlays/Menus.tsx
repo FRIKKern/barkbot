@@ -5,7 +5,7 @@
 import type {ReactNode} from 'react'
 import {Icon} from '../Composer'
 import {weeklyUsage} from './data'
-import {MENU, fit} from './fit'
+import {fit} from '../parts'
 
 function Item({icon, label, trail, onPick}: {icon: ReactNode; label: string; trail?: ReactNode; onPick?: () => void}) {
   return (
@@ -57,7 +57,7 @@ export function AccountMenu({onPick, onSettings}: {onPick?: () => void; onSettin
             trail={
               <span className="menu-trail">
                 <span>
-                  <span style={fit(MENU, weeklyUsage)}>{weeklyUsage}</span>
+                  <span style={fit(weeklyUsage)}>{weeklyUsage}</span>
                 </span>
                 {chevron}
               </span>
