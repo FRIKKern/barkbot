@@ -7,7 +7,7 @@
   2
  ],
  "cases": 98,
- "pass": 97,
+ "pass": 98,
  "results": [
   {
    "key": "aside:Bots",
@@ -283,8 +283,7 @@
   },
   {
    "key": "bubble:assistant#1 look",
-   "pass": false,
-   "why": "0 paragraphs, oracle 1"
+   "pass": true
   },
   {
    "key": "bubble:assistant#1 place",
@@ -403,7 +402,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T08:04:30.318Z",
+ "run": "2026-11-09T08:24:42.558Z",
  "inventory": {
   "id": "oracle-edit-avatar",
   "controls": [

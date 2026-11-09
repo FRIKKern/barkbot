@@ -1,30 +1,30 @@
 {
  "id": "2026-11-08-storage",
  "captured": "2026-11-08T21:26:56.435Z",
- "cases": 14,
- "pass": 12,
+ "cases": 16,
+ "pass": 14,
  "results": [
   {
    "key": "user#1",
    "pass": true,
    "oracle": 419.3,
-   "ours": 424,
+   "ours": 424.2,
    "lag": 5
   },
   {
    "key": "status:working#1",
    "pass": true,
    "oracle": 1234.8,
-   "ours": 1238.9,
-   "lag": 4
+   "ours": 1237.1,
+   "lag": 2
   },
   {
    "key": "working#1",
    "pass": false,
    "oracle": 2013.8,
-   "ours": 1238.9,
-   "lag": -775,
-   "why": "early by 775 ms"
+   "ours": 1237.1,
+   "lag": -777,
+   "why": "early by 777 ms"
   },
   {
    "key": "label:status#1",
@@ -43,22 +43,22 @@
    "key": "label:typing#1",
    "pass": true,
    "oracle": 8978.4,
-   "ours": 8983.1,
-   "lag": 5
+   "ours": 8984.9,
+   "lag": 7
   },
   {
    "key": "status:replied#1",
    "pass": true,
    "oracle": 9822.8,
-   "ours": 9929.2,
-   "lag": 106
+   "ours": 9928.1,
+   "lag": 105
   },
   {
    "key": "assistant#2",
    "pass": true,
    "oracle": 9822.8,
-   "ours": 9826.9,
-   "lag": 4
+   "ours": 9827.6,
+   "lag": 5
   },
   {
    "key": "nothing extra",
@@ -67,7 +67,7 @@
   {
    "key": "budget: composer clears in 1 frame",
    "pass": true,
-   "ours": 0.2
+   "ours": 0.3
   },
   {
    "key": "budget: focus stays in Prompt",
@@ -76,17 +76,25 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 242.3000000000011
+   "ours": 240.5
   },
   {
    "key": "budget: own bubble ≤ 440 ms",
    "pass": true,
-   "ours": 424
+   "ours": 424.2
   },
   {
    "key": "budget: working line ≤ 2.0 s",
    "pass": true,
-   "ours": 1238.9
+   "ours": 1237.1
+  },
+  {
+   "key": "history after a reconnect (stored as today: the last message)",
+   "pass": true
+  },
+  {
+   "key": "history after a reconnect (stored joined)",
+   "pass": true
   }
  ],
  "oracle": [
@@ -129,20 +137,20 @@
  "ours": [
   {
    "kind": "clear",
-   "t": 0.2
+   "t": 0.3
   },
   {
    "kind": "user",
-   "t": 424,
+   "t": 424.2,
    "len": 40
   },
   {
    "kind": "working",
-   "t": 1238.9
+   "t": 1237.1
   },
   {
    "kind": "status:working",
-   "t": 1238.9
+   "t": 1237.1
   },
   {
    "kind": "assistant",
@@ -151,21 +159,21 @@
   },
   {
    "kind": "label:typing",
-   "t": 8983.1
+   "t": 8984.9
   },
   {
    "kind": "assistant",
-   "t": 9826.9,
+   "t": 9827.6,
    "len": 288
   },
   {
    "kind": "working-gone",
-   "t": 10069.2
+   "t": 10068.1
   },
   {
    "kind": "status:replied",
-   "t": 9929.2
+   "t": 9928.1
   }
  ],
- "run": "2026-11-09T07:09:43.351Z"
+ "run": "2026-11-09T08:26:30.763Z"
 }
