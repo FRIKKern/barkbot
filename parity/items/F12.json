@@ -3,11 +3,13 @@
  "slice": "S2",
  "journey": null,
  "title": "Bot avatar editor: Bot, Generate, Upload, Reset character to default (oracle-edit-avatar). Look only: Generate and Upload change the bot and are their own items",
- "status": "open",
+ "status": "done",
  "controls": [
   "Bot",
   "Generate",
   "Upload",
   "Reset character to default"
- ]
+ ],
+ "gate": "Gate A oracle-edit-avatar 67/69: the editor's own 28/28; misses are the frame's Hide and a Connect apps tooltip left from the capture",
+ "evidence": "app/src/components/overlays/Views.tsx (AvatarEditor), shapes and colours shared with Create New Bot (CharacterLooks); opens under the details avatar from Edit Bot avatar. Generate and Upload show their tab only (0005)."
 }

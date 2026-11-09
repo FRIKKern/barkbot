@@ -3,7 +3,7 @@
  "slice": "S2",
  "journey": null,
  "title": "Connect Apps view: header with the connected count, Your plugins, Bot templates, category filters, Recommended for you with each app's Open and Connect (oracle-connect-apps). Look only: Connect and Open act outside the page and are their own items",
- "status": "open",
+ "status": "done",
  "controls": [
   "Your plugins",
   "Bot templates",
@@ -17,5 +17,7 @@
   "View all",
   "/^Open (?!account menu$|conversation).+$/",
   "/^Connect( .+)?$/"
- ]
+ ],
+ "gate": "Gate A oracle-connect-apps 99/100: the view's own 60/60; the 1 miss is the details panel's Hide (frame)",
+ "evidence": "app/src/components/overlays/Views.tsx (ConnectApps), styles/views.css; opens from Connect apps in the rail, Close and Escape close it, filters toggle. App logos are neutral tiles and the connected count a placeholder bar (O2, lengths only); Connect and Open act nowhere yet (0005)."
 }
