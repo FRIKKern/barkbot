@@ -71,12 +71,13 @@ export function Transcript({bot, startedAt, bubbles, working, error}: {bot: stri
     const ro = new ResizeObserver(() => {
       if (pinned.current) el.scrollTop = el.scrollHeight
     })
+    el.dataset.hydrated = '' // the server's HTML is not scrolled; Gate A measures after this
     ro.observe(el)
     if (el.firstElementChild) ro.observe(el.firstElementChild)
     return () => ro.disconnect()
   }, [])
   return (
-    <div className="transcript" ref={box} onScroll={(e) => {
+    <div className="transcript" data-transcript="" ref={box} onScroll={(e) => {
       const el = e.currentTarget
       pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 2
     }}>

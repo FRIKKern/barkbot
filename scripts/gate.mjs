@@ -99,7 +99,7 @@ for (const state of states) {
   // --throttle <n>: slow this Chrome's CPU n times, to rehearse a slow CI runner.
   if (opt('throttle')) await page.send('Emulation.setCPUThrottlingRate', { rate: Number(opt('throttle')) });
   await page.send('Page.navigate', { url: `${base}/gate/${state.id}` });
-  await until(() => page.evaluate(() => document.readyState === 'complete' && !!document.querySelector('.app') && document.fonts.status === 'loaded'), 30000, `/gate/${state.id}`);
+  await until(() => page.evaluate(() => document.readyState === 'complete' && !!document.querySelector('.app') && document.fonts.status === 'loaded' && !document.querySelector('[data-transcript]:not([data-hydrated])')), 30000, `/gate/${state.id}`);
   await wait(300);
   if (state.pointer) {
     // Rest our pointer on our control of the same name, as the capture did on the oracle's.
