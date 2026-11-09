@@ -83,3 +83,5 @@
 .pill > span { display: block; }
 /* Named (fixtures/states/oracle-new-bot-named.json): Create turns solid ink on dark text. */
 .pill.primary:enabled { background: var(--ink); color: rgb(18 18 18); box-shadow: color(srgb 0.0705882 0.0705882 0.0705882 / 0.15) 0 0 0 0.5px inset; }
+/* A menu, list or dialog that holds focus itself shows no ring (the oracle's capture has none). */
+.menu:focus, .dialog:focus, .view:focus, .listbox:focus { outline: none; }

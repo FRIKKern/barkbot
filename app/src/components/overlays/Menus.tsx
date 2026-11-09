@@ -24,7 +24,7 @@ const chevron = <Icon d="M6 4l4 4-4 4" />
 export function ComposerMenu({onPick}: {onPick?: () => void}) {
   return (
     <div role="presentation" className="pop menu-pop composer-menu">
-      <div role="menu" aria-label="Composer actions" className="menu">
+      <div role="menu" tabIndex={-1} aria-label="Composer actions" className="menu">
         <Item
           icon={<Icon d="M10.5 5.5l-4.25 4.25a1.25 1.25 0 0 0 1.77 1.77l4.6-4.6a2.5 2.5 0 0 0-3.54-3.54L4.5 8a3.75 3.75 0 0 0 5.3 5.3l3.7-3.7" />}
           label="Attach files"
@@ -48,7 +48,7 @@ export function ComposerMenu({onPick}: {onPick?: () => void}) {
 export function AccountMenu({onPick, onSettings}: {onPick?: () => void; onSettings?: () => void}) {
   return (
     <div role="presentation" className="pop menu-pop account-menu">
-      <div role="menu" aria-label="Account" className="menu">
+      <div role="menu" tabIndex={-1} aria-label="Account" className="menu">
         <div role="group" className="menu-group">
           <Item
             icon={<Icon d="M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 2.5V8l3.9 3.9" />}

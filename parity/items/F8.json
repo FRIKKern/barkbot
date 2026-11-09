@@ -13,5 +13,5 @@
   "Log out"
  ],
  "gate": "Gate A oracle-account-menu 52/52",
- "evidence": "app/src/components/overlays/Menus.tsx; opens from the account button. Left: the usage line is the captured 12% (data.ts), and every row's target is its own item."
+ "evidence": "app/src/components/overlays/Menus.tsx; opens from the account button. Left: the usage line is the captured 12% (data.ts), and every row's target is its own item. Keys (traces/2026-11-09-keys.json): on open the menu has focus, no row highlighted (traced on the composer menu; the account menu uses the same markup); arrows move focus and data-highlighted; Escape closes without choosing and returns focus. UNTRACED: Enter on a highlighted row clicks it, an assumption from the oracle's Radix-style markup (data-highlighted), not observed, since Enter on oracle rows can act."
 }

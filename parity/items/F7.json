@@ -8,5 +8,5 @@
   "Teach a task"
  ],
  "gate": "Gate A oracle-composer-menu 43/43",
- "evidence": "app/src/components/overlays/Menus.tsx, styles/overlays.css; opens from the + button, closes on a pick, Escape or a click outside. Attach files and Teach a task look and open 1:1 and stop there until a decision wires them (0005)."
+ "evidence": "app/src/components/overlays/Menus.tsx, styles/overlays.css; opens from the + button, closes on a pick, Escape or a click outside. Attach files and Teach a task look and open 1:1 and stop there until a decision wires them (0005). Keys (traces/2026-11-09-keys.json): on open the menu has focus, no row highlighted; arrows move focus and data-highlighted; Escape closes without choosing and returns focus. UNTRACED: Enter on a highlighted row clicks it, an assumption from the oracle's Radix-style markup (data-highlighted), not observed, since Enter on oracle rows can act."
 }

@@ -40,7 +40,7 @@ export function NewBotDialog({onClose}: {onClose?: () => void}) {
   return (
     <>
       <div className="scrim" />
-      <div role="dialog" aria-modal="true" aria-labelledby="new-bot-title" className="dialog new-bot">
+      <div role="dialog" tabIndex={-1} aria-modal="true" aria-labelledby="new-bot-title" className="dialog new-bot">
         <button aria-label="Close dialog" className="dialog-close" onClick={onClose}>
           <Icon d="M4 4l8 8M12 4l-8 8" />
         </button>
