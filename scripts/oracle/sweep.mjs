@@ -55,6 +55,9 @@ const SWEEP = [
   ['oracle-speed-picker', 'the Speed picker open', [{ press: 'Speed' }], [{ key: 'Escape' }]],
   ['oracle-language-picker', 'the Language picker open', [{ press: 'Language' }], [{ key: 'Escape' }]],
   ['oracle-new-bot-dialog', 'the Create New Bot dialog, empty', [{ press: 'New Bot' }], [{ key: 'Escape' }]],
+  // The details panel's name field, clicked into (owner-approved rename test 2026-11-09): nothing is typed,
+  // and Escape leaves it as it was (traces/2026-11-09-rename.json). `focus` tells Gate A what to focus on ours.
+  ['oracle-focus-bot-name', 'the Bot name field, clicked into, pointer on it', [{ hover: 'Bot name' }, { focusClick: 'Bot name' }], [{ escapeField: 'Bot name' }, { park: true }], { keepPointer: true, diff: true, pointer: { over: 'Bot name', nth: 0 }, focus: 'Bot name' }],
 ];
 
 // Hover states: the pointer resting on one control of the main view (1040), nothing pressed.
@@ -153,6 +156,24 @@ async function step(s) {
     await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + w / 2, y: y + h / 2 });
     return wait(SETTLE);
   }
+  // A real click into a text field: it changes focus, not the controls, so it is checked by focus.
+  if (s.focusClick || s.escapeField) {
+    const name = s.focusClick || s.escapeField;
+    if (s.focusClick) {
+      const hit = controls(await page.evaluate(collect)).filter((c) => c.name === name && c.e.tag === 'input');
+      if (hit.length !== 1) throw new Error(`"${name}": ${hit.length} text fields by that name, need exactly 1`);
+      const [x, y, w, h] = hit[0].e.box;
+      execFileSync('open', ['-a', 'Grok Bot']);
+      await page.send('Page.bringToFront');
+      const at = { x: x + w / 2, y: y + h / 2, button: 'left', clickCount: 1 };
+      for (const type of ['mouseMoved', 'mousePressed', 'mouseReleased']) await page.send('Input.dispatchMouseEvent', { type, ...at });
+    } else for (const type of ['rawKeyDown', 'keyUp']) await page.send('Input.dispatchKeyEvent', { type, key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await wait(SETTLE);
+    const focused = await page.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? null);
+    if (s.focusClick && focused !== name) throw new Error(`clicked "${name}" but focus is on "${focused}"; stopping`);
+    if (s.escapeField && focused === name) throw new Error(`Escape left focus in "${name}"; stopping`);
+    return;
+  }
   const before = await names();
   if (s.press) await press(s.press);
   else if (s.key) for (const type of ['keyDown', 'keyUp']) await page.send('Input.dispatchKeyEvent', { type, key: s.key, code: s.key, windowsVirtualKeyCode: 27 });
@@ -219,6 +240,7 @@ for (const [id, what, open, close, opts = {}] of SWEEP) {
   const state = redact(await page.evaluate(collect), opts.privateMenu);
   const out = { id, what, captured: new Date().toISOString().slice(0, 10), engine: 'electron', version, bot, ...state };
   if (opts.pointer) out.pointer = opts.pointer;
+  if (opts.focus) out.focus = opts.focus;
   // Where the pointer rested: some looks (the Suggested card's Hide) show only while it is over the window.
   else if (!opts.keepPointer && parkedAt) out.parked = parkedAt;
   if (opts.diff && !opts.pointer) out.act = open.at(-1); // Gate A replays it on ours: { wheel | type | hoverRole }

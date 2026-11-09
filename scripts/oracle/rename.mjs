@@ -27,6 +27,9 @@ const read = () => page.evaluate((sel) => {
     active: a === document.body ? 'body' : (a?.getAttribute('aria-label') || a?.tagName || null),
     selection: i && a === i ? [i.selectionStart, i.selectionEnd] : null,
     header: document.querySelector('main header [role=heading]')?.innerText.trim() ?? null,
+    // The open bot's rail tile label and the composer's placeholder: do they follow the name?
+    tile: [...document.querySelectorAll('aside[aria-label="Bots"] [aria-label="Bot list"] button[aria-label]')].map((b) => b.getAttribute('aria-label')).find((l) => !/Main Bot/.test(l)) ?? null,
+    placeholder: (() => { const b = document.querySelector('main [role=textbox][aria-label="Prompt"]'); return b ? (b.getAttribute('aria-placeholder') || b.getAttribute('data-placeholder') || b.querySelector('[data-placeholder]')?.getAttribute('data-placeholder') || null) : null; })(),
     rect: r ? [r.x, r.y, r.width, r.height].map((n) => +n.toFixed(1)) : null,
     css: cs ? { color: cs.color, background: cs.backgroundColor, border: cs.border, borderRadius: cs.borderRadius, padding: cs.padding,
       outline: cs.outline, outlineOffset: cs.outlineOffset, boxShadow: cs.boxShadow, caretColor: cs.caretColor, transition: cs.transition.slice(0, 200) } : null,
@@ -76,7 +79,10 @@ try {
   trace.rest = await read();
   await mouse('mouseMoved', await center()); await wait(400); trace.hover = await read();
   await step('click into the field', async () => click(await center()));
-  await step('type a new name, then Escape', async () => { await selectAll(); await page.send('Input.insertText', { text: TRIAL }); await wait(300); await key('Escape'); });
+  // Does the field save by itself after a pause? (Run 1 saw Escape revert, run 2 saw it keep the name.)
+  await step('type a new name, then wait with no key', async () => { await selectAll(); await page.send('Input.insertText', { text: TRIAL }); }, 3000);
+  await step('then Escape', async () => key('Escape'));
+  await step('click in, type the old name, Escape at once', async () => { await click(await center()); await selectAll(); await page.send('Input.insertText', { text: ORACLE_BOT }); await key('Escape'); }, 3000);
   await step('click into the field again', async () => click(await center()));
   await step('type a new name, then Enter', async () => { await selectAll(); await page.send('Input.insertText', { text: TRIAL }); await wait(300); await key('Enter'); }, 2500);
   await step('click into the field, empty it, then Enter', async () => { await click(await center()); await selectAll(); await key('Backspace'); await wait(300); await key('Enter'); }, 2500);

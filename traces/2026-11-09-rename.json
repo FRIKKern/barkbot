@@ -10,12 +10,14 @@
   {
    "name": "click into the field",
    "before": {
-    "t": 230603.39999997616,
+    "t": 75274.20000004768,
     "value": "Oracle",
     "focused": false,
-    "active": "body",
+    "active": "DIV",
     "selection": null,
     "header": "Oracle",
+    "tile": "Oracle",
+    "placeholder": "Message Oracle",
     "rect": [
      842.9,
      148,
@@ -37,7 +39,7 @@
    },
    "frames": [
     {
-     "t": 18.5,
+     "t": 24.9,
      "value": "Oracle",
      "focused": true,
      "active": "Bot name",
@@ -46,6 +48,8 @@
       3
      ],
      "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
      "rect": [
       842.9,
       148,
@@ -68,9 +72,9 @@
    ]
   },
   {
-   "name": "type a new name, then Escape",
+   "name": "type a new name, then wait with no key",
    "before": {
-    "t": 231834,
+    "t": 76506.80000001192,
     "value": "Oracle",
     "focused": true,
     "active": "Bot name",
@@ -79,6 +83,8 @@
      3
     ],
     "header": "Oracle",
+    "tile": "Oracle",
+    "placeholder": "Message Oracle",
     "rect": [
      842.9,
      148,
@@ -100,12 +106,142 @@
    },
    "frames": [
     {
-     "t": 315,
+     "t": 7.8,
+     "value": "Oracle Two",
+     "focused": true,
+     "active": "Bot name",
+     "selection": [
+      10,
+      10
+     ],
+     "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
+     "rect": [
+      824.3,
+      148,
+      111.5,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.08)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 3px",
+      "outlineOffset": "1px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    }
+   ]
+  },
+  {
+   "name": "then Escape",
+   "before": {
+    "t": 79519.20000004768,
+    "value": "Oracle Two",
+    "focused": true,
+    "active": "Bot name",
+    "selection": [
+     10,
+     10
+    ],
+    "header": "Oracle",
+    "tile": "Oracle",
+    "placeholder": "Message Oracle",
+    "rect": [
+     824.3,
+     148,
+     111.5,
+     29
+    ],
+    "css": {
+     "color": "rgb(245, 245, 245)",
+     "background": "rgba(245, 245, 245, 0.08)",
+     "border": "0.5px solid rgba(0, 0, 0, 0)",
+     "borderRadius": "8px",
+     "padding": "2px 10px",
+     "outline": "rgb(245, 245, 245) none 3px",
+     "outlineOffset": "1px",
+     "boxShadow": "none",
+     "caretColor": "rgb(245, 245, 245)",
+     "transition": "border-color 0.12s, background-color 0.12s"
+    }
+   },
+   "frames": [
+    {
+     "t": 10.5,
      "value": "Oracle",
      "focused": false,
      "active": "body",
      "selection": null,
      "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.08)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    }
+   ]
+  },
+  {
+   "name": "click in, type the old name, Escape at once",
+   "before": {
+    "t": 80733.20000004768,
+    "value": "Oracle",
+    "focused": false,
+    "active": "body",
+    "selection": null,
+    "header": "Oracle",
+    "tile": "Oracle",
+    "placeholder": "Message Oracle",
+    "rect": [
+     842.9,
+     148,
+     74.2,
+     29
+    ],
+    "css": {
+     "color": "rgb(245, 245, 245)",
+     "background": "rgba(245, 245, 245, 0.08)",
+     "border": "0.5px solid rgba(0, 0, 0, 0)",
+     "borderRadius": "8px",
+     "padding": "2px 10px",
+     "outline": "rgb(245, 245, 245) none 1.5px",
+     "outlineOffset": "0px",
+     "boxShadow": "none",
+     "caretColor": "rgb(245, 245, 245)",
+     "transition": "border-color 0.12s, background-color 0.12s"
+    }
+   },
+   "frames": [
+    {
+     "t": 22.9,
+     "value": "Oracle",
+     "focused": false,
+     "active": "body",
+     "selection": null,
+     "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
      "rect": [
       842.9,
       148,
@@ -130,12 +266,14 @@
   {
    "name": "click into the field again",
    "before": {
-    "t": 233355.89999997616,
+    "t": 83759,
     "value": "Oracle",
     "focused": false,
     "active": "body",
     "selection": null,
     "header": "Oracle",
+    "tile": "Oracle",
+    "placeholder": "Message Oracle",
     "rect": [
      842.9,
      148,
@@ -157,7 +295,7 @@
    },
    "frames": [
     {
-     "t": 15.9,
+     "t": 18.1,
      "value": "Oracle",
      "focused": true,
      "active": "Bot name",
@@ -166,6 +304,8 @@
       3
      ],
      "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
      "rect": [
       842.9,
       148,
@@ -190,7 +330,7 @@
   {
    "name": "type a new name, then Enter",
    "before": {
-    "t": 234586.69999998808,
+    "t": 84987,
     "value": "Oracle",
     "focused": true,
     "active": "Bot name",
@@ -199,6 +339,8 @@
      3
     ],
     "header": "Oracle",
+    "tile": "Oracle",
+    "placeholder": "Message Oracle",
     "rect": [
      842.9,
      148,
@@ -220,12 +362,14 @@
    },
    "frames": [
     {
-     "t": 338.8,
+     "t": 343.9,
      "value": "Oracle Two",
      "focused": false,
      "active": "body",
      "selection": null,
      "header": "Oracle Two",
+     "tile": "Oracle Two",
+     "placeholder": "Message Oracle Two",
      "rect": [
       824.3,
       148,
@@ -250,12 +394,14 @@
   {
    "name": "click into the field, empty it, then Enter",
    "before": {
-    "t": 237427.89999997616,
+    "t": 87837.30000001192,
     "value": "Oracle Two",
     "focused": false,
     "active": "body",
     "selection": null,
     "header": "Oracle Two",
+    "tile": "Oracle Two",
+    "placeholder": "Message Oracle Two",
     "rect": [
      824.3,
      148,
@@ -277,12 +423,14 @@
    },
    "frames": [
     {
-     "t": 340.6,
+     "t": 335,
      "value": "Oracle Two",
      "focused": false,
      "active": "body",
      "selection": null,
      "header": "Oracle Two",
+     "tile": "Oracle Two",
+     "placeholder": "Message Oracle Two",
      "rect": [
       824.3,
       148,
@@ -307,12 +455,14 @@
   {
    "name": "click into the field, type the old name, click away",
    "before": {
-    "t": 240281.80000001192,
+    "t": 90678.30000001192,
     "value": "Oracle Two",
     "focused": false,
     "active": "body",
     "selection": null,
     "header": "Oracle Two",
+    "tile": "Oracle Two",
+    "placeholder": "Message Oracle Two",
     "rect": [
      824.3,
      148,
@@ -334,12 +484,98 @@
    },
    "frames": [
     {
-     "t": 418.9,
+     "t": 348.9,
      "value": "Oracle",
      "focused": false,
-     "active": "Conversation transcript",
+     "active": "DIV",
      "selection": null,
      "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.063)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    },
+    {
+     "t": 365.8,
+     "value": "Oracle",
+     "focused": false,
+     "active": "DIV",
+     "selection": null,
+     "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.04)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    },
+    {
+     "t": 382.8,
+     "value": "Oracle",
+     "focused": false,
+     "active": "DIV",
+     "selection": null,
+     "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.024)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    },
+    {
+     "t": 400.7,
+     "value": "Oracle",
+     "focused": false,
+     "active": "DIV",
+     "selection": null,
+     "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
      "rect": [
       842.9,
       148,
@@ -360,12 +596,14 @@
      }
     },
     {
-     "t": 437.3,
+     "t": 417.7,
      "value": "Oracle",
      "focused": false,
-     "active": "Conversation transcript",
+     "active": "DIV",
      "selection": null,
      "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
      "rect": [
       842.9,
       148,
@@ -386,12 +624,14 @@
      }
     },
     {
-     "t": 455.1,
+     "t": 435.7,
      "value": "Oracle",
      "focused": false,
-     "active": "Conversation transcript",
+     "active": "DIV",
      "selection": null,
      "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
      "rect": [
       842.9,
       148,
@@ -412,12 +652,14 @@
      }
     },
     {
-     "t": 491,
+     "t": 472.2,
      "value": "Oracle",
      "focused": false,
-     "active": "Conversation transcript",
+     "active": "DIV",
      "selection": null,
      "header": "Oracle",
+     "tile": "Oracle",
+     "placeholder": "Message Oracle",
      "rect": [
       842.9,
       148,
@@ -441,12 +683,14 @@
   }
  ],
  "rest": {
-  "t": 230192.10000002384,
+  "t": 74856.90000003576,
   "value": "Oracle",
   "focused": false,
-  "active": "body",
+  "active": "DIV",
   "selection": null,
   "header": "Oracle",
+  "tile": "Oracle",
+  "placeholder": "Message Oracle",
   "rect": [
    842.9,
    148,
@@ -467,12 +711,14 @@
   }
  },
  "hover": {
-  "t": 230601.80000001192,
+  "t": 75273.10000002384,
   "value": "Oracle",
   "focused": false,
-  "active": "body",
+  "active": "DIV",
   "selection": null,
   "header": "Oracle",
+  "tile": "Oracle",
+  "placeholder": "Message Oracle",
   "rect": [
    842.9,
    148,
