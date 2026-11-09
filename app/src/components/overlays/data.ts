@@ -69,7 +69,7 @@ export const colours: [string, string][] = [
   ['Gray', 'rgb(119, 119, 119)'],
 ]
 
-// The account menu's usage line. The fixtures redact it (O2: a textLength of 7, as in "0% used"),
+// The account menu's usage line. The fixtures redact it (O2: a textLength of 7 only),
 // so this is a placeholder of that length; real usage replaces it when the menu is wired. The
 // menu's width follows this text.
 export const weeklyUsage = '–% used'
