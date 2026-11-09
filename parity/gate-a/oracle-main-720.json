@@ -7,136 +7,121 @@
   2
  ],
  "cases": 14,
- "pass": 0,
- "scene": false,
+ "pass": 14,
  "results": [
   {
    "key": "aside:Bots",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot tile",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot tile#2",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:New Bot",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Connect apps",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Open account menu",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:View conversation details",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Oracle",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Share",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Share",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Prompt",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Composer actions",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Start voice input",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Start voice chat",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   }
  ],
- "run": "2026-11-09T07:47:19.033Z",
+ "run": "2026-11-09T07:53:50.263Z",
  "inventory": {
   "id": "oracle-main-720",
   "controls": [
    {
     "name": "Bot tile",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "New Bot",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Connect apps",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open account menu",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "View conversation details",
     "item": "F2",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Share",
     "item": "F5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Prompt",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Composer actions",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Start voice input",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Start voice chat",
     "item": "T4",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 10,
+  "missing": 0,
   "untracked": []
  }
 }
