@@ -13,6 +13,8 @@
 //                       ours shows the same kind, in the same order, within ±150 ms (the
 //                       oracle's own spread between runs: "replied" 0–101 ms after the reply)
 //   nothing extra       ours shows no moment the oracle did not
+//   timing              ours is counted from the arrival that caused each moment (uiTime below):
+//                       what the UI adds is judged, the stand-in server's own lateness is not
 //   history             after the turn the stream drops and reconnects; the stored rows it
 //                       replays (Barkpark's shape, server/replay.ts) leave the same bubbles
 //   budgets (QUALITY.md) composer clears in 1 frame; focus stays in Prompt; working line gone
@@ -25,7 +27,7 @@ import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync
 import { connect } from './oracle/cdp.mjs';
 import { RECIPES as recipes } from './oracle/recipes.mjs';
 import { path } from './lib/data.mjs';
-import { oracleTurn, filler } from '../app/src/chat/turn.ts';
+import { oracleTurn, replayScript, filler } from '../app/src/chat/turn.ts';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -111,7 +113,8 @@ function armAndSend() {
   const mo = new MutationObserver(look);
   mo.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true });
   prompt.addEventListener('blur', look);
-  window.__gateB = { log, stop: () => { mo.disconnect(); look(); return { log, focus: document.activeElement === prompt }; } };
+  const arrivals = () => (window.__arrivals ?? []).filter((a) => a.t >= t0).map((a) => ({ ...a, t: Math.round((a.t - t0) * 10) / 10 }));
+  window.__gateB = { log, stop: () => { mo.disconnect(); look(); return { log, focus: document.activeElement === prompt, arrivals: arrivals() }; } };
   prompt.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true }));
   return true;
 }
@@ -171,12 +174,34 @@ async function play(trace, sent, query = '') {
   const status = async () => (await fetch(`${base}/api/gate-b/${trace.id}?run=${run}&status`)).json().catch(() => null);
   await until(async () => (await status())?.connects >= 2, 5000, 'the reconnect').catch(() => {});
   await wait(500);
-  const { log, focus } = await page.evaluate(() => window.__gateB.stop());
+  const { log, focus, arrivals } = await page.evaluate(() => window.__gateB.stop());
   const final = await page.evaluate(() => {
     const len = (role) => [...document.querySelectorAll(`.transcript [role=article] [data-role=${role}], .transcript [role=article][data-role=${role}]`)].map((b) => (b.querySelector('.bubble-text') ?? b).textContent.trim().length);
     return { user: len('user'), assistant: len('assistant') };
   });
-  return { milestones, log, focus, final, status: await status() };
+  return { milestones, log, focus, arrivals, final, status: await status() };
+}
+
+// What the UI adds, not what the stand-in delivers: each moment counts from the arrival that
+// caused it (the latest one before it: the send's answer, or a stream event), placed at that
+// arrival's scripted time. The stand-in is a Node server on a shared machine; under load its
+// answers come late (storage's own bubble: 562 ms once, the send answered ~140 ms late), and
+// that lateness is not the UI's. A moment with no arrival before it (the composer clearing)
+// keeps its own time. Precondition: the stream delivered every scripted event, in order.
+function uiTime(milestones, log, arrivals) {
+  const { accept, steps } = replayScript(milestones);
+  const send = arrivals.find((a) => a.type === 'send');
+  const events = arrivals.filter((a) => a.type === 'runtime');
+  const kinds = (list) => list.map((x) => x.kind ?? x.data?.kind).join(',');
+  if (!send || events.length < steps.length || kinds(events.slice(0, steps.length)) !== kinds(steps))
+    return { log, precondition: { pass: false, why: `the page got ${send ? 'the send answer' : 'no send answer'} and ${events.length}/${steps.length} scripted events (${kinds(events)})` } };
+  const causes = [{ t: send.t, at: accept }, ...events.slice(0, steps.length).map((a, i) => ({ t: a.t, at: steps[i].t }))].sort((a, b) => a.t - b.t);
+  const timed = log.map((m) => {
+    const c = causes.filter((x) => x.t <= m.t).at(-1);
+    return c ? { ...m, t: Math.round((c.at + m.t - c.t) * 10) / 10, raw: m.t } : m;
+  });
+  const late = causes.map((c) => c.t - c.at);
+  return { log: timed, precondition: { pass: true, late: [Math.round(Math.min(...late)), Math.round(Math.max(...late))] } };
 }
 
 // After a reconnect, Barkpark's stored rows must claim the live bubbles, never add to them.
@@ -194,12 +219,13 @@ for (const trace of traces) {
   const own = milestones.find((m) => m.kind === 'user');
   if (own && own.len !== sent) { console.error(`Gate B: ${trace.id}: the own bubble holds ${own.len} characters, the recipe sent ${sent}: ARTICLE_CHROME in app/src/chat/turn.ts no longer holds`); process.exit(1); }
   const live = await play(trace, sent);
-  const cases = compare(milestones, live.log, live.focus);
+  const ui = uiTime(milestones, live.log, live.arrivals);
+  const cases = [{ key: 'replay: every scripted event reached the page', pass: ui.precondition.pass, why: ui.precondition.why }, ...compare(milestones, ui.log, live.focus)];
   cases.push(historyCase('history after a reconnect (stored as today: the last message)', milestones, live));
   // A turn of several messages, stored as one joined text (if Barkpark keeps them all).
   if (milestones.filter((m) => m.kind === 'assistant').length > 1) cases.push(historyCase('history after a reconnect (stored joined)', milestones, await play(trace, sent, '?history=joined')));
   const pass = cases.filter((c) => c.pass).length;
-  report.push({ id: trace.id, captured: trace.captured, cases: cases.length, pass, results: cases, oracle: milestones.map(({ text, ...m }) => m), ours: live.log.map(({ text, ...m }) => m) });
+  report.push({ id: trace.id, captured: trace.captured, cases: cases.length, pass, results: cases, oracle: milestones.map(({ text, ...m }) => m), ours: ui.log.map(({ text, ...m }) => m), standInLate: ui.precondition.late });
   console.log(`Gate B · ${trace.id} · ${pass}/${cases.length} pass`);
   for (const c of cases.filter((x) => !x.pass).slice(0, Number(opt('show') ?? 20))) console.log(`  ✗ ${c.key}: ${c.why}`);
 }

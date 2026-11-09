@@ -9,6 +9,38 @@ import {scenes} from '../gate/scenes'
 // Gate B's stage (H5): the oracle's screen with our live conversation, fed by a recorded oracle
 // turn instead of Barkpark (server/replay.ts). Type anything and press Enter: the turn plays
 // at the oracle's times. scripts/gate-b.mjs measures it. Development builds only.
+// When each answer from the stand-in reached the page (window.__arrivals, performance.now()):
+// the send's answer, and every event the stream delivered, as the listener got it. Gate B counts
+// a moment from the arrival that caused it, so the stand-in's own lateness under load is not
+// charged to the UI; what the UI adds after an arrival still is.
+type Arrival = {type: string; kind?: string; t: number}
+declare global {
+  interface Window {
+    __arrivals?: Arrival[]
+  }
+}
+if (typeof window !== 'undefined' && import.meta.env.DEV && !('logged' in window.EventSource)) {
+  const Base = window.EventSource
+  const log = (window.__arrivals = [] as Arrival[])
+  // An EventSource whose listeners note the moment each event reaches them.
+  const Logged = function (url: string | URL, init?: EventSourceInit) {
+    const es = new Base(url, init)
+    const add = es.addEventListener.bind(es) as (type: string, fn: (e: MessageEvent) => void) => void
+    ;(es as {addEventListener: unknown}).addEventListener = (type: string, fn: (e: MessageEvent) => void) =>
+      add(type, (e: MessageEvent) => {
+        let kind: string | undefined
+        try {
+          kind = JSON.parse(e.data)?.kind
+        } catch {}
+        log.push({type, kind, t: performance.now()})
+        fn(e)
+      })
+    return es
+  } as unknown as typeof EventSource
+  Object.assign(Logged, {logged: true, CONNECTING: 0, OPEN: 1, CLOSED: 2})
+  window.EventSource = Logged
+}
+
 export const Route = createFileRoute('/gate-b/$trace')({
   loader: ({params}) => {
     if (!import.meta.env.DEV || !/^[\w.-]+$/.test(params.trace)) throw notFound()
@@ -29,7 +61,9 @@ function Replay() {
       events: (id) => `/api/gate-b/${trace}?run=${id}${history ? `&history=${encodeURIComponent(history)}` : ''}`,
       send: async (id) => {
         const res = await fetch(`/api/gate-b/${trace}?run=${id}`, {method: 'POST'})
-        if (!res.ok) throw new Error(await res.text())
+        const body = res.ok ? null : await res.text()
+        window.__arrivals?.push({type: 'send', t: performance.now()})
+        if (body !== null) throw new Error(body)
       },
     }),
     [trace, history],

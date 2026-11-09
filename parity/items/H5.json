@@ -5,5 +5,5 @@
  "title": "Gate B: a recorded turn replayed in ours, report in parity/gate-b/<trace>.json",
  "status": "done",
  "gate": "npm run gate:b (CI: gate.yml); 33/37 over 3 turns, a lower count fails",
- "evidence": "scripts/gate-b.mjs plays traces/2026-11-08-{say-hi,say-hi-2,storage} through /gate-b/<trace> (server/replay.ts as Barkpark's runtime stream, the real hook and transcript); moments timed in-page. Proof it fails: the working line's exit delayed 100 -> 300 ms took it to 27/37 and --ci exited 1."
+ "evidence": "scripts/gate-b.mjs plays traces/2026-11-08-{say-hi,say-hi-2,storage} through /gate-b/<trace> (server/replay.ts as Barkpark's runtime stream, the real hook and transcript); moments timed in-page. Proof it fails: the working line's exit delayed 100 -> 300 ms took it to 27/37 and --ci exited 1. Since 2026-11-09 each moment counts from the arrival that caused it (the stand-in's lateness under load is not the UI's): +200 ms in the UI before the own bubble fails it (624 ms), +300 ms on the stand-in's send answer does not (raw 727, counted 422)."
 }
