@@ -1,13 +1,13 @@
 {
  "id": "oracle-main-1280",
- "captured": "2026-11-08",
+ "captured": "2026-11-09",
  "viewport": [
   1280,
   760,
   2
  ],
  "cases": 39,
- "pass": 38,
+ "pass": 39,
  "results": [
   {
    "key": "aside:Bots",
@@ -55,8 +55,7 @@
   },
   {
    "key": "control:Composer actions",
-   "pass": false,
-   "why": "background-color rgba(245, 245, 245, 0.04) ≠ rgba(245, 245, 245, 0.08); color rgba(245, 245, 245, 0.54) ≠ rgb(245, 245, 245)"
+   "pass": true
   },
   {
    "key": "control:Start voice input",
@@ -167,7 +166,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:06:41.037Z",
+ "run": "2026-11-09T07:08:37.134Z",
  "inventory": {
   "id": "oracle-main-1280",
   "controls": [

@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 5 changes
-  - Overlay mount point for the overlays lane; runbook linked from AGENTS.md
-  - One scene file per gated state; Gate A on CI is green
+- **Today** · 11 changes
+  - Oracle: park the pointer before every capture; 1280 recaptured, 39/39
+  - Composer grows with the window up to 960 ([#3](https://github.com/FRIKKern/barkbot/pull/3))
 - **Yesterday** · 11 changes
   - S1: talk through Barkpark (server side, transcript, working line, composer)
   - S0 closed on the board; Gate B moves to S1 with the transcript it needs

@@ -85,6 +85,15 @@ async function step(s) {
   throw new Error(`${JSON.stringify(s)} changed nothing on screen in 3 s; stopping`);
 }
 
+// Before a capture the pointer rests in the bottom-right corner, 8 pt in: blank in every captured
+// layout (the details panel, or beside the composer when the panel is closed). A pointer left on a
+// control would capture its hover look (oracle-main-1280 caught Composer actions hovered).
+async function park() {
+  const [w, h] = await page.evaluate(() => [innerWidth, innerHeight]);
+  await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: w - 8, y: h - 8 });
+  await wait(400);
+}
+
 function redact(state, privateMenu) {
   const els = state.elements;
   const inMenu = (e) => { let p = e; while (p) { if (p.role === 'menu') return p; p = p.parent === undefined ? null : els[p.parent]; } return null; };
@@ -103,6 +112,7 @@ let done = 0;
 for (const [id, what, open, close, opts = {}] of SWEEP) {
   if (only && id !== only) continue;
   for (const s of open) await step(s);
+  if (!opts.keepPointer) await park();
   const state = redact(await page.evaluate(collect), opts.privateMenu);
   const out = { id, what, captured: new Date().toISOString().slice(0, 10), engine: 'electron', version, bot, ...state };
   writeFileSync(path('fixtures', 'states', `${id}.json`), JSON.stringify(out) + '\n');
