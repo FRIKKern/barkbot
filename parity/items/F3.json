@@ -3,12 +3,14 @@
  "slice": "S2",
  "journey": "J03",
  "title": "Right panel: mark, name, Activity and Library tabs, close",
- "status": "unknown",
+ "status": "done",
  "controls": [
   "Close",
   "Edit Bot avatar",
   "Bot name",
   "Activity",
   "Library"
- ]
+ ],
+ "gate": "Gate A: Close, Edit Bot avatar, Bot name, Activity, Library pass in oracle-turn-1040 (39/39) and oracle-library (20/20)",
+ "evidence": "Details.tsx + details.css; name field 10 pt side padding matches the oracle's 74.2 pt field for 'Oracle'; parity/gate-a/oracle-turn-1040.json"
 }

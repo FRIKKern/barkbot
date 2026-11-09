@@ -3,8 +3,10 @@
  "slice": "S2",
  "journey": "J04",
  "title": "Computer card: asleep (zzz, breathing), waking up, unreachable, working; read from the host heartbeat",
- "status": "unknown",
+ "status": "partial",
  "controls": [
   "Bot's computer"
- ]
+ ],
+ "gate": "Gate A: Bot's computer and Asleep pass in oracle-turn-1040",
+ "evidence": "Details.tsx; only the asleep state is captured. Left: waking up, unreachable, working, the breathing zzz, and the host heartbeat"
 }

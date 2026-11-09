@@ -7,7 +7,7 @@
   2
  ],
  "cases": 20,
- "pass": 17,
+ "pass": 20,
  "results": [
   {
    "key": "aside:Bots",
@@ -79,21 +79,18 @@
   },
   {
    "key": "control:Bot name",
-   "pass": false,
-   "why": "box off by 1.5,0,-2.9,0"
+   "pass": true
   },
   {
    "key": "control:Activity",
-   "pass": false,
-   "why": "box off by -1.4,0,0.9,0"
+   "pass": true
   },
   {
    "key": "control:Library",
-   "pass": false,
-   "why": "box off by -0.4,0,1.9,0"
+   "pass": true
   }
  ],
- "run": "2026-11-08T23:15:14.839Z",
+ "run": "2026-11-09T07:02:52.499Z",
  "inventory": {
   "id": "oracle-library",
   "controls": [

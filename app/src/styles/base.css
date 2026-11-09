@@ -1,6 +1,8 @@
 /* Measured on the oracle: fixtures/states/oracle-turn-1040.json (1040 x 760 pt).
-   Every number below names what it was read from. The face is Inter, a stand-in for the
-   oracle's own font (O2); weights and sizes are the oracle's. */
+   Every number below names what it was read from. The face is the system's own (SF Pro on
+   macOS), a stand-in for the oracle's font (O2) picked by measured widths: across 41 widths in
+   fixtures/ it runs 0.5 pt from the oracle on average, Inter 2.9 pt (item F6). Inter is the
+   fallback off macOS. Weights and sizes are the oracle's. */
 
 :root {
   --ink: rgb(245 245 245);
@@ -26,7 +28,7 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); }
-body { font: 425 16px/normal 'Inter Variable', system-ui, sans-serif; letter-spacing: 0.015em; -webkit-font-smoothing: antialiased; }
+body { font: 425 16px/normal BlinkMacSystemFont, -apple-system, 'Inter Variable', sans-serif; letter-spacing: 0.015em; -webkit-font-smoothing: antialiased; }
 button, input { font: inherit; color: inherit; letter-spacing: inherit; background: none; border: 0; padding: 0; margin: 0; }
 /* The oracle's buttons carry 13/18 type unless they say otherwise (Close 156, New Bot 31). */
 button { cursor: default; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; }

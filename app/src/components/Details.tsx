@@ -2,7 +2,7 @@
 // Activity cards: Suggested, Computer, Voice chat. Library shows its empty state.
 import type {Scene} from './Shell'
 import {Icon} from './Composer'
-import {Face, Pick, Row, Section} from './parts'
+import {Face, Pick, Row, Section, fit} from './parts'
 
 export function Details({scene}: {scene: Scene}) {
   const active = scene.active ?? ''
@@ -49,7 +49,7 @@ export function Details({scene}: {scene: Scene}) {
                   <button className="computer">
                     <span className="computer-text">
                       <span className="computer-name">
-                        <bdi>Bot's computer</bdi>
+                        <bdi style={fit("Bot's computer")}>Bot's computer</bdi>
                       </span>
                       <span className="computer-state">
                         <bdi>{scene.computer}</bdi>

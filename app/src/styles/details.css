@@ -1,3 +1,4 @@
+/* Picker (combobox 246): 1 border, text at +6, chevron 10 after a 4 gap, 4 to the right edge. */
 /* Details: header 60, Close 36 at 12 from the corner; face 64; name 17/24; tabs 26 high. */
 .details { position: relative; box-shadow: inset 0.5px 0 0 var(--wash-06); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
 .details-head { height: 60px; flex: none; position: relative; }
@@ -5,7 +6,7 @@
 .details-body { flex: 1; min-height: 0; background: var(--bg); }
 .who { padding: 8px 16px 12px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .who-face { width: 64px; height: 64px; display: grid; place-items: center; color: #fff; }
-.who-name { field-sizing: content; min-width: 2ch; text-align: center; height: 29px; padding: 2px 8px; border: 0.5px solid transparent; border-radius: 8px; font-size: 17px; font-weight: 500; line-height: 24px; letter-spacing: 0.17px; outline: none; }
+.who-name { field-sizing: content; min-width: 2ch; text-align: center; height: 29px; padding: 2px 10px; border: 0.5px solid transparent; border-radius: 8px; font-size: 17px; font-weight: 500; line-height: 24px; letter-spacing: 0.17px; outline: none; }
 .tabs-row { height: 40px; padding-top: 4px; display: flex; justify-content: center; background: var(--bg); }
 .tabs { display: flex; gap: 2px; height: 26px; }
 .tab { height: 26px; padding: 0 8px; border-radius: 9999px; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; color: var(--ink-66); }
@@ -26,8 +27,8 @@
 .computer-state { font-size: 12px; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-54); }
 .thumb { width: 64px; height: 40px; border-radius: 8px; background: var(--wash-04); display: grid; place-items: center; }
 .pick { height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 3px 0 8px; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; }
-.pick-value { height: 24px; display: flex; align-items: center; gap: 2px; padding: 0 5px 0 7px; border-radius: 8px; border: 1px solid var(--wash-04); letter-spacing: -0.08px; }
-.pick-value .icon { width: 12px; height: 12px; color: var(--ink-66); }
+.pick-value { height: 24px; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 6px; border-radius: 8px; border: 1px solid var(--wash-04); letter-spacing: -0.08px; }
+.pick-value .icon { width: 10px; height: 10px; color: var(--ink-66); }
 
 /* Library tab, empty (oracle-library: text 14/20 at 54% ink, 256 wide, centred, 16 in from the card). */
 .tabpanel.library { padding: 10px 16px 16px; }
