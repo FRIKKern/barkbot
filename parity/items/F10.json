@@ -4,6 +4,6 @@
  "journey": "J02",
  "title": "Every captured width matches: 1040, 1280, 1600 (oracle-main-*)",
  "status": "partial",
- "gate": "Gate A: oracle-main-1280 35/39, oracle-main-1600 35/39, oracle-panel-closed 10/14",
- "evidence": "Every frame case passes at every width except the composer: the oracle's composer is the main column less 16 each side, up to 960 (840 at 1280, 960 at 1600, 920 panel closed); ours stops at 600 (composer.css, talk lane). Composer actions at 1280 also reads a different background and ink"
+ "gate": "Gate A: oracle-main-1600 39/39, oracle-panel-closed 14/14, oracle-main-1280 38/39",
+ "evidence": "composer.css: the composer is the main column less 16 each side, up to 960 (600/840/920/960 at 1040/1280/panel closed/1600). Left: Composer actions at 1280 reads background 0.08 and full ink; 1040, 1600 and panel-closed all read 0.04 and 0.54, so that capture holds a hover. Recapture oracle-main-1280 with the pointer off the composer; not tuned to it"
 }

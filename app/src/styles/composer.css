@@ -1,6 +1,8 @@
-/* Composer: 600 x 44, radius 22, 16 from the bottom; border .1 -> .22 on focus in 150 ms. */
+/* Composer: the main column less 16 each side, up to 960 (600 at 1040, 840 at 1280, 920 panel
+   closed, 960 at 1600: fixtures/states/oracle-{turn-1040,main-1280,panel-closed,main-1600}.json);
+   44 high, radius 22, 16 from the bottom; border .1 -> .22 on focus in 150 ms. */
 .composer-wrap { padding: 0 16px 16px; display: flex; justify-content: center; }
-.composer { width: 100%; max-width: 600px; height: 44px; border-radius: 22px; background: var(--bg-raised); border: 0.5px solid var(--wash-10); transition: border-color 150ms ease; box-shadow: rgb(0 0 0 / 0.05) 0 2px 8px -1px, rgb(0 0 0 / 0.03) 0 1px 2px 0, rgb(228 228 228 / 0.04) 0 0 0 1px; display: flex; align-items: center; gap: 8px; padding: 0 8px; }
+.composer { width: 100%; max-width: 960px; height: 44px; border-radius: 22px; background: var(--bg-raised); border: 0.5px solid var(--wash-10); transition: border-color 150ms ease; box-shadow: rgb(0 0 0 / 0.05) 0 2px 8px -1px, rgb(0 0 0 / 0.03) 0 1px 2px 0, rgb(228 228 228 / 0.04) 0 0 0 1px; display: flex; align-items: center; gap: 8px; padding: 0 8px; }
 .composer:focus-within { border-color: rgb(245 245 245 / 0.22); }
 .round { font-size: 16px; line-height: normal; width: 28px; height: 28px; flex: none; border-radius: 9999px; display: grid; place-items: center; background: var(--wash-04); box-shadow: inset 0 0 0 0.5px var(--wash-06); color: var(--ink-54); }
 .round.voice { background: var(--ink); box-shadow: none; color: var(--bg); }
