@@ -7,30 +7,26 @@
   2
  ],
  "cases": 4,
- "pass": 0,
+ "pass": 4,
  "results": [
   {
    "key": "control:Start voice input",
-   "pass": false,
-   "why": "background-color rgba(245, 245, 245, 0.04) ≠ rgba(245, 245, 245, 0.08); color rgba(245, 245, 245, 0.54) ≠ rgb(245, 245, 245)"
+   "pass": true
   },
   {
    "key": "div:Click or hold  to dictate",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:⌘",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:D",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   }
  ],
- "run": "2026-11-09T07:13:16.785Z",
+ "run": "2026-11-09T07:19:33.538Z",
  "inventory": {
   "id": "oracle-hover-start-voice-input",
   "controls": [
@@ -112,7 +108,7 @@
    {
     "name": "Hide",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Add to Slack",
@@ -145,7 +141,7 @@
     "ours": true
    }
   ],
-  "missing": 1,
+  "missing": 0,
   "untracked": []
  }
 }

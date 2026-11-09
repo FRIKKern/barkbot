@@ -7,20 +7,18 @@
   2
  ],
  "cases": 2,
- "pass": 0,
+ "pass": 2,
  "results": [
   {
    "key": "control:Connect apps",
-   "pass": false,
-   "why": "background-color rgba(0, 0, 0, 0) ≠ rgba(245, 245, 245, 0.04); color rgba(245, 245, 245, 0.64) ≠ rgba(245, 245, 245, 0.9)"
+   "pass": true
   },
   {
    "key": "div:Connect apps",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   }
  ],
- "run": "2026-11-09T07:13:16.785Z",
+ "run": "2026-11-09T07:19:33.538Z",
  "inventory": {
   "id": "oracle-hover-connect-apps",
   "controls": [
@@ -102,7 +100,7 @@
    {
     "name": "Hide",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Add to Slack",
@@ -135,7 +133,7 @@
     "ours": true
    }
   ],
-  "missing": 1,
+  "missing": 0,
   "untracked": []
  }
 }

@@ -38,3 +38,19 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 .app { display: grid; grid-template-columns: var(--rail) 1fr var(--details); height: 100vh; min-width: 0; }
 .app[data-panel='closed'] { grid-template-columns: var(--rail) 1fr 0; }
+
+/* Tooltips and the chat preview (components/tips.tsx; fixtures/states/oracle-hover-*.json). */
+.tip-wrap, .preview-wrap { position: fixed; z-index: 50; pointer-events: none; }
+.tip-wrap { border-radius: 6px; }
+/* Sides 6. The oracle's tooltips track 'normal'; SF Pro runs ~0.06 pt a character wider at 12 px
+   (5 tooltips: 0.7-2.8 pt over at normal), so ours track -0.06px (item F6's method). */
+.tip { height: 24px; padding: 4px 6px; border-radius: 6px; background: var(--bg-raised); color: var(--ink); font-size: 12px; font-weight: 425; line-height: 16px; letter-spacing: -0.06px; white-space: nowrap; }
+.tip-keys, .tip-keys > span { display: inline-flex; gap: 2px; vertical-align: top; font-size: 12px; line-height: 16px; }
+.tip-key { width: 16px; height: 16px; display: inline-grid; place-items: center; border-radius: 3px; background: var(--wash-04); color: var(--ink-66); font-size: 11px; line-height: 18px; }
+.preview-wrap { border-radius: 14px; }
+.preview { width: 260px; height: 60px; padding: 10px; border-radius: 12px; background: var(--bg-raised); font-size: 13px; line-height: 18px; letter-spacing: -0.08px; }
+.preview-body { display: flex; flex-direction: column; gap: 4px; }
+.preview-head { height: 18px; display: flex; align-items: center; gap: 4px; }
+.preview-face { width: 16px; height: 16px; border-radius: 5px; background: var(--face); }
+.preview-name { font-weight: 500; letter-spacing: 0.195px; }
+.preview-line { display: block; color: var(--ink-66); letter-spacing: 0.195px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

@@ -15,6 +15,8 @@ export type Scene = {
   computer?: string
   voice?: {voice: string; speed: string; language: string}
   tab?: 'activity' | 'library'
+  /** Each bot's last message, shown in its chat preview on hover. Placeholder text in scenes (O2). */
+  previews?: Record<string, string>
   /** An open menu, picker or dialog, by name (components/overlays). */
   overlay?: string
 }
@@ -44,7 +46,7 @@ export function Shell({scene, transcript, composer}: {scene: Scene; transcript?:
       </main>
 
       {scene.panelOpen && <Details scene={scene} />}
-      <Overlay name={scene.overlay} />
+      <Overlay name={scene.overlay} scene={scene} />
     </div>
   )
 }
