@@ -33,7 +33,8 @@ const NARROW = '(max-width: 799.98px)'
 
 // `workingBots`: the bots whose run is in progress, from the chat stream (the same signal as the
 // transcript's working row; both flip at the same ms in traces say-hi, say-hi-2, storage).
-export function Shell({scene: start, transcript, composer, onPickBot, workingBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (name: string) => void; workingBots?: string[]}) {
+// `unreadBots`: the bots with a reply the person has not seen (the rail's "Unread activity" dot).
+export function Shell({scene: start, transcript, composer, onPickBot, workingBots = [], unreadBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (name: string) => void; workingBots?: string[]; unreadBots?: string[]}) {
   const [panelOpen, setPanelOpen] = useState(start.panelOpen)
   const [picked, setPicked] = useState<string | undefined>(undefined)
   // The overlay that is up, whether the scene holds it or a click opened it (Overlay's
@@ -60,7 +61,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, workingBot
   }
   return (
     <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-instant={instant || undefined}>
-      <Rail scene={scene} onPick={pick} working={workingBots} />
+      <Rail scene={scene} onPick={pick} working={workingBots} unread={unreadBots} />
 
       <main className="convo" aria-label="Conversation transcript">
         <header className="convo-head">
