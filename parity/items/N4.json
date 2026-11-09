@@ -11,5 +11,5 @@
   "/^Play the .+ preview$/"
  ],
  "gate": "Gate A oracle-voice-picker 71/71, oracle-speed-picker 45/45, oracle-language-picker 56/56",
- "evidence": "app/src/components/overlays/Pickers.tsx; each opens 4 pt above its row with the row's value checked, a pick closes it. Left: 12 more voices and 12 more languages need a capture scrolled to the end; a pick does not yet change the row (Details owns the value); preview buttons play nothing."
+ "evidence": "app/src/components/overlays/Pickers.tsx; each opens 4 pt above its row with the row's value checked, a pick closes it. Left: 12 more voices and 12 more languages need a capture scrolled to the end; a pick does not yet change the row (Details owns the value); preview buttons play nothing. Keys (traces/2026-11-09-keys.json): on open the picked option has focus and is highlighted (traced on Speed; Voice and Language use the same markup); arrows move focus and data-highlighted; Escape closes without choosing and returns focus. UNTRACED: Enter on a highlighted row clicks it, an assumption from the oracle's Radix-style markup (data-highlighted), not observed, since Enter on oracle rows can act."
 }

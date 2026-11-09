@@ -19,7 +19,7 @@ export function ConnectApps({onClose}: {onClose?: () => void}) {
   return (
     <>
       <div className="scrim" />
-      <div role="dialog" aria-modal="true" aria-label="Connect Apps" className="view connect-apps">
+      <div role="dialog" tabIndex={-1} aria-modal="true" aria-label="Connect Apps" className="view connect-apps">
         <button aria-label="Close" className="view-close ca-close" onClick={onClose}>
           <span>{x}</span>
         </button>
@@ -174,7 +174,7 @@ export function Settings({onClose}: {onClose?: () => void}) {
   return (
     <>
       <div className="scrim" />
-      <div role="dialog" aria-modal="true" aria-label="Grok Bot settings" className="view settings">
+      <div role="dialog" tabIndex={-1} aria-modal="true" aria-label="Grok Bot settings" className="view settings">
         <div className="set-wrap">
           <nav aria-label="Settings sections" className="set-nav">
             {settingsSections.map((s) => (
