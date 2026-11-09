@@ -8,12 +8,11 @@
 .share { position: absolute; top: 12px; right: 12px; height: 36px; padding: 0 17px; display: flex; align-items: center; border-radius: 9999px; background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--wash-06); font-size: 14px; line-height: 20px; letter-spacing: 0.14px; }
 
 
-/* A narrow conversation column shows Share as its icon alone, 36 x 36 with an 18 pt icon
-   (oracle-main-880: column 472, icon; 720 and 1040: column 632, label). The line is bracketed by
-   those captures, not measured: half-way, below 552. */
+/* A conversation column under 592 shows Share as its icon alone, 36 x 36 with an 18 pt icon:
+   measured on the oracle (oracle-main-980: column 572, icon; oracle-main-1000: column 592, label). */
 .convo { container: convo / inline-size; }
 .share-icon { display: none; width: 18px; height: 18px; place-items: center; }
-@container convo (max-width: 551.98px) {
+@container convo (max-width: 591.98px) {
   .share { padding: 0 9px; }
   .share-label { display: none; }
   .share-icon { display: grid; }

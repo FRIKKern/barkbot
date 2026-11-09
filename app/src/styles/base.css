@@ -36,7 +36,10 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
 
-.app { display: grid; grid-template-columns: var(--rail) 1fr auto; height: 100vh; min-width: 0; }
+.app { display: grid; grid-template-columns: var(--rail) 1fr auto; height: 100vh; min-width: 0;
+  /* From 800 to 840 the conversation column holds at 424 and the panel gives way: 288 at 800,
+     308 at 820, 320 from 840 (oracle-main-800, -820, -840 edge measured by the oracle lane). */
+  --panel: min(var(--details), calc(100vw - var(--rail) - 424px)); }
 
 /* Tooltips and the chat preview (components/tips.tsx; fixtures/states/oracle-hover-*.json). */
 .tip-wrap, .preview-wrap { position: fixed; z-index: 50; pointer-events: none; }
