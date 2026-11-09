@@ -82,6 +82,7 @@ function armAndSend() {
     user: [...tx.querySelectorAll('[role=article] [data-role=user]')].map((b) => b.textContent.trim().length),
     assistant: [...tx.querySelectorAll('[role=article] [data-role=assistant]')].map((b) => b.textContent.trim().length),
     working: !!tx.querySelector('.working'),
+    leaving: tx.querySelector('.working.leaving') ? parseFloat(getComputedStyle(tx.querySelector('.working.leaving')).transitionDuration) * 1000 : null,
     label: tx.querySelector('.working .work-label')?.textContent.trim() ?? '',
     status: tx.querySelector('[role=status]')?.textContent.trim() ?? '',
     focus: document.activeElement === prompt,
@@ -95,7 +96,9 @@ function armAndSend() {
     if (now.empty && !was.empty) log.push({ kind: 'clear', t });
     for (let i = was.user.length; i < now.user.length; i++) log.push({ kind: 'user', t, len: now.user[i] });
     if (now.working && !was.working) log.push({ kind: 'working', t });
-    if (!now.working && was.working) log.push({ kind: 'working-gone', t });
+    // Gone = its exit has played out (leaving + its own transition), not when React drops the node.
+    if (now.leaving !== null && was.leaving === null) log.push({ kind: 'working-gone', t: Math.round((t + now.leaving) * 10) / 10 });
+    if (!now.working && was.working && was.leaving === null) log.push({ kind: 'working-gone', t });
     if (now.label && now.label !== was.label) log.push({ kind: /^Typing/.test(now.label) ? 'label:typing' : 'label:status', t, text: now.label });
     for (let i = was.assistant.length; i < now.assistant.length; i++) log.push({ kind: 'assistant', t, len: now.assistant[i] });
     if (now.status !== was.status && / is working$/.test(now.status)) log.push({ kind: 'status:working', t });
@@ -119,7 +122,7 @@ function compare(oracle, ours, focusAtEnd) {
     const k = oracle.filter((x) => x.kind === m.kind).indexOf(m);
     const o = nth(ours, m.kind, k);
     const key = `${m.kind}#${k + 1}`;
-    if (!o) { cases.push({ key, pass: false, oracle: m.t, why: 'ours never shows it' }); return; }
+    if (!o) { cases.push({ key, pass: false, oracle: m.t, why: m.kind === 'label:status' ? 'ours never shows it: no Barkpark event carries the oracle\'s summary label (task-f13fc4b4dc2af6de)' : 'ours never shows it' }); return; }
     const lag = Math.round(o.t - m.t);
     const why = [];
     if (Math.abs(lag) > W) why.push(`${lag > 0 ? 'late' : 'early'} by ${Math.abs(lag)} ms`);
@@ -195,7 +198,7 @@ if (CI) {
 }
 if (lower.length) console.log(`Gate B: recorded a LOWER count on purpose: ${lower.join(', ')}`);
 // Timings move a little every run; a file is rewritten only when a verdict changed.
-const verdicts = (s) => JSON.stringify(s.results.map((c) => [c.key, c.pass]));
+const verdicts = (s) => JSON.stringify(s.results.map((c) => [c.key, c.pass, (c.why ?? '').replace(/[\d.]+/g, '#')]));
 for (const s of report) {
   const p = recorded(s.id);
   if (!p || p.cases !== s.cases || p.pass !== s.pass || verdicts(p) !== verdicts(s)) writeFileSync(`${dir}/${s.id}.json`, JSON.stringify({ ...s, run: new Date().toISOString() }, null, 1) + '\n');
