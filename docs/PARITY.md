@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-8 of 40 items done, 5 partial, 11 open, 16 not yet read on the oracle.
+12 of 40 items done, 9 partial, 8 open, 11 not yet read on the oracle.
 Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an item file, never this page.
 
 ## S0 Harness
@@ -34,16 +34,16 @@ Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an it
 
 | Id | Item | Journey | Status | Gate or evidence |
 |---|---|---|---|---|
-| F1 | Left rail: bots, the active one, badge, new chat, apps grid, my avatar | J02 | ? unread | — |
-| F2 | Header: the bot's name pill, centred over the transcript | J02 | ? unread | — |
-| F3 | Right panel: mark, name, Activity and Library tabs, close | J03 | ? unread | — |
-| F4 | Computer card: asleep (zzz, breathing), waking up, unreachable, working; read from the host heartbeat | J04 | ? unread | — |
-| F5 | Top bar: Share (the sidebar toggle shows on hover; not in the captured state) | J02 | ? unread | — |
-| F6 | Stand-in font picked by measured widths: Gate A's last misses are Inter running 1-3 pt wider than the oracle's own font | — | ○ open | — |
+| F1 | Left rail: bots, the active one, badge, new chat, apps grid, my avatar | J02 | ✓ done | Gate: Gate A: aside Bots, both Bot tiles, New Bot, Connect apps, Open account menu pass in all five frame states. Evidence: Rail.tsx + rail.css; parity/gate-a/oracle-{turn-1040,main-1280,main-1600,panel-closed,library}.json |
+| F2 | Header: the bot's name pill, centred over the transcript | J02 | ✓ done | Gate: Gate A: View conversation details and span Oracle pass at 1040, 1280, 1600 and with the panel closed. Evidence: Shell.tsx + convo.css; parity/gate-a/oracle-{turn-1040,main-1280,main-1600,panel-closed}.json |
+| F3 | Right panel: mark, name, Activity and Library tabs, close | J03 | ✓ done | Gate: Gate A: Close, Edit Bot avatar, Bot name, Activity, Library pass in oracle-turn-1040 (39/39) and oracle-library (20/20). Evidence: Details.tsx + details.css; name field 10 pt side padding matches the oracle's 74.2 pt field for 'Oracle'; parity/gate-a/oracle-turn-1040.json |
+| F4 | Computer card: asleep (zzz, breathing), waking up, unreachable, working; read from the host heartbeat | J04 | ◐ partial | Gate: Gate A: Bot's computer and Asleep pass in oracle-turn-1040. Evidence: Details.tsx; only the asleep state is captured. Left: waking up, unreachable, working, the breathing zzz, and the host heartbeat |
+| F5 | Top bar: Share (the sidebar toggle shows on hover; not in the captured state) | J02 | ◐ partial | Gate: Gate A: Share (control and label) passes in all five frame states. Evidence: Shell.tsx + convo.css. Left: the sidebar toggle shows on hover, which no capture holds yet |
+| F6 | Stand-in font picked by measured widths: Gate A's last misses are Inter running 1-3 pt wider than the oracle's own font | — | ✓ done | Gate: npm run gate (2026-11-09): oracle-turn-1040 39/39, oracle-library 20/20, oracle-main-1280 35/39, oracle-main-1600 35/39, oracle-panel-closed 10/14; every miss left is the composer's width. Evidence: 41 oracle widths (fixtures/states/*, fixtures/text-metrics.json) measured in 36 faces in headless Chrome: the macOS system face (SF Pro) runs 0.52 pt off on average after tracking, Inter 0.70 and 2.88 raw; base.css sets BlinkMacSystemFont, -apple-system, Inter fallback. Three fixed words keep their own tracking (parts.tsx FIT) where SF still runs 1.2-1.6 pt off. No oracle font file read or shipped (O2) |
 | F7 | Composer actions menu: Attach files, Teach a task (oracle-composer-menu) | — | ○ open | — |
 | F8 | Account menu: Weekly usage, Get Grok Bot for mobile, Support, Settings, Add account, Log out (oracle-account-menu); each row's target is its own item | — | ○ open | — |
-| F9 | Library tab: the empty state 'Pages, files, and apps this Bot makes show up here' (oracle-library) | J03 | ○ open | — |
-| F10 | Every captured width matches: 1040, 1280, 1600 (oracle-main-*) | J02 | ○ open | — |
+| F9 | Library tab: the empty state 'Pages, files, and apps this Bot makes show up here' (oracle-library) | J03 | ◐ partial | Gate: Gate A: oracle-library 20/20 (the empty-state text is longer than 40 characters, so it is not a named case). Evidence: Details.tsx library branch: p 256 x 40 at 14/20, 54% ink, matches the oracle's size and look. Left: the oracle's tab panel sits 100.6 pt lower (y 329.6 against our 229); its header block is 269.6 tall only in this capture, which reads like a mid-transition frame: recapture before matching it |
+| F10 | Every captured width matches: 1040, 1280, 1600 (oracle-main-*) | J02 | ◐ partial | Gate: Gate A: oracle-main-1280 35/39, oracle-main-1600 35/39, oracle-panel-closed 10/14. Evidence: Every frame case passes at every width except the composer: the oracle's composer is the main column less 16 each side, up to 960 (840 at 1280, 960 at 1600, 920 panel closed); ours stops at 600 (composer.css, talk lane). Composer actions at 1280 also reads a different background and ink |
 
 ## S3 Control
 

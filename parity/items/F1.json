@@ -3,11 +3,13 @@
  "slice": "S2",
  "journey": "J02",
  "title": "Left rail: bots, the active one, badge, new chat, apps grid, my avatar",
- "status": "unknown",
+ "status": "done",
  "controls": [
   "Bot tile",
   "New Bot",
   "Connect apps",
   "Open account menu"
- ]
+ ],
+ "gate": "Gate A: aside Bots, both Bot tiles, New Bot, Connect apps, Open account menu pass in all five frame states",
+ "evidence": "Rail.tsx + rail.css; parity/gate-a/oracle-{turn-1040,main-1280,main-1600,panel-closed,library}.json"
 }

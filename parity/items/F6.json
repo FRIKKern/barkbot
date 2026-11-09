@@ -3,5 +3,7 @@
  "slice": "S2",
  "journey": null,
  "title": "Stand-in font picked by measured widths: Gate A's last misses are Inter running 1-3 pt wider than the oracle's own font",
- "status": "open"
+ "status": "done",
+ "gate": "npm run gate (2026-11-09): oracle-turn-1040 39/39, oracle-library 20/20, oracle-main-1280 35/39, oracle-main-1600 35/39, oracle-panel-closed 10/14; every miss left is the composer's width",
+ "evidence": "41 oracle widths (fixtures/states/*, fixtures/text-metrics.json) measured in 36 faces in headless Chrome: the macOS system face (SF Pro) runs 0.52 pt off on average after tracking, Inter 0.70 and 2.88 raw; base.css sets BlinkMacSystemFont, -apple-system, Inter fallback. Three fixed words keep their own tracking (parts.tsx FIT) where SF still runs 1.2-1.6 pt off. No oracle font file read or shipped (O2)"
 }
