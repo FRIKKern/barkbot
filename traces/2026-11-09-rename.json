@@ -1,0 +1,499 @@
+{
+ "id": "2026-11-09-rename",
+ "oracle_version": "0.79.3",
+ "bot": "Oracle",
+ "typed": [
+  "Oracle Two",
+  ""
+ ],
+ "steps": [
+  {
+   "name": "click into the field",
+   "before": {
+    "t": 230603.39999997616,
+    "value": "Oracle",
+    "focused": false,
+    "active": "body",
+    "selection": null,
+    "header": "Oracle",
+    "rect": [
+     842.9,
+     148,
+     74.2,
+     29
+    ],
+    "css": {
+     "color": "rgb(245, 245, 245)",
+     "background": "rgba(245, 245, 245, 0.08)",
+     "border": "0.5px solid rgba(0, 0, 0, 0)",
+     "borderRadius": "8px",
+     "padding": "2px 10px",
+     "outline": "rgb(245, 245, 245) none 1.5px",
+     "outlineOffset": "0px",
+     "boxShadow": "none",
+     "caretColor": "rgb(245, 245, 245)",
+     "transition": "border-color 0.12s, background-color 0.12s"
+    }
+   },
+   "frames": [
+    {
+     "t": 18.5,
+     "value": "Oracle",
+     "focused": true,
+     "active": "Bot name",
+     "selection": [
+      3,
+      3
+     ],
+     "header": "Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.08)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 3px",
+      "outlineOffset": "1px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    }
+   ]
+  },
+  {
+   "name": "type a new name, then Escape",
+   "before": {
+    "t": 231834,
+    "value": "Oracle",
+    "focused": true,
+    "active": "Bot name",
+    "selection": [
+     3,
+     3
+    ],
+    "header": "Oracle",
+    "rect": [
+     842.9,
+     148,
+     74.2,
+     29
+    ],
+    "css": {
+     "color": "rgb(245, 245, 245)",
+     "background": "rgba(245, 245, 245, 0.08)",
+     "border": "0.5px solid rgba(0, 0, 0, 0)",
+     "borderRadius": "8px",
+     "padding": "2px 10px",
+     "outline": "rgb(245, 245, 245) none 3px",
+     "outlineOffset": "1px",
+     "boxShadow": "none",
+     "caretColor": "rgb(245, 245, 245)",
+     "transition": "border-color 0.12s, background-color 0.12s"
+    }
+   },
+   "frames": [
+    {
+     "t": 315,
+     "value": "Oracle",
+     "focused": false,
+     "active": "body",
+     "selection": null,
+     "header": "Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.08)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    }
+   ]
+  },
+  {
+   "name": "click into the field again",
+   "before": {
+    "t": 233355.89999997616,
+    "value": "Oracle",
+    "focused": false,
+    "active": "body",
+    "selection": null,
+    "header": "Oracle",
+    "rect": [
+     842.9,
+     148,
+     74.2,
+     29
+    ],
+    "css": {
+     "color": "rgb(245, 245, 245)",
+     "background": "rgba(245, 245, 245, 0.08)",
+     "border": "0.5px solid rgba(0, 0, 0, 0)",
+     "borderRadius": "8px",
+     "padding": "2px 10px",
+     "outline": "rgb(245, 245, 245) none 1.5px",
+     "outlineOffset": "0px",
+     "boxShadow": "none",
+     "caretColor": "rgb(245, 245, 245)",
+     "transition": "border-color 0.12s, background-color 0.12s"
+    }
+   },
+   "frames": [
+    {
+     "t": 15.9,
+     "value": "Oracle",
+     "focused": true,
+     "active": "Bot name",
+     "selection": [
+      3,
+      3
+     ],
+     "header": "Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.08)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 3px",
+      "outlineOffset": "1px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    }
+   ]
+  },
+  {
+   "name": "type a new name, then Enter",
+   "before": {
+    "t": 234586.69999998808,
+    "value": "Oracle",
+    "focused": true,
+    "active": "Bot name",
+    "selection": [
+     3,
+     3
+    ],
+    "header": "Oracle",
+    "rect": [
+     842.9,
+     148,
+     74.2,
+     29
+    ],
+    "css": {
+     "color": "rgb(245, 245, 245)",
+     "background": "rgba(245, 245, 245, 0.08)",
+     "border": "0.5px solid rgba(0, 0, 0, 0)",
+     "borderRadius": "8px",
+     "padding": "2px 10px",
+     "outline": "rgb(245, 245, 245) none 3px",
+     "outlineOffset": "1px",
+     "boxShadow": "none",
+     "caretColor": "rgb(245, 245, 245)",
+     "transition": "border-color 0.12s, background-color 0.12s"
+    }
+   },
+   "frames": [
+    {
+     "t": 338.8,
+     "value": "Oracle Two",
+     "focused": false,
+     "active": "body",
+     "selection": null,
+     "header": "Oracle Two",
+     "rect": [
+      824.3,
+      148,
+      111.5,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.08)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    }
+   ]
+  },
+  {
+   "name": "click into the field, empty it, then Enter",
+   "before": {
+    "t": 237427.89999997616,
+    "value": "Oracle Two",
+    "focused": false,
+    "active": "body",
+    "selection": null,
+    "header": "Oracle Two",
+    "rect": [
+     824.3,
+     148,
+     111.5,
+     29
+    ],
+    "css": {
+     "color": "rgb(245, 245, 245)",
+     "background": "rgba(245, 245, 245, 0.08)",
+     "border": "0.5px solid rgba(0, 0, 0, 0)",
+     "borderRadius": "8px",
+     "padding": "2px 10px",
+     "outline": "rgb(245, 245, 245) none 1.5px",
+     "outlineOffset": "0px",
+     "boxShadow": "none",
+     "caretColor": "rgb(245, 245, 245)",
+     "transition": "border-color 0.12s, background-color 0.12s"
+    }
+   },
+   "frames": [
+    {
+     "t": 340.6,
+     "value": "Oracle Two",
+     "focused": false,
+     "active": "body",
+     "selection": null,
+     "header": "Oracle Two",
+     "rect": [
+      824.3,
+      148,
+      111.5,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.08)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    }
+   ]
+  },
+  {
+   "name": "click into the field, type the old name, click away",
+   "before": {
+    "t": 240281.80000001192,
+    "value": "Oracle Two",
+    "focused": false,
+    "active": "body",
+    "selection": null,
+    "header": "Oracle Two",
+    "rect": [
+     824.3,
+     148,
+     111.5,
+     29
+    ],
+    "css": {
+     "color": "rgb(245, 245, 245)",
+     "background": "rgba(245, 245, 245, 0.08)",
+     "border": "0.5px solid rgba(0, 0, 0, 0)",
+     "borderRadius": "8px",
+     "padding": "2px 10px",
+     "outline": "rgb(245, 245, 245) none 1.5px",
+     "outlineOffset": "0px",
+     "boxShadow": "none",
+     "caretColor": "rgb(245, 245, 245)",
+     "transition": "border-color 0.12s, background-color 0.12s"
+    }
+   },
+   "frames": [
+    {
+     "t": 418.9,
+     "value": "Oracle",
+     "focused": false,
+     "active": "Conversation transcript",
+     "selection": null,
+     "header": "Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.01)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    },
+    {
+     "t": 437.3,
+     "value": "Oracle",
+     "focused": false,
+     "active": "Conversation transcript",
+     "selection": null,
+     "header": "Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0.004)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    },
+    {
+     "t": 455.1,
+     "value": "Oracle",
+     "focused": false,
+     "active": "Conversation transcript",
+     "selection": null,
+     "header": "Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(245, 245, 245, 0)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    },
+    {
+     "t": 491,
+     "value": "Oracle",
+     "focused": false,
+     "active": "Conversation transcript",
+     "selection": null,
+     "header": "Oracle",
+     "rect": [
+      842.9,
+      148,
+      74.2,
+      29
+     ],
+     "css": {
+      "color": "rgb(245, 245, 245)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0.5px solid rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "padding": "2px 10px",
+      "outline": "rgb(245, 245, 245) none 1.5px",
+      "outlineOffset": "0px",
+      "boxShadow": "none",
+      "caretColor": "rgb(245, 245, 245)",
+      "transition": "border-color 0.12s, background-color 0.12s"
+     }
+    }
+   ]
+  }
+ ],
+ "rest": {
+  "t": 230192.10000002384,
+  "value": "Oracle",
+  "focused": false,
+  "active": "body",
+  "selection": null,
+  "header": "Oracle",
+  "rect": [
+   842.9,
+   148,
+   74.2,
+   29
+  ],
+  "css": {
+   "color": "rgb(245, 245, 245)",
+   "background": "rgba(0, 0, 0, 0)",
+   "border": "0.5px solid rgba(0, 0, 0, 0)",
+   "borderRadius": "8px",
+   "padding": "2px 10px",
+   "outline": "rgb(245, 245, 245) none 1.5px",
+   "outlineOffset": "0px",
+   "boxShadow": "none",
+   "caretColor": "rgb(245, 245, 245)",
+   "transition": "border-color 0.12s, background-color 0.12s"
+  }
+ },
+ "hover": {
+  "t": 230601.80000001192,
+  "value": "Oracle",
+  "focused": false,
+  "active": "body",
+  "selection": null,
+  "header": "Oracle",
+  "rect": [
+   842.9,
+   148,
+   74.2,
+   29
+  ],
+  "css": {
+   "color": "rgb(245, 245, 245)",
+   "background": "rgba(245, 245, 245, 0.08)",
+   "border": "0.5px solid rgba(0, 0, 0, 0)",
+   "borderRadius": "8px",
+   "padding": "2px 10px",
+   "outline": "rgb(245, 245, 245) none 1.5px",
+   "outlineOffset": "0px",
+   "boxShadow": "none",
+   "caretColor": "rgb(245, 245, 245)",
+   "transition": "border-color 0.12s, background-color 0.12s"
+  }
+ },
+ "restored": {
+  "value": "Oracle",
+  "header": "Oracle"
+ }
+}

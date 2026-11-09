@@ -11,6 +11,8 @@ export const RECIPES = {
   'say-hi': { kind: 'send', text: 'Say hi in one short sentence.', sends: true },
   // The hero's turn: the bot checks its own computer before answering.
   storage: { kind: 'send', text: 'How much storage do you have, and where?', sends: true },
+  // A reply long enough to scroll the transcript while it streams (owner-approved 2026-11-09).
+  'long-answer': { kind: 'send', text: 'Explain in five short paragraphs how ocean tides work.', sends: true },
 };
 
 export async function activeBot(page) {
