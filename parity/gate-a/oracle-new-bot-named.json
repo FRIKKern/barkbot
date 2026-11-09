@@ -7,73 +7,70 @@
   2
  ],
  "cases": 2,
- "pass": 0,
- "scene": false,
+ "pass": 2,
  "results": [
   {
    "key": "control:Create",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Create",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   }
  ],
- "run": "2026-11-09T07:19:41.647Z",
+ "run": "2026-11-09T07:25:08.247Z",
  "inventory": {
   "id": "oracle-new-bot-named",
   "controls": [
    {
     "name": "Bot tile",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "New Bot",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Connect apps",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open account menu",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "View conversation details",
     "item": "F2",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Share",
     "item": "F5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Prompt",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Composer actions",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Start voice input",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Start voice chat",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Close",
@@ -88,7 +85,7 @@
    {
     "name": "Bot name",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Activity",
@@ -138,140 +135,140 @@
    {
     "name": "Close dialog",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "blob character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "cloud character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "square character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "sparkle character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "clover character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "heart character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "flower character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "teardrop character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "tablet character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "wedge character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "house character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "star character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "hex character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Black character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Brown character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Red character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Orange character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Yellow character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Green character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Cyan character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Blue character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Violet character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Magenta character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Gray character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Cancel",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Create",
     "item": "N5",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 49,
+  "missing": 11,
   "untracked": []
  }
 }

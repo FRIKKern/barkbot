@@ -1,0 +1,90 @@
+/* Overlays: menus, pickers, the Create New Bot dialog. Every number is read from
+   fixtures/states/oracle-{composer-menu,account-menu,voice-picker,speed-picker,language-picker,new-bot-dialog}.json
+   (1040 x 760 pt). Each overlay is a fixed layer; its anchor is named where it is placed. */
+
+.overlay { display: contents; }
+.pop { position: fixed; z-index: 20; background: var(--bg-raised); border-radius: 16px; color: var(--ink); }
+
+/* ── Menus: 14/20, 6 pt inset, rows 32 tall 2 apart, icon 18 at +8, label at +32 ── */
+.menu { padding: 6px; font-size: 14px; font-weight: 425; line-height: 20px; letter-spacing: 0.14px; }
+.menu-item { height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 8px; outline: none; }
+.menu-item + .menu-item { margin-top: 2px; }
+.menu-icon { width: 18px; height: 18px; flex: none; display: grid; place-items: center; color: var(--ink-64); }
+.menu-icon .icon { width: 14px; height: 14px; }
+.menu-label { flex: 1; min-width: 0; height: 18px; }
+.menu-label > span { display: block; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Trailing value and chevron (Weekly usage "12% used ›", Support ↗): 20 pt after the label, half ink. */
+.menu-trail { flex: none; margin-left: 14px; display: flex; align-items: center; gap: 8px; color: rgb(245 245 245 / 0.5); }
+.menu-trail > span { display: flex; align-items: center; height: 20px; }
+.menu-trail > span > span { color: var(--ink-54); }
+.menu-trail .icon { width: 14px; height: 14px; }
+/* The groups are split by a rule the capture could not see (under 1 pt): 6 + 0.5 + 6. */
+.menu-group + .menu-group { margin-top: 6px; padding-top: 6px; border-top: 0.5px solid var(--wash-10); }
+
+/* Composer actions: 200 wide, its left 9 pt left of the + button, its foot 4 pt above it
+   (button 112.5, 707.5 -> menu 103.5, 625.5 .. 703.5). */
+.composer-menu { left: calc(var(--rail) + 15.5px); bottom: 56.5px; width: 200px; }
+.composer-menu .menu-icon .icon { width: 12px; height: 12px; }
+.composer-menu .rec { color: rgb(207 43 53); }
+.composer-menu .rec circle:first-child { fill: none; stroke: currentColor; stroke-width: 1.5; }
+.composer-menu .rec circle:last-child { fill: currentColor; }
+
+/* Account: its foot 4 pt above the account button (698 -> 694), left 17, 248.8 wide. */
+.account-menu { left: 17px; bottom: 66px; width: 248.8px; }
+
+/* ── Pickers: 4 pt above the row's button, right edges aligned (1016.5); 13/18 ── */
+.picker { right: 23.5px; width: 200px; transform: translateY(-100%); font-size: 13px; font-weight: 425; line-height: 18px; letter-spacing: -0.08px; }
+.voice-picker { top: 512.5px; }    /* Voice button top 516.5 */
+.speed-picker { top: 542.5px; }    /* Speed button top 546.5 */
+.language-picker { top: 572.5px; right: 23.3px; width: 211.2px; } /* Language button top 576.5 */
+.picker-scroll { max-height: 360px; overflow-y: auto; scrollbar-width: none; border-radius: inherit; }
+.picker-scroll::-webkit-scrollbar { display: none; }
+/* A list that scrolls keeps a 7 pt gutter for its bar (listbox 193 of 200, 204.2 of 211.2). */
+.voice-picker .picker-scroll, .language-picker .picker-scroll { padding-right: 7px; }
+.listbox { padding: 6px 0; display: flex; flex-direction: column; gap: 2px; }
+.option { height: 30px; flex: none; display: flex; align-items: center; gap: 20px; padding: 0 14px; outline: none; }
+.voice-picker .option { height: 36px; }
+.option-text { flex: 1; min-width: 0; }
+.option-text > div, .option-text span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.option-check { width: 12px; height: 12px; flex: none; display: grid; place-items: center; color: var(--ink-90); }
+.option-check .icon { width: 12px; height: 12px; }
+.option-trail { flex: none; display: flex; align-items: center; gap: 4px; color: var(--ink-66); }
+.option-mark { width: 14px; height: 14px; display: grid; }
+.option-mark > span { border-radius: 50%; border: 1px solid currentColor; }
+.play { width: 24px; height: 24px; border-radius: 9999px; background: var(--wash-04); color: var(--ink-64); display: grid; place-items: center; }
+.play > span { width: 18px; height: 18px; display: grid; place-items: center; }
+.play .icon { width: 14px; height: 14px; fill: currentColor; }
+
+/* The row whose picker is open shows a pressed button (rgba 245 / .04) in the details panel. */
+.app:has([data-overlay='voice-picker']) .pick-value[aria-label='Voice'],
+.app:has([data-overlay='speed-picker']) .pick-value[aria-label='Speed'],
+.app:has([data-overlay='language-picker']) .pick-value[aria-label='Language'] { background-color: var(--wash-04); }
+
+/* ── Create New Bot: 440 x 579 centred, 70% black scrim ── */
+.scrim { position: fixed; inset: 0; z-index: 30; background: rgb(0 0 0 / 0.698); }
+.dialog { position: fixed; z-index: 31; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 440px; background: var(--bg-raised); border: 0.5px solid var(--wash-10); border-radius: 14px; font-size: 13px; letter-spacing: normal; color: var(--ink); }
+.dialog-close { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 9999px; display: grid; place-items: center; color: var(--ink-66); line-height: normal; }
+.dialog-close .icon { width: 14px; height: 14px; }
+.dialog-head { height: 54.5px; padding: 16px; }
+.dialog-head h2 { margin: 0; width: fit-content; font-size: 14px; font-weight: 600; line-height: 22px; letter-spacing: -0.15px; }
+.dialog-body { padding: 16px; line-height: 18px; }
+.new-bot-form { display: flex; flex-direction: column; gap: 16px; }
+.new-bot-preview { align-self: center; width: 96px; height: 96px; display: grid; place-items: center; }
+.shape { fill: currentColor; }
+.new-bot-name { height: 35px; width: 100%; padding: 0 12px; border: 0.5px solid var(--wash-10); border-radius: 8px; font-size: 13px; line-height: 18px; outline: none; }
+.new-bot-looks { display: flex; flex-direction: column; gap: 12px; }
+.shapes { padding: 6px 0; display: flex; flex-direction: column; gap: 8px; }
+.shape-row { display: flex; justify-content: center; gap: 8px; }
+.shape-btn { position: relative; width: 48px; height: 48px; display: grid; place-items: center; color: rgb(255 255 255); }
+.shape-btn > span:first-child { width: 36px; height: 36px; display: grid; }
+.shape-on { position: absolute; inset: 2px; background: rgb(245 245 245 / 0.22); }
+.swatches { align-self: center; width: 232px; padding: 8px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.swatch { width: 32px; height: 32px; border: 1px solid transparent; border-radius: 50%; display: grid; place-items: center; color: rgb(255 255 255); }
+.swatch > span { width: 24px; height: 24px; border-radius: 50%; }
+.swatch[aria-pressed='true'] > span { box-shadow: rgb(31 31 31) 0 0 0 3px, rgb(245 245 245 / 0.22) 0 0 0 4px; }
+.dialog-foot { border-top: 0.5px solid var(--wash-10); padding: 12px; display: flex; justify-content: flex-end; gap: 8px; }
+.pill { height: 32px; padding: 0 12px; border-radius: 9999px; font-size: 14px; line-height: 20px; letter-spacing: 0.14px; background: var(--wash-04); color: var(--ink); box-shadow: color(srgb 0.960784 0.960784 0.960784 / 0.15) 0 0 0 0.5px inset; }
+.pill.primary:disabled { background: rgb(245 245 245 / 0.13); color: color(srgb 0.960784 0.960784 0.960784 / 0.3); box-shadow: color(srgb 0.960784 0.960784 0.960784 / 0.045) 0 0 0 0.5px inset; }
+.pill > span { display: block; }
+/* Named (fixtures/states/oracle-new-bot-named.json): Create turns solid ink on dark text. */
+.pill.primary:enabled { background: var(--ink); color: rgb(18 18 18); box-shadow: color(srgb 0.0705882 0.0705882 0.0705882 / 0.15) 0 0 0 0.5px inset; }

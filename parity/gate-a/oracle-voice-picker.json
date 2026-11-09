@@ -7,556 +7,484 @@
   2
  ],
  "cases": 71,
- "pass": 0,
- "scene": false,
+ "pass": 71,
  "results": [
   {
    "key": "aside:Bots",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot tile",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot tile#2",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:New Bot",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Connect apps",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Open account menu",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:View conversation details",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Oracle",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Share",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Share",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Prompt",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Composer actions",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Start voice input",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Start voice chat",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "aside:Conversation details",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Close",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Edit Bot avatar",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot name",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Activity",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Library",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Suggested",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Add to Slack",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Add to Slack",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Create a routine",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Create a routine",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Computer",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot's computer",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bdi:Bot's computer",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bdi:Asleep",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Voice chat",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Voice",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Voice",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Helix",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Speed",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Speed",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:1x",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Language",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Language",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Auto-detect",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Altair",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Altair preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Ara",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Ara preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Atlas",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Atlas preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Aurora",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Aurora preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Carina",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Carina preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Castor",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Castor preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Celeste",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Celeste preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Cosmo",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Cosmo preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Eve",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Eve preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Helios",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Helios preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Helix#2",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Helix preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Iris",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Iris preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Kepler",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Kepler preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Leo",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Leo preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Liora",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Liora preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Lumen",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Play the Lumen preview",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   }
  ],
- "run": "2026-11-08T23:15:14.839Z",
+ "run": "2026-11-09T07:05:51.676Z",
  "inventory": {
   "id": "oracle-voice-picker",
   "controls": [
    {
     "name": "Bot tile",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "New Bot",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Connect apps",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open account menu",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "View conversation details",
     "item": "F2",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Share",
     "item": "F5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Prompt",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Composer actions",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Start voice input",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Start voice chat",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Close",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Edit Bot avatar",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Bot name",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Activity",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Library",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Add to Slack",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Create a routine",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Bot's computer",
     "item": "F4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Voice",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Speed",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Language",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Altair preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Ara preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Atlas preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Aurora preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Carina preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Castor preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Celeste preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Cosmo preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Eve preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Helios preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Helix preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Iris preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Kepler preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Leo preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Liora preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Lumen preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 37,
+  "missing": 0,
   "untracked": []
  }
 }

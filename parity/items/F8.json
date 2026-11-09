@@ -3,7 +3,7 @@
  "slice": "S2",
  "journey": null,
  "title": "Account menu: Weekly usage, Get Grok Bot for mobile, Support, Settings, Add account, Log out (oracle-account-menu); each row's target is its own item",
- "status": "open",
+ "status": "partial",
  "controls": [
   "Weekly usage",
   "Get Grok Bot for mobile",
@@ -11,5 +11,7 @@
   "Settings",
   "Add account",
   "Log out"
- ]
+ ],
+ "gate": "Gate A oracle-account-menu 50/52: Weekly usage and 12% used are 1.4 pt off on text width (the font stand-in measures \"12% used\" wider)",
+ "evidence": "app/src/components/overlays/Menus.tsx; opens from the account button. Left: the usage line is the captured 12% (data.ts), and every row's target is its own item."
 }
