@@ -13,6 +13,10 @@ export const Route = createFileRoute('/')({
   component: Home,
 })
 
+// The Voice card's values until Barkpark has a voice setting: what the oracle's fresh bot shows
+// (fixtures/states: Helix, 1x, Auto-detect).
+const VOICE = {voice: 'Helix', speed: '1x', language: 'Auto-detect'}
+
 function Home() {
   const chat = Route.useLoaderData()
   const router = useRouter()
@@ -47,7 +51,7 @@ function Home() {
   const computer = !chat.host ? 'Unreachable' : chat.host.online ? 'Asleep' : 'Unreachable'
   return (
     <Shell
-      scene={{bots: [{name: chat.bot}], active: chat.bot, panelOpen: true, computer}}
+      scene={{bots: [{name: chat.bot}], active: chat.bot, panelOpen: true, computer, voice: VOICE}}
       transcript={
         chat.host ? (
           <Transcript bot={chat.bot} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error} />

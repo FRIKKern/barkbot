@@ -1,7 +1,8 @@
 /* Transcript (fixtures/states/oracle-turn-1040.json, articles 71-86; main-1280/1600): the column
    is the pane less 16 a side, at most 960 (600 at 1040, 840 at 1280); the time row at y 76 (28
-   tall); bubbles 15/20, text 22, 7 x 12 padding, radius 18; a reply at most 80% of the column and
-   560 (480 at 1040). A turn is 2 pt above and below its bubble; a change of speaker adds 12.
+   tall); bubbles 15/20, text 22, 7 x 12 padding, radius 18; a bubble at most 80% of the column,
+   560, and the column less 82 (main-* widths 720-2000: 480 of 600, 352 of 440, 560 of 840; at
+   800-820 the column is 392 and wrapped bubbles, own ones too, stop at 310, not 80%'s 313.6). A turn is 2 pt above and below its bubble; a change of speaker adds 12.
    Scrolled to its end, the last bubble sits 54 above the composer. Gated: Gate A transcript cases. */
 .transcript { flex: 1; min-height: 0; contain: size; overflow-y: auto; padding: 76px 16px 52px; scrollbar-width: none; }
 .column { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; }
@@ -9,7 +10,7 @@
 .turn { padding: 2px 0; display: flex; }
 .turn-user { justify-content: flex-end; }
 .turn-change { padding-top: 14px; }
-.bubble { max-width: min(80%, 560px); padding: 7px 12px; border-radius: 18px; font-size: 15px; line-height: 20px; letter-spacing: 0.15px; white-space: pre-wrap; overflow-wrap: anywhere;
+.bubble { max-width: min(80%, 560px, calc(100% - 82px)); padding: 7px 12px; border-radius: 18px; font-size: 15px; line-height: 20px; letter-spacing: 0.15px; white-space: pre-wrap; overflow-wrap: anywhere;
   box-shadow: rgb(255 255 255 / 0.03) 0 0.5px 0 0 inset, rgb(255 255 255 / 0.03) 0 -0.5px 0 0 inset, rgb(245 245 245 / 0.04) 0 0 0 0.5px inset;
   animation: bubble-in 240ms cubic-bezier(0.23, 1, 0.32, 1); }
 .bubble-assistant { background-color: rgb(245 245 245 / 0.04); background-image: linear-gradient(rgb(255 255 255 / 0.03), transparent); }
