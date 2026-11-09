@@ -10,6 +10,6 @@
   "Cancel",
   "Close dialog"
  ],
- "gate": "Gate A oracle-new-bot-dialog 43/45 (Cancel 1.1 pt off on text width), oracle-new-bot-named 2/2 (Create's enabled look)",
+ "gate": "Gate A oracle-new-bot-dialog 45/45, oracle-new-bot-named 2/2 (Create's enabled look)",
  "evidence": "app/src/components/overlays/NewBotDialog.tsx; opens from New Bot; shape and colour pick, Create disabled until named, Close and Cancel close. Left: the shapes are plain stand-ins (O2), and Create makes nothing yet."
 }

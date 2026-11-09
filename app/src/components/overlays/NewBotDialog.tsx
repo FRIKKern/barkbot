@@ -5,6 +5,7 @@
 import {useState} from 'react'
 import {Icon} from '../Composer'
 import {colours, shapeRows} from './data'
+import {DIALOG, fit} from './fit'
 
 // Plain shapes in a 36 x 36 box, one per captured shape name.
 const shapes: Record<string, string> = {
@@ -57,10 +58,10 @@ export function NewBotDialog({onClose}: {onClose?: () => void}) {
         </div>
         <div className="dialog-foot">
           <button className="pill" onClick={onClose}>
-            <span>Cancel</span>
+            <span style={fit(DIALOG, 'Cancel')}>Cancel</span>
           </button>
           <button className="pill primary" disabled={!name.trim()}>
-            <span>Create</span>
+            <span style={fit(DIALOG, 'Create')}>Create</span>
           </button>
         </div>
       </div>

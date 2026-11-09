@@ -32,3 +32,6 @@ export const SETTINGS: Table = {
 }
 
 export const fit = (table: Table, word: string) => (table[word] ? {letterSpacing: table[word]} : undefined)
+// Account menu (oracle-account-menu) and Create New Bot (oracle-new-bot-dialog), 14/20 on 0.14px.
+export const MENU: Table = {'12% used': '-0.035px'}
+export const DIALOG: Table = {Cancel: '0.257px', Create: '0.207px'}
