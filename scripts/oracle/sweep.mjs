@@ -3,7 +3,7 @@
 // captures it, and puts the screen back; the sweep checks the screen came back before the next.
 // Nothing here sends, shares, connects, creates, approves or wakes a computer (O1, O3).
 //
-//   node scripts/oracle/sweep.mjs [--only <id>] [--list]
+//   node scripts/oracle/sweep.mjs [--only <id>] [--list] [--settle <ms>]
 //
 // Personal data never lands in a fixture (O2): any text that looks like an e-mail address,
 // and everything in the account menu that is not a menu item, is kept as a length only.
@@ -18,6 +18,8 @@ import { path } from '../lib/data.mjs';
 const args = process.argv.slice(2);
 const only = args.includes('--only') ? args[args.indexOf('--only') + 1] : null;
 const shots = args.includes('--shots') ? args[args.indexOf('--shots') + 1] : null;
+// How long a changed screen must sit before the capture: some panels animate their height for longer.
+const SETTLE = args.includes('--settle') ? Number(args[args.indexOf('--settle') + 1]) : 600;
 const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
 // The only controls the sweep may press. Anything else is refused, by name.
@@ -77,9 +79,9 @@ async function step(s) {
     else await page.send('Emulation.setDeviceMetricsOverride', { width: s.width, height: W0[1], deviceScaleFactor: 0, mobile: false });
     const want = s.width ?? W0[0];
     for (let t = 0; t < 30 && (await page.evaluate(() => innerWidth)) !== want; t++) await wait(100);
-    return wait(600);
+    return wait(SETTLE);
   }
-  for (let t = 0; t < 30; t++) { await wait(100); if ((await names()) !== before) return wait(600); } // 600: the slowest measured move is 300 ms
+  for (let t = 0; t < 30; t++) { await wait(100); if ((await names()) !== before) return wait(SETTLE); } // 600 default: the slowest measured move is 300 ms
   throw new Error(`${JSON.stringify(s)} changed nothing on screen in 3 s; stopping`);
 }
 
