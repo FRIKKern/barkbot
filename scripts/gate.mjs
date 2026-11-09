@@ -76,7 +76,8 @@ const report = { run: new Date().toISOString(), states: [] };
 const inventory = { run: report.run, states: [] };
 for (const state of states) {
   const [w, h, dpr] = state.viewport;
-  const theirs = namedElements(state);
+  // A hover state scores only what the hover changed (fixture `changed`), not the screen again.
+  const theirs = namedElements(state).filter(({ key }) => !state.changed || state.changed.includes(key));
   // A captured state the app has no scene for yet scores 0: every case is open work.
   if ((await fetch(`${base}/gate/${state.id}`)).status === 404) {
     report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: theirs.length, pass: 0, scene: false, results: theirs.map(({ key }) => ({ key, pass: false, why: 'no scene' })) });
@@ -93,6 +94,11 @@ for (const state of states) {
   await page.send('Page.navigate', { url: `${base}/gate/${state.id}` });
   await until(() => page.evaluate(() => document.readyState === 'complete' && !!document.querySelector('.app') && document.fonts.status === 'loaded'), 30000, `/gate/${state.id}`);
   await wait(300);
+  if (state.pointer) {
+    // Rest our pointer on our control of the same name, as the capture did on the oracle's.
+    const hit = controls(await page.evaluate(collect)).filter((c) => c.name === state.pointer.over)[state.pointer.nth ?? 0];
+    if (hit) { const [x, y, bw, bh] = hit.e.box; await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + bw / 2, y: y + bh / 2 }); await wait(400); }
+  }
   const ours = await page.evaluate(collect);
   page.close();
   chrome.kill('SIGTERM');

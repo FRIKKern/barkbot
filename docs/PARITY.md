@@ -81,6 +81,6 @@ Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an it
 |---|---|---|---|---|
 | N1 | First run: greeting, naming, a 'Renamed to' line | J12 | ? unread | — |
 | N2 | Message actions on hover | — | ? unread | — |
-| N3 | Suggested card: Add to Slack and Create a routine; each opens 1:1 and stops before acting outside the page | — | ? unread | — |
+| N3 | Suggested card: Add to Slack and Create a routine; each opens 1:1 and stops before acting outside the page; its Hide button shows while the pointer is over the window (oracle-hover-*) | — | ? unread | — |
 | N4 | Voice chat card: voice, speed and language pickers | — | ? unread | — |
 | N5 | Create New Bot dialog: name, 13 shapes, 11 colours, Cancel and Create (Create stays disabled until named) | J12 | ○ open | — |

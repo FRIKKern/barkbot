@@ -3,7 +3,7 @@
 // captures it, and puts the screen back; the sweep checks the screen came back before the next.
 // Nothing here sends, shares, connects, creates, approves or wakes a computer (O1, O3).
 //
-//   node scripts/oracle/sweep.mjs [--only <id>] [--list] [--settle <ms>]
+//   node scripts/oracle/sweep.mjs [--only <id>] [--hovers] [--list] [--settle <ms>]
 //
 // Personal data never lands in a fixture (O2): any text that looks like an e-mail address,
 // and everything in the account menu that is not a menu item, is kept as a length only.
@@ -12,7 +12,7 @@ import { execFileSync } from 'node:child_process';
 import { connect } from './cdp.mjs';
 import { activeBot, ORACLE_BOT } from './recipes.mjs';
 import { collect } from './collect.mjs';
-import { controls } from '../lib/controls.mjs';
+import { controls, namedElements } from '../lib/controls.mjs';
 import { path } from '../lib/data.mjs';
 
 const args = process.argv.slice(2);
@@ -39,6 +39,16 @@ const SWEEP = [
   ['oracle-language-picker', 'the Language picker open', [{ press: 'Language' }], [{ key: 'Escape' }]],
   ['oracle-new-bot-dialog', 'the Create New Bot dialog, empty', [{ press: 'New Bot' }], [{ key: 'Escape' }]],
 ];
+
+// Hover states: the pointer resting on one control of the main view (1040), nothing pressed.
+// A hover fixture keeps the whole screen, plus `pointer` (which control) and `changed` (the keys
+// whose box or look differ from the same screen with the pointer parked): Gate A scores only those.
+const HOVER = ['New Bot', 'Connect apps', 'Open account menu', 'View conversation details', 'Share', 'Composer actions', 'Start voice input', 'Start voice chat', 'Close', 'Edit Bot avatar', 'Bot name', 'Activity', 'Library', 'Add to Slack', 'Create a routine', "Bot's computer", 'Voice', 'Speed', 'Language', 'Prompt'];
+const slug = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+// Bot tile #2 is Oracle's. #1 is the owner's real bot and is never touched, not even hovered (O1).
+for (const [name, nth] of [...HOVER.map((n) => [n, 0]), ['Bot tile', 1]])
+  SWEEP.push([`oracle-hover-${slug(name)}${name === 'Bot tile' ? `-${nth + 1}` : ''}`, `pointer over ${name}${name === 'Bot tile' ? ` #${nth + 1}` : ''}`, [{ hover: name, nth }], [{ park: true }], { keepPointer: true, pointer: { over: name, nth } }]);
+const only2 = args.includes('--hovers');
 
 if (args.includes('--list')) { for (const [id, what] of SWEEP) console.log(`${id}  ${what}`); process.exit(0); }
 
@@ -71,6 +81,16 @@ async function press(name) {
 // Every step must visibly change the screen (its controls, or the width) within 3 s, or the
 // sweep stops: a press that did not take would capture the wrong state under the right name.
 async function step(s) {
+  if (s.park) return park();
+  if (s.hover) {
+    const hit = controls(await page.evaluate(collect)).filter((c) => c.name === s.hover);
+    if (!hit[s.nth ?? 0]) throw new Error(`"${s.hover}" #${(s.nth ?? 0) + 1}: no such control`);
+    const [x, y, w, h] = hit[s.nth ?? 0].e.box;
+    execFileSync('open', ['-a', 'Grok Bot']);
+    await page.send('Page.bringToFront');
+    await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + w / 2, y: y + h / 2 });
+    return wait(SETTLE);
+  }
   const before = await names();
   if (s.press) await press(s.press);
   else if (s.key) for (const type of ['keyDown', 'keyUp']) await page.send('Input.dispatchKeyEvent', { type, key: s.key, code: s.key, windowsVirtualKeyCode: 27 });
@@ -101,7 +121,10 @@ function redact(state, privateMenu) {
     if (!e.text) continue;
     // Inside a menu item: a label of the app's ("Settings"). Elsewhere in the account menu: the person's own (name, plan).
     const inItem = (x) => { let p = x; while (p) { if (p.role === 'menuitem' || p.role === 'menuitemradio' || p.role === 'menuitemcheckbox') return true; p = p.parent === undefined ? null : els[p.parent]; } return false; };
-    const priv = /@|\b[\w.-]+\.(com|no|ai|io|dev)\b/i.test(e.text) || (privateMenu && inMenu(e) && !inItem(e));
+    // A bot's chat preview (hover on its tile) shows its last message: keep only the bot's name.
+    const inPreview = (x) => { let p = x; while (p) { if (p.role === 'dialog' && / chat preview$/.test(p.label || '')) return p; p = p.parent === undefined ? null : els[p.parent]; } return null; };
+    const pv = inPreview(e);
+    const priv = /@|\b[\w.-]+\.(com|no|ai|io|dev)\b/i.test(e.text) || (privateMenu && inMenu(e) && !inItem(e)) || (pv && e.text !== pv.label.replace(/ chat preview$/, ''));
     if (priv) { e.textLength = e.text.length; delete e.text; }
   }
   return state;
@@ -111,15 +134,27 @@ mkdirSync(path('fixtures', 'states'), { recursive: true });
 let done = 0;
 for (const [id, what, open, close, opts = {}] of SWEEP) {
   if (only && id !== only) continue;
+  if (only2 && !id.startsWith('oracle-hover-')) continue;
   for (const s of open) await step(s);
   if (!opts.keepPointer) await park();
   const state = redact(await page.evaluate(collect), opts.privateMenu);
   const out = { id, what, captured: new Date().toISOString().slice(0, 10), engine: 'electron', version, bot, ...state };
+  if (opts.pointer) {
+    // What the hover changed: compare with the same screen, pointer parked, captured just before.
+    for (const s of close) await step(s);
+    const rest = new Map(namedElements(await page.evaluate(collect)).map((c) => [c.key, c.e]));
+    for (const s of open) await step(s);
+    const now = namedElements(redact(await page.evaluate(collect), opts.privateMenu));
+    const look = (e) => JSON.stringify([e.box.map((v) => Math.round(v * 10) / 10), e.style]);
+    out.pointer = opts.pointer;
+    out.changed = now.filter((c) => !rest.has(c.key) || look(rest.get(c.key)) !== look(c.e)).map((c) => c.key);
+    if (!out.changed.length) { console.log(`${id}: the hover changes nothing visible; not kept`); for (const s of close) await step(s); continue; }
+  }
   writeFileSync(path('fixtures', 'states', `${id}.json`), JSON.stringify(out) + '\n');
   if (shots) { const s = await page.send('Page.captureScreenshot', { format: 'png' }); writeFileSync(`${shots}/${id}.png`, Buffer.from(s.data, 'base64')); }
   for (const s of close) await step(s);
   const now = await names();
-  console.log(`${id}: ${state.elements.length} elements at ${state.viewport.slice(0, 2).join('x')} · ${what}`);
+  console.log(`${id}: ${state.elements.length} elements at ${state.viewport.slice(0, 2).join('x')} · ${what}${out.changed ? ` · changed: ${out.changed.join(', ')}` : ''}`);
   if (now !== base) throw new Error(`the screen did not come back after ${id}; stopping. Controls now differ from the start.`);
   done++;
 }

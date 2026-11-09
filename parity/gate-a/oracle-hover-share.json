@@ -1,0 +1,135 @@
+{
+ "id": "oracle-hover-share",
+ "captured": "2026-11-09",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 1,
+ "pass": 1,
+ "results": [
+  {
+   "key": "control:Share",
+   "pass": true
+  }
+ ],
+ "run": "2026-11-09T07:13:16.785Z",
+ "inventory": {
+  "id": "oracle-hover-share",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": true
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": true
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Close",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Add to Slack",
+    "item": "N3",
+    "ours": true
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": true
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": true
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Speed",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": true
+   }
+  ],
+  "missing": 1,
+  "untracked": []
+ }
+}

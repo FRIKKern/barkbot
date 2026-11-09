@@ -23,9 +23,9 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 11 changes
+- **Today** · 12 changes
+  - Hover states: 18 captured, scored on what the hover changes
   - Oracle: park the pointer before every capture; 1280 recaptured, 39/39
-  - Composer grows with the window up to 960 ([#3](https://github.com/FRIKKern/barkbot/pull/3))
 - **Yesterday** · 11 changes
   - S1: talk through Barkpark (server side, transcript, working line, composer)
   - S0 closed on the board; Gate B moves to S1 with the transcript it needs

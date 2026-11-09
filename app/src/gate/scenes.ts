@@ -8,3 +8,7 @@ const files = import.meta.glob<{default: Scene}>('./scenes/oracle-*.ts', {eager:
 export const scenes: Record<string, Scene> = Object.fromEntries(
   Object.entries(files).map(([file, mod]) => [file.replace('./scenes/', '').replace(/\.ts$/, ''), mod.default]),
 )
+
+// A hover state is the main view with the pointer on one control: same scene as oracle-turn-1040
+// (the gate moves the pointer itself).
+export const sceneFor = (id: string): Scene | undefined => scenes[id] ?? (id.startsWith('oracle-hover-') ? scenes['oracle-turn-1040'] : undefined)

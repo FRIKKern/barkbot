@@ -2,10 +2,11 @@
  "id": "N3",
  "slice": "S7",
  "journey": null,
- "title": "Suggested card: Add to Slack and Create a routine; each opens 1:1 and stops before acting outside the page",
+ "title": "Suggested card: Add to Slack and Create a routine; each opens 1:1 and stops before acting outside the page; its Hide button shows while the pointer is over the window (oracle-hover-*)",
  "status": "unknown",
  "controls": [
   "Add to Slack",
-  "Create a routine"
+  "Create a routine",
+  "Hide"
  ]
 }
