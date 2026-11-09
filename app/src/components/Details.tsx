@@ -1,18 +1,22 @@
 // The details panel (aside "Conversation details", 720..1040): the bot, its tabs, and the
 // Activity cards: Suggested, Computer, Voice chat. Library shows its empty state.
+import {useState} from 'react'
 import type {Scene} from './Shell'
 import {Icon} from './Composer'
 import {Face, Pick, Row, Section, fit} from './parts'
 import {Tooltip, useHover} from './tips'
 
-export function Details({scene}: {scene: Scene}) {
+// Always mounted: closing runs its width 320 -> 0 (styles/details.css), and a closed panel is
+// inert. The tab starts on the scene's and follows clicks.
+export function Details({scene, onClose}: {scene: Scene; onClose?: () => void}) {
   const active = scene.active ?? ''
-  const library = scene.tab === 'library'
+  const [tab, setTab] = useState(scene.tab ?? 'activity')
+  const library = tab === 'library'
   const avatar = useHover()
   return (
-    <aside className="details" aria-label="Conversation details">
+    <aside className="details" aria-label="Conversation details" inert={!scene.panelOpen}>
       <header className="details-head">
-        <button className="close" aria-label="Close">
+        <button className="close" aria-label="Close" onClick={onClose}>
           <Icon d="M4 4l8 8M12 4l-8 8" />
         </button>
       </header>
@@ -24,14 +28,14 @@ export function Details({scene}: {scene: Scene}) {
           <Tooltip box={avatar.box} side="bottom">
             Edit Avatar
           </Tooltip>
-          <input className="who-name" aria-label="Bot name" defaultValue={active} />
+          <input key={active} className="who-name" aria-label="Bot name" defaultValue={active} />
         </div>
         <div className="tabs-row">
           <div role="tablist" aria-label="Conversation details" className="tabs">
-            <button role="tab" aria-selected={!library} className="tab">
+            <button role="tab" aria-selected={!library} className="tab" onClick={() => setTab('activity')}>
               Activity
             </button>
-            <button role="tab" aria-selected={library} className="tab">
+            <button role="tab" aria-selected={library} className="tab" onClick={() => setTab('library')}>
               Library
             </button>
           </div>

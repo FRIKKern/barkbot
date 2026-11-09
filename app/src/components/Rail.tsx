@@ -5,7 +5,7 @@ import {Icon} from './Composer'
 import {Face} from './parts'
 import {Preview, Tooltip, useHover} from './tips'
 
-export function Rail({scene}: {scene: Scene}) {
+export function Rail({scene, onPick}: {scene: Scene; onPick?: (name: string) => void}) {
   const main = scene.bots.find((b) => b.main)
   const others = scene.bots.filter((b) => !b.main)
   const active = scene.active ?? ''
@@ -13,7 +13,7 @@ export function Rail({scene}: {scene: Scene}) {
     <aside className="rail" aria-label="Bots">
       <div className="rail-main">
         {main && (
-          <Tile name={main.name} label={`${main.name}, Main Bot`} line={scene.previews?.[main.name]}>
+          <Tile name={main.name} label={`${main.name}, Main Bot`} current={main.name === active} line={scene.previews?.[main.name]} onPick={onPick}>
             <span className="face face-main" />
             <span className="badge" role="img" aria-label="Main Bot" />
           </Tile>
@@ -23,7 +23,7 @@ export function Rail({scene}: {scene: Scene}) {
       <div className="rail-list" role="list" aria-label="Pinned Bots">
         {others.map((b) => (
           <div role="listitem" key={b.name}>
-            <Tile name={b.name} label={b.name} current={b.name === active} line={scene.previews?.[b.name]}>
+            <Tile name={b.name} label={b.name} current={b.name === active} line={scene.previews?.[b.name]} onPick={onPick}>
               <Face size={34} />
             </Tile>
           </div>
@@ -51,11 +51,11 @@ export function Rail({scene}: {scene: Scene}) {
 }
 
 // A bot's tile; the pointer on it brings up the bot's chat preview (oracle-hover-bot-tile-2).
-function Tile({name, label, current, line, children}: {name: string; label: string; current?: boolean; line?: string; children: ReactNode}) {
+function Tile({name, label, current, line, onPick, children}: {name: string; label: string; current?: boolean; line?: string; onPick?: (name: string) => void; children: ReactNode}) {
   const h = useHover()
   return (
     <>
-      <button className="rail-tile" aria-label={label} aria-current={current ? 'page' : undefined} {...h.on}>
+      <button className="rail-tile" aria-label={label} aria-current={current ? 'page' : undefined} onClick={() => onPick?.(name)} {...h.on}>
         {children}
       </button>
       <Preview box={h.box} name={name} line={line ?? ''} />

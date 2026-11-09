@@ -1,6 +1,11 @@
 /* Picker (combobox 246): 1 border, text at +6, chevron 10 after a 4 gap, 4 to the right edge. */
 /* Details: header 60, Close 36 at 12 from the corner; face 64; name 17/24; tabs 26 high. */
-.details { position: relative; box-shadow: inset 0.5px 0 0 var(--wash-06); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.details { position: relative; box-shadow: inset 0.5px 0 0 var(--wash-06); overflow: hidden; display: flex; flex-direction: column; min-width: 0;
+  width: var(--details); transition: width 300ms var(--ease-panel), visibility 0s; }
+/* Close and open: width 320 <-> 0 in 300 ms on cubic-bezier(.2,0,0,1) (traces/2026-11-08-feel-panel.json);
+   the content keeps its 320 and is cut, and a closed panel is hidden once the width reaches 0. */
+.app[data-panel='closed'] .details { width: 0; visibility: hidden; transition: width 300ms var(--ease-panel), visibility 0s 300ms; }
+.details-head, .details-body { width: var(--details); }
 .details-head { height: 60px; flex: none; position: relative; }
 .close { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 9999px; display: grid; place-items: center; background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--wash-06); color: var(--ink-90); font-size: 13px; }
 .details-body { flex: 1; min-height: 0; background: var(--bg); }
