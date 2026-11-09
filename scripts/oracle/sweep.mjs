@@ -32,6 +32,10 @@ const NEVER = /send|share|connect|approve|allow|create|add to|delete|remove|invi
 const SWEEP = [
   ['oracle-main-1280', 'the main view, 1280 wide', [{ width: 1280 }], [{ width: null }]],
   ['oracle-main-1600', 'the main view, 1600 wide', [{ width: 1600 }], [{ width: null }]],
+  // At 720 the oracle closes its details panel by itself, and it stays closed when the width comes back.
+  ['oracle-main-720', 'the main view, 720 wide (the panel closes itself)', [{ width: 720 }], [{ width: null }, { panelOpen: true }]],
+  ['oracle-main-880', 'the main view, 880 wide', [{ width: 880 }], [{ width: null }]],
+  ['oracle-main-2000', 'the main view, 2000 wide', [{ width: 2000 }], [{ width: null }]],
   ['oracle-panel-closed', 'details panel closed', [{ press: 'View conversation details' }], [{ press: 'View conversation details' }]],
   ['oracle-library', 'details panel, Library tab', [{ press: 'Library' }], [{ press: 'Activity' }]],
   ['oracle-composer-menu', 'the composer actions menu', [{ press: 'Composer actions' }], [{ key: 'Escape' }]],
@@ -79,7 +83,15 @@ const W0 = await page.evaluate(() => [innerWidth, innerHeight]);
 // The oracle's own version: a Grok update can move any number, so every capture names it.
 const version = await page.evaluate(() => navigator.userAgent.match(/(Grok[ \w]*)\/([\d.]+)/)?.slice(1).join(' ') ?? navigator.userAgent.match(/Electron\/[\d.]+/)?.[0] ?? null);
 // The screen's signature: its controls by name, and every open list, menu or dialog.
-const names = async () => { const st = await page.evaluate(collect); return [...new Set(controls(st).map((c) => c.name))].sort().join('|') + '#' + st.elements.filter((e) => ['listbox', 'option', 'menu', 'menuitem', 'dialog'].includes(e.role)).length; };
+// 'Hide' (Suggested) comes and goes with the pointer over the window, so it is not part of the signature.
+const names = async () => { const st = await page.evaluate(collect); return [...new Set(controls(st).map((c) => c.name).filter((n) => n !== 'Hide'))].sort().join('|') + '#' + st.elements.filter((e) => ['listbox', 'option', 'menu', 'menuitem', 'dialog'].includes(e.role)).length; };
+// Every recipe starts from the captured base: Oracle open with its details panel open. Grok remembers a
+// closed panel across launches, and a sweep that once stopped mid-recipe can leave it closed.
+if (!controls(await page.evaluate(collect)).some((c) => c.name === 'Close')) {
+  console.log('the details panel was closed: opening it first (the base every recipe starts from)');
+  await press('View conversation details');
+  await wait(SETTLE);
+}
 const base = await names();
 
 // A real pointer press at the control's centre (menus open on pointerdown, not on click()).
@@ -102,6 +114,11 @@ async function press(name) {
 // sweep stops: a press that did not take would capture the wrong state under the right name.
 async function step(s) {
   if (s.park) return park();
+  if (s.panelOpen) { // open the details panel only if it is still closed, then let it finish moving
+    await wait(1000);
+    if (!controls(await page.evaluate(collect)).some((c) => c.name === 'Close')) await press('View conversation details');
+    return wait(1000);
+  }
   if (s.type) { await page.send('Input.insertText', { text: s.type }); return wait(SETTLE); }
   if (s.wheel || s.hoverRole) {
     const el = (await page.evaluate(collect)).elements.find((e) => e.role === (s.wheel || s.hoverRole) && e.box[2] > 0 && e.box[3] > 0);
@@ -139,8 +156,10 @@ async function step(s) {
 // Before a capture the pointer rests in the bottom-right corner, 8 pt in: blank in every captured
 // layout (the details panel, or beside the composer when the panel is closed). A pointer left on a
 // control would capture its hover look (oracle-main-1280 caught Composer actions hovered).
+let parkedAt = null;
 async function park() {
   const [w, h] = await page.evaluate(() => [innerWidth, innerHeight]);
+  parkedAt = [w - 8, h - 8];
   await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: w - 8, y: h - 8 });
   await wait(400);
 }
@@ -181,6 +200,8 @@ for (const [id, what, open, close, opts = {}] of SWEEP) {
   const state = redact(await page.evaluate(collect), opts.privateMenu);
   const out = { id, what, captured: new Date().toISOString().slice(0, 10), engine: 'electron', version, bot, ...state };
   if (opts.pointer) out.pointer = opts.pointer;
+  // Where the pointer rested: some looks (the Suggested card's Hide) show only while it is over the window.
+  else if (!opts.keepPointer && parkedAt) out.parked = parkedAt;
   if (opts.diff && !opts.pointer) out.act = open.at(-1); // Gate A replays it on ours: { wheel | type | hoverRole }
   if (rest) {
     const look = (e) => JSON.stringify([e.box.map((v) => Math.round(v * 10) / 10), e.style]);
@@ -192,7 +213,7 @@ for (const [id, what, open, close, opts = {}] of SWEEP) {
   for (const s of close) await step(s);
   const now = await names();
   console.log(`${id}: ${state.elements.length} elements at ${state.viewport.slice(0, 2).join('x')} · ${what}${out.changed ? ` · changed: ${out.changed.join(', ')}` : ''}`);
-  if (now !== base) throw new Error(`the screen did not come back after ${id}; stopping. Controls now differ from the start.`);
+  if (now !== base) { const [a, b] = [base, now].map((x) => new Set(x.split(/[|#]/))); throw new Error(`the screen did not come back after ${id}; stopping. Gone: ${[...a].filter((x) => !b.has(x)).join(', ') || '-'}; new: ${[...b].filter((x) => !a.has(x)).join(', ') || '-'}; overlay count ${base.split('#')[1]} → ${now.split('#')[1]}`); }
   done++;
 }
 console.log(`sweep: ${done} state(s) captured, screen restored each time`);

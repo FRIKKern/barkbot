@@ -99,6 +99,8 @@ for (const state of states) {
     const hit = controls(await page.evaluate(collect)).filter((c) => c.name === state.pointer.over)[state.pointer.nth ?? 0];
     if (hit) { const [x, y, bw, bh] = hit.e.box; await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + bw / 2, y: y + bh / 2 }); await wait(400); }
   }
+  // A capture taken with the pointer parked in the window: rest ours at the same point.
+  if (state.parked && !state.pointer) { await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: state.parked[0], y: state.parked[1] }); await wait(400); }
   // The capture's last step (fixture `act`), replayed on ours the same way.
   const act = state.act;
   if (act?.type) { await page.send('Input.insertText', { text: act.type }); await wait(400); }

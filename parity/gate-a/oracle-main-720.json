@@ -1,0 +1,142 @@
+{
+ "id": "oracle-main-720",
+ "captured": "2026-11-09",
+ "viewport": [
+  720,
+  760,
+  2
+ ],
+ "cases": 14,
+ "pass": 0,
+ "scene": false,
+ "results": [
+  {
+   "key": "aside:Bots",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:New Bot",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect apps",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open account menu",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Oracle",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Prompt",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Composer actions",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice input",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice chat",
+   "pass": false,
+   "why": "no scene"
+  }
+ ],
+ "run": "2026-11-09T07:47:19.033Z",
+ "inventory": {
+  "id": "oracle-main-720",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": false
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": false
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": false
+   }
+  ],
+  "missing": 10,
+  "untracked": []
+ }
+}
