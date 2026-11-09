@@ -40,13 +40,15 @@ export function Row({icon, label}: {icon: ReactNode; label: string}) {
   )
 }
 
-export function Pick({label, value}: {label: string; value: string}) {
+// A voice-chat picker row. `open` while its list is up (Scene.overlay names it); the value is the
+// scene's voice setting.
+export function Pick({label, value, open = false}: {label: string; value: string; open?: boolean}) {
   return (
     <li className="pick">
       <span className="pick-label">
         <span style={fit(label)}>{label}</span>
       </span>
-      <button role="combobox" aria-expanded="false" aria-label={label} className="pick-value">
+      <button role="combobox" aria-expanded={open} aria-label={label} className="pick-value">
         <span className="pick-text">
           <span style={fit(value)}>{value}</span>
         </span>

@@ -46,8 +46,9 @@
 .library-empty > div { padding: 16px 0; }
 .library-empty p { margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.14px; color: var(--ink-54); }
 
-/* Hover (oracle-hover-*): rows, the computer card, pickers and the unselected tab wash 4%, the name 8%. */
-.row:hover, .computer:hover, .pick-value:hover, .tab:not([aria-selected='true']):hover { background: var(--wash-04); }
+/* Hover (oracle-hover-*): rows, the computer card, pickers and the unselected tab wash 4%, the name 8%.
+   An open picker keeps the 4% wash (oracle-{voice,speed,language}-picker: only the open combobox). */
+.row:hover, .computer:hover, .pick-value:hover, .pick-value[aria-expanded='true'], .tab:not([aria-selected='true']):hover { background: var(--wash-04); }
 .who-name:hover { background: var(--wash-08); }
 /* Suggested's Hide shows while the pointer is anywhere over the window (N3; button 979.5,236,38.5,24). */
 .section-title { position: relative; }

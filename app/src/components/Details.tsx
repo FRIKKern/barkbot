@@ -73,9 +73,9 @@ export function Details({scene}: {scene: Scene}) {
             )}
             {scene.voice && (
               <Section title="Voice chat">
-                <Pick label="Voice" value={scene.voice.voice} />
-                <Pick label="Speed" value={scene.voice.speed} />
-                <Pick label="Language" value={scene.voice.language} />
+                <Pick label="Voice" value={scene.voice.voice} open={scene.overlay === 'voice-picker'} />
+                <Pick label="Speed" value={scene.voice.speed} open={scene.overlay === 'speed-picker'} />
+                <Pick label="Language" value={scene.voice.language} open={scene.overlay === 'language-picker'} />
               </Section>
             )}
           </div>
