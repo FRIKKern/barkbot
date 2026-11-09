@@ -28,14 +28,16 @@ export function bubbles(state) {
 // A paragraph's length is its own text plus its bold runs and code spans.
 const paraLength = (els, p) => (p.textLength ?? 0) + els.filter((e) => e.parent === p.i && (e.tag === 'strong' || e.tag === 'code')).reduce((n, e) => n + (e.textLength ?? 0), 0);
 
-/** A transcript as lengths, for a gate scene: [{role, paras: [{len, marks: [{tag, len}]}]}]. */
+/** A transcript as lengths, for a gate scene: [{role, paras: [{len, height, marks: [{tag, len}]}]}]. */
 export function transcriptOf(state) {
   const els = state.elements;
   return bubbles(state).map(({ role, paras }) => ({
     role,
     paras: paras.map((p) => {
       const marks = els.filter((e) => e.parent === p.i && (e.tag === 'strong' || e.tag === 'code')).sort((m, n) => m.box[1] - n.box[1] || m.box[0] - n.box[0]);
-      return { len: paraLength(els, p), ...(marks.length ? { marks: marks.map((m) => ({ tag: m.tag, len: m.textLength ?? 0 })) } : {}) };
+      // Its height too: placeholder words wrap differently from the real ones, and a bubble's
+      // height decides where every bubble above it sits (the transcript is pinned at its end).
+      return { len: paraLength(els, p), height: p.box[3], ...(marks.length ? { marks: marks.map((m) => ({ tag: m.tag, len: m.textLength ?? 0 })) } : {}) };
     }),
   }));
 }

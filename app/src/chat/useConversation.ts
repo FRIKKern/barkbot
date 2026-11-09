@@ -6,7 +6,14 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {sendMessage} from './api'
 
-export type Bubble = {key: string; role: 'user' | 'assistant'; text: string; seq?: number}
+export type Bubble = {
+  key: string
+  role: 'user' | 'assistant'
+  text: string
+  seq?: number
+  /** Gate scenes only: each paragraph's height on the oracle, kept whatever the placeholder words do. */
+  heights?: number[]
+}
 export type Working = {label: string; leaving: boolean; first: boolean} | null
 
 type Frame = Record<string, any>

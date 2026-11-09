@@ -5,7 +5,7 @@ import type {Bubble, Working} from '../chat/useConversation'
 import {filler} from '../chat/turn'
 
 /** A message as lengths only (O2): what a gate scene holds (gate/transcripts.ts). */
-export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; marks?: {tag: 'strong' | 'code'; len: number}[]}[]}
+export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; height?: number; marks?: {tag: 'strong' | 'code'; len: number}[]}[]}
 
 /** Placeholder words of the captured lengths, bold runs and code spans (one word, like a path) in their order. */
 export function fromLengths(list: SceneBubble[]): Bubble[] {
@@ -19,7 +19,7 @@ export function fromLengths(list: SceneBubble[]): Bubble[] {
     })
     return out + words(rest, marks.length > 0, false)
   }
-  return list.map((b, i) => ({key: `scene-${i}`, role: b.role, text: b.paras.map(para).join('\n\n')}))
+  return list.map((b, i) => ({key: `scene-${i}`, role: b.role, text: b.paras.map(para).join('\n\n'), heights: b.paras.map((p) => p.height ?? 0)}))
 }
 // n characters of words, with a space where it meets a mark before or after it.
 const words = (n: number, before: boolean, after: boolean) => {
@@ -28,13 +28,16 @@ const words = (n: number, before: boolean, after: boolean) => {
   return (before ? ' ' : '') + filler(n - pad) + (after ? ' ' : '')
 }
 
+// A gate scene's paragraph is as tall as the oracle's, whatever its placeholder words do.
+const heightStyle = (h?: number) => (h ? {height: h, overflow: 'hidden' as const} : undefined)
+
 // A reply's paragraphs (a blank line), **bold** and `code`: the marks the oracle's replies show.
 // Your own message stays as typed.
-function Rich({text}: {text: string}) {
+function Rich({text, heights}: {text: string; heights?: number[]}) {
   return (
     <>
       {text.split(/\n{2,}/).map((p, i) => (
-        <p key={i}>
+        <p key={i} style={heightStyle(heights?.[i])}>
           {p.split(/(\*\*[^*]+\*\*|`[^`]+`)/).map((part, j): ReactNode =>
             part.startsWith('**') && part.endsWith('**') && part.length > 4 ? (
               <strong key={j}>{part.slice(2, -2)}</strong>
@@ -92,7 +95,7 @@ export function Transcript({bot, startedAt, bubbles, working, error}: {bot: stri
             <div role="article" className={`bubble bubble-${b.role}`} data-role={b.role}>
               <span className="sr-only">{b.role === 'user' ? 'You' : bot}</span>
               <div className="bubble-text">
-                {b.role === 'assistant' ? <Rich text={b.text} /> : <p>{b.text}</p>}
+                {b.role === 'assistant' ? <Rich text={b.text} heights={b.heights} /> : <p style={heightStyle(b.heights?.[0])}>{b.text}</p>}
               </div>
             </div>
           </div>
