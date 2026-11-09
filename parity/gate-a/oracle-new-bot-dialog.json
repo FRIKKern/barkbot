@@ -7,431 +7,391 @@
   2
  ],
  "cases": 45,
- "pass": 0,
- "scene": false,
+ "pass": 39,
  "results": [
   {
    "key": "aside:Bots",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot tile",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot tile#2",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:New Bot",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Connect apps",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Open account menu",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:View conversation details",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Oracle",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Share",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Share",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Prompt",
    "pass": false,
-   "why": "no scene"
+   "why": "box off by 160,0,-320,0"
   },
   {
    "key": "control:Composer actions",
    "pass": false,
-   "why": "no scene"
+   "why": "box off by 160,0.5,0,0"
   },
   {
    "key": "control:Start voice input",
    "pass": false,
-   "why": "no scene"
+   "why": "box off by -160,0.5,0,0"
   },
   {
    "key": "control:Start voice chat",
    "pass": false,
-   "why": "no scene"
+   "why": "box off by -160,0.5,0,0"
   },
   {
    "key": "control:Close dialog",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "h2:Create New Bot",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot name",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:blob character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:cloud character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:square character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:sparkle character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:clover character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:heart character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:flower character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:teardrop character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:tablet character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:wedge character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:house character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:star character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:hex character shape",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Black character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Brown character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Red character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Orange character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Yellow character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Green character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Cyan character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Blue character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Violet character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Magenta character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Gray character color",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Cancel",
    "pass": false,
-   "why": "no scene"
+   "why": "box off by -1.3,0,0.7,0"
   },
   {
    "key": "span:Cancel",
    "pass": false,
-   "why": "no scene"
+   "why": "box off by -1.3,0,0.7,0"
   },
   {
    "key": "control:Create",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Create",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   }
  ],
- "run": "2026-11-08T23:15:14.839Z",
+ "run": "2026-11-09T07:05:20.601Z",
  "inventory": {
   "id": "oracle-new-bot-dialog",
   "controls": [
    {
     "name": "Bot tile",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "New Bot",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Connect apps",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open account menu",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "View conversation details",
     "item": "F2",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Share",
     "item": "F5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Prompt",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Composer actions",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Start voice input",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Start voice chat",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Close dialog",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Bot name",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "blob character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "cloud character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "square character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "sparkle character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "clover character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "heart character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "flower character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "teardrop character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "tablet character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "wedge character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "house character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "star character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "hex character shape",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Black character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Brown character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Red character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Orange character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Yellow character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Green character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Cyan character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Blue character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Violet character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Magenta character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Gray character color",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Cancel",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Create",
     "item": "N5",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 38,
+  "missing": 0,
   "untracked": []
  }
 }
