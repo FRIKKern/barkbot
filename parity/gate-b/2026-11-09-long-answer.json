@@ -24,14 +24,14 @@
    "key": "user#1",
    "pass": true,
    "oracle": 309.5,
-   "ours": 310.8,
-   "lag": 1
+   "ours": 311.2,
+   "lag": 2
   },
   {
    "key": "status:working#1",
    "pass": false,
    "oracle": 750.4,
-   "ours": 311.2,
+   "ours": 311.8,
    "lag": -439,
    "why": "early by 439 ms"
   },
@@ -57,15 +57,15 @@
    "key": "status:replied#1",
    "pass": true,
    "oracle": 8785.4,
-   "ours": 8888.8,
-   "lag": 103
+   "ours": 8889.8,
+   "lag": 104
   },
   {
    "key": "assistant#1",
    "pass": true,
    "oracle": 8785.4,
-   "ours": 8794.1,
-   "lag": 9
+   "ours": 8793.8,
+   "lag": 8
   },
   {
    "key": "nothing extra",
@@ -74,7 +74,7 @@
   {
    "key": "budget: composer clears in 1 frame",
    "pass": true,
-   "ours": 0.3
+   "ours": 0.4
   },
   {
    "key": "budget: focus stays in Prompt",
@@ -88,7 +88,7 @@
   {
    "key": "budget: own bubble ≤ 440 ms",
    "pass": true,
-   "ours": 310.8
+   "ours": 311.2
   },
   {
    "key": "budget: working line ≤ 2.0 s",
@@ -96,7 +96,7 @@
    "why": "never happened"
   },
   {
-   "key": "history after a reconnect (stored as today: the last message)",
+   "key": "history after a reconnect (one row, every message joined, as Barkpark stores a turn since #25471)",
    "pass": true
   }
  ],
@@ -143,35 +143,35 @@
  "ours": [
   {
    "kind": "clear",
-   "t": 0.3
+   "t": 0.4
   },
   {
    "kind": "status:working",
-   "t": 311.2,
-   "raw": 312.7
+   "t": 311.8,
+   "raw": 313
   },
   {
    "kind": "user",
-   "t": 310.8,
+   "t": 311.2,
    "len": 54,
-   "raw": 314.4
+   "raw": 315.5
   },
   {
    "kind": "assistant",
-   "t": 8794.1,
+   "t": 8793.8,
    "len": 1214,
-   "raw": 8796.6
+   "raw": 8797.8
   },
   {
    "kind": "status:replied",
-   "t": 8888.8,
-   "raw": 8891.3
+   "t": 8889.8,
+   "raw": 8893.8
   }
  ],
  "standInLate": [
   1,
-  9
+  20
  ],
  "skipped": [],
- "run": "2026-11-09T22:52:48.319Z"
+ "run": "2026-11-09T23:19:10.367Z"
 }

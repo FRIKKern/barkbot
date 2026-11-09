@@ -78,13 +78,13 @@ const runtime = (kind: string, extra: Record<string, unknown> = {}) => {
   return {provider: 'claude', kind, native, durability: 'durable', terminal_state: kind === 'turn_completed' ? 'completed' : null}
 }
 
-/** Which host the replay plays: `legacy` is what a registered claude host sends today (a
- *  turn_started per model message); `items` is the host with item events (task-f13fc4b4dc2af6de):
- *  one turn_started, each text block between item_started and item_completed {type: text}, and
- *  Barkpark's paragraph break in front of a later block's first delta. */
+/** Which host the replay plays: `items` is what a registered claude host sends since Barkpark
+ *  #25471 (task-f13fc4b4dc2af6de): one turn_started, each text block between item_started and
+ *  item_completed {type: text}, and Barkpark's paragraph break in front of a later block's first
+ *  delta. `legacy` is the older host: a turn_started per model message. */
 export type Shape = 'legacy' | 'items'
 
-export function replayScript(milestones: Milestone[], shape: Shape = 'legacy'): {accept: number; steps: Step[]} {
+export function replayScript(milestones: Milestone[], shape: Shape = 'items'): {accept: number; steps: Step[]} {
   const first = (k: Kind) => milestones.find((m) => m.kind === k)
   const accept = first('user')?.t ?? 0
   const starts = [first('status:working')?.t, first('working')?.t].filter((t): t is number => t !== undefined)
