@@ -27,7 +27,11 @@ const dot = () => page.evaluate((bot) => {
   const cs = d && getComputedStyle(d), r = d?.getBoundingClientRect();
   return { t: performance.now(), tile: tile?.getAttribute('aria-label') ?? null, focus: document.hasFocus(), visible: document.visibilityState,
     dot: d ? { rect: [r.x, r.y, r.width, r.height].map((n) => +n.toFixed(1)), background: cs.backgroundColor, border: cs.border, boxShadow: cs.boxShadow,
-      borderRadius: cs.borderRadius, opacity: cs.opacity, outline: cs.outline } : null };
+      borderRadius: cs.borderRadius, opacity: cs.opacity, outline: cs.outline,
+      // The span's own background is transparent (2026-11-09): read where the paint is, its pseudo-elements and children.
+      parts: [...['::before', '::after'].map((pe) => [pe, getComputedStyle(d, pe)]), ...[...d.querySelectorAll('*')].slice(0, 4).map((c) => [c.tagName.toLowerCase(), getComputedStyle(c)])]
+        .filter(([, s]) => s.content !== 'none' || s.display !== 'none')
+        .map(([what, s]) => ({ what, content: s.content, background: s.backgroundColor, fill: s.fill, color: s.color, boxShadow: s.boxShadow, width: s.width, height: s.height })) } : null };
 }, ORACLE_BOT);
 const point = (sel) => page.evaluate((sel) => { const e = document.querySelector(sel); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; }, sel);
 const mouse = (type, at, extra = {}) => page.send('Input.dispatchMouseEvent', { type, button: 'left', clickCount: 1, ...at, ...extra });
