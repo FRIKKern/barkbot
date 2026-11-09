@@ -63,48 +63,85 @@ async function open(url) {
 }
 
 // ── Rename: the details panel's Bot name field (traces/2026-11-09-rename.json) ──────────────────
+// Each case opens the page fresh, so it starts from "Oracle" and one failure cannot leak a
+// leftover name into the next. Typing waits until React's own value matches the field's.
 console.log('Behaviour · rename (traces/2026-11-09-rename.json)');
-await open(`${base}/gate/oracle-turn-1040`);
-await windowFocus(true);
 const name = () => ev(() => {
   const i = document.querySelector('.who-name'), a = document.activeElement, cs = getComputedStyle(i), r = i.getBoundingClientRect();
-  return { value: i.value, header: document.querySelector('.bot-pill [role=heading]')?.textContent, tile: document.querySelectorAll('.rail-tile')[1]?.getAttribute('aria-label'),
+  const props = i[Object.keys(i).find((k) => k.startsWith('__reactProps$'))];
+  return { value: i.value, react: props?.value, header: document.querySelector('.bot-pill [role=heading]')?.textContent, tile: document.querySelectorAll('.rail-tile')[1]?.getAttribute('aria-label'),
     placeholder: document.querySelector('[data-placeholder]')?.getAttribute('data-placeholder'), active: a === document.body ? 'body' : a.getAttribute('aria-label') || a.tagName,
     sel: a === i ? [i.selectionStart, i.selectionEnd] : null, bg: cs.backgroundColor, transition: cs.transition, rect: [r.x, r.y, r.width, r.height] };
 });
 const nextFrame = () => ev(() => new Promise((r) => requestAnimationFrame(() => r())));
-const clear = async () => { await ev(() => document.querySelector('.who-name').select()); await key('Backspace'); };
-await mouse('mouseMoved', 400, 740); await wait(300);
-let s = await name();
-precondition('the Bot name field holds "Oracle", the header and tile agree', s.value === 'Oracle' && s.header === 'Oracle' && s.tile === 'Oracle' && s.placeholder === 'Message Oracle', s);
+// Typed text counts once React has rendered it, not after a fixed time.
+const typeIn = async (t) => {
+  const want = (await name()).value;
+  await type(t);
+  await until(async () => { const n = await name(); return n.value !== want && n.react === n.value; }, 5000, `React to render the typed "${t}"`);
+};
+const clear = async () => { await ev(() => document.querySelector('.who-name').select()); await key('Backspace'); await until(async () => { const n = await name(); return n.value === '' && n.react === ''; }, 5000, 'the field to empty'); };
+let field;
+const fresh = async () => {
+  await open(`${base}/gate/oracle-turn-1040`); await windowFocus(true);
+  await mouse('mouseMoved', 400, 740); await wait(300);
+  const s = await name();
+  precondition('a fresh page: the Bot name field holds "Oracle", header, tile and placeholder agree, nothing focused', s.value === 'Oracle' && s.react === 'Oracle' && s.header === 'Oracle' && s.tile === 'Oracle' && s.placeholder === 'Message Oracle' && s.active === 'body', s);
+  field = s.rect;
+  return s;
+};
+const into = async (at = 'middle') => { const [x, y, w, h] = field; await click(at === 'middle' ? x + w / 2 : x + w - 12, y + h / 2); };
+let s;
+
+s = await fresh();
 check('rest: transparent, border-color and background-color transitions of 0.12 s', s.bg === 'rgba(0, 0, 0, 0)' && /border-color 0\.12s.*background-color 0\.12s/.test(s.transition), s);
-let [x, y, w, h] = s.rect;
-await mouse('mouseMoved', x + w / 2, y + h / 2); await wait(60);
-const early = (await name()).bg; await wait(250); s = await name();
+{ const [x, y, w, h] = field; await mouse('mouseMoved', x + w / 2, y + h / 2); }
+await wait(60); const early = (await name()).bg; await wait(250); s = await name();
 check('hover: fills to rgba(245,245,245,0.08), through the transition (control: not there at 60 ms)', s.bg === 'rgba(245, 245, 245, 0.08)' && early !== s.bg, { at60ms: early, settled: s.bg });
-await click(x + w / 2, y + h / 2); const middle = (await name()).sel;
-await key('Escape'); await click(x + w - 12, y + h / 2); const right = (await name()).sel;
+
+await fresh();
+await into('middle'); const middle = (await name()).sel;
+await key('Escape'); await into('right'); const right = (await name()).sel;
 check('click: the caret goes where it lands, no select-all (control: a click further right lands further right)', middle && middle[0] === middle[1] && middle[0] > 0 && middle[0] < 6 && right && right[0] === 6 && right[1] === 6, { middle, right });
-await key('End'); await type(' Two'); await wait(3000); const typed = await name();
+
+await fresh();
+await into(); await key('End'); await typeIn(' Two'); await wait(3000); const typed = await name();
 check('no autosave: 3 s after typing, nothing has saved', typed.value === 'Oracle Two' && typed.header === 'Oracle' && typed.tile === 'Oracle' && typed.placeholder === 'Message Oracle', typed);
 await key('Escape'); s = await name();
-check('Escape: puts the old name back, focus on body (control: the field held the typed name)', typed.value === 'Oracle Two' && s.value === 'Oracle' && s.active === 'body' && s.header === 'Oracle', s);
-await click(x + w / 2, y + h / 2); await key('End'); await type(' Two'); const before = await name();
+check('Escape: puts the old name back, focus on body (control: the field held the typed name)', typed.value === 'Oracle Two' && s.value === 'Oracle' && s.react === 'Oracle' && s.active === 'body' && s.header === 'Oracle', s);
+
+// The CI race of PR #28: React's record of the value one step behind the field when Escape
+// blurs it. blur() fires the native change event, and React raised onChange from it with the
+// typed text after the revert. Forced here by setting React's value tracker back.
+await fresh();
+await into(); await key('End'); await typeIn(' Two');
+await ev(() => document.querySelector('.who-name')._valueTracker.setValue('Oracle'));
+await key('Escape'); s = await name();
+check('Escape reverts even when React\'s record of the value is behind the field (PR #28 CI race)', s.value === 'Oracle' && s.react === 'Oracle' && s.header === 'Oracle' && s.active === 'body', s);
+
+await fresh();
+await into(); await key('End'); await typeIn(' Two'); const before = await name();
 await key('Enter'); await nextFrame(); s = await name();
 check('Enter: saves, focus on body; header, tile label and placeholder follow in the next frame (control: all old while typing)',
   before.header === 'Oracle' && before.tile === 'Oracle' && before.placeholder === 'Message Oracle' &&
   s.value === 'Oracle Two' && s.active === 'body' && s.header === 'Oracle Two' && s.tile === 'Oracle Two' && s.placeholder === 'Message Oracle Two', { before, after: s });
-[x, y, w, h] = s.rect;
-await click(x + w / 2, y + h / 2); await clear(); const empty = await name();
+
+await fresh();
+await into(); await clear(); const empty = await name();
 await key('Enter'); s = await name();
-check('empty + Enter: keeps the old name (control: a non-empty Enter saved above)', empty.value === '' && s.value === 'Oracle Two' && s.header === 'Oracle Two' && s.active === 'body', s);
-await click(x + w / 2, y + h / 2); await clear(); await type('Oracle'); const away = await name();
+check('empty + Enter: keeps the old name, focus on body (control: the field was empty)', empty.value === '' && s.value === 'Oracle' && s.react === 'Oracle' && s.header === 'Oracle' && s.active === 'body', s);
+
+await fresh();
+await into(); await key('End'); await typeIn('X'); const away = await name();
 await click(400, 300); s = await name();
-check('click away on the transcript: saves, focus on the transcript (control: old name until then)', away.header === 'Oracle Two' && s.value === 'Oracle' && s.header === 'Oracle' && s.tile === 'Oracle' && s.active === 'Conversation transcript', s);
+check('click away on the transcript: saves, focus on the transcript (control: old name until then)', away.header === 'Oracle' && s.value === 'OracleX' && s.header === 'OracleX' && s.tile === 'OracleX' && s.active === 'Conversation transcript', s);
+
+await fresh();
 await click(400, 300); s = await name();
-check('control: a click on the transcript alone renames nothing', s.header === 'Oracle' && s.value === 'Oracle', s);
-[x, y, w, h] = s.rect;
-await click(x + w / 2, y + h / 2); await key('End'); await type('X'); await click(44, 155); s = await name();
+check('control: a click on the transcript alone renames nothing, focus on the transcript', s.header === 'Oracle' && s.value === 'Oracle' && s.active === 'Conversation transcript', s);
+
+await fresh();
+await into(); await key('End'); await typeIn('X'); await click(44, 155); s = await name();
 check('click away on a rail tile: saves, focus goes to what was clicked', s.header === 'OracleX' && s.active === 'OracleX', s);
 
 // ── Unread dot and the Working label (traces/2026-11-09-unread.json, -long-answer.json) ──────────

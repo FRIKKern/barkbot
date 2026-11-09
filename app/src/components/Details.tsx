@@ -101,10 +101,14 @@ export function Details({scene, name, onRename, onClose}: {scene: Scene; name?: 
 function BotName({name, onRename}: {name: string; onRename?: (name: string) => void}) {
   const [draft, setDraft] = useState(name)
   const cancelled = useRef(false)
-  const save = () => {
-    const next = draft.trim()
-    if (!next) setDraft(name)
-    else if (next !== name) onRename?.(next)
+  // Saves what the field holds, not `draft`: the same native change event can update draft
+  // after this closure was made, and the field is what the person sees.
+  const save = (field: HTMLInputElement) => {
+    const next = field.value.trim()
+    if (!next) {
+      field.value = name
+      setDraft(name)
+    } else if (next !== name) onRename?.(next)
   }
   return (
     <input
@@ -115,14 +119,20 @@ function BotName({name, onRename}: {name: string; onRename?: (name: string) => v
       onKeyDown={(e) => {
         if (e.key === 'Enter') e.currentTarget.blur()
         if (e.key === 'Escape') {
+          // Put the old name in the field itself before leaving it. blur() fires the native change
+          // event, and React raises onChange from it whenever its own record of the value is behind
+          // the field; with the typed text still in the field, that onChange re-applied it after
+          // setDraft(name) (seen on CI: field "Oracle Two", header "Oracle"). With the old name
+          // already there, nothing has changed and no onChange can bring the typing back.
           cancelled.current = true
+          e.currentTarget.value = name
           setDraft(name)
           e.currentTarget.blur()
         }
       }}
-      onBlur={() => {
+      onBlur={(e) => {
         if (cancelled.current) cancelled.current = false
-        else save()
+        else save(e.currentTarget)
       }}
     />
   )
