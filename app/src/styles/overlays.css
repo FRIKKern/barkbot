@@ -86,3 +86,5 @@
 .pill { height: 32px; padding: 0 12px; border-radius: 9999px; font-size: 14px; line-height: 20px; letter-spacing: 0.14px; background: var(--wash-04); color: var(--ink); box-shadow: color(srgb 0.960784 0.960784 0.960784 / 0.15) 0 0 0 0.5px inset; }
 .pill.primary:disabled { background: rgb(245 245 245 / 0.13); color: color(srgb 0.960784 0.960784 0.960784 / 0.3); box-shadow: color(srgb 0.960784 0.960784 0.960784 / 0.045) 0 0 0 0.5px inset; }
 .pill > span { display: block; }
+/* Named (fixtures/states/oracle-new-bot-named.json): Create turns solid ink on dark text. */
+.pill.primary:enabled { background: var(--ink); color: rgb(18 18 18); box-shadow: color(srgb 0.0705882 0.0705882 0.0705882 / 0.15) 0 0 0 0.5px inset; }

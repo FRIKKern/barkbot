@@ -51,7 +51,7 @@ export function NewBotDialog({onClose}: {onClose?: () => void}) {
             <span className="new-bot-preview" style={{color: fill}}>
               <Shape name={shape} size={96} />
             </span>
-            <input aria-label="Bot name" className="new-bot-name" value={name} onChange={(e) => setName(e.target.value)} />
+            <input aria-label="Bot name" className="new-bot-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} />
             <div className="new-bot-looks">
               <div aria-label="Character shape" className="shapes">
                 {shapeRows.map((row) => (
