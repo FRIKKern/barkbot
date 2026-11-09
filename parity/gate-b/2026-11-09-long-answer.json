@@ -1,0 +1,177 @@
+{
+ "id": "2026-11-09-long-answer",
+ "captured": "2026-11-09T22:04:46.857Z",
+ "cases": 17,
+ "pass": 9,
+ "results": [
+  {
+   "key": "replay: every scripted event reached the page",
+   "pass": true
+  },
+  {
+   "key": "working#1",
+   "pass": false,
+   "oracle": 309.5,
+   "why": "ours never shows it"
+  },
+  {
+   "key": "label:status#1",
+   "pass": false,
+   "oracle": 309.5,
+   "why": "ours never shows it: the oracle's own summary of the turn, which no Barkpark event carries"
+  },
+  {
+   "key": "user#1",
+   "pass": true,
+   "oracle": 309.5,
+   "ours": 311.2,
+   "lag": 2
+  },
+  {
+   "key": "status:working#1",
+   "pass": false,
+   "oracle": 750.4,
+   "ours": 311.1,
+   "lag": -439,
+   "why": "early by 439 ms; out of order: after user#1"
+  },
+  {
+   "key": "working#2",
+   "pass": false,
+   "oracle": 750.4,
+   "why": "ours never shows it"
+  },
+  {
+   "key": "label:status#2",
+   "pass": false,
+   "oracle": 1967.7,
+   "why": "ours never shows it: the oracle's own summary of the turn, which no Barkpark event carries"
+  },
+  {
+   "key": "label:typing#1",
+   "pass": false,
+   "oracle": 4615.3,
+   "why": "ours never shows it"
+  },
+  {
+   "key": "status:replied#1",
+   "pass": true,
+   "oracle": 8785.4,
+   "ours": 8890.8,
+   "lag": 105
+  },
+  {
+   "key": "assistant#1",
+   "pass": true,
+   "oracle": 8785.4,
+   "ours": 8789.2,
+   "lag": 4
+  },
+  {
+   "key": "nothing extra",
+   "pass": true
+  },
+  {
+   "key": "budget: composer clears in 1 frame",
+   "pass": true,
+   "ours": 0.5
+  },
+  {
+   "key": "budget: focus stays in Prompt",
+   "pass": true
+  },
+  {
+   "key": "budget: working line gone ≤ 250 ms after the reply",
+   "pass": false,
+   "why": "never happened"
+  },
+  {
+   "key": "budget: own bubble ≤ 440 ms",
+   "pass": true,
+   "ours": 311.2
+  },
+  {
+   "key": "budget: working line ≤ 2.0 s",
+   "pass": false,
+   "why": "never happened"
+  },
+  {
+   "key": "history after a reconnect (stored as today: the last message)",
+   "pass": true
+  }
+ ],
+ "oracle": [
+  {
+   "kind": "working",
+   "t": 309.5
+  },
+  {
+   "kind": "label:status",
+   "t": 309.5
+  },
+  {
+   "kind": "user",
+   "t": 309.5,
+   "len": 54
+  },
+  {
+   "kind": "status:working",
+   "t": 750.4
+  },
+  {
+   "kind": "working",
+   "t": 750.4
+  },
+  {
+   "kind": "label:status",
+   "t": 1967.7
+  },
+  {
+   "kind": "label:typing",
+   "t": 4615.3
+  },
+  {
+   "kind": "status:replied",
+   "t": 8785.4
+  },
+  {
+   "kind": "assistant",
+   "t": 8785.4,
+   "len": 1214
+  }
+ ],
+ "ours": [
+  {
+   "kind": "clear",
+   "t": 0.5
+  },
+  {
+   "kind": "status:working",
+   "t": 311.1,
+   "raw": 314.3
+  },
+  {
+   "kind": "user",
+   "t": 311.2,
+   "len": 54,
+   "raw": 316.2
+  },
+  {
+   "kind": "assistant",
+   "t": 8789.2,
+   "len": 1214,
+   "raw": 8792.8
+  },
+  {
+   "kind": "status:replied",
+   "t": 8890.8,
+   "raw": 8894.4
+  }
+ ],
+ "standInLate": [
+  2,
+  7
+ ],
+ "skipped": [],
+ "run": "2026-11-09T22:19:33.558Z"
+}
