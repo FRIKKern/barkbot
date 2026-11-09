@@ -3,8 +3,10 @@
  "slice": "S2",
  "journey": null,
  "title": "Composer actions menu: Attach files, Teach a task (oracle-composer-menu)",
- "status": "open",
+ "status": "partial",
  "controls": [
   "Teach a task"
- ]
+ ],
+ "gate": "Gate A oracle-composer-menu 31/43: the menu's own 4/4; the 12 misses are the frame behind it (details text widths)",
+ "evidence": "app/src/components/overlays/Menus.tsx, styles/overlays.css; opens from the + button, closes on a pick, Escape or a click outside. Left: real Attach files and Teach a task targets; the frame (lane FRAME) at 39/39."
 }
