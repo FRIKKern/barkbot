@@ -7,7 +7,7 @@
   2
  ],
  "cases": 39,
- "pass": 35,
+ "pass": 38,
  "results": [
   {
    "key": "aside:Bots",
@@ -51,23 +51,20 @@
   },
   {
    "key": "control:Prompt",
-   "pass": false,
-   "why": "box off by 120,0,-240,0"
+   "pass": true
   },
   {
    "key": "control:Composer actions",
    "pass": false,
-   "why": "box off by 120,0.5,0,0; background-color rgba(245, 245, 245, 0.04) ≠ rgba(245, 245, 245, 0.08); color rgba(245, 245, 245, 0.54) ≠ rgb(245, 245, 245)"
+   "why": "background-color rgba(245, 245, 245, 0.04) ≠ rgba(245, 245, 245, 0.08); color rgba(245, 245, 245, 0.54) ≠ rgb(245, 245, 245)"
   },
   {
    "key": "control:Start voice input",
-   "pass": false,
-   "why": "box off by -120,0.5,0,0"
+   "pass": true
   },
   {
    "key": "control:Start voice chat",
-   "pass": false,
-   "why": "box off by -120,0.5,0,0"
+   "pass": true
   },
   {
    "key": "aside:Conversation details",
@@ -170,7 +167,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:02:52.499Z",
+ "run": "2026-11-09T07:06:41.037Z",
  "inventory": {
   "id": "oracle-main-1280",
   "controls": [
