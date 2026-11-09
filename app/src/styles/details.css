@@ -42,5 +42,6 @@
 .details-body.lib .tabs-row { margin-bottom: 100.6px; }
 .tabpanel.library { flex: 1; min-height: 0; margin: 0 16px 16px; padding: 10px 0 0; }
 .library-end { height: 1px; flex: none; }
-.library-empty { padding: 16px; text-align: center; }
+.library-empty { padding: 0 16px; text-align: center; }
+.library-empty > div { padding: 16px 0; }
 .library-empty p { margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.14px; color: var(--ink-54); }

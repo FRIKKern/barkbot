@@ -35,7 +35,9 @@ export function Details({scene}: {scene: Scene}) {
         {library ? (
           <div role="tabpanel" className="tabpanel library">
             <div className="library-empty">
-              <p>Pages, files, and apps this Bot makes show up here</p>
+              <div>
+                <p>Pages, files, and apps this Bot makes show up here</p>
+              </div>
             </div>
             <div className="library-end" />
           </div>

@@ -4,6 +4,6 @@
  "journey": "J03",
  "title": "Library tab: the empty state 'Pages, files, and apps this Bot makes show up here' (oracle-library)",
  "status": "done",
- "gate": "Gate A: oracle-library 20/20; the parts it does not name (tab panel, empty state, its text, the 1 pt rule, the tab fade) measured box by box with scripts/oracle/collect.mjs against fixtures/states/oracle-library.json: all equal to 0.1 pt",
- "evidence": "Details.tsx + details.css: tab panel 736,329.6,288,414.4; empty state 736,339.6,288,72; text 752,355.6,256,40 at 14/20, 54% ink; rule 736,433.6,288,1; fade 720,229,320,12. The 100.6 pt drop on the Library tab is the oracle's settled layout (recaptured with a 3 s settle, 2026-11-09)"
+ "gate": "Gate A: oracle-library 20/20. The panel's unnamed elements (not Gate A cases) measured box by box with scripts/oracle/collect.mjs against fixtures/states/oracle-library.json elements 212-221: every box in the tab panel equal to 0.1 pt, every look equal",
+ "evidence": "Details.tsx + details.css. Matched: tab panel 217 at 736,329.6,288,414.4; empty state 218 at 736,339.6,288,72; its inner block 219 at 752,339.6,256,72; text 220 at 752,355.6,256,40 (14/20, 54% ink); rule 221 at 736,433.6,288,1; tab fade 216 at 720,229,320,12; tabs row 212 exact, tabs within 1.3 pt (font). The 100.6 pt drop is the oracle's settled layout (recaptured with a 3 s settle, 2026-11-09)"
 }
