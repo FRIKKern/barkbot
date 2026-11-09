@@ -7,16 +7,19 @@ import {Preview, Tooltip, useHover} from './tips'
 
 // A working bot's tile says so in its name, last: "Oracle, Working", "Oracle, Unread activity,
 // Working" (traces say-hi, storage). Nothing else on the tile changes while it works.
+// Not for the bot that is open: on 0.79.3 its tile never says Working (traces/2026-11-09-long-
+// answer.json, no rail change in the whole turn). UNVERIFIED on 0.79.3 for a bot that is not
+// open: that label comes from the 0.79.2 traces of 2026-11-08 and waits for a re-record.
 // A bot with unread activity gets a dot on its face and ", Unread activity" in its name
 // (trace say-hi-2 at 5071.6 ms). Where "Main Bot" goes in that order is not captured; it stays first.
 // `names`: bots the person renamed (details panel), shown in place of their own name; the bot's
 // own name stays its id for picking (rename trace: the tile label follows on Enter).
 export function Rail({scene, onPick, working = [], unread = [], names = {}}: {scene: Scene; onPick?: (name: string) => void; working?: string[]; unread?: string[]; names?: Record<string, string>}) {
   const shown = (name: string) => names[name] ?? name
-  const busy = (name: string, label: string) => [label, unread.includes(name) && 'Unread activity', working.includes(name) && 'Working'].filter(Boolean).join(', ')
+  const active = scene.active ?? ''
+  const busy = (name: string, label: string) => [label, unread.includes(name) && 'Unread activity', working.includes(name) && name !== active && 'Working'].filter(Boolean).join(', ')
   const main = scene.bots.find((b) => b.main)
   const others = scene.bots.filter((b) => !b.main)
-  const active = scene.active ?? ''
   const held = useCommandHeld()
   // ⌘1 on the main bot, ⌘2 on the first pinned bot, and so on (trace say-hi; only two bots captured).
   const hint = (i: number) => (held ? `⌘${i + 1}` : undefined)

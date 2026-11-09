@@ -1,7 +1,7 @@
 // The three panes: rail, conversation, details. Sizes and colours come from the captured
 // oracle state fixtures/states/oracle-turn-1040.json (see styles.css). The bots' faces are
 // plain stand-ins of the same size (O2): never the oracle's mascot art.
-import {useEffect, useState, type ReactNode} from 'react'
+import {useEffect, useRef, useState, type ReactNode} from 'react'
 import {Composer, Icon} from './Composer'
 import {Rail} from './Rail'
 import {Details} from './Details'
@@ -34,7 +34,8 @@ const NARROW = '(max-width: 799.98px)'
 
 // `workingBots`: the bots whose run is in progress, from the chat stream (the same signal as the
 // transcript's working row; both flip at the same ms in traces say-hi, say-hi-2, storage).
-// `unreadBots`: the bots with a reply the person has not seen (the rail's "Unread activity" dot).
+// `unreadBots`: bots the page itself marks unread; Shell adds its own by the oracle's rule
+// (useUnread below).
 export function Shell({scene: start, transcript, composer, onPickBot, onRenameBot, workingBots = [], unreadBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (name: string) => void; onRenameBot?: (bot: string, name: string) => void; workingBots?: string[]; unreadBots?: string[]}) {
   const [panelOpen, setPanelOpen] = useState(start.panelOpen)
   const [picked, setPicked] = useState<string | undefined>(undefined)
@@ -55,6 +56,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
     return () => narrow.removeEventListener('change', onChange)
   }, [])
   const scene: Scene = {...start, panelOpen, active: picked ?? start.active}
+  const unread = useUnread(workingBots)
   const active = scene.active ?? ''
   // A bot's name as the person renamed it in the details panel. On Enter the header pill, the
   // rail tile's label and the composer's "Message <name>" all follow in the same frame
@@ -67,7 +69,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
   }
   return (
     <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-instant={instant || undefined}>
-      <Rail scene={scene} onPick={pick} working={workingBots} unread={unreadBots} names={names} />
+      <Rail scene={scene} onPick={pick} working={workingBots} unread={[...new Set([...unreadBots, ...unread])]} names={names} />
 
       {/* Focusable like the oracle's transcript (role=log, tabindex 0): a click on it takes focus,
           which is where a click away from the Bot name field leaves it (rename trace). */}
@@ -104,4 +106,27 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
       <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} />
     </div>
   )
+}
+
+// The unread dot, by the rule in traces/2026-11-09-unread.json (0.79.3): a reply that lands while
+// the window does not have focus marks its bot unread, even the bot that is open; the window
+// getting focus clears every dot at once, whatever is open (Settings was). A reply that lands
+// in a focused window marks nothing (traces/2026-11-09-long-answer.json: no rail change).
+// A reply landing is a bot leaving `workingBots`.
+function useUnread(working: string[]) {
+  const [unread, setUnread] = useState<string[]>([])
+  const was = useRef<string[]>([])
+  const key = working.join('\n')
+  useEffect(() => {
+    const now = key ? key.split('\n') : []
+    const replied = was.current.filter((b) => !now.includes(b))
+    was.current = now
+    if (replied.length && !document.hasFocus()) setUnread((u) => [...new Set([...u, ...replied])])
+  }, [key])
+  useEffect(() => {
+    const clear = () => setUnread([])
+    window.addEventListener('focus', clear)
+    return () => window.removeEventListener('focus', clear)
+  }, [])
+  return unread
 }
