@@ -9,7 +9,10 @@ import {Preview, Tooltip, useHover} from './tips'
 // Working" (traces say-hi, storage). Nothing else on the tile changes while it works.
 // A bot with unread activity gets a dot on its face and ", Unread activity" in its name
 // (trace say-hi-2 at 5071.6 ms). Where "Main Bot" goes in that order is not captured; it stays first.
-export function Rail({scene, onPick, working = [], unread = []}: {scene: Scene; onPick?: (name: string) => void; working?: string[]; unread?: string[]}) {
+// `names`: bots the person renamed (details panel), shown in place of their own name; the bot's
+// own name stays its id for picking (rename trace: the tile label follows on Enter).
+export function Rail({scene, onPick, working = [], unread = [], names = {}}: {scene: Scene; onPick?: (name: string) => void; working?: string[]; unread?: string[]; names?: Record<string, string>}) {
+  const shown = (name: string) => names[name] ?? name
   const busy = (name: string, label: string) => [label, unread.includes(name) && 'Unread activity', working.includes(name) && 'Working'].filter(Boolean).join(', ')
   const main = scene.bots.find((b) => b.main)
   const others = scene.bots.filter((b) => !b.main)
@@ -21,7 +24,7 @@ export function Rail({scene, onPick, working = [], unread = []}: {scene: Scene; 
     <aside className="rail" aria-label="Bots">
       <div className="rail-main">
         {main && (
-          <Tile name={main.name} label={busy(main.name, `${main.name}, Main Bot`)} current={main.name === active} line={scene.previews?.[main.name]} onPick={onPick} unread={unread.includes(main.name)} hint={hint(0)}>
+          <Tile name={main.name} shown={shown(main.name)} label={busy(main.name, `${shown(main.name)}, Main Bot`)} current={main.name === active} line={scene.previews?.[main.name]} onPick={onPick} unread={unread.includes(main.name)} hint={hint(0)}>
             <span className="face face-main" />
             <span className="badge" role="img" aria-label="Main Bot" />
           </Tile>
@@ -31,7 +34,7 @@ export function Rail({scene, onPick, working = [], unread = []}: {scene: Scene; 
       <div className="rail-list" role="list" aria-label="Pinned Bots">
         {others.map((b, i) => (
           <div role="listitem" key={b.name}>
-            <Tile name={b.name} label={busy(b.name, b.name)} current={b.name === active} line={scene.previews?.[b.name]} onPick={onPick} unread={unread.includes(b.name)} hint={hint(main ? i + 1 : i)}>
+            <Tile name={b.name} shown={shown(b.name)} label={busy(b.name, shown(b.name))} current={b.name === active} line={scene.previews?.[b.name]} onPick={onPick} unread={unread.includes(b.name)} hint={hint(main ? i + 1 : i)}>
               <Face size={34} />
             </Tile>
           </div>
@@ -59,7 +62,7 @@ export function Rail({scene, onPick, working = [], unread = []}: {scene: Scene; 
 }
 
 // A bot's tile; the pointer on it brings up the bot's chat preview (oracle-hover-bot-tile-2).
-function Tile({name, label, current, line, onPick, unread, hint, children}: {name: string; label: string; current?: boolean; line?: string; onPick?: (name: string) => void; unread?: boolean; hint?: string; children: ReactNode}) {
+function Tile({name, shown, label, current, line, onPick, unread, hint, children}: {name: string; shown?: string; label: string; current?: boolean; line?: string; onPick?: (name: string) => void; unread?: boolean; hint?: string; children: ReactNode}) {
   const h = useHover()
   return (
     <>
@@ -68,7 +71,7 @@ function Tile({name, label, current, line, onPick, unread, hint, children}: {nam
         {unread && <span className="unread" role="status" aria-label="Unread activity" />}
         {hint && <span className="rail-hint">{hint}</span>}
       </button>
-      <Preview box={h.box} name={name} line={line ?? ''} />
+      <Preview box={h.box} name={shown ?? name} line={line ?? ''} />
     </>
   )
 }

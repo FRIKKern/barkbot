@@ -1,6 +1,6 @@
 // The details panel (aside "Conversation details", 720..1040): the bot, its tabs, and the
 // Activity cards: Suggested, Computer, Voice chat. Library shows its empty state.
-import {useState} from 'react'
+import {useRef, useState} from 'react'
 import type {Scene} from './Shell'
 import {Icon} from './Composer'
 import {Face, Pick, Row, Section, fit} from './parts'
@@ -8,7 +8,7 @@ import {Tooltip, useHover} from './tips'
 
 // Always mounted: closing runs its width 320 -> 0 (styles/details.css), and a closed panel is
 // inert. The tab starts on the scene's and follows clicks.
-export function Details({scene, onClose}: {scene: Scene; onClose?: () => void}) {
+export function Details({scene, name, onRename, onClose}: {scene: Scene; name?: string; onRename?: (name: string) => void; onClose?: () => void}) {
   const active = scene.active ?? ''
   const [tab, setTab] = useState(scene.tab ?? 'activity')
   const library = tab === 'library'
@@ -33,7 +33,7 @@ export function Details({scene, onClose}: {scene: Scene; onClose?: () => void}) 
           <Tooltip box={avatar.box} side="bottom">
             Edit Avatar
           </Tooltip>
-          <input key={active} className="who-name" aria-label="Bot name" defaultValue={active} />
+          <BotName key={active} name={name ?? active} onRename={onRename} />
         </div>
         <div className="tabs-row">
           <div role="tablist" aria-label="Conversation details" className="tabs">
@@ -91,5 +91,39 @@ export function Details({scene, onClose}: {scene: Scene; onClose?: () => void}) 
         )}
       </div>
     </aside>
+  )
+}
+
+// The Bot name field, as traces/2026-11-09-rename.json shows it. A click puts the caret where it
+// lands (no select-all). Enter saves and leaves the field (focus on body); Escape puts the old
+// name back and leaves it; a click elsewhere saves (focus goes where the click went). An empty
+// name is never saved: the old one comes back.
+function BotName({name, onRename}: {name: string; onRename?: (name: string) => void}) {
+  const [draft, setDraft] = useState(name)
+  const cancelled = useRef(false)
+  const save = () => {
+    const next = draft.trim()
+    if (!next) setDraft(name)
+    else if (next !== name) onRename?.(next)
+  }
+  return (
+    <input
+      className="who-name"
+      aria-label="Bot name"
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.currentTarget.blur()
+        if (e.key === 'Escape') {
+          cancelled.current = true
+          setDraft(name)
+          e.currentTarget.blur()
+        }
+      }}
+      onBlur={() => {
+        if (cancelled.current) cancelled.current = false
+        else save()
+      }}
+    />
   )
 }

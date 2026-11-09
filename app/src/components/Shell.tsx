@@ -27,6 +27,7 @@ export type Scene = {
 // The scene is where the page starts; what the person does from there (panel, tab, the bot they
 // pick in the rail) is held here, so the live page and the gate share one behaviour.
 // `onPickBot` tells the page which bot is now active, so it can load that bot's conversation.
+// `onRenameBot` tells it a bot's new name (for a composer the page passes in, and for saving it).
 // A window under 800 closes the details panel by itself, and widening it again leaves it closed
 // (measured on the oracle: 790 closed, 800 open; oracle-main-790, -800).
 const NARROW = '(max-width: 799.98px)'
@@ -34,7 +35,7 @@ const NARROW = '(max-width: 799.98px)'
 // `workingBots`: the bots whose run is in progress, from the chat stream (the same signal as the
 // transcript's working row; both flip at the same ms in traces say-hi, say-hi-2, storage).
 // `unreadBots`: the bots with a reply the person has not seen (the rail's "Unread activity" dot).
-export function Shell({scene: start, transcript, composer, onPickBot, workingBots = [], unreadBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (name: string) => void; workingBots?: string[]; unreadBots?: string[]}) {
+export function Shell({scene: start, transcript, composer, onPickBot, onRenameBot, workingBots = [], unreadBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (name: string) => void; onRenameBot?: (bot: string, name: string) => void; workingBots?: string[]; unreadBots?: string[]}) {
   const [panelOpen, setPanelOpen] = useState(start.panelOpen)
   const [picked, setPicked] = useState<string | undefined>(undefined)
   // The overlay that is up, whether the scene holds it or a click opened it (Overlay's
@@ -55,21 +56,28 @@ export function Shell({scene: start, transcript, composer, onPickBot, workingBot
   }, [])
   const scene: Scene = {...start, panelOpen, active: picked ?? start.active}
   const active = scene.active ?? ''
+  // A bot's name as the person renamed it in the details panel. On Enter the header pill, the
+  // rail tile's label and the composer's "Message <name>" all follow in the same frame
+  // (traces/2026-11-09-rename.json and the lead's re-run on oracle/focus-bot-name).
+  const [names, setNames] = useState<Record<string, string>>({})
+  const shown = names[active] ?? active
   const pick = (name: string) => {
     setPicked(name)
     onPickBot?.(name)
   }
   return (
     <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-instant={instant || undefined}>
-      <Rail scene={scene} onPick={pick} working={workingBots} unread={unreadBots} />
+      <Rail scene={scene} onPick={pick} working={workingBots} unread={unreadBots} names={names} />
 
-      <main className="convo" aria-label="Conversation transcript">
+      {/* Focusable like the oracle's transcript (role=log, tabindex 0): a click on it takes focus,
+          which is where a click away from the Bot name field leaves it (rename trace). */}
+      <main className="convo" aria-label="Conversation transcript" tabIndex={0}>
         <header className="convo-head">
           {active && (
             <button className="bot-pill" aria-label="View conversation details" aria-expanded={panelOpen} onClick={() => setPanelOpen((o) => !o)}>
               <Face size={18} />
               <span role="heading" aria-level={1}>
-                {active}
+                {shown}
               </span>
             </button>
           )}
@@ -86,10 +94,13 @@ export function Shell({scene: start, transcript, composer, onPickBot, workingBot
           ) : (
             <div className="transcript" />
           ))}
-        {composer ?? <Composer placeholder={active ? `Message ${active}` : 'Message'} />}
+        {composer ?? <Composer placeholder={shown ? `Message ${shown}` : 'Message'} />}
       </main>
 
-      <Details scene={{...scene, overlay: opened ?? scene.overlay}} onClose={() => setPanelOpen(false)} />
+      <Details scene={{...scene, overlay: opened ?? scene.overlay}} name={shown} onRename={(n) => {
+        setNames((m) => ({...m, [active]: n}))
+        onRenameBot?.(active, n)
+      }} onClose={() => setPanelOpen(false)} />
       <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} />
     </div>
   )
