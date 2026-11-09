@@ -1,0 +1,179 @@
+{
+ "id": "2026-11-09-unread",
+ "oracle_version": "0.79.3",
+ "bot": "Oracle",
+ "steps": [
+  {
+   "name": "wait",
+   "before": {
+    "dot": true,
+    "focus": false
+   },
+   "after": {
+    "dot": true,
+    "tile": "Oracle, Unread activity",
+    "focus": false
+   },
+   "frames": [
+    {
+     "t": 3009.5,
+     "tile": "Oracle, Unread activity",
+     "focus": false,
+     "visible": "hidden",
+     "dot": {
+      "rect": [
+       51.8,
+       163.5,
+       8,
+       8
+      ],
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px none rgb(245, 245, 245)",
+      "boxShadow": "none",
+      "borderRadius": "9999px",
+      "opacity": "1",
+      "outline": "rgb(245, 245, 245) none 1.5px"
+     }
+    }
+   ]
+  },
+  {
+   "name": "bring the window to the front",
+   "before": {
+    "dot": true,
+    "focus": false
+   },
+   "after": {
+    "dot": false,
+    "tile": "Oracle",
+    "focus": true
+   },
+   "frames": [
+    {
+     "t": 710.4,
+     "tile": "Oracle",
+     "focus": true,
+     "visible": "visible",
+     "dot": null
+    }
+   ]
+  }
+ ],
+ "clearedBy": "bring the window to the front",
+ "precondition": {
+  "t": 430308.89999997616,
+  "tile": "Oracle",
+  "focus": false,
+  "visible": "hidden",
+  "dot": null
+ },
+ "away": [
+  {
+   "t": 432567.7,
+   "tile": "Oracle",
+   "focus": false,
+   "visible": "visible",
+   "dot": null
+  },
+  {
+   "t": 436037.9,
+   "tile": "Oracle, Unread activity",
+   "focus": false,
+   "visible": "visible",
+   "dot": {
+    "rect": [
+     51.8,
+     163.5,
+     8,
+     8
+    ],
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px none rgb(245, 245, 245)",
+    "boxShadow": "none",
+    "borderRadius": "9999px",
+    "opacity": "0",
+    "outline": "rgb(245, 245, 245) none 1.5px"
+   }
+  },
+  {
+   "t": 436089.4,
+   "tile": "Oracle, Unread activity",
+   "focus": false,
+   "visible": "visible",
+   "dot": {
+    "rect": [
+     51.8,
+     163.5,
+     8,
+     8
+    ],
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px none rgb(245, 245, 245)",
+    "boxShadow": "none",
+    "borderRadius": "9999px",
+    "opacity": "0.911974",
+    "outline": "rgb(245, 245, 245) none 1.5px"
+   }
+  },
+  {
+   "t": 436140.3,
+   "tile": "Oracle, Unread activity",
+   "focus": false,
+   "visible": "visible",
+   "dot": {
+    "rect": [
+     51.8,
+     163.5,
+     8,
+     8
+    ],
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px none rgb(245, 245, 245)",
+    "boxShadow": "none",
+    "borderRadius": "9999px",
+    "opacity": "0.997862",
+    "outline": "rgb(245, 245, 245) none 1.5px"
+   }
+  },
+  {
+   "t": 436191.2,
+   "tile": "Oracle, Unread activity",
+   "focus": false,
+   "visible": "visible",
+   "dot": {
+    "rect": [
+     51.8,
+     163.5,
+     8,
+     8
+    ],
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px none rgb(245, 245, 245)",
+    "boxShadow": "none",
+    "borderRadius": "9999px",
+    "opacity": "1",
+    "outline": "rgb(245, 245, 245) none 1.5px"
+   }
+  }
+ ],
+ "start": {
+  "t": 439908.6999999881,
+  "tile": "Oracle, Unread activity",
+  "focus": false,
+  "visible": "visible",
+  "dot": {
+   "rect": [
+    51.8,
+    163.5,
+    8,
+    8
+   ],
+   "background": "rgba(0, 0, 0, 0)",
+   "border": "0px none rgb(245, 245, 245)",
+   "boxShadow": "none",
+   "borderRadius": "9999px",
+   "opacity": "1",
+   "outline": "rgb(245, 245, 245) none 1.5px"
+  }
+ }
+}
