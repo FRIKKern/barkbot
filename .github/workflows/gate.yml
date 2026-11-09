@@ -19,5 +19,17 @@ jobs:
       - run: pnpm install --frozen-lockfile
         working-directory: app
       - run: node scripts/gate.mjs --ci
-      # Gate B: each recorded oracle turn replayed in ours; fails below parity/gate-b/<trace>.json.
-      - run: node scripts/gate-b.mjs --ci
+      # Gate B, report only: each recorded oracle turn replayed in ours. Its timings are judged on
+      # the Mac the oracle was recorded on (land.sh runs it for real); this runner is slower and
+      # misses feel budgets the app meets there. A drop here is a warning on the PR, never a red.
+      # Not continue-on-error: that shows a failed step as a green run.
+      - name: Gate B (report only)
+        run: |
+          set +e
+          node scripts/gate-b.mjs --ci --show 20 > gate-b.log 2>&1
+          rc=$?
+          cat gate-b.log
+          if [ "$rc" -ne 0 ]; then
+            echo "::warning title=Gate B (report only)::$(grep -E '^Gate B( ·|:)' gate-b.log | tr '\n' ' ')"
+          fi
+          exit 0
