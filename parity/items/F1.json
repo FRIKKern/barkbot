@@ -10,6 +10,6 @@
   "Connect apps",
   "Open account menu"
  ],
- "gate": "Gate A: aside Bots, both Bot tiles, New Bot, Connect apps, Open account menu pass in all five frame states",
- "evidence": "Rail.tsx + rail.css; parity/gate-a/oracle-{turn-1040,main-1280,main-1600,panel-closed,library}.json"
+ "gate": "Gate A: aside Bots, both Bot tiles, New Bot, Connect apps, Open account menu pass in all five frame states; hover: oracle-hover-new-bot 2/2, -connect-apps 2/2, -open-account-menu 1/1, -bot-tile-2 1/1 (tooltips and the chat preview)",
+ "evidence": "Rail.tsx + rail.css; parity/gate-a/oracle-{turn-1040,main-1280,main-1600,panel-closed,library}.json; hover looks in rail.css, tooltips and the bot's chat preview in tips.tsx (preview card, its inner block, name and line on the fixture's boxes to 0.4 pt; its line is placeholder text, O2)"
 }
