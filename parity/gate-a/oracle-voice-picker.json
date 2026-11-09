@@ -7,7 +7,7 @@
   2
  ],
  "cases": 101,
- "pass": 100,
+ "pass": 101,
  "results": [
   {
    "key": "aside:Bots",
@@ -295,8 +295,7 @@
   },
   {
    "key": "bubble:assistant#1 look",
-   "pass": false,
-   "why": "0 paragraphs, oracle 1"
+   "pass": true
   },
   {
    "key": "bubble:assistant#1 place",
@@ -415,7 +414,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:49:27.987Z",
+ "run": "2026-11-09T08:24:42.558Z",
  "inventory": {
   "id": "oracle-voice-picker",
   "controls": [

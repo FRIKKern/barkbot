@@ -7,7 +7,7 @@
   2
  ],
  "cases": 61,
- "pass": 56,
+ "pass": 61,
  "results": [
   {
    "key": "aside:Bots",
@@ -171,8 +171,7 @@
   },
   {
    "key": "bubble:assistant#1 place",
-   "pass": false,
-   "why": "width (filled) off by 3.6"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -180,8 +179,7 @@
   },
   {
    "key": "bubble:user#1 place",
-   "pass": false,
-   "why": "width (filled) off by 1.6"
+   "pass": true
   },
   {
    "key": "bubble:assistant#2 look",
@@ -189,8 +187,7 @@
   },
   {
    "key": "bubble:assistant#2 place",
-   "pass": false,
-   "why": "width (filled) off by 3.6"
+   "pass": true
   },
   {
    "key": "strong#1",
@@ -214,8 +211,7 @@
   },
   {
    "key": "bubble:user#2 place",
-   "pass": false,
-   "why": "width (filled) off by 1.6"
+   "pass": true
   },
   {
    "key": "bubble:assistant#3 look",
@@ -223,8 +219,7 @@
   },
   {
    "key": "bubble:assistant#3 place",
-   "pass": false,
-   "why": "width (filled) off by 3.6"
+   "pass": true
   },
   {
    "key": "strong#3",
@@ -259,7 +254,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T08:10:23.396Z",
+ "run": "2026-11-09T08:24:42.558Z",
  "inventory": {
   "id": "oracle-main-820",
   "controls": [

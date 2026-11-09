@@ -1,29 +1,29 @@
 {
  "id": "2026-11-08-say-hi-2",
  "captured": "2026-11-08T21:39:32.645Z",
- "cases": 10,
- "pass": 9,
+ "cases": 11,
+ "pass": 10,
  "results": [
   {
    "key": "user#1",
    "pass": true,
    "oracle": 1561.5,
-   "ours": 1570.1,
-   "lag": 9
+   "ours": 1568.1,
+   "lag": 7
   },
   {
    "key": "status:working#1",
    "pass": true,
    "oracle": 2231,
-   "ours": 2235.2,
-   "lag": 4
+   "ours": 2236.8,
+   "lag": 6
   },
   {
    "key": "working#1",
    "pass": true,
    "oracle": 2231,
-   "ours": 2235.2,
-   "lag": 4
+   "ours": 2236.8,
+   "lag": 6
   },
   {
    "key": "label:status#1",
@@ -35,15 +35,15 @@
    "key": "assistant#1",
    "pass": true,
    "oracle": 4642.7,
-   "ours": 4649.9,
-   "lag": 7
+   "ours": 4647.5,
+   "lag": 5
   },
   {
    "key": "status:replied#1",
    "pass": true,
    "oracle": 4743.9,
-   "ours": 4751.4,
-   "lag": 8
+   "ours": 4748.5,
+   "lag": 5
   },
   {
    "key": "nothing extra",
@@ -61,7 +61,11 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 241.5
+   "ours": 241
+  },
+  {
+   "key": "history after a reconnect (stored as today: the last message)",
+   "pass": true
   }
  ],
  "oracle": [
@@ -99,30 +103,30 @@
   },
   {
    "kind": "user",
-   "t": 1570.1,
+   "t": 1568.1,
    "len": 29
   },
   {
    "kind": "working",
-   "t": 2235.2
+   "t": 2236.8
   },
   {
    "kind": "status:working",
-   "t": 2235.2
+   "t": 2236.8
   },
   {
    "kind": "assistant",
-   "t": 4649.9,
+   "t": 4647.5,
    "len": 12
   },
   {
    "kind": "working-gone",
-   "t": 4891.4
+   "t": 4888.5
   },
   {
    "kind": "status:replied",
-   "t": 4751.4
+   "t": 4748.5
   }
  ],
- "run": "2026-11-09T07:09:43.346Z"
+ "run": "2026-11-09T08:26:30.762Z"
 }

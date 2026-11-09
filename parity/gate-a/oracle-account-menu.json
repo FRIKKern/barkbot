@@ -7,7 +7,7 @@
   2
  ],
  "cases": 82,
- "pass": 81,
+ "pass": 82,
  "results": [
   {
    "key": "aside:Bots",
@@ -219,8 +219,7 @@
   },
   {
    "key": "bubble:assistant#1 look",
-   "pass": false,
-   "why": "0 paragraphs, oracle 1"
+   "pass": true
   },
   {
    "key": "bubble:assistant#1 place",
@@ -339,7 +338,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T08:04:30.318Z",
+ "run": "2026-11-09T08:24:42.558Z",
  "inventory": {
   "id": "oracle-account-menu",
   "controls": [

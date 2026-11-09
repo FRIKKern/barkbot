@@ -1,29 +1,29 @@
 {
  "id": "2026-11-08-say-hi",
  "captured": "2026-11-08T21:28:09.048Z",
- "cases": 13,
- "pass": 12,
+ "cases": 14,
+ "pass": 13,
  "results": [
   {
    "key": "user#1",
    "pass": true,
    "oracle": 304.3,
-   "ours": 310.7,
-   "lag": 6
+   "ours": 309.4,
+   "lag": 5
   },
   {
    "key": "status:working#1",
    "pass": true,
    "oracle": 939.8,
-   "ours": 943.3,
-   "lag": 4
+   "ours": 942.5,
+   "lag": 3
   },
   {
    "key": "working#1",
    "pass": true,
    "oracle": 939.8,
-   "ours": 943.3,
-   "lag": 4
+   "ours": 942.5,
+   "lag": 3
   },
   {
    "key": "label:status#1",
@@ -35,22 +35,22 @@
    "key": "label:typing#1",
    "pass": true,
    "oracle": 3293,
-   "ours": 3299.3,
-   "lag": 6
+   "ours": 3304.4,
+   "lag": 11
   },
   {
    "key": "assistant#1",
    "pass": true,
    "oracle": 3351.7,
-   "ours": 3355.2,
-   "lag": 4
+   "ours": 3354.9,
+   "lag": 3
   },
   {
    "key": "status:replied#1",
    "pass": true,
    "oracle": 3437.6,
-   "ours": 3456,
-   "lag": 18
+   "ours": 3456.6,
+   "lag": 19
   },
   {
    "key": "nothing extra",
@@ -59,7 +59,7 @@
   {
    "key": "budget: composer clears in 1 frame",
    "pass": true,
-   "ours": 0.2
+   "ours": 0.3
   },
   {
    "key": "budget: focus stays in Prompt",
@@ -68,17 +68,21 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 240.80000000000018
+   "ours": 241.69999999999982
   },
   {
    "key": "budget: own bubble ≤ 440 ms",
    "pass": true,
-   "ours": 310.7
+   "ours": 309.4
   },
   {
    "key": "budget: working line ≤ 2.0 s",
    "pass": true,
-   "ours": 943.3
+   "ours": 942.5
+  },
+  {
+   "key": "history after a reconnect (stored as today: the last message)",
+   "pass": true
   }
  ],
  "oracle": [
@@ -116,38 +120,38 @@
  "ours": [
   {
    "kind": "clear",
-   "t": 0.2
+   "t": 0.3
   },
   {
    "kind": "user",
-   "t": 310.7,
+   "t": 309.4,
    "len": 29
   },
   {
    "kind": "working",
-   "t": 943.3
+   "t": 942.5
   },
   {
    "kind": "status:working",
-   "t": 943.3
+   "t": 942.5
   },
   {
    "kind": "label:typing",
-   "t": 3299.3
+   "t": 3304.4
   },
   {
    "kind": "assistant",
-   "t": 3355.2,
+   "t": 3354.9,
    "len": 29
   },
   {
    "kind": "working-gone",
-   "t": 3596
+   "t": 3596.6
   },
   {
    "kind": "status:replied",
-   "t": 3456
+   "t": 3456.6
   }
  ],
- "run": "2026-11-09T07:09:43.350Z"
+ "run": "2026-11-09T08:26:30.763Z"
 }
