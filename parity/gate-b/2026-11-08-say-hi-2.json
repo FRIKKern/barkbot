@@ -1,8 +1,8 @@
 {
  "id": "2026-11-08-say-hi-2",
  "captured": "2026-11-08T21:39:32.645Z",
- "cases": 12,
- "pass": 11,
+ "cases": 13,
+ "pass": 12,
  "results": [
   {
    "key": "replay: every scripted event reached the page",
@@ -12,22 +12,29 @@
    "key": "user#1",
    "pass": true,
    "oracle": 1561.5,
-   "ours": 1564.7,
+   "ours": 1564.2,
    "lag": 3
   },
   {
    "key": "status:working#1",
    "pass": true,
    "oracle": 2231,
-   "ours": 2234.2,
-   "lag": 3
+   "ours": 2237.6,
+   "lag": 7
   },
   {
    "key": "working#1",
    "pass": true,
    "oracle": 2231,
-   "ours": 2234.2,
-   "lag": 3
+   "ours": 2237.6,
+   "lag": 7
+  },
+  {
+   "key": "rail:working#1",
+   "pass": true,
+   "oracle": 2231,
+   "ours": 2237.6,
+   "lag": 7
   },
   {
    "key": "label:status#1",
@@ -39,15 +46,15 @@
    "key": "assistant#1",
    "pass": true,
    "oracle": 4642.7,
-   "ours": 4646.8,
-   "lag": 4
+   "ours": 4644.6,
+   "lag": 2
   },
   {
    "key": "status:replied#1",
    "pass": true,
    "oracle": 4743.9,
-   "ours": 4746.2,
-   "lag": 2
+   "ours": 4748.5,
+   "lag": 5
   },
   {
    "key": "nothing extra",
@@ -56,7 +63,7 @@
   {
    "key": "budget: composer clears in 1 frame",
    "pass": true,
-   "ours": 0.5
+   "ours": 0.6
   },
   {
    "key": "budget: focus stays in Prompt",
@@ -65,7 +72,7 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 239.39999999999964
+   "ours": 243.89999999999964
   },
   {
    "key": "history after a reconnect (stored as today: the last message)",
@@ -87,6 +94,10 @@
    "t": 2231
   },
   {
+   "kind": "rail:working",
+   "t": 2231
+  },
+  {
    "kind": "label:status",
    "t": 3999.7
   },
@@ -103,44 +114,53 @@
  "ours": [
   {
    "kind": "clear",
-   "t": 0.5
+   "t": 0.6
   },
   {
    "kind": "user",
-   "t": 1564.7,
+   "t": 1564.2,
    "len": 29,
-   "raw": 1568.6
+   "raw": 1567.7
   },
   {
    "kind": "working",
-   "t": 2234.2,
-   "raw": 2237.5
+   "t": 2237.6,
+   "raw": 2241.9
   },
   {
    "kind": "status:working",
-   "t": 2234.2,
-   "raw": 2237.5
+   "t": 2237.6,
+   "raw": 2241.9
+  },
+  {
+   "kind": "rail:working",
+   "t": 2237.6,
+   "raw": 2241.9
   },
   {
    "kind": "assistant",
-   "t": 4646.8,
+   "t": 4644.6,
    "len": 12,
-   "raw": 4649.4
+   "raw": 4647.7
   },
   {
    "kind": "working-gone",
-   "t": 4886.2,
-   "raw": 4888.8
+   "t": 4888.5,
+   "raw": 4889.8
   },
   {
    "kind": "status:replied",
-   "t": 4746.2,
-   "raw": 4748.8
+   "t": 4748.5,
+   "raw": 4749.8
   }
  ],
  "standInLate": [
-  2,
+  1,
   4
  ],
- "run": "2026-11-09T08:54:04.570Z"
+ "skipped": [
+  "budget: own bubble ≤ 440 ms: not judged, the oracle's own is 1561.5 ms",
+  "budget: working line ≤ 2.0 s: not judged, the oracle's own is 2231 ms"
+ ],
+ "run": "2026-11-09T09:23:14.307Z"
 }
