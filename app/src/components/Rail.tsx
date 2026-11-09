@@ -1,5 +1,5 @@
 // The rail: the main bot, the pinned bots, New Bot, Connect apps, the account (fixture rail, 0..88).
-import type {ReactNode} from 'react'
+import {useEffect, useState, type ReactNode} from 'react'
 import type {Scene} from './Shell'
 import {Icon} from './Composer'
 import {Face} from './parts'
@@ -14,11 +14,14 @@ export function Rail({scene, onPick, working = [], unread = []}: {scene: Scene; 
   const main = scene.bots.find((b) => b.main)
   const others = scene.bots.filter((b) => !b.main)
   const active = scene.active ?? ''
+  const held = useCommandHeld()
+  // ⌘1 on the main bot, ⌘2 on the first pinned bot, and so on (trace say-hi; only two bots captured).
+  const hint = (i: number) => (held ? `⌘${i + 1}` : undefined)
   return (
     <aside className="rail" aria-label="Bots">
       <div className="rail-main">
         {main && (
-          <Tile name={main.name} label={busy(main.name, `${main.name}, Main Bot`)} current={main.name === active} line={scene.previews?.[main.name]} onPick={onPick} unread={unread.includes(main.name)}>
+          <Tile name={main.name} label={busy(main.name, `${main.name}, Main Bot`)} current={main.name === active} line={scene.previews?.[main.name]} onPick={onPick} unread={unread.includes(main.name)} hint={hint(0)}>
             <span className="face face-main" />
             <span className="badge" role="img" aria-label="Main Bot" />
           </Tile>
@@ -26,9 +29,9 @@ export function Rail({scene, onPick, working = [], unread = []}: {scene: Scene; 
       </div>
       <div className="rail-rule" />
       <div className="rail-list" role="list" aria-label="Pinned Bots">
-        {others.map((b) => (
+        {others.map((b, i) => (
           <div role="listitem" key={b.name}>
-            <Tile name={b.name} label={busy(b.name, b.name)} current={b.name === active} line={scene.previews?.[b.name]} onPick={onPick} unread={unread.includes(b.name)}>
+            <Tile name={b.name} label={busy(b.name, b.name)} current={b.name === active} line={scene.previews?.[b.name]} onPick={onPick} unread={unread.includes(b.name)} hint={hint(main ? i + 1 : i)}>
               <Face size={34} />
             </Tile>
           </div>
@@ -56,13 +59,14 @@ export function Rail({scene, onPick, working = [], unread = []}: {scene: Scene; 
 }
 
 // A bot's tile; the pointer on it brings up the bot's chat preview (oracle-hover-bot-tile-2).
-function Tile({name, label, current, line, onPick, unread, children}: {name: string; label: string; current?: boolean; line?: string; onPick?: (name: string) => void; unread?: boolean; children: ReactNode}) {
+function Tile({name, label, current, line, onPick, unread, hint, children}: {name: string; label: string; current?: boolean; line?: string; onPick?: (name: string) => void; unread?: boolean; hint?: string; children: ReactNode}) {
   const h = useHover()
   return (
     <>
       <button className="rail-tile" aria-label={label} aria-current={current ? 'page' : undefined} onClick={() => onPick?.(name)} {...h.on}>
         {children}
         {unread && <span className="unread" role="status" aria-label="Unread activity" />}
+        {hint && <span className="rail-hint">{hint}</span>}
       </button>
       <Preview box={h.box} name={name} line={line ?? ''} />
     </>
@@ -80,4 +84,26 @@ function IconTip({label, children}: {label: string; children: ReactNode}) {
       <Tooltip box={h.box}>{label}</Tooltip>
     </>
   )
+}
+
+// While ⌘ is held the bot tiles show their shortcut; letting go, or the window losing focus, hides
+// them in the same frame (trace say-hi: added at 7129.1 and 9990.2 ms, removed at 8752.9 and
+// 11214.1, opacity 1 from the first sample, no fade). Only the hint: ⌘1/⌘2 themselves are not
+// built, since the oracle's switching was never captured.
+function useCommandHeld() {
+  const [held, setHeld] = useState(false)
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => e.key === 'Meta' && setHeld(true)
+    const up = (e: KeyboardEvent) => e.key === 'Meta' && setHeld(false)
+    const off = () => setHeld(false)
+    window.addEventListener('keydown', down)
+    window.addEventListener('keyup', up)
+    window.addEventListener('blur', off)
+    return () => {
+      window.removeEventListener('keydown', down)
+      window.removeEventListener('keyup', up)
+      window.removeEventListener('blur', off)
+    }
+  }, [])
+  return held
 }
