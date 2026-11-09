@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GateBTraceRouteImport } from './routes/gate-b.$trace'
 import { Route as GateStateRouteImport } from './routes/gate.$state'
+import { Route as ApiChatEventsRouteImport } from './routes/api/chat.events'
 import { Route as ApiGateBTraceRouteImport } from './routes/api/gate-b.$trace'
 import { Route as ApiChatIdEventsRouteImport } from './routes/api/chat.$id.events'
 
@@ -30,6 +31,11 @@ const GateStateRoute = GateStateRouteImport.update({
   path: '/gate/$state',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatEventsRoute = ApiChatEventsRouteImport.update({
+  id: '/api/chat/events',
+  path: '/api/chat/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGateBTraceRoute = ApiGateBTraceRouteImport.update({
   id: '/api/gate-b/$trace',
   path: '/api/gate-b/$trace',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gate-b/$trace': typeof GateBTraceRoute
   '/gate/$state': typeof GateStateRoute
+  '/api/chat/events': typeof ApiChatEventsRoute
   '/api/gate-b/$trace': typeof ApiGateBTraceRoute
   '/api/chat/$id/events': typeof ApiChatIdEventsRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/gate-b/$trace': typeof GateBTraceRoute
   '/gate/$state': typeof GateStateRoute
+  '/api/chat/events': typeof ApiChatEventsRoute
   '/api/gate-b/$trace': typeof ApiGateBTraceRoute
   '/api/chat/$id/events': typeof ApiChatIdEventsRoute
 }
@@ -60,6 +68,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/gate-b/$trace': typeof GateBTraceRoute
   '/gate/$state': typeof GateStateRoute
+  '/api/chat/events': typeof ApiChatEventsRoute
   '/api/gate-b/$trace': typeof ApiGateBTraceRoute
   '/api/chat/$id/events': typeof ApiChatIdEventsRoute
 }
@@ -69,6 +78,7 @@ export interface FileRouteTypes {
     | '/'
     | '/gate-b/$trace'
     | '/gate/$state'
+    | '/api/chat/events'
     | '/api/gate-b/$trace'
     | '/api/chat/$id/events'
   fileRoutesByTo: FileRoutesByTo
@@ -76,6 +86,7 @@ export interface FileRouteTypes {
     | '/'
     | '/gate-b/$trace'
     | '/gate/$state'
+    | '/api/chat/events'
     | '/api/gate-b/$trace'
     | '/api/chat/$id/events'
   id:
@@ -83,6 +94,7 @@ export interface FileRouteTypes {
     | '/'
     | '/gate-b/$trace'
     | '/gate/$state'
+    | '/api/chat/events'
     | '/api/gate-b/$trace'
     | '/api/chat/$id/events'
   fileRoutesById: FileRoutesById
@@ -91,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GateBTraceRoute: typeof GateBTraceRoute
   GateStateRoute: typeof GateStateRoute
+  ApiChatEventsRoute: typeof ApiChatEventsRoute
   ApiGateBTraceRoute: typeof ApiGateBTraceRoute
   ApiChatIdEventsRoute: typeof ApiChatIdEventsRoute
 }
@@ -118,6 +131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GateStateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/events': {
+      id: '/api/chat/events'
+      path: '/api/chat/events'
+      fullPath: '/api/chat/events'
+      preLoaderRoute: typeof ApiChatEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/gate-b/$trace': {
       id: '/api/gate-b/$trace'
       path: '/api/gate-b/$trace'
@@ -139,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GateBTraceRoute: GateBTraceRoute,
   GateStateRoute: GateStateRoute,
+  ApiChatEventsRoute: ApiChatEventsRoute,
   ApiGateBTraceRoute: ApiGateBTraceRoute,
   ApiChatIdEventsRoute: ApiChatIdEventsRoute,
 }

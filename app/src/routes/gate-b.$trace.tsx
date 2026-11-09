@@ -22,15 +22,19 @@ declare global {
 if (typeof window !== 'undefined' && import.meta.env.DEV && !('logged' in window.EventSource)) {
   const Base = window.EventSource
   const log = (window.__arrivals = [] as Arrival[])
+  const open: EventSource[] = []
+  addEventListener('pagehide', () => open.forEach((es) => es.close()))
   // An EventSource whose listeners note the moment each event reaches them.
   const Logged = function (url: string | URL, init?: EventSourceInit) {
     const es = new Base(url, init)
+    open.push(es)
     const add = es.addEventListener.bind(es) as (type: string, fn: (e: MessageEvent) => void) => void
     ;(es as {addEventListener: unknown}).addEventListener = (type: string, fn: (e: MessageEvent) => void) =>
       add(type, (e: MessageEvent) => {
         let kind: string | undefined
         try {
-          kind = JSON.parse(e.data)?.kind
+          const d = JSON.parse(e.data)
+          kind = d?.kind ?? d?.agent_state // a runtime event's kind, or a fleet state's
         } catch {}
         log.push({type, kind, t: performance.now()})
         fn(e)
@@ -59,6 +63,7 @@ function Replay() {
   const transport = useMemo<Transport>(
     () => ({
       events: (id) => `/api/gate-b/${trace}?run=${id}${history ? `&history=${encodeURIComponent(history)}` : ''}`,
+      fleet: (id) => `/api/gate-b/${trace}?run=${id}&fleet`,
       send: async (id) => {
         const res = await fetch(`/api/gate-b/${trace}?run=${id}`, {method: 'POST'})
         const body = res.ok ? null : await res.text()
@@ -73,6 +78,7 @@ function Replay() {
     <>
       <Shell
         scene={scene}
+        workingBots={convo.botState === 'working' ? [bot] : []}
         transcript={<Transcript bot={bot} startedAt={null} bubbles={convo.bubbles} working={convo.working} error={convo.error} />}
         composer={<Composer placeholder={`Message ${bot}`} onSend={(text) => void convo.send(text)} disabled={!convo.ready} />}
       />

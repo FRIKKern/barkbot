@@ -14,7 +14,12 @@ export type Bubble = {
   /** Gate scenes only: each paragraph's height on the oracle, kept whatever the placeholder words do. */
   heights?: number[]
 }
-export type Working = {label: string; leaving: boolean; first: boolean} | null
+/** The working line. `held`: the turn has started but the bot's state is not Working yet, so the
+ *  row waits (the oracle's row comes with its rail's Working, not with the turn's start). */
+export type Working = {label: string; leaving: boolean; first: boolean; held: boolean} | null
+/** The bot's state from Barkpark's fleet stream (agent_state); null until the stream has said. */
+export type BotState = 'working' | 'blocked' | 'idle' | 'unknown' | null
+const busy = (s: BotState) => s === null || s === 'working' || s === 'blocked'
 
 type Frame = Record<string, any>
 
@@ -37,10 +42,12 @@ let n = 0
 const key = () => `local-${++n}`
 const flat = (s: string) => s.replace(/\s+/g, '')
 
-/** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay. */
-export type Transport = {events: (sessionId: string) => string; send: (sessionId: string, content: string) => Promise<unknown>}
+/** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay.
+ *  `fleet` is the stream of every bot's state (Barkpark's /v1/chat/events: snapshot, then state). */
+export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string) => Promise<unknown>}
 export const barkpark: Transport = {
   events: (id) => `/api/chat/${id}/events`,
+  fleet: () => '/api/chat/events',
   send: (id, content) => sendMessage({data: {id, content}}),
 }
 
@@ -52,10 +59,15 @@ export function useConversation(sessionId: string | null, transport: Transport =
   const [ready, setReady] = useState(false) // the live stream is open: a send now cannot miss its run
   const text = useRef<string | null>(null) // the reply block being written, not shown until it ends
   const leave = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [botState, setBotState] = useState<BotState>(null)
+  const bot = useRef<BotState>(null) // the same, for event handlers
+  // A new line is held while the bot is not Working; once shown it stays until the turn ends.
+  const fresh = (w: Working) => !w || w.leaving
+  const held = (w: Working) => (fresh(w) ? !busy(bot.current) : w!.held)
 
   const show = useCallback((label: string) => {
     if (leave.current) clearTimeout(leave.current), (leave.current = null)
-    setWorking((w) => ({label, leaving: false, first: !w || w.leaving}))
+    setWorking((w) => ({label, leaving: false, first: fresh(w), held: held(w)}))
   }, [])
   // "Typing…" waits one frame: text that lands within the frame it began never shows it (the
   // oracle shows no "Typing…" for a reply that arrives whole, Gate B say-hi-2).
@@ -68,7 +80,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
   // A new model message in the same turn keeps what the line said, unless that was "Typing…".
   const resume = useCallback(() => {
     if (leave.current) clearTimeout(leave.current), (leave.current = null)
-    setWorking((w) => (w && !w.leaving && w.label !== 'Typing…' ? w : {label: '', leaving: false, first: !w || w.leaving}))
+    setWorking((w) => (w && !w.leaving && w.label !== 'Typing…' ? w : {label: '', leaving: false, first: fresh(w), held: held(w)}))
   }, [])
   const land = useCallback((b: Omit<Bubble, 'key'>) => {
     if (b.role === 'assistant' && typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
@@ -104,6 +116,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
     setBubbles([])
     setWorking(null)
     setReady(false)
+    setBotState(null)
     if (!sessionId) return
     const es = new EventSource(transport.events(sessionId))
     es.onopen = () => setReady(true)
@@ -180,8 +193,26 @@ export function useConversation(sessionId: string | null, transport: Transport =
       }
     })
     es.addEventListener('exit', () => end())
+    // The bot's state: Barkpark flips it when a turn starts and ends (Recorder → FleetHub). The
+    // working row shows when the bot is Working, which the rail shows too (workingBots).
+    const fleet = transport.fleet ? new EventSource(transport.fleet(sessionId)) : null
+    const take = (s: BotState) => {
+      bot.current = s
+      setBotState(s)
+      if (busy(s)) setWorking((w) => (w?.held ? {...w, held: false} : w))
+    }
+    fleet?.addEventListener('snapshot', (e) => {
+      const f = JSON.parse((e as MessageEvent).data) as {sessions?: {session_id: string; agent_state: BotState}[]}
+      take(f.sessions?.find((x) => x.session_id === sessionId)?.agent_state ?? 'idle')
+    })
+    fleet?.addEventListener('state', (e) => {
+      const f = JSON.parse((e as MessageEvent).data) as {session_id: string; agent_state: BotState}
+      if (f.session_id === sessionId) take(f.agent_state)
+    })
     return () => {
       es.close()
+      fleet?.close()
+      bot.current = null
       if (leave.current) clearTimeout(leave.current)
       if (typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
     }
@@ -201,5 +232,5 @@ export function useConversation(sessionId: string | null, transport: Transport =
     [sessionId, transport, land],
   )
 
-  return {bubbles, working, error, ready, send}
+  return {bubbles, working, botState, error, ready, send}
 }
