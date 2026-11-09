@@ -76,6 +76,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
   }, [])
   const end = useCallback(() => {
     // Measured: the line goes ~100 ms after the reply lands, then a 140 ms exit.
+    if (typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
     leave.current = setTimeout(() => {
       setWorking((w) => (w ? {...w, leaving: true} : w))
       leave.current = setTimeout(() => setWorking(null), 140)
