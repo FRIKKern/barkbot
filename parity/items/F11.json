@@ -18,6 +18,6 @@
   "/^Open (?!account menu$|conversation).+$/",
   "/^Connect( .+)?$/"
  ],
- "gate": "Gate A oracle-connect-apps 99/100: the view's own 60/60; the 1 miss is the details panel's Hide (frame)",
+ "gate": "Gate A oracle-connect-apps 100/100",
  "evidence": "app/src/components/overlays/Views.tsx (ConnectApps), styles/views.css; opens from Connect apps in the rail, Close and Escape close it, filters toggle. App logos are neutral tiles and the connected count a placeholder bar (O2, lengths only); Connect and Open act nowhere yet (0005)."
 }

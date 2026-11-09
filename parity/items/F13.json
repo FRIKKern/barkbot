@@ -16,6 +16,6 @@
   "Sign Out",
   "Check Spelling While Typing"
  ],
- "gate": "Gate A oracle-settings 77/78: the page's own 38/38; the 1 miss is the frame's Hide",
+ "gate": "Gate A oracle-settings 78/78",
  "evidence": "app/src/components/overlays/Views.tsx (Settings); opens from Settings in the account menu, Close and Escape close it, the spelling switch toggles. Name, e-mail, promo copy and art are placeholders of the captured size (lengths only); other sections highlight but show General."
 }
