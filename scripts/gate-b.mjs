@@ -203,10 +203,10 @@ async function play(trace, sent) {
 // answers come late (storage's own bubble: 562 ms once, the send answered ~140 ms late), and
 // that lateness is not the UI's. A moment with no arrival before it (the composer clearing)
 // keeps its own time. Precondition: the streams delivered every scripted event, in order: the
-// runtime events, and the bot's state flips (the fleet stream, at the oracle rail's times).
-function uiTime(milestones, rail, log, arrivals) {
+// runtime events, and the bot's state flips (the fleet stream, at oracleTurn's `fleet` times).
+function uiTime(milestones, fleet, log, arrivals) {
   const { accept, steps } = replayScript(milestones, SHAPE);
-  const states = stateScript(rail);
+  const states = stateScript(fleet);
   const send = arrivals.find((a) => a.type === 'send');
   const events = arrivals.filter((a) => a.type === 'runtime');
   const flips = arrivals.filter((a) => a.type === 'state');
@@ -240,12 +240,12 @@ function historyCase(key, milestones, { final, status }) {
 
 const report = [];
 for (const trace of traces) {
-  const { milestones, rail } = oracleTurn(trace);
+  const { milestones, fleet } = oracleTurn(trace);
   const sent = recipes[trace.recipe].text.length;
   const own = milestones.find((m) => m.kind === 'user');
   if (own && own.len !== sent) { console.error(`Gate B: ${trace.id}: the own bubble holds ${own.len} characters, the recipe sent ${sent}: ARTICLE_CHROME in app/src/chat/turn.ts no longer holds`); process.exit(1); }
   const live = await play(trace, sent);
-  const ui = uiTime(milestones, rail, live.log, live.arrivals);
+  const ui = uiTime(milestones, fleet, live.log, live.arrivals);
   const skipped = [];
   const cases = [{ key: 'replay: every scripted event reached the page', pass: ui.precondition.pass, why: ui.precondition.why }, ...compare(milestones, ui.log, live.focus, skipped)];
   cases.push(historyCase('history after a reconnect (one row, every message joined, as Barkpark stores a turn since #25471)', milestones, live));

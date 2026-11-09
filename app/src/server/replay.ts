@@ -55,9 +55,9 @@ const nothing = () => {}
 function runFor(run: string, trace: Trace, shape: Shape): Run {
   let r = runs.get(run)
   if (!r) {
-    const {milestones, rail} = oracleTurn(trace)
+    const {milestones, fleet} = oracleTurn(trace)
     const {accept, steps} = replayScript(milestones, shape)
-    r = {steps, states: stateScript(rail), accept, milestones, write: nothing, close: nothing, fleet: nothing, state: 'idle', timers: [], sent: false, connects: 0, rows: 0}
+    r = {steps, states: stateScript(fleet), accept, milestones, write: nothing, close: nothing, fleet: nothing, state: 'idle', timers: [], sent: false, connects: 0, rows: 0}
     runs.set(run, r)
     setTimeout(() => runs.delete(run), 5 * 60 * 1000)
   }
