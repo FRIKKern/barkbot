@@ -15,8 +15,9 @@
 //                           one, turn_started (Claude's host sends one per model message, so
 //                           a new one means the text before it is a whole message)
 //   a bubble with no "Typing…" before it gets its text in one delta at the bubble's time.
-// The oracle's own summary labels ("Saying hello") have no Barkpark event; the script sends
-// none, so ours cannot show them (task-f13fc4b4dc2af6de) and Gate B says so.
+// The oracle's own summary labels ("Saying hello") have no Barkpark event: they summarise the
+// turn (say-hi calls no tool), and a host's tool items (task-f13fc4b4dc2af6de) name tools, not
+// that. The oracle's DOM shows no tool call either, so the script sends none; Gate B says so.
 
 export type Kind = 'user' | 'working' | 'label:status' | 'label:typing' | 'assistant' | 'status:working' | 'status:replied' | 'rail:working'
 export type Milestone = {kind: Kind; t: number; len?: number; text?: string}
@@ -73,10 +74,17 @@ const runtime = (kind: string, extra: Record<string, unknown> = {}) => {
   // Barkpark's runtime event as /v1/chat/sessions/:id/events sends it for a registered host.
   const native: Record<string, unknown> = {kind, ...extra}
   if (typeof extra.delta === 'string') native.params = {delta: extra.delta}
+  if (extra.item) native.params = {item: extra.item}
   return {provider: 'claude', kind, native, durability: 'durable', terminal_state: kind === 'turn_completed' ? 'completed' : null}
 }
 
-export function replayScript(milestones: Milestone[]): {accept: number; steps: Step[]} {
+/** Which host the replay plays: `legacy` is what a registered claude host sends today (a
+ *  turn_started per model message); `items` is the host with item events (task-f13fc4b4dc2af6de):
+ *  one turn_started, each text block between item_started and item_completed {type: text}, and
+ *  Barkpark's paragraph break in front of a later block's first delta. */
+export type Shape = 'legacy' | 'items'
+
+export function replayScript(milestones: Milestone[], shape: Shape = 'legacy'): {accept: number; steps: Step[]} {
   const first = (k: Kind) => milestones.find((m) => m.kind === k)
   const accept = first('user')?.t ?? 0
   const starts = [first('status:working')?.t, first('working')?.t].filter((t): t is number => t !== undefined)
@@ -89,15 +97,24 @@ export function replayScript(milestones: Milestone[]): {accept: number; steps: S
   replies.forEach((b, i) => {
     const text = filler(b.len ?? 0)
     const typing = milestones.find((m) => m.kind === 'label:typing' && m.t > from && m.t <= b.t)
+    const last = i === replies.length - 1
+    const item = {type: 'text', id: `text-${i + 1}`}
+    const deltas: Step[] = []
     if (typing && b.t - typing.t >= 1) {
       const n = Math.max(1, Math.floor((b.t - typing.t) / 50))
       const size = Math.ceil(text.length / n)
       for (let k = 0; k < n; k++) {
         const chunk = text.slice(k * size, (k + 1) * size)
-        if (chunk) steps.push({t: round(typing.t + ((b.t - typing.t) * k) / n), data: runtime('text_delta', {delta: chunk})})
+        if (chunk) deltas.push({t: round(typing.t + ((b.t - typing.t) * k) / n), data: runtime('text_delta', {delta: chunk})})
       }
-    } else if (text) steps.push({t: b.t, data: runtime('text_delta', {delta: text})})
-    steps.push({t: b.t, data: runtime(i === replies.length - 1 ? 'turn_completed' : 'turn_started')})
+    } else if (text) deltas.push({t: b.t, data: runtime('text_delta', {delta: text})})
+    if (shape === 'legacy') {
+      steps.push(...deltas, {t: b.t, data: runtime(last ? 'turn_completed' : 'turn_started')})
+    } else {
+      if (i > 0 && deltas[0]) deltas[0] = {t: deltas[0].t, data: runtime('text_delta', {delta: '\n\n' + (deltas[0].data.native as {delta: string}).delta})}
+      steps.push({t: deltas[0]?.t ?? b.t, data: runtime('item_started', {item_id: item.id, item})}, ...deltas, {t: b.t, data: runtime('item_completed', {item_id: item.id, item})})
+      if (last) steps.push({t: b.t, data: runtime('turn_completed')})
+    }
     from = b.t
   })
   return {accept, steps}

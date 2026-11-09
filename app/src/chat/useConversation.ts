@@ -150,21 +150,25 @@ export function useConversation(sessionId: string | null, transport: Transport =
       }
     })
     // A registered host (the bot's own computer) speaks in runtime events, not claude's frames:
-    // turn_started, text_delta, turn_completed, error. Barkpark's host protocol carries no tool
-    // calls or text-block edges yet, so a reply lands whole when the turn ends.
+    // turn_started, text_delta, turn_completed, error. A host with Barkpark's item events
+    // (task-f13fc4b4dc2af6de) also sends each tool call (item {type: tool_use, name, input}) and
+    // each text block's edges (item {type: text}); an older one sends a turn_started per model
+    // message instead. Either way a message that ends lands as its own bubble.
+    const message = () => {
+      const t = (text.current ?? '').trim()
+      text.current = ''
+      if (t) land({role: 'assistant', text: t})
+      resume()
+    }
     es.addEventListener('runtime', (e) => {
       const ev = JSON.parse((e as MessageEvent).data) as Frame
       if (import.meta.env.DEV) console.debug('[runtime]', ev.kind)
       switch (ev.kind) {
-        case 'turn_started': {
-          // Claude's host sends one per model message (message_start), so a second one in a
+        case 'turn_started':
+          // An older host sends one per model message (message_start), so a second one in a
           // turn means the text before it is a whole message: it lands now, not lost (Gate B,
           // storage: a sentence, a tool, then the answer are two bubbles).
-          const t = (text.current ?? '').trim()
-          text.current = ''
-          if (t) land({role: 'assistant', text: t})
-          return resume()
-        }
+          return message()
         case 'text_delta': {
           const d = ev.native?.params?.delta ?? ev.native?.delta
           if (typeof d !== 'string') return
@@ -175,7 +179,13 @@ export function useConversation(sessionId: string | null, transport: Transport =
         }
         case 'item_started': {
           const it = ev.native?.params?.item
-          if (typeof it?.name === 'string') show(toolLabel(it.name, it.input))
+          if (it?.type !== 'text' && typeof it?.name === 'string') show(toolLabel(it.name, it.input))
+          return
+        }
+        case 'item_completed': {
+          // A text block ended: its text is a whole message. (Barkpark puts a paragraph break in
+          // front of the next block's first delta; the bubble is trimmed.)
+          if (ev.native?.params?.item?.type === 'text') message()
           return
         }
         case 'turn_completed': {

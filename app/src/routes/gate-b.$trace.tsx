@@ -60,10 +60,12 @@ function Replay() {
   const [run] = useState(() => crypto.randomUUID())
   // ?history=joined: after its reconnect the stream replays the turn stored as one joined text.
   const [history] = useState(() => (typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('history')))
+  // ?shape=items: the replay plays a host with item events (turn.ts, Shape).
+  const [shape] = useState(() => (typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('shape')))
   const transport = useMemo<Transport>(
     () => ({
-      events: (id) => `/api/gate-b/${trace}?run=${id}${history ? `&history=${encodeURIComponent(history)}` : ''}`,
-      fleet: (id) => `/api/gate-b/${trace}?run=${id}&fleet`,
+      events: (id) => `/api/gate-b/${trace}?run=${id}${history ? `&history=${encodeURIComponent(history)}` : ''}${shape ? `&shape=${encodeURIComponent(shape)}` : ''}`,
+      fleet: (id) => `/api/gate-b/${trace}?run=${id}&fleet${shape ? `&shape=${encodeURIComponent(shape)}` : ''}`,
       send: async (id) => {
         const res = await fetch(`/api/gate-b/${trace}?run=${id}`, {method: 'POST'})
         const body = res.ok ? null : await res.text()
@@ -71,7 +73,7 @@ function Replay() {
         if (body !== null) throw new Error(body)
       },
     }),
-    [trace, history],
+    [trace, history, shape],
   )
   const convo = useConversation(run, transport)
   return (

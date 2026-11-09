@@ -13,11 +13,12 @@
 // (seq-ascending, `id: <seq>`): the user's row, then the turn's ONE assistant row. `history`
 // picks that row's text: `last` (default) is what Barkpark stores today, the text of the turn's
 // last model message, because its recorder resets the turn's text at every turn_started;
-// `joined` is every message's text joined, as it would store it if that reset were fixed.
+// `joined` is every message's text, a paragraph apart, as it stores it once that reset is fixed
+// (task-aa27c3d55ca8d009). `shape=items` plays the host with item events (turn.ts, Shape).
 import '@tanstack/react-start/server-only'
 import {readFileSync} from 'node:fs'
 import {resolve} from 'node:path'
-import {filler, oracleTurn, replayScript, stateScript, type Milestone, type Step, type Trace} from '../chat/turn'
+import {filler, oracleTurn, replayScript, stateScript, type Milestone, type Shape, type Step, type Trace} from '../chat/turn'
 
 type Run = {
   steps: Step[]
@@ -52,11 +53,11 @@ const row = (seq: number, role: string, text: string) =>
   `id: ${seq}\nevent: message\ndata: ${JSON.stringify({seq, role, source_markdown: text, metadata: {}, inserted_at: new Date().toISOString()})}\n\n`
 
 const nothing = () => {}
-function runFor(run: string, trace: Trace): Run {
+function runFor(run: string, trace: Trace, shape: Shape): Run {
   let r = runs.get(run)
   if (!r) {
     const {milestones, rail} = oracleTurn(trace)
-    const {accept, steps} = replayScript(milestones)
+    const {accept, steps} = replayScript(milestones, shape)
     r = {steps, states: stateScript(rail), accept, milestones, write: nothing, close: nothing, fleet: nothing, state: 'idle', timers: [], sent: false, connects: 0, rows: 0}
     runs.set(run, r)
     setTimeout(() => runs.delete(run), 5 * 60 * 1000)
@@ -93,7 +94,7 @@ function history(m: Milestone[], shape: string, since: number): string {
   const user = m.find((x) => x.kind === 'user')
   const replies = m.filter((x) => x.kind === 'assistant').map((x) => filler(x.len ?? 0))
   if (!user || !replies.length) return ''
-  const rows = [row(1, 'user', filler(user.len ?? 0)), row(2, 'assistant', shape === 'joined' ? replies.join('') : replies.at(-1)!)]
+  const rows = [row(1, 'user', filler(user.len ?? 0)), row(2, 'assistant', shape === 'joined' ? replies.join('\n\n') : replies.at(-1)!)]
   return rows.slice(since).join('') // rows after Last-Event-ID, as Barkpark replays
 }
 
@@ -108,21 +109,23 @@ export function replayStream(id: string, request: Request): Response {
   }
   const trace = loadTrace(id)
   if (!trace) return new Response('no such trace', {status: 404})
-  const r = runFor(run, trace)
+  const shape: Shape = url.searchParams.get('shape') === 'items' ? 'items' : 'legacy'
+  const r = runFor(run, trace, shape)
   if (url.searchParams.has('fleet'))
     return sseResponse((write) => {
       r.fleet = write
       write('retry: 50\n\n')
       write(fleetFrame('snapshot', {sessions: [{session_id: run, agent_state: r.state, ts: new Date().toISOString(), title: null}]}))
     }, request.signal)
-  const shape = url.searchParams.get('history') ?? 'last'
+  // A host with item events stores the turn joined (task-aa27c3d55ca8d009), so that is its default.
+  const stored = url.searchParams.get('history') ?? (shape === 'items' ? 'joined' : 'last')
   return sseResponse((write, close) => {
     r.write = write
     r.close = close
     r.connects++
     write('retry: 50\n\n') // reconnect soon after a drop; the first bytes also open the EventSource
     if (r.sent) {
-      const h = history(r.milestones, shape, since)
+      const h = history(r.milestones, stored, since)
       r.rows += (h.match(/^event: message$/gm) ?? []).length
       write(h)
     }

@@ -49,6 +49,9 @@ async function until(fn, ms, what) {
 
 // A turn trace is one whose recipe sends a message.
 const ONLY = opt('only');
+// --shape items: replay a host with item events (app/src/chat/turn.ts, Shape); compare only.
+const SHAPE = opt('shape') === 'items' ? 'items' : 'legacy';
+if (SHAPE !== 'legacy' && !process.argv.includes('--ci')) { console.error('Gate B: --shape items compares only; add --ci'); process.exit(2); }
 const traces = readdirSync(path('traces')).filter((f) => f.endsWith('.json') && (!ONLY || f === `${ONLY}.json`))
   .map((f) => JSON.parse(readFileSync(path('traces', f), 'utf8')))
   .filter((t) => recipes[t.recipe]?.kind === 'send');
@@ -131,7 +134,7 @@ function compare(oracle, ours, focusAtEnd, skipped = []) {
     const k = oracle.filter((x) => x.kind === m.kind).indexOf(m);
     const o = nth(ours, m.kind, k);
     const key = `${m.kind}#${k + 1}`;
-    if (!o) { cases.push({ key, pass: false, oracle: m.t, why: m.kind === 'label:status' ? 'ours never shows it: no Barkpark event carries the oracle\'s summary label (task-f13fc4b4dc2af6de)' : 'ours never shows it' }); return; }
+    if (!o) { cases.push({ key, pass: false, oracle: m.t, why: m.kind === 'label:status' ? 'ours never shows it: the oracle\'s own summary of the turn (say-hi has no tool call), which no Barkpark event carries' : 'ours never shows it' }); return; }
     const lag = Math.round(o.t - m.t);
     const why = [];
     if (Math.abs(lag) > W) why.push(`${lag > 0 ? 'late' : 'early'} by ${Math.abs(lag)} ms`);
@@ -169,7 +172,8 @@ async function play(trace, sent, query = '') {
   const { milestones } = oracleTurn(trace);
   const [w, h, dpr] = trace.viewport;
   await page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: dpr, mobile: false });
-  await page.send('Page.navigate', { url: `${base}/gate-b/${trace.id}${query}` });
+  const q = SHAPE === 'legacy' ? query : `${query}${query ? '&' : '?'}shape=${SHAPE}`;
+  await page.send('Page.navigate', { url: `${base}/gate-b/${trace.id}${q}` });
   await until(() => page.evaluate(() => document.readyState === 'complete' && document.querySelector('[data-gate-b]')?.dataset.gateB === 'ready' && document.fonts.status === 'loaded'), 30000, `/gate-b/${trace.id}`);
   const run = await page.evaluate(() => document.querySelector('[data-gate-b]').dataset.run);
   // The draft: placeholder words of the sent message's length (O2), typed as an input event.
@@ -197,7 +201,7 @@ async function play(trace, sent, query = '') {
 // keeps its own time. Precondition: the streams delivered every scripted event, in order: the
 // runtime events, and the bot's state flips (the fleet stream, at the oracle rail's times).
 function uiTime(milestones, rail, log, arrivals) {
-  const { accept, steps } = replayScript(milestones);
+  const { accept, steps } = replayScript(milestones, SHAPE);
   const states = stateScript(rail);
   const send = arrivals.find((a) => a.type === 'send');
   const events = arrivals.filter((a) => a.type === 'runtime');
