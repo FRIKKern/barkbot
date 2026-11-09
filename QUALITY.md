@@ -26,7 +26,7 @@ Measured on the oracle on 2026-11-08 (`traces/2026-11-08-*.json`). Ours must sta
 | Focus after send | stays in Prompt | same |
 | Details panel close, open | width 320 ↔ 0 in 300 ms, `cubic-bezier(.2,0,0,1)` | same curve |
 
-Gate B (`npm run gate:b`, item H5) checks these by replaying each recorded turn through our real chat UI: every moment the oracle showed must appear in ours, of the same kind, in the same order, within ±150 ms of the oracle's time (about 9 frames: tighter flags the replay's own scheduling jitter, looser lets a visibly late step pass). It is judged on the Mac the traces were recorded on, by `npm run land`; CI's slower runner only reports it.
+Gate B (`npm run gate:b`, item H5) checks these by replaying each recorded turn through our real chat UI: every moment the oracle showed must appear in ours, of the same kind, in the same order, within ±150 ms of the oracle's time (the oracle's own spread between runs: "replied" lands 0–101 ms after the reply). It is judged on the Mac the traces were recorded on, by `npm run land`; CI's slower runner only reports it.
 
 ## Oracle rules
 
