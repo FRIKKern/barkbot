@@ -1,0 +1,13 @@
+{
+ "id": "2026-11-09-keys",
+ "what": "Focus, arrow keys, Escape and an outside click on the oracle's overlays. Probed with real CDP key and pointer events in the Oracle bot; nothing typed, no Enter. UI labels only (O2).",
+ "version": "GrokBot 0.79.2",
+ "outside_click_at": [960, 40],
+ "observations": [
+  {"overlay": "New Bot", "on_open": "input Bot name", "tab": "button blob character shape (first shape)", "escape": "closes; focus back to button New Bot", "outside_click": "closes; focus on body"},
+  {"overlay": "Connect apps", "on_open": "the dialog itself (Connect Apps)", "tab": "button Close", "escape": "closes; focus back to button Connect apps", "outside_click": "closes; focus on body"},
+  {"overlay": "Settings (account menu > Settings)", "on_open": "the dialog itself (Grok Bot settings)", "tab": "button General", "escape": "closes; focus went to button Connect apps (the element focused before the account menu opened in this probe)", "outside_click": "closes; focus on body"},
+  {"overlay": "Composer menu", "on_open": "the menu itself; no row highlighted", "arrow_down": "menuitem Attach files (focused and data-highlighted)", "arrow_down_2": "menuitem Teach a task", "arrow_up": "menuitem Attach files", "escape": "closes; focus back to button Composer actions"},
+  {"overlay": "Speed picker", "on_open": "the selected option 1x (focused and highlighted)", "arrow_down": "option 1.25x", "arrow_down_2": "option 1.5x", "arrow_up": "option 1.25x", "escape": "closes without choosing; focus back to the combobox, still 1x"}
+ ]
+}
