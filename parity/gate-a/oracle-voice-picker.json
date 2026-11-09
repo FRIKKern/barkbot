@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 71,
- "pass": 71,
+ "cases": 101,
+ "pass": 100,
  "results": [
   {
    "key": "aside:Bots",
@@ -292,9 +292,130 @@
   {
    "key": "control:Play the Lumen preview",
    "pass": true
+  },
+  {
+   "key": "bubble:assistant#1 look",
+   "pass": false,
+   "why": "0 paragraphs, oracle 1"
+  },
+  {
+   "key": "bubble:assistant#1 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": true
+  },
+  {
+   "key": "strong#1",
+   "pass": true
+  },
+  {
+   "key": "strong#2",
+   "pass": true
+  },
+  {
+   "key": "code#1",
+   "pass": true
+  },
+  {
+   "key": "code#2",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": true
+  },
+  {
+   "key": "strong#3",
+   "pass": true
+  },
+  {
+   "key": "strong#4",
+   "pass": true
+  },
+  {
+   "key": "code#3",
+   "pass": true
+  },
+  {
+   "key": "code#4",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": true
+  },
+  {
+   "key": "strong#5",
+   "pass": true
+  },
+  {
+   "key": "strong#6",
+   "pass": true
+  },
+  {
+   "key": "code#5",
+   "pass": true
+  },
+  {
+   "key": "code#6",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#4 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#5 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#5 place",
+   "pass": true
   }
  ],
- "run": "2026-11-09T07:05:51.676Z",
+ "run": "2026-11-09T07:49:27.987Z",
  "inventory": {
   "id": "oracle-voice-picker",
   "controls": [

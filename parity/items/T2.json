@@ -4,5 +4,5 @@
  "journey": "J01",
  "title": "Transcript: user and bot bubbles, grouping, the day and time line",
  "status": "partial",
- "evidence": "app/src/components/Transcript.tsx: bubbles 15/22, 7x12, radius 18, max 480, user .18 / bot .04, +12 on a change of speaker, time row 12/16 (fixture articles 71-86); slide-in 12 pt 240 ms. Gate B (H5): own and reply bubbles land at the oracle's moments and group into the same bubbles on all 3 recorded turns (storage: two reply bubbles). The live path still waits on T6."
+ "evidence": "app/src/components/Transcript.tsx: bubbles 15/20 (text 22), 7x12, radius 18 (6 where the same speaker meets), a reply at most min(80%, 560), user .18 / bot .04, +12 on a change of speaker, time row 12/16; paragraphs 10 apart, bold 600, code chips; column = pane less 32, at most 960; pinned to its end, 54 above the composer. Gate A transcript cases (scripts/lib/transcript.mjs): 54/54 oracle-turn-1040, 69/69 main-1280 and main-1600, and the conversation in every 1040 state. Gate B (H5): bubbles land at the oracle's moments and group the same on 3 recorded turns. The live path still waits on T6."
 }

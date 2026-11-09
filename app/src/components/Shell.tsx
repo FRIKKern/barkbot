@@ -7,6 +7,7 @@ import {Rail} from './Rail'
 import {Details} from './Details'
 import {Face} from './parts'
 import {Overlay} from './overlays'
+import {Transcript, fromLengths, type SceneBubble} from './Transcript'
 
 export type Scene = {
   bots: {name: string; main?: boolean}[]
@@ -19,6 +20,8 @@ export type Scene = {
   previews?: Record<string, string>
   /** An open menu, picker or dialog, by name (components/overlays). */
   overlay?: string
+  /** The conversation on screen, as lengths (gate/transcripts.ts); `time` shows its time row. */
+  transcript?: {bubbles: SceneBubble[]; time?: string}
 }
 
 // The scene is where the page starts; what the person does from there (panel, tab, the bot they
@@ -72,7 +75,12 @@ export function Shell({scene: start, transcript, composer, onPickBot}: {scene: S
             </span>
           </button>
         </header>
-        {transcript ?? <div className="transcript" />}
+        {transcript ??
+          (scene.transcript ? (
+            <Transcript bot={active} startedAt={scene.transcript.time ?? null} bubbles={fromLengths(scene.transcript.bubbles)} working={null} error={null} />
+          ) : (
+            <div className="transcript" />
+          ))}
         {composer ?? <Composer placeholder={active ? `Message ${active}` : 'Message'} />}
       </main>
 
