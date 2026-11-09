@@ -12,63 +12,63 @@
    "key": "user#1",
    "pass": true,
    "oracle": 419.3,
-   "ours": 421.6,
-   "lag": 2
+   "ours": 425.1,
+   "lag": 6
   },
   {
    "key": "status:working#1",
    "pass": true,
    "oracle": 1234.8,
-   "ours": 1236.1,
-   "lag": 1
+   "ours": 1237.9,
+   "lag": 3
   },
   {
    "key": "working#1",
    "pass": true,
    "oracle": 2013.8,
-   "ours": 2016.6,
-   "lag": 3
+   "ours": 2022,
+   "lag": 8
   },
   {
    "key": "label:status#1",
    "pass": false,
    "oracle": 2013.8,
-   "why": "ours never shows it: no Barkpark event carries the oracle's summary label (task-f13fc4b4dc2af6de)"
+   "why": "ours never shows it: the oracle's own summary of the turn (say-hi has no tool call), which no Barkpark event carries"
   },
   {
    "key": "rail:working#1",
    "pass": true,
    "oracle": 2013.8,
-   "ours": 2016.6,
-   "lag": 3
+   "ours": 2022,
+   "lag": 8
   },
   {
    "key": "assistant#1",
    "pass": true,
    "oracle": 3514.2,
-   "ours": 3517.7,
-   "lag": 4
+   "ours": 3520.8,
+   "lag": 7
   },
   {
    "key": "label:typing#1",
    "pass": true,
    "oracle": 8978.4,
-   "ours": 8985.6,
-   "lag": 7
+   "ours": 8997.8,
+   "lag": 19
   },
   {
    "key": "status:replied#1",
    "pass": true,
    "oracle": 9822.8,
-   "ours": 9926.2,
-   "lag": 103
+   "ours": 9930.1,
+   "lag": 107
   },
   {
    "key": "assistant#2",
    "pass": true,
    "oracle": 9822.8,
-   "ours": 9825.3,
-   "lag": 3
+   "ours": 9834.5,
+   "lag": 12
   },
   {
    "key": "nothing extra",
@@ -77,7 +77,7 @@
   {
    "key": "budget: composer clears in 1 frame",
    "pass": true,
-   "ours": 0.3
+   "ours": 0.7
   },
   {
    "key": "budget: focus stays in Prompt",
@@ -86,12 +86,12 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 240
+   "ours": 235.60000000000036
   },
   {
    "key": "budget: own bubble ≤ 440 ms",
    "pass": true,
-   "ours": 421.6
+   "ours": 425.1
   },
   {
    "key": "history after a reconnect (stored as today: the last message)",
@@ -146,63 +146,63 @@
  "ours": [
   {
    "kind": "clear",
-   "t": 0.3
+   "t": 0.7
   },
   {
    "kind": "user",
-   "t": 421.6,
+   "t": 425.1,
    "len": 40,
-   "raw": 424.4
+   "raw": 438.8
   },
   {
    "kind": "status:working",
-   "t": 1236.1,
-   "raw": 1237.6
+   "t": 1237.9,
+   "raw": 1247.1
   },
   {
    "kind": "working",
-   "t": 2016.6,
-   "raw": 2018.4
+   "t": 2022,
+   "raw": 2032.6
   },
   {
    "kind": "rail:working",
-   "t": 2016.6,
-   "raw": 2018.4
+   "t": 2022,
+   "raw": 2032.6
   },
   {
    "kind": "assistant",
-   "t": 3517.7,
+   "t": 3520.8,
    "len": 41,
-   "raw": 3520.3
+   "raw": 3577.1
   },
   {
    "kind": "label:typing",
-   "t": 8985.6,
-   "raw": 8987.8
+   "t": 8997.8,
+   "raw": 9038.4
   },
   {
    "kind": "assistant",
-   "t": 9825.3,
+   "t": 9834.5,
    "len": 288,
-   "raw": 9827.2
+   "raw": 9844.6
   },
   {
    "kind": "working-gone",
-   "t": 10065.3,
-   "raw": 10068.1
+   "t": 10070.1,
+   "raw": 10080.9
   },
   {
    "kind": "status:replied",
-   "t": 9926.2,
-   "raw": 9928.1
+   "t": 9930.1,
+   "raw": 9940.9
   }
  ],
  "standInLate": [
-  2,
-  4
+  6,
+  56
  ],
  "skipped": [
   "budget: working line ≤ 2.0 s: not judged, the oracle's own is 2013.8 ms"
  ],
- "run": "2026-11-09T09:23:14.312Z"
+ "run": "2026-11-09T16:03:28.906Z"
 }
