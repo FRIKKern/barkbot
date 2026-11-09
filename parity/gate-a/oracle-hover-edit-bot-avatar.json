@@ -7,15 +7,14 @@
   2
  ],
  "cases": 1,
- "pass": 0,
+ "pass": 1,
  "results": [
   {
    "key": "div:Edit Avatar",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   }
  ],
- "run": "2026-11-09T07:13:16.785Z",
+ "run": "2026-11-09T07:19:33.538Z",
  "inventory": {
   "id": "oracle-hover-edit-bot-avatar",
   "controls": [
@@ -97,7 +96,7 @@
    {
     "name": "Hide",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Add to Slack",
@@ -130,7 +129,7 @@
     "ours": true
    }
   ],
-  "missing": 1,
+  "missing": 0,
   "untracked": []
  }
 }
