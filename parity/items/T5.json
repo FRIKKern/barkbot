@@ -4,5 +4,5 @@
  "journey": "J01",
  "title": "Live reply from /v1/chat/sessions/:id/events",
  "status": "partial",
- "evidence": "useConversation.ts reads event: message (history), event: chat (claude frames, managed) and event: runtime (registered host). Not yet seen live: no host enrolled."
+ "evidence": "useConversation.ts reads event: message (history), event: chat (claude frames, managed) and event: runtime (registered host). Runtime path replayed by Gate B (H5): a second turn_started in a turn lands the text before it as its own bubble (it was dropped). Not yet seen live: no host enrolled."
 }

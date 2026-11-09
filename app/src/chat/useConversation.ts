@@ -1,7 +1,8 @@
 // One conversation, live: history from Barkpark's stream, then the running turn.
-// Timing follows the oracle (QUALITY.md, feel budgets): the own bubble lands when Barkpark
-// accepts the send; a working line shows while the run goes; a reply bubble lands whole when
-// its text block ends ("Typing…" while it is written); the line leaves once the turn ends.
+// Timing follows the oracle (QUALITY.md, feel budgets; Gate B replays its recorded turns): the
+// own bubble lands when Barkpark accepts the send; a working line (the mark alone, then what it
+// is doing) shows while the run goes; a reply bubble lands whole when its text ends ("Typing…"
+// while it is written); the line leaves once the turn ends.
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {sendMessage} from './api'
 
@@ -28,7 +29,15 @@ export function toolLabel(name: string, input: Frame | undefined): string {
 let n = 0
 const key = () => `local-${++n}`
 
-export function useConversation(sessionId: string | null) {
+/** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay. */
+export type Transport = {events: (sessionId: string) => string; send: (sessionId: string, content: string) => Promise<unknown>}
+export const barkpark: Transport = {
+  events: (id) => `/api/chat/${id}/events`,
+  send: (id, content) => sendMessage({data: {id, content}}),
+}
+
+/** One conversation. `transport` must be stable (module-level or memoized): a new one reconnects. */
+export function useConversation(sessionId: string | null, transport: Transport = barkpark) {
   const [bubbles, setBubbles] = useState<Bubble[]>([])
   const [working, setWorking] = useState<Working>(null)
   const [error, setError] = useState<string | null>(null)
@@ -40,7 +49,21 @@ export function useConversation(sessionId: string | null) {
     if (leave.current) clearTimeout(leave.current), (leave.current = null)
     setWorking((w) => ({label, leaving: false, first: !w || w.leaving}))
   }, [])
+  // "Typing…" waits one frame: text that lands within the frame it began never shows it (the
+  // oracle shows no "Typing…" for a reply that arrives whole, Gate B say-hi-2).
+  const typing = useRef<number | null>(null)
+  const typingSoon = useCallback(() => {
+    if (typing.current === null) typing.current = requestAnimationFrame(() => ((typing.current = null), show('Typing…')))
+  }, [show])
+  // The line starts with the mark alone: the oracle's row has no words until it has something
+  // to say (Gate B, say-hi: the row at 960 ms is empty, its first label comes at 2.4 s).
+  // A new model message in the same turn keeps what the line said, unless that was "Typing…".
+  const resume = useCallback(() => {
+    if (leave.current) clearTimeout(leave.current), (leave.current = null)
+    setWorking((w) => (w && !w.leaving && w.label !== 'Typing…' ? w : {label: '', leaving: false, first: !w || w.leaving}))
+  }, [])
   const land = useCallback((b: Omit<Bubble, 'key'>) => {
+    if (b.role === 'assistant' && typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
     setBubbles((all) => {
       // A history row that matches a bubble we already showed claims it, instead of doubling it.
       if (b.seq !== undefined) {
@@ -53,6 +76,7 @@ export function useConversation(sessionId: string | null) {
   }, [])
   const end = useCallback(() => {
     // Measured: the line goes ~100 ms after the reply lands, then a 140 ms exit.
+    if (typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
     leave.current = setTimeout(() => {
       setWorking((w) => (w ? {...w, leaving: true} : w))
       leave.current = setTimeout(() => setWorking(null), 140)
@@ -64,7 +88,7 @@ export function useConversation(sessionId: string | null) {
     setWorking(null)
     setReady(false)
     if (!sessionId) return
-    const es = new EventSource(`/api/chat/${sessionId}/events`)
+    const es = new EventSource(transport.events(sessionId))
     es.onopen = () => setReady(true)
     es.addEventListener('message', (e) => {
       const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string}
@@ -73,7 +97,7 @@ export function useConversation(sessionId: string | null) {
     es.addEventListener('chat', (e) => {
       const f = JSON.parse((e as MessageEvent).data) as Frame
       if (import.meta.env.DEV) console.debug('[chat]', f.type, f.subtype ?? f.event?.type ?? '')
-      if (f.type === 'system' && f.subtype === 'init') return show('Thinking')
+      if (f.type === 'system' && f.subtype === 'init') return show('')
       if (f.type === 'stream_event') {
         const ev = f.event as Frame
         if (ev.type === 'content_block_start' && ev.content_block?.type === 'text') (text.current = ''), show('Typing…')
@@ -102,14 +126,20 @@ export function useConversation(sessionId: string | null) {
       const ev = JSON.parse((e as MessageEvent).data) as Frame
       if (import.meta.env.DEV) console.debug('[runtime]', ev.kind)
       switch (ev.kind) {
-        case 'turn_started':
+        case 'turn_started': {
+          // Claude's host sends one per model message (message_start), so a second one in a
+          // turn means the text before it is a whole message: it lands now, not lost (Gate B,
+          // storage: a sentence, a tool, then the answer are two bubbles).
+          const t = (text.current ?? '').trim()
           text.current = ''
-          return show('Thinking')
+          if (t) land({role: 'assistant', text: t})
+          return resume()
+        }
         case 'text_delta': {
           const d = ev.native?.params?.delta ?? ev.native?.delta
           if (typeof d !== 'string') return
           if (text.current === null) text.current = ''
-          if (!text.current) show('Typing…')
+          if (!text.current) typingSoon()
           text.current += d
           return
         }
@@ -136,21 +166,22 @@ export function useConversation(sessionId: string | null) {
     return () => {
       es.close()
       if (leave.current) clearTimeout(leave.current)
+      if (typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
     }
-  }, [sessionId, land, show, end])
+  }, [sessionId, transport, land, show, resume, typingSoon, end])
 
   const send = useCallback(
     async (content: string) => {
       if (!sessionId) return
       setError(null)
       try {
-        await sendMessage({data: {id: sessionId, content}})
+        await transport.send(sessionId, content)
         land({role: 'user', text: content})
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e))
       }
     },
-    [sessionId, land],
+    [sessionId, transport, land],
   )
 
   return {bubbles, working, error, ready, send}

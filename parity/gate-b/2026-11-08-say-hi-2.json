@@ -1,0 +1,128 @@
+{
+ "id": "2026-11-08-say-hi-2",
+ "captured": "2026-11-08T21:39:32.645Z",
+ "cases": 10,
+ "pass": 9,
+ "results": [
+  {
+   "key": "user#1",
+   "pass": true,
+   "oracle": 1561.5,
+   "ours": 1570.1,
+   "lag": 9
+  },
+  {
+   "key": "status:working#1",
+   "pass": true,
+   "oracle": 2231,
+   "ours": 2235.2,
+   "lag": 4
+  },
+  {
+   "key": "working#1",
+   "pass": true,
+   "oracle": 2231,
+   "ours": 2235.2,
+   "lag": 4
+  },
+  {
+   "key": "label:status#1",
+   "pass": false,
+   "oracle": 3999.7,
+   "why": "ours never shows it: no Barkpark event carries the oracle's summary label (task-f13fc4b4dc2af6de)"
+  },
+  {
+   "key": "assistant#1",
+   "pass": true,
+   "oracle": 4642.7,
+   "ours": 4649.9,
+   "lag": 7
+  },
+  {
+   "key": "status:replied#1",
+   "pass": true,
+   "oracle": 4743.9,
+   "ours": 4751.4,
+   "lag": 8
+  },
+  {
+   "key": "nothing extra",
+   "pass": true
+  },
+  {
+   "key": "budget: composer clears in 1 frame",
+   "pass": true,
+   "ours": 0.5
+  },
+  {
+   "key": "budget: focus stays in Prompt",
+   "pass": true
+  },
+  {
+   "key": "budget: working line gone ≤ 250 ms after the reply",
+   "pass": true,
+   "ours": 241.5
+  }
+ ],
+ "oracle": [
+  {
+   "kind": "user",
+   "t": 1561.5,
+   "len": 29
+  },
+  {
+   "kind": "status:working",
+   "t": 2231
+  },
+  {
+   "kind": "working",
+   "t": 2231
+  },
+  {
+   "kind": "label:status",
+   "t": 3999.7
+  },
+  {
+   "kind": "assistant",
+   "t": 4642.7,
+   "len": 12
+  },
+  {
+   "kind": "status:replied",
+   "t": 4743.9
+  }
+ ],
+ "ours": [
+  {
+   "kind": "clear",
+   "t": 0.5
+  },
+  {
+   "kind": "user",
+   "t": 1570.1,
+   "len": 29
+  },
+  {
+   "kind": "working",
+   "t": 2235.2
+  },
+  {
+   "kind": "status:working",
+   "t": 2235.2
+  },
+  {
+   "kind": "assistant",
+   "t": 4649.9,
+   "len": 12
+  },
+  {
+   "kind": "working-gone",
+   "t": 4891.4
+  },
+  {
+   "kind": "status:replied",
+   "t": 4751.4
+  }
+ ],
+ "run": "2026-11-09T07:09:43.346Z"
+}

@@ -1,0 +1,171 @@
+{
+ "id": "2026-11-08-storage",
+ "captured": "2026-11-08T21:26:56.435Z",
+ "cases": 14,
+ "pass": 12,
+ "results": [
+  {
+   "key": "user#1",
+   "pass": true,
+   "oracle": 419.3,
+   "ours": 424,
+   "lag": 5
+  },
+  {
+   "key": "status:working#1",
+   "pass": true,
+   "oracle": 1234.8,
+   "ours": 1238.9,
+   "lag": 4
+  },
+  {
+   "key": "working#1",
+   "pass": false,
+   "oracle": 2013.8,
+   "ours": 1238.9,
+   "lag": -775,
+   "why": "early by 775 ms"
+  },
+  {
+   "key": "label:status#1",
+   "pass": false,
+   "oracle": 2013.8,
+   "why": "ours never shows it: no Barkpark event carries the oracle's summary label (task-f13fc4b4dc2af6de)"
+  },
+  {
+   "key": "assistant#1",
+   "pass": true,
+   "oracle": 3514.2,
+   "ours": 3518.1,
+   "lag": 4
+  },
+  {
+   "key": "label:typing#1",
+   "pass": true,
+   "oracle": 8978.4,
+   "ours": 8983.1,
+   "lag": 5
+  },
+  {
+   "key": "status:replied#1",
+   "pass": true,
+   "oracle": 9822.8,
+   "ours": 9929.2,
+   "lag": 106
+  },
+  {
+   "key": "assistant#2",
+   "pass": true,
+   "oracle": 9822.8,
+   "ours": 9826.9,
+   "lag": 4
+  },
+  {
+   "key": "nothing extra",
+   "pass": true
+  },
+  {
+   "key": "budget: composer clears in 1 frame",
+   "pass": true,
+   "ours": 0.2
+  },
+  {
+   "key": "budget: focus stays in Prompt",
+   "pass": true
+  },
+  {
+   "key": "budget: working line gone ≤ 250 ms after the reply",
+   "pass": true,
+   "ours": 242.3000000000011
+  },
+  {
+   "key": "budget: own bubble ≤ 440 ms",
+   "pass": true,
+   "ours": 424
+  },
+  {
+   "key": "budget: working line ≤ 2.0 s",
+   "pass": true,
+   "ours": 1238.9
+  }
+ ],
+ "oracle": [
+  {
+   "kind": "user",
+   "t": 419.3,
+   "len": 40
+  },
+  {
+   "kind": "status:working",
+   "t": 1234.8
+  },
+  {
+   "kind": "working",
+   "t": 2013.8
+  },
+  {
+   "kind": "label:status",
+   "t": 2013.8
+  },
+  {
+   "kind": "assistant",
+   "t": 3514.2,
+   "len": 41
+  },
+  {
+   "kind": "label:typing",
+   "t": 8978.4
+  },
+  {
+   "kind": "status:replied",
+   "t": 9822.8
+  },
+  {
+   "kind": "assistant",
+   "t": 9822.8,
+   "len": 288
+  }
+ ],
+ "ours": [
+  {
+   "kind": "clear",
+   "t": 0.2
+  },
+  {
+   "kind": "user",
+   "t": 424,
+   "len": 40
+  },
+  {
+   "kind": "working",
+   "t": 1238.9
+  },
+  {
+   "kind": "status:working",
+   "t": 1238.9
+  },
+  {
+   "kind": "assistant",
+   "t": 3518.1,
+   "len": 41
+  },
+  {
+   "kind": "label:typing",
+   "t": 8983.1
+  },
+  {
+   "kind": "assistant",
+   "t": 9826.9,
+   "len": 288
+  },
+  {
+   "kind": "working-gone",
+   "t": 10069.2
+  },
+  {
+   "kind": "status:replied",
+   "t": 9929.2
+  }
+ ],
+ "run": "2026-11-09T07:09:43.351Z"
+}

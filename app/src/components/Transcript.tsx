@@ -53,7 +53,7 @@ export function Transcript({bot, startedAt, bubbles, working, error}: {bot: stri
           </p>
         )}
         <div className="sr-only" role="status" aria-live="polite">
-          {working ? `${bot} is working` : bubbles.at(-1)?.role === 'assistant' ? `${bot} replied` : ''}
+          {working && !working.leaving ? `${bot} is working` : bubbles.at(-1)?.role === 'assistant' ? `${bot} replied` : ''}
         </div>
       </div>
     </div>

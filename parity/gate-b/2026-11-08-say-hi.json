@@ -1,0 +1,153 @@
+{
+ "id": "2026-11-08-say-hi",
+ "captured": "2026-11-08T21:28:09.048Z",
+ "cases": 13,
+ "pass": 12,
+ "results": [
+  {
+   "key": "user#1",
+   "pass": true,
+   "oracle": 304.3,
+   "ours": 310.7,
+   "lag": 6
+  },
+  {
+   "key": "status:working#1",
+   "pass": true,
+   "oracle": 939.8,
+   "ours": 943.3,
+   "lag": 4
+  },
+  {
+   "key": "working#1",
+   "pass": true,
+   "oracle": 939.8,
+   "ours": 943.3,
+   "lag": 4
+  },
+  {
+   "key": "label:status#1",
+   "pass": false,
+   "oracle": 2390.8,
+   "why": "ours never shows it: no Barkpark event carries the oracle's summary label (task-f13fc4b4dc2af6de)"
+  },
+  {
+   "key": "label:typing#1",
+   "pass": true,
+   "oracle": 3293,
+   "ours": 3299.3,
+   "lag": 6
+  },
+  {
+   "key": "assistant#1",
+   "pass": true,
+   "oracle": 3351.7,
+   "ours": 3355.2,
+   "lag": 4
+  },
+  {
+   "key": "status:replied#1",
+   "pass": true,
+   "oracle": 3437.6,
+   "ours": 3456,
+   "lag": 18
+  },
+  {
+   "key": "nothing extra",
+   "pass": true
+  },
+  {
+   "key": "budget: composer clears in 1 frame",
+   "pass": true,
+   "ours": 0.2
+  },
+  {
+   "key": "budget: focus stays in Prompt",
+   "pass": true
+  },
+  {
+   "key": "budget: working line gone ≤ 250 ms after the reply",
+   "pass": true,
+   "ours": 240.80000000000018
+  },
+  {
+   "key": "budget: own bubble ≤ 440 ms",
+   "pass": true,
+   "ours": 310.7
+  },
+  {
+   "key": "budget: working line ≤ 2.0 s",
+   "pass": true,
+   "ours": 943.3
+  }
+ ],
+ "oracle": [
+  {
+   "kind": "user",
+   "t": 304.3,
+   "len": 29
+  },
+  {
+   "kind": "status:working",
+   "t": 939.8
+  },
+  {
+   "kind": "working",
+   "t": 939.8
+  },
+  {
+   "kind": "label:status",
+   "t": 2390.8
+  },
+  {
+   "kind": "label:typing",
+   "t": 3293
+  },
+  {
+   "kind": "assistant",
+   "t": 3351.7,
+   "len": 29
+  },
+  {
+   "kind": "status:replied",
+   "t": 3437.6
+  }
+ ],
+ "ours": [
+  {
+   "kind": "clear",
+   "t": 0.2
+  },
+  {
+   "kind": "user",
+   "t": 310.7,
+   "len": 29
+  },
+  {
+   "kind": "working",
+   "t": 943.3
+  },
+  {
+   "kind": "status:working",
+   "t": 943.3
+  },
+  {
+   "kind": "label:typing",
+   "t": 3299.3
+  },
+  {
+   "kind": "assistant",
+   "t": 3355.2,
+   "len": 29
+  },
+  {
+   "kind": "working-gone",
+   "t": 3596
+  },
+  {
+   "kind": "status:replied",
+   "t": 3456
+  }
+ ],
+ "run": "2026-11-09T07:09:43.350Z"
+}
