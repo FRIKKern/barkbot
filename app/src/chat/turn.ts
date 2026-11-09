@@ -6,7 +6,8 @@
 // How the script is read off the oracle's DOM (its network is never watched, O2):
 //   own bubble lands      → the send is accepted then (our bubble lands on acceptance)
 //   "is working" / row    → turn_started (the first of the two)
-//   the rail says Working → the bot's state flips (fleet stream, event: state; stateScript).
+//   the rail says Working → the bot's state flips (fleet stream, event: state; stateScript);
+//                           a moment of its own (rail:working), judged like the others.
 //                           The row waits for it: in storage the row came with the rail,
 //                           779 ms after "is working", not with the turn's start.
 //   "Typing…" label       → text_delta from then until the bubble, in ~50 ms chunks
@@ -17,7 +18,7 @@
 // The oracle's own summary labels ("Saying hello") have no Barkpark event; the script sends
 // none, so ours cannot show them (task-f13fc4b4dc2af6de) and Gate B says so.
 
-export type Kind = 'user' | 'working' | 'label:status' | 'label:typing' | 'assistant' | 'status:working' | 'status:replied'
+export type Kind = 'user' | 'working' | 'label:status' | 'label:typing' | 'assistant' | 'status:working' | 'status:replied' | 'rail:working'
 export type Milestone = {kind: Kind; t: number; len?: number; text?: string}
 export type TraceEvent = {t: number; type: string; kind: string; tag?: string; role?: string; data?: string; text?: string; textLength?: number; name?: string; value?: string}
 export type Trace = {id: string; recipe: string; bot: string; viewport: [number, number, number]; events: TraceEvent[]}
@@ -53,6 +54,9 @@ export function oracleTurn(trace: Trace): {clear: number; milestones: Milestone[
     const state = e.value.split(', ').includes('Working') ? 'working' : 'idle'
     if (rail.at(-1)?.state !== state) rail.push({t: at(e), state})
   }
+  // The rail turning to Working is a moment too: it comes with the bot's state, not the turn.
+  for (const r of rail) if (r.state === 'working') out.push({kind: 'rail:working', t: r.t})
+  out.sort((a, b) => a.t - b.t) // stable: same-ms moments keep the trace's order
   return {clear: clear.t, milestones: out, rail}
 }
 

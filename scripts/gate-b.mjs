@@ -9,7 +9,8 @@
 //   --url <base> measures an app that is already running; ports are free ones per run.
 //
 // Cases per trace (app/src/chat/turn.ts reads the trace):
-//   each oracle moment  own bubble, working line and status, each label, each reply bubble, "replied":
+//   each oracle moment  own bubble, working line and status, the rail's Working, each label, each
+//                       reply bubble, "replied":
 //                       ours shows the same kind, in the same order, within ±150 ms (the
 //                       oracle's own spread between runs: "replied" 0–101 ms after the reply)
 //   nothing extra       ours shows no moment the oracle did not
@@ -91,6 +92,7 @@ function armAndSend() {
     label: tx.querySelector('.working .work-label')?.textContent.trim() ?? '',
     status: tx.querySelector('[role=status]')?.textContent.trim() ?? '',
     focus: document.activeElement === prompt,
+    rail: [...document.querySelectorAll('.rail-tile[aria-label]')].some((b) => b.getAttribute('aria-label').split(', ').includes('Working')),
   });
   const log = [];
   let was = read();
@@ -108,6 +110,7 @@ function armAndSend() {
     for (let i = was.assistant.length; i < now.assistant.length; i++) log.push({ kind: 'assistant', t, len: now.assistant[i] });
     if (now.status !== was.status && / is working$/.test(now.status)) log.push({ kind: 'status:working', t });
     if (now.status !== was.status && / replied$/.test(now.status)) log.push({ kind: 'status:replied', t });
+    if (now.rail && !was.rail) log.push({ kind: 'rail:working', t });
     if (!now.focus && was.focus) log.push({ kind: 'blur', t });
     was = now;
   };
@@ -139,7 +142,7 @@ function compare(oracle, ours, focusAtEnd, skipped = []) {
     matched.push({ key, m, o });
     cases.push({ key, pass: !why.length, oracle: m.t, ours: o.t, lag, why: why.join('; ') || undefined });
   });
-  const counted = new Set(['user', 'working', 'label:status', 'label:typing', 'assistant', 'status:working', 'status:replied']);
+  const counted = new Set(['user', 'working', 'label:status', 'label:typing', 'assistant', 'status:working', 'status:replied', 'rail:working']);
   const extra = ours.filter((o) => counted.has(o.kind) && !matched.some((x) => x.o === o));
   cases.push({ key: 'nothing extra', pass: !extra.length, why: extra.length ? extra.map((o) => `${o.kind}${o.text ? ` "${o.text}"` : ''} at ${o.t}`).join(', ') : undefined });
 
