@@ -1,0 +1,160 @@
+{
+ "id": "2026-11-08-say-hi",
+ "captured": "2026-11-08T21:28:09.048Z",
+ "cases": 13,
+ "pass": 11,
+ "results": [
+  {
+   "key": "user#1",
+   "pass": true,
+   "oracle": 304.3,
+   "ours": 309,
+   "lag": 5
+  },
+  {
+   "key": "status:working#1",
+   "pass": true,
+   "oracle": 939.8,
+   "ours": 942.9,
+   "lag": 3
+  },
+  {
+   "key": "working#1",
+   "pass": true,
+   "oracle": 939.8,
+   "ours": 942.9,
+   "lag": 3
+  },
+  {
+   "key": "label:status#1",
+   "pass": false,
+   "oracle": 2390.8,
+   "ours": 942.9,
+   "lag": -1448,
+   "why": "early by 1448 ms"
+  },
+  {
+   "key": "label:typing#1",
+   "pass": true,
+   "oracle": 3293,
+   "ours": 3302.3,
+   "lag": 9
+  },
+  {
+   "key": "assistant#1",
+   "pass": true,
+   "oracle": 3351.7,
+   "ours": 3356,
+   "lag": 4
+  },
+  {
+   "key": "status:replied#1",
+   "pass": false,
+   "oracle": 3437.6,
+   "ours": 3597.4,
+   "lag": 160,
+   "why": "late by 160 ms"
+  },
+  {
+   "key": "nothing extra",
+   "pass": true
+  },
+  {
+   "key": "budget: composer clears in 1 frame",
+   "pass": true,
+   "ours": 0.3
+  },
+  {
+   "key": "budget: focus stays in Prompt",
+   "pass": true
+  },
+  {
+   "key": "budget: working line gone ≤ 250 ms after the reply",
+   "pass": true,
+   "ours": 241.4000000000001
+  },
+  {
+   "key": "budget: own bubble ≤ 440 ms",
+   "pass": true,
+   "ours": 309
+  },
+  {
+   "key": "budget: working line ≤ 2.0 s",
+   "pass": true,
+   "ours": 942.9
+  }
+ ],
+ "oracle": [
+  {
+   "kind": "user",
+   "t": 304.3,
+   "len": 29
+  },
+  {
+   "kind": "status:working",
+   "t": 939.8
+  },
+  {
+   "kind": "working",
+   "t": 939.8
+  },
+  {
+   "kind": "label:status",
+   "t": 2390.8
+  },
+  {
+   "kind": "label:typing",
+   "t": 3293
+  },
+  {
+   "kind": "assistant",
+   "t": 3351.7,
+   "len": 29
+  },
+  {
+   "kind": "status:replied",
+   "t": 3437.6
+  }
+ ],
+ "ours": [
+  {
+   "kind": "clear",
+   "t": 0.3
+  },
+  {
+   "kind": "user",
+   "t": 309,
+   "len": 29
+  },
+  {
+   "kind": "working",
+   "t": 942.9
+  },
+  {
+   "kind": "label:status",
+   "t": 942.9
+  },
+  {
+   "kind": "status:working",
+   "t": 942.9
+  },
+  {
+   "kind": "label:typing",
+   "t": 3302.3
+  },
+  {
+   "kind": "assistant",
+   "t": 3356,
+   "len": 29
+  },
+  {
+   "kind": "working-gone",
+   "t": 3597.4
+  },
+  {
+   "kind": "status:replied",
+   "t": 3597.4
+  }
+ ],
+ "run": "2026-11-09T07:04:37.046Z"
+}

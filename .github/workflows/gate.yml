@@ -19,3 +19,5 @@ jobs:
       - run: pnpm install --frozen-lockfile
         working-directory: app
       - run: node scripts/gate.mjs --ci
+      # Gate B: each recorded oracle turn replayed in ours; fails below parity/gate-b/<trace>.json.
+      - run: node scripts/gate-b.mjs --ci

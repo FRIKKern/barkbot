@@ -1,0 +1,174 @@
+{
+ "id": "2026-11-08-storage",
+ "captured": "2026-11-08T21:26:56.435Z",
+ "cases": 14,
+ "pass": 8,
+ "results": [
+  {
+   "key": "user#1",
+   "pass": true,
+   "oracle": 419.3,
+   "ours": 426.1,
+   "lag": 7
+  },
+  {
+   "key": "status:working#1",
+   "pass": true,
+   "oracle": 1234.8,
+   "ours": 1239.4,
+   "lag": 5
+  },
+  {
+   "key": "working#1",
+   "pass": false,
+   "oracle": 2013.8,
+   "ours": 1239.4,
+   "lag": -774,
+   "why": "early by 774 ms"
+  },
+  {
+   "key": "label:status#1",
+   "pass": false,
+   "oracle": 2013.8,
+   "ours": 1239.4,
+   "lag": -774,
+   "why": "early by 774 ms"
+  },
+  {
+   "key": "assistant#1",
+   "pass": false,
+   "oracle": 3514.2,
+   "ours": 9828.7,
+   "lag": 6315,
+   "why": "late by 6315 ms; 288 characters, oracle 41 (bubbles grouped differently)"
+  },
+  {
+   "key": "label:typing#1",
+   "pass": false,
+   "oracle": 8978.4,
+   "ours": 8985.1,
+   "lag": 7,
+   "why": "out of order: after assistant#1"
+  },
+  {
+   "key": "status:replied#1",
+   "pass": false,
+   "oracle": 9822.8,
+   "ours": 10070.2,
+   "lag": 247,
+   "why": "late by 247 ms"
+  },
+  {
+   "key": "assistant#2",
+   "pass": false,
+   "oracle": 9822.8,
+   "why": "ours never shows it"
+  },
+  {
+   "key": "nothing extra",
+   "pass": true
+  },
+  {
+   "key": "budget: composer clears in 1 frame",
+   "pass": true,
+   "ours": 0.5
+  },
+  {
+   "key": "budget: focus stays in Prompt",
+   "pass": true
+  },
+  {
+   "key": "budget: working line gone ≤ 250 ms after the reply",
+   "pass": true,
+   "ours": 241.5
+  },
+  {
+   "key": "budget: own bubble ≤ 440 ms",
+   "pass": true,
+   "ours": 426.1
+  },
+  {
+   "key": "budget: working line ≤ 2.0 s",
+   "pass": true,
+   "ours": 1239.4
+  }
+ ],
+ "oracle": [
+  {
+   "kind": "user",
+   "t": 419.3,
+   "len": 40
+  },
+  {
+   "kind": "status:working",
+   "t": 1234.8
+  },
+  {
+   "kind": "working",
+   "t": 2013.8
+  },
+  {
+   "kind": "label:status",
+   "t": 2013.8
+  },
+  {
+   "kind": "assistant",
+   "t": 3514.2,
+   "len": 41
+  },
+  {
+   "kind": "label:typing",
+   "t": 8978.4
+  },
+  {
+   "kind": "status:replied",
+   "t": 9822.8
+  },
+  {
+   "kind": "assistant",
+   "t": 9822.8,
+   "len": 288
+  }
+ ],
+ "ours": [
+  {
+   "kind": "clear",
+   "t": 0.5
+  },
+  {
+   "kind": "user",
+   "t": 426.1,
+   "len": 40
+  },
+  {
+   "kind": "working",
+   "t": 1239.4
+  },
+  {
+   "kind": "label:status",
+   "t": 1239.4
+  },
+  {
+   "kind": "status:working",
+   "t": 1239.4
+  },
+  {
+   "kind": "label:typing",
+   "t": 8985.1
+  },
+  {
+   "kind": "assistant",
+   "t": 9828.7,
+   "len": 288
+  },
+  {
+   "kind": "working-gone",
+   "t": 10070.2
+  },
+  {
+   "kind": "status:replied",
+   "t": 10070.2
+  }
+ ],
+ "run": "2026-11-09T07:04:37.046Z"
+}

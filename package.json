@@ -17,6 +17,7 @@
     "host": "sh scripts/host.sh run",
     "host:enroll": "sh scripts/host.sh enroll",
     "gate:ci": "node scripts/gate.mjs --ci",
+    "gate:b": "node scripts/gate-b.mjs",
     "land": "sh scripts/land.sh"
   }
 }

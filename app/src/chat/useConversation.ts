@@ -28,7 +28,15 @@ export function toolLabel(name: string, input: Frame | undefined): string {
 let n = 0
 const key = () => `local-${++n}`
 
-export function useConversation(sessionId: string | null) {
+/** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay. */
+export type Transport = {events: (sessionId: string) => string; send: (sessionId: string, content: string) => Promise<unknown>}
+export const barkpark: Transport = {
+  events: (id) => `/api/chat/${id}/events`,
+  send: (id, content) => sendMessage({data: {id, content}}),
+}
+
+/** One conversation. `transport` must be stable (module-level or memoized): a new one reconnects. */
+export function useConversation(sessionId: string | null, transport: Transport = barkpark) {
   const [bubbles, setBubbles] = useState<Bubble[]>([])
   const [working, setWorking] = useState<Working>(null)
   const [error, setError] = useState<string | null>(null)
@@ -64,7 +72,7 @@ export function useConversation(sessionId: string | null) {
     setWorking(null)
     setReady(false)
     if (!sessionId) return
-    const es = new EventSource(`/api/chat/${sessionId}/events`)
+    const es = new EventSource(transport.events(sessionId))
     es.onopen = () => setReady(true)
     es.addEventListener('message', (e) => {
       const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string}
@@ -137,20 +145,20 @@ export function useConversation(sessionId: string | null) {
       es.close()
       if (leave.current) clearTimeout(leave.current)
     }
-  }, [sessionId, land, show, end])
+  }, [sessionId, transport, land, show, end])
 
   const send = useCallback(
     async (content: string) => {
       if (!sessionId) return
       setError(null)
       try {
-        await sendMessage({data: {id: sessionId, content}})
+        await transport.send(sessionId, content)
         land({role: 'user', text: content})
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e))
       }
     },
-    [sessionId, land],
+    [sessionId, transport, land],
   )
 
   return {bubbles, working, error, ready, send}
