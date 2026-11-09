@@ -7,461 +7,393 @@
   2
  ],
  "cases": 67,
- "pass": 0,
- "scene": false,
+ "pass": 67,
  "results": [
   {
    "key": "aside:Bots",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot tile",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot tile#2",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:New Bot",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Connect apps",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Open account menu",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:View conversation details",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Oracle",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Share",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Prompt",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Composer actions",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Start voice input",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Start voice chat",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "aside:Conversation details",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Close",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Edit Bot avatar",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot name",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Activity",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Library",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Suggested",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Hide",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Add to Slack",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Add to Slack",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Create a routine",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Create a routine",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Computer",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Bot's computer",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bdi:Bot's computer",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bdi:Asleep",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Voice chat",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Voice",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Voice",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Helix",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Speed",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Speed",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:1x",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Language",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "control:Language",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "span:Auto-detect",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:user#1 place",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:assistant#1 look",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:assistant#1 place",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "strong#1",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "strong#2",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "code#1",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "code#2",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:user#2 look",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:user#2 place",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:assistant#2 look",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:assistant#2 place",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "strong#3",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "strong#4",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "code#3",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "code#4",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:user#3 look",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:user#3 place",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:assistant#3 look",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:assistant#3 place",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "strong#5",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "strong#6",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "code#5",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "code#6",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:user#4 look",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:user#4 place",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:assistant#4 look",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   },
   {
    "key": "bubble:assistant#4 place",
-   "pass": false,
-   "why": "no scene"
+   "pass": true
   }
  ],
- "run": "2026-11-09T08:04:30.318Z",
+ "run": "2026-11-09T08:10:23.396Z",
  "inventory": {
   "id": "oracle-main-980",
   "controls": [
    {
     "name": "Bot tile",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "New Bot",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Connect apps",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open account menu",
     "item": "F1",
-    "ours": false
+    "ours": true
    },
    {
     "name": "View conversation details",
     "item": "F2",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Share",
     "item": "F5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Prompt",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Composer actions",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Start voice input",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Start voice chat",
     "item": "T4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Close",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Edit Bot avatar",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Bot name",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Activity",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Library",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Hide",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Add to Slack",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Create a routine",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Bot's computer",
     "item": "F4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Voice",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Speed",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Language",
     "item": "N4",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 22,
+  "missing": 0,
   "untracked": []
  }
 }

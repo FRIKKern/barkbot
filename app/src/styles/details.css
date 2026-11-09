@@ -1,11 +1,11 @@
 /* Picker (combobox 246): 1 border, text at +6, chevron 10 after a 4 gap, 4 to the right edge. */
 /* Details: header 60, Close 36 at 12 from the corner; face 64; name 17/24; tabs 26 high. */
 .details { position: relative; box-shadow: inset 0.5px 0 0 var(--wash-06); overflow: hidden; display: flex; flex-direction: column; min-width: 0;
-  width: var(--details); transition: width 300ms var(--ease-panel), visibility 0s; }
+  width: var(--panel); transition: width 300ms var(--ease-panel), visibility 0s; }
 /* Close and open: width 320 <-> 0 in 300 ms on cubic-bezier(.2,0,0,1) (traces/2026-11-08-feel-panel.json);
    the content keeps its 320 and is cut, and a closed panel is hidden once the width reaches 0. */
 .app[data-panel='closed'] .details { width: 0; visibility: hidden; transition: width 300ms var(--ease-panel), visibility 0s 300ms; }
-.details-head, .details-body { width: var(--details); }
+.details-head, .details-body { width: var(--panel); } /* its content reflows to the panel's width */
 .app[data-instant] .details { transition: none; }
 .details-head { height: 60px; flex: none; position: relative; }
 .close { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 9999px; display: grid; place-items: center; background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--wash-06); color: var(--ink-90); font-size: 13px; }
@@ -61,3 +61,9 @@
 .section-hide { position: absolute; right: 6px; top: -3px; height: 24px; padding: 0 6px; border-radius: 6px; font-size: 12px; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-66); visibility: hidden; }
 /* Only in an open panel: a closed one is hidden, and Hide must not override that. */
 :root:hover .app[data-panel='open'] .section-hide { visibility: visible; }
+
+/* Avatar pencil (i 873,93,14,14 in oracle-turn-1040, -edit-avatar, -hover-edit-bot-avatar). */
+.who-face { position: relative; }
+.who-pencil { position: absolute; left: 25px; top: 25px; width: 14px; height: 14px; display: grid; place-items: center; font-style: normal; font-size: 14px; font-weight: 400; line-height: 14px; color: var(--ink); }
+.who-pencil .icon { width: 14px; height: 14px; opacity: 0; }
+.who-face:hover .who-pencil .icon, .who-face[data-editing] .who-pencil .icon { opacity: 1; }

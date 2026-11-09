@@ -27,14 +27,16 @@ export type Scene = {
 // The scene is where the page starts; what the person does from there (panel, tab, the bot they
 // pick in the rail) is held here, so the live page and the gate share one behaviour.
 // `onPickBot` tells the page which bot is now active, so it can load that bot's conversation.
-// A narrow window closes the details panel by itself, and widening it again leaves it closed
-// (oracle-main-720: closed; oracle-main-880: open). The line is bracketed by those two captures,
-// not measured: it sits half-way, below 800.
+// A window under 800 closes the details panel by itself, and widening it again leaves it closed
+// (measured on the oracle: 790 closed, 800 open; oracle-main-790, -800).
 const NARROW = '(max-width: 799.98px)'
 
 export function Shell({scene: start, transcript, composer, onPickBot}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (name: string) => void}) {
   const [panelOpen, setPanelOpen] = useState(start.panelOpen)
   const [picked, setPicked] = useState<string | undefined>(undefined)
+  // The overlay that is up, whether the scene holds it or a click opened it (Overlay's
+  // onOpenChange), so its trigger in the panel shows open (Pick's aria-expanded, the pencil).
+  const [opened, setOpened] = useState<string | null>(null)
   // A page that opens already narrow shows the panel closed at once, without the 300 ms close.
   const [instant, setInstant] = useState(false)
   useEffect(() => {
@@ -84,8 +86,8 @@ export function Shell({scene: start, transcript, composer, onPickBot}: {scene: S
         {composer ?? <Composer placeholder={active ? `Message ${active}` : 'Message'} />}
       </main>
 
-      <Details scene={scene} onClose={() => setPanelOpen(false)} />
-      <Overlay name={scene.overlay} scene={scene} />
+      <Details scene={{...scene, overlay: opened ?? scene.overlay}} onClose={() => setPanelOpen(false)} />
+      <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} />
     </div>
   )
 }
