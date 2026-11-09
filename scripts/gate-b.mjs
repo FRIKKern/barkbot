@@ -50,9 +50,10 @@ async function until(fn, ms, what) {
 
 // A turn trace is one whose recipe sends a message.
 const ONLY = opt('only');
-// --shape items: replay a host with item events (app/src/chat/turn.ts, Shape); compare only.
-const SHAPE = opt('shape') === 'items' ? 'items' : 'legacy';
-if (SHAPE !== 'legacy' && !process.argv.includes('--ci')) { console.error('Gate B: --shape items compares only; add --ci'); process.exit(2); }
+// The host the replay plays (app/src/chat/turn.ts, Shape): `items` is what a registered claude host
+// sends since Barkpark #25471 (1c4a128565). --shape legacy plays the older host; it compares only.
+const SHAPE = opt('shape') === 'legacy' ? 'legacy' : 'items';
+if (SHAPE !== 'items' && !CI) { console.error('Gate B: --shape legacy compares only; add --ci'); process.exit(2); }
 const traces = readdirSync(path('traces')).filter((f) => f.endsWith('.json') && (!ONLY || f === `${ONLY}.json`))
   .map((f) => JSON.parse(readFileSync(path('traces', f), 'utf8')))
   .filter((t) => recipes[t.recipe]?.kind === 'send');
@@ -172,12 +173,11 @@ function compare(oracle, ours, focusAtEnd, skipped = []) {
 }
 
 // One replayed turn: type, send, wait for the turn and the reconnect after it, read the page.
-async function play(trace, sent, query = '') {
+async function play(trace, sent) {
   const { milestones } = oracleTurn(trace);
   const [w, h, dpr] = trace.viewport;
   await page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: dpr, mobile: false });
-  const q = SHAPE === 'legacy' ? query : `${query}${query ? '&' : '?'}shape=${SHAPE}`;
-  await page.send('Page.navigate', { url: `${base}/gate-b/${trace.id}${q}` });
+  await page.send('Page.navigate', { url: `${base}/gate-b/${trace.id}?shape=${SHAPE}` });
   await until(() => page.evaluate(() => document.readyState === 'complete' && document.querySelector('[data-gate-b]')?.dataset.gateB === 'ready' && document.fonts.status === 'loaded'), 30000, `/gate-b/${trace.id}`);
   const run = await page.evaluate(() => document.querySelector('[data-gate-b]').dataset.run);
   // The draft: placeholder words of the sent message's length (O2), typed as an input event.
@@ -248,9 +248,7 @@ for (const trace of traces) {
   const ui = uiTime(milestones, rail, live.log, live.arrivals);
   const skipped = [];
   const cases = [{ key: 'replay: every scripted event reached the page', pass: ui.precondition.pass, why: ui.precondition.why }, ...compare(milestones, ui.log, live.focus, skipped)];
-  cases.push(historyCase('history after a reconnect (stored as today: the last message)', milestones, live));
-  // A turn of several messages, stored as one joined text (if Barkpark keeps them all).
-  if (milestones.filter((m) => m.kind === 'assistant').length > 1) cases.push(historyCase('history after a reconnect (stored joined)', milestones, await play(trace, sent, '?history=joined')));
+  cases.push(historyCase('history after a reconnect (one row, every message joined, as Barkpark stores a turn since #25471)', milestones, live));
   const pass = cases.filter((c) => c.pass).length;
   report.push({ id: trace.id, captured: trace.captured, cases: cases.length, pass, results: cases, oracle: milestones.map(({ text, ...m }) => m), ours: ui.log.map(({ text, ...m }) => m), standInLate: ui.precondition.late, skipped });
   console.log(`Gate B · ${trace.id} · ${pass}/${cases.length} pass`);

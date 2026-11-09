@@ -10,11 +10,10 @@
 //                                        at the oracle rail's times (Working, then not)
 // After the turn the stream closes, as a dropped connection would. The browser reconnects and,
 // as Barkpark does on every connect, the stream replays the stored rows as `event: message`
-// (seq-ascending, `id: <seq>`): the user's row, then the turn's ONE assistant row. `history`
-// picks that row's text: `last` (default) is what Barkpark stores today, the text of the turn's
-// last model message, because its recorder resets the turn's text at every turn_started;
-// `joined` is every message's text, a paragraph apart, as it stores it once that reset is fixed
-// (task-aa27c3d55ca8d009). `shape=items` plays the host with item events (turn.ts, Shape).
+// (seq-ascending, `id: <seq>`): the user's row, then the turn's ONE assistant row, holding every
+// message's text a paragraph apart, as Barkpark's recorder stores it from either host since #25471
+// (task-aa27c3d55ca8d009). `shape` picks the host (turn.ts, Shape): `items` by default, as a
+// registered claude host sends since #25471; `shape=legacy` plays the older host.
 import '@tanstack/react-start/server-only'
 import {readFileSync} from 'node:fs'
 import {resolve} from 'node:path'
@@ -90,11 +89,11 @@ function sseResponse(start: (write: (s: string) => void, close: () => void) => v
 }
 
 /** The stored rows after the turn, as Barkpark replays them on connect. */
-function history(m: Milestone[], shape: string, since: number): string {
+function history(m: Milestone[], since: number): string {
   const user = m.find((x) => x.kind === 'user')
   const replies = m.filter((x) => x.kind === 'assistant').map((x) => filler(x.len ?? 0))
   if (!user || !replies.length) return ''
-  const rows = [row(1, 'user', filler(user.len ?? 0)), row(2, 'assistant', shape === 'joined' ? replies.join('\n\n') : replies.at(-1)!)]
+  const rows = [row(1, 'user', filler(user.len ?? 0)), row(2, 'assistant', replies.join('\n\n'))]
   return rows.slice(since).join('') // rows after Last-Event-ID, as Barkpark replays
 }
 
@@ -109,7 +108,7 @@ export function replayStream(id: string, request: Request): Response {
   }
   const trace = loadTrace(id)
   if (!trace) return new Response('no such trace', {status: 404})
-  const shape: Shape = url.searchParams.get('shape') === 'items' ? 'items' : 'legacy'
+  const shape: Shape = url.searchParams.get('shape') === 'legacy' ? 'legacy' : 'items'
   const r = runFor(run, trace, shape)
   if (url.searchParams.has('fleet'))
     return sseResponse((write) => {
@@ -117,15 +116,13 @@ export function replayStream(id: string, request: Request): Response {
       write('retry: 50\n\n')
       write(fleetFrame('snapshot', {sessions: [{session_id: run, agent_state: r.state, ts: new Date().toISOString(), title: null}]}))
     }, request.signal)
-  // A host with item events stores the turn joined (task-aa27c3d55ca8d009), so that is its default.
-  const stored = url.searchParams.get('history') ?? (shape === 'items' ? 'joined' : 'last')
   return sseResponse((write, close) => {
     r.write = write
     r.close = close
     r.connects++
     write('retry: 50\n\n') // reconnect soon after a drop; the first bytes also open the EventSource
     if (r.sent) {
-      const h = history(r.milestones, stored, since)
+      const h = history(r.milestones, since)
       r.rows += (h.match(/^event: message$/gm) ?? []).length
       write(h)
     }

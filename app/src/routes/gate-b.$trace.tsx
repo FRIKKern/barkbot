@@ -58,13 +58,11 @@ function Replay() {
   const scene = scenes['oracle-turn-1040']
   const bot = scene.active ?? 'Oracle'
   const [run] = useState(() => crypto.randomUUID())
-  // ?history=joined: after its reconnect the stream replays the turn stored as one joined text.
-  const [history] = useState(() => (typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('history')))
-  // ?shape=items: the replay plays a host with item events (turn.ts, Shape).
+  // ?shape=: the host the replay plays (turn.ts, Shape); the replay's default is `items`.
   const [shape] = useState(() => (typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('shape')))
   const transport = useMemo<Transport>(
     () => ({
-      events: (id) => `/api/gate-b/${trace}?run=${id}${history ? `&history=${encodeURIComponent(history)}` : ''}${shape ? `&shape=${encodeURIComponent(shape)}` : ''}`,
+      events: (id) => `/api/gate-b/${trace}?run=${id}${shape ? `&shape=${encodeURIComponent(shape)}` : ''}`,
       fleet: (id) => `/api/gate-b/${trace}?run=${id}&fleet${shape ? `&shape=${encodeURIComponent(shape)}` : ''}`,
       send: async (id) => {
         const res = await fetch(`/api/gate-b/${trace}?run=${id}`, {method: 'POST'})
@@ -73,7 +71,7 @@ function Replay() {
         if (body !== null) throw new Error(body)
       },
     }),
-    [trace, history, shape],
+    [trace, shape],
   )
   const convo = useConversation(run, transport)
   return (
