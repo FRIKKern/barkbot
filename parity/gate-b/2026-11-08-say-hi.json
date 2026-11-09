@@ -1,29 +1,33 @@
 {
  "id": "2026-11-08-say-hi",
  "captured": "2026-11-08T21:28:09.048Z",
- "cases": 14,
- "pass": 13,
+ "cases": 15,
+ "pass": 14,
  "results": [
+  {
+   "key": "replay: every scripted event reached the page",
+   "pass": true
+  },
   {
    "key": "user#1",
    "pass": true,
    "oracle": 304.3,
-   "ours": 309.4,
-   "lag": 5
+   "ours": 305.9,
+   "lag": 2
   },
   {
    "key": "status:working#1",
    "pass": true,
    "oracle": 939.8,
-   "ours": 942.5,
-   "lag": 3
+   "ours": 943.7,
+   "lag": 4
   },
   {
    "key": "working#1",
    "pass": true,
    "oracle": 939.8,
-   "ours": 942.5,
-   "lag": 3
+   "ours": 943.7,
+   "lag": 4
   },
   {
    "key": "label:status#1",
@@ -35,22 +39,22 @@
    "key": "label:typing#1",
    "pass": true,
    "oracle": 3293,
-   "ours": 3304.4,
-   "lag": 11
+   "ours": 3300.2,
+   "lag": 7
   },
   {
    "key": "assistant#1",
    "pass": true,
    "oracle": 3351.7,
-   "ours": 3354.9,
-   "lag": 3
+   "ours": 3353.4,
+   "lag": 2
   },
   {
    "key": "status:replied#1",
    "pass": true,
    "oracle": 3437.6,
-   "ours": 3456.6,
-   "lag": 19
+   "ours": 3454.9,
+   "lag": 17
   },
   {
    "key": "nothing extra",
@@ -68,17 +72,17 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 241.69999999999982
+   "ours": 241.5
   },
   {
    "key": "budget: own bubble ≤ 440 ms",
    "pass": true,
-   "ours": 309.4
+   "ours": 305.9
   },
   {
    "key": "budget: working line ≤ 2.0 s",
    "pass": true,
-   "ours": 942.5
+   "ours": 943.7
   },
   {
    "key": "history after a reconnect (stored as today: the last message)",
@@ -124,34 +128,45 @@
   },
   {
    "kind": "user",
-   "t": 309.4,
-   "len": 29
+   "t": 305.9,
+   "len": 29,
+   "raw": 309.2
   },
   {
    "kind": "working",
-   "t": 942.5
+   "t": 943.7,
+   "raw": 946
   },
   {
    "kind": "status:working",
-   "t": 942.5
+   "t": 943.7,
+   "raw": 946
   },
   {
    "kind": "label:typing",
-   "t": 3304.4
+   "t": 3300.2,
+   "raw": 3303.4
   },
   {
    "kind": "assistant",
-   "t": 3354.9,
-   "len": 29
+   "t": 3353.4,
+   "len": 29,
+   "raw": 3355
   },
   {
    "kind": "working-gone",
-   "t": 3596.6
+   "t": 3594.9,
+   "raw": 3596.5
   },
   {
    "kind": "status:replied",
-   "t": 3456.6
+   "t": 3454.9,
+   "raw": 3456.5
   }
  ],
- "run": "2026-11-09T08:26:30.763Z"
+ "standInLate": [
+  2,
+  3
+ ],
+ "run": "2026-11-09T08:54:04.571Z"
 }
