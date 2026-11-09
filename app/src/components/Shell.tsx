@@ -1,8 +1,8 @@
 // The three panes: rail, conversation, details. Sizes and colours come from the captured
 // oracle state fixtures/states/oracle-turn-1040.json (see styles.css). The bots' faces are
 // plain stand-ins of the same size (O2): never the oracle's mascot art.
-import {useState, type ReactNode} from 'react'
-import {Composer} from './Composer'
+import {useEffect, useState, type ReactNode} from 'react'
+import {Composer, Icon} from './Composer'
 import {Rail} from './Rail'
 import {Details} from './Details'
 import {Face} from './parts'
@@ -24,9 +24,27 @@ export type Scene = {
 // The scene is where the page starts; what the person does from there (panel, tab, the bot they
 // pick in the rail) is held here, so the live page and the gate share one behaviour.
 // `onPickBot` tells the page which bot is now active, so it can load that bot's conversation.
+// A narrow window closes the details panel by itself, and widening it again leaves it closed
+// (oracle-main-720: closed; oracle-main-880: open). The line is bracketed by those two captures,
+// not measured: it sits half-way, below 800.
+const NARROW = '(max-width: 799.98px)'
+
 export function Shell({scene: start, transcript, composer, onPickBot}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (name: string) => void}) {
   const [panelOpen, setPanelOpen] = useState(start.panelOpen)
   const [picked, setPicked] = useState<string | undefined>(undefined)
+  // A page that opens already narrow shows the panel closed at once, without the 300 ms close.
+  const [instant, setInstant] = useState(false)
+  useEffect(() => {
+    const narrow = window.matchMedia(NARROW)
+    if (narrow.matches) {
+      setInstant(true)
+      setPanelOpen(false)
+      requestAnimationFrame(() => requestAnimationFrame(() => setInstant(false)))
+    }
+    const onChange = (e: MediaQueryListEvent) => e.matches && setPanelOpen(false)
+    narrow.addEventListener('change', onChange)
+    return () => narrow.removeEventListener('change', onChange)
+  }, [])
   const scene: Scene = {...start, panelOpen, active: picked ?? start.active}
   const active = scene.active ?? ''
   const pick = (name: string) => {
@@ -34,7 +52,7 @@ export function Shell({scene: start, transcript, composer, onPickBot}: {scene: S
     onPickBot?.(name)
   }
   return (
-    <div className="app" data-panel={panelOpen ? 'open' : 'closed'}>
+    <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-instant={instant || undefined}>
       <Rail scene={scene} onPick={pick} />
 
       <main className="convo" aria-label="Conversation transcript">
@@ -48,7 +66,10 @@ export function Shell({scene: start, transcript, composer, onPickBot}: {scene: S
             </button>
           )}
           <button className="share" aria-label="Share">
-            <span>Share</span>
+            <span className="share-label">Share</span>
+            <span className="share-icon">
+              <Icon d="M8 10V2.5M5 5.5l3-3 3 3M3 9v3.5h10V9" />
+            </span>
           </button>
         </header>
         {transcript ?? <div className="transcript" />}

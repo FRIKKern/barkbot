@@ -4,6 +4,6 @@
  "journey": "J02",
  "title": "Every captured width matches: 1040, 1280, 1600 (oracle-main-*)",
  "status": "done",
- "gate": "Gate A: oracle-main-1280 39/39, oracle-main-1600 39/39, oracle-panel-closed 14/14, oracle-turn-1040 39/39",
- "evidence": "Every frame case passes at every captured width. The composer is the main column less 16 each side, up to 960 (#3). The 1280 capture had held a hovered Composer actions; recaptured 2026-11-09 with the pointer parked (sweep park()), it reads like the other widths."
+ "gate": "Gate A: oracle-main-720 14/14, -880 39/39, -1040 (turn) 39/39, -1280 39/39, -1600 39/39, -2000 40/40, oracle-panel-closed 14/14",
+ "evidence": "Every frame case passes at every captured width. The composer is the main column less 16 each side, up to 960 (#3). The 1280 capture had held a hovered Composer actions; recaptured 2026-11-09 with the pointer parked (sweep park()), it reads like the other widths. Narrow (2026-11-09): below 800 Shell closes the panel itself and leaves it closed on widening (closed at 720, open at 880: bracketed, not measured); the 720 scene starts open so the rule is what closes it. A conversation column under 552 shows Share as its 36 pt icon (472 icon, 632 label: bracketed)."
 }
