@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-15 of 40 items done, 10 partial, 5 open, 10 not yet read on the oracle.
+15 of 43 items done, 10 partial, 8 open, 10 not yet read on the oracle.
 Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an item file, never this page.
 
 ## S0 Harness
@@ -44,6 +44,9 @@ Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an it
 | F8 | Account menu: Weekly usage, Get Grok Bot for mobile, Support, Settings, Add account, Log out (oracle-account-menu); each row's target is its own item | — | ◐ partial | Gate: Gate A oracle-account-menu 50/52: Weekly usage and 12% used are 1.4 pt off on text width (the font stand-in measures "12% used" wider). Evidence: app/src/components/overlays/Menus.tsx; opens from the account button. Left: the usage line is the captured 12% (data.ts), and every row's target is its own item. |
 | F9 | Library tab: the empty state 'Pages, files, and apps this Bot makes show up here' (oracle-library) | J03 | ✓ done | Gate: Gate A: oracle-library 20/20. The panel's unnamed elements (not Gate A cases) measured box by box with scripts/oracle/collect.mjs against fixtures/states/oracle-library.json elements 212-221: every box in the tab panel equal to 0.1 pt, every look equal. Evidence: Details.tsx + details.css. Matched: tab panel 217 at 736,329.6,288,414.4; empty state 218 at 736,339.6,288,72; its inner block 219 at 752,339.6,256,72; text 220 at 752,355.6,256,40 (14/20, 54% ink); rule 221 at 736,433.6,288,1; tab fade 216 at 720,229,320,12; tabs row 212 exact, tabs within 1.3 pt (font). The 100.6 pt drop is the oracle's settled layout (recaptured with a 3 s settle, 2026-11-09) |
 | F10 | Every captured width matches: 1040, 1280, 1600 (oracle-main-*) | J02 | ✓ done | Gate: Gate A: oracle-main-1280 39/39, oracle-main-1600 39/39, oracle-panel-closed 14/14, oracle-turn-1040 39/39. Evidence: Every frame case passes at every captured width. The composer is the main column less 16 each side, up to 960 (#3). The 1280 capture had held a hovered Composer actions; recaptured 2026-11-09 with the pointer parked (sweep park()), it reads like the other widths. |
+| F11 | Connect Apps view: header with the connected count, Your plugins, Bot templates, category filters, Recommended for you with each app's Open and Connect (oracle-connect-apps). Look only: Connect and Open act outside the page and are their own items | — | ○ open | — |
+| F12 | Bot avatar editor: Bot, Generate, Upload, Reset character to default (oracle-edit-avatar). Look only: Generate and Upload change the bot and are their own items | — | ○ open | — |
+| F13 | Settings, General page: General, Computer, Permissions, Vault, Usage & Billing, Updates; Account (name and e-mail are the owner's: lengths only), Add account, Sign Out; Appearance; Spelling; Microphone (oracle-settings). Look only | — | ○ open | — |
 
 ## S3 Control
 

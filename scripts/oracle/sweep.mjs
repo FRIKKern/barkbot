@@ -23,7 +23,9 @@ const SETTLE = args.includes('--settle') ? Number(args[args.indexOf('--settle') 
 const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
 // The only controls the sweep may press. Anything else is refused, by name.
-const MAY_PRESS = new Set(['View conversation details', 'Library', 'Activity', 'Composer actions', 'Open account menu', 'New Bot', 'Voice', 'Speed', 'Language', 'Close']);
+const MAY_PRESS = new Set(['View conversation details', 'Library', 'Activity', 'Composer actions', 'Open account menu', 'New Bot', 'Voice', 'Speed', 'Language', 'Close', 'Connect apps', 'Edit Bot avatar', 'Settings', 'Get Grok Bot for mobile']);
+// Names NEVER would refuse that only open a view: 'Connect apps' opens the list; each row's own Connect stays refused.
+const OPENS_ONLY = new Set(['Close', 'Connect apps']);
 const NEVER = /send|share|connect|approve|allow|create|add to|delete|remove|invite|upgrade|sign out|log out|wake|start voice/i;
 
 // [id, what it shows, steps to open, steps to close]. A step: {press: name} | {key: 'Escape'} | {width: n}.
@@ -58,6 +60,15 @@ SWEEP.push(
 );
 const only2 = args.includes('--hovers');
 const only3 = args.includes('--followups');
+// Second-level views: look only, closed with Escape. Captured with --out first and read before any is kept.
+SWEEP.push(
+  ['oracle-connect-apps', 'the Connect apps list', [{ press: 'Connect apps' }], [{ key: 'Escape' }]],
+  ['oracle-edit-avatar', 'the Bot avatar editor', [{ press: 'Edit Bot avatar' }], [{ key: 'Escape' }]],
+  ['oracle-settings', 'Settings, from the account menu', [{ press: 'Open account menu' }, { press: 'Settings' }], [{ key: 'Escape' }], { privateMenu: true }],
+  ['oracle-get-mobile', 'Get Grok Bot for mobile, from the account menu', [{ press: 'Open account menu' }, { press: 'Get Grok Bot for mobile' }], [{ key: 'Escape' }], { privateMenu: true }],
+);
+const out2 = args.includes('--out') ? args[args.indexOf('--out') + 1] : null;
+const only4 = args.includes('--views');
 
 if (args.includes('--list')) { for (const [id, what] of SWEEP) console.log(`${id}  ${what}`); process.exit(0); }
 
@@ -73,7 +84,7 @@ const base = await names();
 
 // A real pointer press at the control's centre (menus open on pointerdown, not on click()).
 async function press(name) {
-  if (!MAY_PRESS.has(name) || NEVER.test(name) && name !== 'Close') throw new Error(`refusing to press "${name}": not on the sweep's list`);
+  if (!MAY_PRESS.has(name) || (NEVER.test(name) && !OPENS_ONLY.has(name))) throw new Error(`refusing to press "${name}": not on the sweep's list`);
   const state = await page.evaluate(collect);
   const hit = controls(state).filter((c) => c.name === name);
   if (hit.length !== 1) throw new Error(`"${name}": ${hit.length} controls by that name, need exactly 1`);
@@ -134,6 +145,11 @@ async function park() {
   await wait(400);
 }
 
+// The owner's own name (this Mac's account name, git's user.name) and account counts never land in a fixture.
+const PEOPLE = [() => execFileSync('id', ['-F'], { encoding: 'utf8' }), () => execFileSync('git', ['config', 'user.name'], { encoding: 'utf8' })]
+  .map((f) => { try { return f().trim(); } catch { return ''; } }).filter((n) => n.length > 2);
+const ACCOUNT_FACT = /^\d+ connected$/;
+
 function redact(state, privateMenu) {
   const els = state.elements;
   const inMenu = (e) => { let p = e; while (p) { if (p.role === 'menu') return p; p = p.parent === undefined ? null : els[p.parent]; } return null; };
@@ -144,7 +160,7 @@ function redact(state, privateMenu) {
     // A bot's chat preview (hover on its tile) shows its last message: keep only the bot's name.
     const inPreview = (x) => { let p = x; while (p) { if (p.role === 'dialog' && / chat preview$/.test(p.label || '')) return p; p = p.parent === undefined ? null : els[p.parent]; } return null; };
     const pv = inPreview(e);
-    const priv = /@|\b[\w.-]+\.(com|no|ai|io|dev)\b/i.test(e.text) || (privateMenu && inMenu(e) && !inItem(e)) || (pv && e.text !== pv.label.replace(/ chat preview$/, ''));
+    const priv = PEOPLE.some((n) => e.text.includes(n)) || ACCOUNT_FACT.test(e.text) || /@|\b[\w.-]+\.(com|no|ai|io|dev)\b/i.test(e.text) || (privateMenu && inMenu(e) && !inItem(e)) || (pv && e.text !== pv.label.replace(/ chat preview$/, ''));
     if (priv) { e.textLength = e.text.length; delete e.text; }
   }
   return state;
@@ -156,6 +172,7 @@ for (const [id, what, open, close, opts = {}] of SWEEP) {
   if (only && id !== only) continue;
   if (only2 && !id.startsWith('oracle-hover-')) continue;
   if (only3 && !/-(end|named|hover)$/.test(id)) continue;
+  if (only4 && !['oracle-connect-apps', 'oracle-edit-avatar', 'oracle-settings', 'oracle-get-mobile'].includes(id)) continue;
   // diff recipes: capture the screen just before the last step, so `changed` names what it changed.
   for (const s of opts.diff ? open.slice(0, -1) : open) await step(s);
   let rest = null;
@@ -170,7 +187,7 @@ for (const [id, what, open, close, opts = {}] of SWEEP) {
     out.changed = namedElements(state).filter((c) => !rest.has(c.key) || look(rest.get(c.key)) !== look(c.e)).map((c) => c.key);
     if (!out.changed.length) { console.log(`${id}: the last step changes nothing visible; not kept`); for (const s of close) await step(s); continue; }
   }
-  writeFileSync(path('fixtures', 'states', `${id}.json`), JSON.stringify(out) + '\n');
+  writeFileSync(out2 ? `${out2}/${id}.json` : path('fixtures', 'states', `${id}.json`), JSON.stringify(out) + '\n');
   if (shots) { const s = await page.send('Page.captureScreenshot', { format: 'png' }); writeFileSync(`${shots}/${id}.png`, Buffer.from(s.data, 'base64')); }
   for (const s of close) await step(s);
   const now = await names();

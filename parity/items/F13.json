@@ -1,0 +1,19 @@
+{
+ "id": "F13",
+ "slice": "S2",
+ "journey": null,
+ "title": "Settings, General page: General, Computer, Permissions, Vault, Usage & Billing, Updates; Account (name and e-mail are the owner's: lengths only), Add account, Sign Out; Appearance; Spelling; Microphone (oracle-settings). Look only",
+ "status": "open",
+ "controls": [
+  "General",
+  "Computer",
+  "Permissions",
+  "Vault",
+  "Usage & Billing",
+  "Updates",
+  "Get started",
+  "Copy email address",
+  "Sign Out",
+  "Check Spelling While Typing"
+ ]
+}

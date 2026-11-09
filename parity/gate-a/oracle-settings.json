@@ -1,0 +1,577 @@
+{
+ "id": "oracle-settings",
+ "captured": "2026-11-09",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 78,
+ "pass": 0,
+ "scene": false,
+ "results": [
+  {
+   "key": "aside:Bots",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:New Bot",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect apps",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open account menu",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Oracle",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Prompt",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Composer actions",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice input",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "aside:Conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Close",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Edit Bot avatar",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot name",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Activity",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Library",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Suggested",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Hide",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Add to Slack",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Add to Slack",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Create a routine",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Create a routine",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot's computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bdi:Bot's computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bdi:Asleep",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Voice",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Voice",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Helix",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Speed",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Speed",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:1x",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Language",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Language",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Auto-detect",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "nav:Settings sections",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:General",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:General",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Computer#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Permissions",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Permissions",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Vault",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Vault",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Usage & Billing",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Usage & Billing",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Updates",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Updates",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Close#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "h2:General",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "p:Unlock the ultimate AI subscription",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Get started",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Get started",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "h3:Account",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Copy email address",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Add account",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Add account",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Sign Out",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Sign Out",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "h3:Appearance",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Theme",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Follow System",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Accent",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Speed#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Bot color",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Language#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Language#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Follow System#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Check Spelling While Typing",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Check Spelling While Typing",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "h3:System",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Microphone",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:System Default",
+   "pass": false,
+   "why": "no scene"
+  }
+ ],
+ "run": "2026-11-09T07:30:05.611Z",
+ "inventory": {
+  "id": "oracle-settings",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": false
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": false
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Close",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Add to Slack",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": false
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Speed",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "General",
+    "item": "F13",
+    "ours": false
+   },
+   {
+    "name": "Computer",
+    "item": "F13",
+    "ours": false
+   },
+   {
+    "name": "Permissions",
+    "item": "F13",
+    "ours": false
+   },
+   {
+    "name": "Vault",
+    "item": "F13",
+    "ours": false
+   },
+   {
+    "name": "Usage & Billing",
+    "item": "F13",
+    "ours": false
+   },
+   {
+    "name": "Updates",
+    "item": "F13",
+    "ours": false
+   },
+   {
+    "name": "Get started",
+    "item": "F13",
+    "ours": false
+   },
+   {
+    "name": "Copy email address",
+    "item": "F13",
+    "ours": false
+   },
+   {
+    "name": "Add account",
+    "item": "F8",
+    "ours": false
+   },
+   {
+    "name": "Sign Out",
+    "item": "F13",
+    "ours": false
+   },
+   {
+    "name": "Check Spelling While Typing",
+    "item": "F13",
+    "ours": false
+   }
+  ],
+  "missing": 33,
+  "untracked": []
+ }
+}

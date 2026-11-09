@@ -1,0 +1,13 @@
+{
+ "id": "F12",
+ "slice": "S2",
+ "journey": null,
+ "title": "Bot avatar editor: Bot, Generate, Upload, Reset character to default (oracle-edit-avatar). Look only: Generate and Upload change the bot and are their own items",
+ "status": "open",
+ "controls": [
+  "Bot",
+  "Generate",
+  "Upload",
+  "Reset character to default"
+ ]
+}

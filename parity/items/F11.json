@@ -1,0 +1,21 @@
+{
+ "id": "F11",
+ "slice": "S2",
+ "journey": null,
+ "title": "Connect Apps view: header with the connected count, Your plugins, Bot templates, category filters, Recommended for you with each app's Open and Connect (oracle-connect-apps). Look only: Connect and Open act outside the page and are their own items",
+ "status": "open",
+ "controls": [
+  "Your plugins",
+  "Bot templates",
+  "All",
+  "Password Managers",
+  "Productivity",
+  "Communication",
+  "Design",
+  "Code",
+  "More",
+  "View all",
+  "/^Open (?!account menu$|conversation).+$/",
+  "/^Connect( .+)?$/"
+ ]
+}

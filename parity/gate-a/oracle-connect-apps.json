@@ -1,0 +1,747 @@
+{
+ "id": "oracle-connect-apps",
+ "captured": "2026-11-09",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 100,
+ "pass": 0,
+ "scene": false,
+ "results": [
+  {
+   "key": "aside:Bots",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:New Bot",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect apps",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open account menu",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Oracle",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Prompt",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Composer actions",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice input",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "aside:Conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Close",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Edit Bot avatar",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot name",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Activity",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Library",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Suggested",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Hide",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Add to Slack",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Add to Slack",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Create a routine",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Create a routine",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot's computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bdi:Bot's computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bdi:Asleep",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Voice",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Voice",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Helix",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Speed",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Speed",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:1x",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Language",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Language",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Auto-detect",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Close#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "h2:Connect Apps",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Your plugins",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot templates",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:All",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Password Managers",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Productivity",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Communication",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Design",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Code",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:More",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "h3:Recommended for you",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View all",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open Datadog",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Datadog",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open Vercel",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Vercel",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open Supabase",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Supabase",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect#3",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect#3",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open Cloudflare",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Cloudflare",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect#4",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect#4",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open Sentry",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Sentry",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect#5",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect#5",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open Firebase",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Firebase",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect#6",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect#6",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "h3:Password Managers",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open 1Password",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:1Password",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect 1Password",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect#7",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "h3:Productivity",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View all#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open Notion",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Notion",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect#7",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect#8",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open Atlassian",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Atlassian",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect#8",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect#9",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open Google Docs",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Google Docs",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect#9",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect#10",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open Canva",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Canva",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect#10",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Connect#11",
+   "pass": false,
+   "why": "no scene"
+  }
+ ],
+ "run": "2026-11-09T07:30:05.611Z",
+ "inventory": {
+  "id": "oracle-connect-apps",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": false
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": false
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Close",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Add to Slack",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": false
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Speed",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Your plugins",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Bot templates",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "All",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Password Managers",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Productivity",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Communication",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Design",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Code",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "More",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "View all",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open Datadog",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Connect",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open Vercel",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open Supabase",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open Cloudflare",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open Sentry",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open Firebase",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open 1Password",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Connect 1Password",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open Notion",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open Atlassian",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open Google Docs",
+    "item": "F11",
+    "ours": false
+   },
+   {
+    "name": "Open Canva",
+    "item": "F11",
+    "ours": false
+   }
+  ],
+  "missing": 45,
+  "untracked": []
+ }
+}
