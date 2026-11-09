@@ -1,13 +1,13 @@
 {
  "id": "oracle-language-picker",
- "captured": "2026-11-08",
+ "captured": "2026-11-09",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 86,
- "pass": 86,
+ "cases": 87,
+ "pass": 87,
  "results": [
   {
    "key": "aside:Bots",
@@ -91,6 +91,10 @@
   },
   {
    "key": "span:Suggested",
+   "pass": true
+  },
+  {
+   "key": "control:Hide",
    "pass": true
   },
   {
@@ -354,7 +358,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T08:24:42.558Z",
+ "run": "2026-11-09T09:01:32.439Z",
  "inventory": {
   "id": "oracle-language-picker",
   "controls": [
@@ -431,6 +435,11 @@
    {
     "name": "Library",
     "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
     "ours": true
    },
    {
