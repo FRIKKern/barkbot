@@ -1,13 +1,13 @@
 {
  "id": "oracle-main-1600",
- "captured": "2026-11-08",
+ "captured": "2026-11-09",
  "viewport": [
   1600,
   760,
   2
  ],
- "cases": 69,
- "pass": 69,
+ "cases": 70,
+ "pass": 70,
  "results": [
   {
    "key": "aside:Bots",
@@ -91,6 +91,10 @@
   },
   {
    "key": "span:Suggested",
+   "pass": true
+  },
+  {
+   "key": "control:Hide",
    "pass": true
   },
   {
@@ -286,7 +290,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:49:27.987Z",
+ "run": "2026-11-09T09:01:32.439Z",
  "inventory": {
   "id": "oracle-main-1600",
   "controls": [
@@ -363,6 +367,11 @@
    {
     "name": "Library",
     "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
     "ours": true
    },
    {

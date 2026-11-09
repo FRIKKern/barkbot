@@ -1,13 +1,13 @@
 {
  "id": "oracle-new-bot-dialog",
- "captured": "2026-11-08",
+ "captured": "2026-11-09",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 75,
- "pass": 75,
+ "cases": 101,
+ "pass": 101,
  "results": [
   {
    "key": "aside:Bots",
@@ -66,6 +66,110 @@
    "pass": true
   },
   {
+   "key": "aside:Conversation details",
+   "pass": true
+  },
+  {
+   "key": "control:Close",
+   "pass": true
+  },
+  {
+   "key": "control:Edit Bot avatar",
+   "pass": true
+  },
+  {
+   "key": "control:Bot name",
+   "pass": true
+  },
+  {
+   "key": "control:Activity",
+   "pass": true
+  },
+  {
+   "key": "control:Library",
+   "pass": true
+  },
+  {
+   "key": "span:Suggested",
+   "pass": true
+  },
+  {
+   "key": "control:Hide",
+   "pass": true
+  },
+  {
+   "key": "control:Add to Slack",
+   "pass": true
+  },
+  {
+   "key": "span:Add to Slack",
+   "pass": true
+  },
+  {
+   "key": "control:Create a routine",
+   "pass": true
+  },
+  {
+   "key": "span:Create a routine",
+   "pass": true
+  },
+  {
+   "key": "span:Computer",
+   "pass": true
+  },
+  {
+   "key": "control:Bot's computer",
+   "pass": true
+  },
+  {
+   "key": "bdi:Bot's computer",
+   "pass": true
+  },
+  {
+   "key": "bdi:Asleep",
+   "pass": true
+  },
+  {
+   "key": "span:Voice chat",
+   "pass": true
+  },
+  {
+   "key": "span:Voice",
+   "pass": true
+  },
+  {
+   "key": "control:Voice",
+   "pass": true
+  },
+  {
+   "key": "span:Helix",
+   "pass": true
+  },
+  {
+   "key": "span:Speed",
+   "pass": true
+  },
+  {
+   "key": "control:Speed",
+   "pass": true
+  },
+  {
+   "key": "span:1x",
+   "pass": true
+  },
+  {
+   "key": "span:Language",
+   "pass": true
+  },
+  {
+   "key": "control:Language",
+   "pass": true
+  },
+  {
+   "key": "span:Auto-detect",
+   "pass": true
+  },
+  {
    "key": "control:Close dialog",
    "pass": true
   },
@@ -74,7 +178,7 @@
    "pass": true
   },
   {
-   "key": "control:Bot name",
+   "key": "control:Bot name#2",
    "pass": true
   },
   {
@@ -310,7 +414,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T08:04:30.318Z",
+ "run": "2026-11-09T09:01:32.439Z",
  "inventory": {
   "id": "oracle-new-bot-dialog",
   "controls": [
@@ -365,13 +469,68 @@
     "ours": true
    },
    {
-    "name": "Close dialog",
-    "item": "N5",
+    "name": "Close",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
     "ours": true
    },
    {
     "name": "Bot name",
     "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
+    "ours": true
+   },
+   {
+    "name": "Add to Slack",
+    "item": "N3",
+    "ours": true
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": true
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": true
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Speed",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Close dialog",
+    "item": "N5",
     "ours": true
    },
    {

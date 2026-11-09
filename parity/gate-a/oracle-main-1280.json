@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 69,
- "pass": 69,
+ "cases": 70,
+ "pass": 70,
  "results": [
   {
    "key": "aside:Bots",
@@ -91,6 +91,10 @@
   },
   {
    "key": "span:Suggested",
+   "pass": true
+  },
+  {
+   "key": "control:Hide",
    "pass": true
   },
   {
@@ -286,7 +290,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:48:25.144Z",
+ "run": "2026-11-09T09:01:32.439Z",
  "inventory": {
   "id": "oracle-main-1280",
   "controls": [
@@ -363,6 +367,11 @@
    {
     "name": "Library",
     "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
     "ours": true
    },
    {

@@ -1,13 +1,13 @@
 {
  "id": "oracle-voice-picker",
- "captured": "2026-11-08",
+ "captured": "2026-11-09",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 101,
- "pass": 101,
+ "cases": 102,
+ "pass": 102,
  "results": [
   {
    "key": "aside:Bots",
@@ -91,6 +91,10 @@
   },
   {
    "key": "span:Suggested",
+   "pass": true
+  },
+  {
+   "key": "control:Hide",
    "pass": true
   },
   {
@@ -414,7 +418,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T08:24:42.558Z",
+ "run": "2026-11-09T09:01:32.439Z",
  "inventory": {
   "id": "oracle-voice-picker",
   "controls": [
@@ -491,6 +495,11 @@
    {
     "name": "Library",
     "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
     "ours": true
    },
    {

@@ -17,19 +17,22 @@ import { path } from '../lib/data.mjs';
 
 const args = process.argv.slice(2);
 const only = args.includes('--only') ? args[args.indexOf('--only') + 1] : null;
+// --ids a,b,c: several recipes by id (a re-capture after a Grok update takes the stale ones).
+const ids = args.includes('--ids') ? args[args.indexOf('--ids') + 1].split(',') : null;
 const shots = args.includes('--shots') ? args[args.indexOf('--shots') + 1] : null;
 // How long a changed screen must sit before the capture: some panels animate their height for longer.
 const SETTLE = args.includes('--settle') ? Number(args[args.indexOf('--settle') + 1]) : 600;
 const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
 // The only controls the sweep may press. Anything else is refused, by name.
-const MAY_PRESS = new Set(['View conversation details', 'Library', 'Activity', 'Composer actions', 'Open account menu', 'New Bot', 'Voice', 'Speed', 'Language', 'Close', 'Connect apps', 'Edit Bot avatar', 'Settings', 'Get Grok Bot for mobile']);
+const MAY_PRESS = new Set(['View conversation details', 'Library', 'Activity', 'Composer actions', 'Open account menu', 'New Bot', 'Voice', 'Speed', 'Language', 'Close', 'Connect apps', 'Edit Bot avatar', 'Settings', 'Get Grok Bot for mobile', 'Computer', 'Permissions', 'Updates']);
 // Names NEVER would refuse that only open a view: 'Connect apps' opens the list; each row's own Connect stays refused.
 const OPENS_ONLY = new Set(['Close', 'Connect apps']);
 const NEVER = /send|share|connect|approve|allow|create|add to|delete|remove|invite|upgrade|sign out|log out|wake|start voice/i;
 
 // [id, what it shows, steps to open, steps to close]. A step: {press: name} | {key: 'Escape'} | {width: n}.
 const SWEEP = [
+  ['oracle-turn-1040', 'the main view, 1040 wide (the window as it rests)', [], []],
   ['oracle-main-1280', 'the main view, 1280 wide', [{ width: 1280 }], [{ width: null }]],
   ['oracle-main-1600', 'the main view, 1600 wide', [{ width: 1600 }], [{ width: null }]],
   // At 720 the oracle closes its details panel by itself, and it stays closed when the width comes back.
@@ -77,6 +80,9 @@ SWEEP.push(
   ['oracle-connect-apps', 'the Connect apps list', [{ press: 'Connect apps' }], [{ key: 'Escape' }]],
   ['oracle-edit-avatar', 'the Bot avatar editor', [{ press: 'Edit Bot avatar' }], [{ key: 'Escape' }]],
   ['oracle-settings', 'Settings, from the account menu', [{ press: 'Open account menu' }, { press: 'Settings' }], [{ key: 'Escape' }], { privateMenu: true }],
+  // Settings tabs, look only. Not Usage & Billing (the owner's spend) and not Vault (stored secrets): never captured (O2).
+  // Updates shows an Install button; it is looked at, never pressed (Grok stays on 0.79.2).
+  ...['Computer', 'Permissions', 'Updates'].map((tab) => [`oracle-settings-${tab.toLowerCase()}`, `Settings, ${tab} tab`, [{ press: 'Open account menu' }, { press: 'Settings' }, { press: tab }], [{ key: 'Escape' }], { privateMenu: true }]),
   ['oracle-get-mobile', 'Get Grok Bot for mobile, from the account menu', [{ press: 'Open account menu' }, { press: 'Get Grok Bot for mobile' }], [{ key: 'Escape' }], { privateMenu: true }],
 );
 const out2 = args.includes('--out') ? args[args.indexOf('--out') + 1] : null;
@@ -173,9 +179,12 @@ async function park() {
 }
 
 // The owner's own name (this Mac's account name, git's user.name) and account counts never land in a fixture.
-const PEOPLE = [() => execFileSync('id', ['-F'], { encoding: 'utf8' }), () => execFileSync('git', ['config', 'user.name'], { encoding: 'utf8' })]
+// The person's names and this Mac's names (Settings > Computer lists the device by its network name).
+const PEOPLE = [() => execFileSync('id', ['-F'], { encoding: 'utf8' }), () => execFileSync('git', ['config', 'user.name'], { encoding: 'utf8' }),
+  () => execFileSync('hostname', { encoding: 'utf8' }), () => execFileSync('scutil', ['--get', 'ComputerName'], { encoding: 'utf8' }), () => execFileSync('scutil', ['--get', 'LocalHostName'], { encoding: 'utf8' })]
   .map((f) => { try { return f().trim(); } catch { return ''; } }).filter((n) => n.length > 2);
-const ACCOUNT_FACT = /^\d+ connected$/;
+// Facts about the account, wherever they sit (a menu row's trailing value included): apps connected, weekly usage.
+const ACCOUNT_FACT = /^\d+ connected$|^\d+% used$/;
 
 function redact(state, privateMenu) {
   const els = state.elements;
@@ -197,9 +206,11 @@ mkdirSync(path('fixtures', 'states'), { recursive: true });
 let done = 0;
 for (const [id, what, open, close, opts = {}] of SWEEP) {
   if (only && id !== only) continue;
+  if (ids && !ids.includes(id)) continue;
   if (only2 && !id.startsWith('oracle-hover-')) continue;
   if (only3 && !/-(end|named|hover)$/.test(id)) continue;
-  if (only4 && !['oracle-connect-apps', 'oracle-edit-avatar', 'oracle-settings', 'oracle-get-mobile'].includes(id)) continue;
+  if (only4 && !['oracle-connect-apps', 'oracle-edit-avatar', 'oracle-settings', 'oracle-get-mobile'].includes(id) && !id.startsWith('oracle-settings-')) continue;
+  if (args.includes('--settings-tabs') && !id.startsWith('oracle-settings-')) continue;
   // diff recipes: capture the screen just before the last step, so `changed` names what it changed.
   for (const s of opts.diff ? open.slice(0, -1) : open) await step(s);
   let rest = null;
