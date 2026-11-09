@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-13 of 40 items done, 8 partial, 8 open, 11 not yet read on the oracle.
+14 of 40 items done, 7 partial, 8 open, 11 not yet read on the oracle.
 Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an item file, never this page.
 
 ## S0 Harness
@@ -42,7 +42,7 @@ Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an it
 | F6 | Stand-in font picked by measured widths: Gate A's last misses are Inter running 1-3 pt wider than the oracle's own font | — | ✓ done | Gate: npm run gate (2026-11-09): oracle-turn-1040 39/39, oracle-library 20/20, oracle-main-1280 35/39, oracle-main-1600 35/39, oracle-panel-closed 10/14; every miss left is the composer's width. Evidence: 41 oracle widths (fixtures/states/*, fixtures/text-metrics.json) measured in 36 faces in headless Chrome: the macOS system face (SF Pro) runs 0.52 pt off on average after tracking, Inter 0.70 and 2.88 raw; base.css sets BlinkMacSystemFont, -apple-system, Inter fallback. Three fixed words keep their own tracking (parts.tsx FIT) where SF still runs 1.2-1.6 pt off. No oracle font file read or shipped (O2) |
 | F7 | Composer actions menu: Attach files, Teach a task (oracle-composer-menu) | — | ○ open | — |
 | F8 | Account menu: Weekly usage, Get Grok Bot for mobile, Support, Settings, Add account, Log out (oracle-account-menu); each row's target is its own item | — | ○ open | — |
-| F9 | Library tab: the empty state 'Pages, files, and apps this Bot makes show up here' (oracle-library) | J03 | ◐ partial | Gate: Gate A: oracle-library 20/20 (the empty-state text is longer than 40 characters, so it is not a named case). Evidence: Details.tsx library branch: p 256 x 40 at 14/20, 54% ink, matches the oracle's size and look. Left: the oracle's tab panel sits 100.6 pt lower (y 329.6 against our 229); its header block is 269.6 tall only in this capture, which reads like a mid-transition frame: recapture before matching it |
+| F9 | Library tab: the empty state 'Pages, files, and apps this Bot makes show up here' (oracle-library) | J03 | ✓ done | Gate: Gate A: oracle-library 20/20; the parts it does not name (tab panel, empty state, its text, the 1 pt rule, the tab fade) measured box by box with scripts/oracle/collect.mjs against fixtures/states/oracle-library.json: all equal to 0.1 pt. Evidence: Details.tsx + details.css: tab panel 736,329.6,288,414.4; empty state 736,339.6,288,72; text 752,355.6,256,40 at 14/20, 54% ink; rule 736,433.6,288,1; fade 720,229,320,12. The 100.6 pt drop on the Library tab is the oracle's settled layout (recaptured with a 3 s settle, 2026-11-09) |
 | F10 | Every captured width matches: 1040, 1280, 1600 (oracle-main-*) | J02 | ✓ done | Gate: Gate A: oracle-main-1280 39/39, oracle-main-1600 39/39, oracle-panel-closed 14/14, oracle-turn-1040 39/39. Evidence: Every frame case passes at every captured width. The composer is the main column less 16 each side, up to 960 (#3). The 1280 capture had held a hovered Composer actions; recaptured 2026-11-09 with the pointer parked (sweep park()), it reads like the other widths. |
 
 ## S3 Control

@@ -14,7 +14,7 @@ export function Details({scene}: {scene: Scene}) {
           <Icon d="M4 4l8 8M12 4l-8 8" />
         </button>
       </header>
-      <div className="details-body">
+      <div className={library ? 'details-body lib' : 'details-body'}>
         <div className="who">
           <button className="who-face" aria-label="Edit Bot avatar">
             <Face size={52} />
@@ -30,12 +30,14 @@ export function Details({scene}: {scene: Scene}) {
               Library
             </button>
           </div>
+          <span className="tabs-fade" />
         </div>
         {library ? (
           <div role="tabpanel" className="tabpanel library">
             <div className="library-empty">
               <p>Pages, files, and apps this Bot makes show up here</p>
             </div>
+            <div className="library-end" />
           </div>
         ) : (
           <div role="tabpanel" className="tabpanel">

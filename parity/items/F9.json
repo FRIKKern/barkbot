@@ -3,7 +3,7 @@
  "slice": "S2",
  "journey": "J03",
  "title": "Library tab: the empty state 'Pages, files, and apps this Bot makes show up here' (oracle-library)",
- "status": "partial",
- "gate": "Gate A: oracle-library 20/20 (the empty-state text is longer than 40 characters, so it is not a named case)",
- "evidence": "Details.tsx library branch: p 256 x 40 at 14/20, 54% ink, matches the oracle's size and look. Left: the oracle's tab panel sits 100.6 pt lower (y 329.6 against our 229); its header block is 269.6 tall only in this capture, which reads like a mid-transition frame: recapture before matching it"
+ "status": "done",
+ "gate": "Gate A: oracle-library 20/20; the parts it does not name (tab panel, empty state, its text, the 1 pt rule, the tab fade) measured box by box with scripts/oracle/collect.mjs against fixtures/states/oracle-library.json: all equal to 0.1 pt",
+ "evidence": "Details.tsx + details.css: tab panel 736,329.6,288,414.4; empty state 736,339.6,288,72; text 752,355.6,256,40 at 14/20, 54% ink; rule 736,433.6,288,1; fade 720,229,320,12. The 100.6 pt drop on the Library tab is the oracle's settled layout (recaptured with a 3 s settle, 2026-11-09)"
 }

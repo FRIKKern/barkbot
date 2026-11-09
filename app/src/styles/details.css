@@ -8,6 +8,9 @@
 .who-face { width: 64px; height: 64px; display: grid; place-items: center; color: #fff; }
 .who-name { field-sizing: content; min-width: 2ch; text-align: center; height: 29px; padding: 2px 10px; border: 0.5px solid transparent; border-radius: 8px; font-size: 17px; font-weight: 500; line-height: 24px; letter-spacing: 0.17px; outline: none; }
 .tabs-row { height: 40px; padding-top: 4px; display: flex; justify-content: center; background: var(--bg); }
+/* A 12 pt fade from the panel's ground hangs under the tabs (span 182 / 216, 720,229,320,12). */
+.tabs-row { position: relative; z-index: 1; }
+.tabs-fade { position: absolute; left: 0; right: 0; top: 40px; height: 12px; background-image: linear-gradient(rgb(18, 18, 18), rgba(0, 0, 0, 0)); pointer-events: none; }
 .tabs { display: flex; gap: 2px; height: 26px; }
 .tab { height: 26px; padding: 0 8px; border-radius: 9999px; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; color: var(--ink-66); }
 .tab[aria-selected='true'] { background: var(--wash-04); color: var(--ink); }
@@ -31,6 +34,13 @@
 .pick-value .icon { width: 10px; height: 10px; color: var(--ink-66); }
 
 /* Library tab, empty (oracle-library: text 14/20 at 54% ink, 256 wide, centred, 16 in from the card). */
-.tabpanel.library { padding: 10px 16px 16px; }
+/* On the Library tab the oracle's head block (face, name, tabs) stands 269.6 tall, 100.6 more than
+   on Activity, and the tab panel is inset 16 and runs to 16 above the bottom: 736,329.6,288,414.4.
+   Recaptured with a 3 s settle on 2026-11-09: its real layout, not a frame mid-move. A 1 pt rule
+   follows the empty state 22 below (div 221). */
+.details-body.lib { display: flex; flex-direction: column; }
+.details-body.lib .tabs-row { margin-bottom: 100.6px; }
+.tabpanel.library { flex: 1; min-height: 0; margin: 0 16px 16px; padding: 10px 0 0; }
+.library-end { height: 1px; flex: none; }
 .library-empty { padding: 16px; text-align: center; }
 .library-empty p { margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.14px; color: var(--ink-54); }
