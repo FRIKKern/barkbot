@@ -6,7 +6,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "check": "node scripts/check.mjs",
+    "check": "node scripts/check.mjs && node scripts/transcript-scenes.mjs --check",
     "board": "node scripts/board.mjs",
     "docs": "node scripts/generate-hero.mjs && node scripts/generate-roadmap.mjs && node scripts/generate-parity.mjs && node scripts/readme-timeline.mjs",
     "hero": "node scripts/generate-hero.mjs",
