@@ -4,14 +4,15 @@
 #      (npm run docs), never by hand; any other conflict stops here for a person.
 #      A Gate A record (parity/gate-a/<state>.json) is settled the same way: keep main's, then
 #      measure the rebased tree. Two lanes often lift the same state (a frame fix lifts the menus).
-#   2. Gate A re-measures the rebased tree and records it (a count below the record stops here);
+#   2. Gate A (and Gate B, once it exists) re-measure the rebased tree and record it (a count
+#      below the record stops here);
 #      npm run check must pass.
 #   3. push the branch; open or update its pull request.
 set -eu
 # README.md is NOT here: its timeline is generated but its prose is not, and a lane never
 # rewrites the timeline (only main does), so a README conflict is a real one.
 GEN='^(docs/PARITY\.md|docs/images/(roadmap|journeys|hero)\.svg)$'
-REC='^parity/gate-a/[^/]+\.json$'
+REC='^parity/gate-(a|b)/[^/]+\.json$'
 branch=$(git rev-parse --abbrev-ref HEAD)
 [ "$branch" = main ] && { echo "land: on main; lanes land from their own branch (worktree)" >&2; exit 2; }
 [ -z "$(git status --porcelain)" ] || { echo "land: commit first, the tree is not clean" >&2; exit 2; }
@@ -42,9 +43,11 @@ while in_rebase; do
 done
 [ "$(git merge-base HEAD "$BASE")" = "$(git rev-parse "$BASE")" ] || { echo "land: the branch is not on $BASE after the rebase; stopping" >&2; exit 1; }
 node scripts/gate.mjs --show 0   # records the rebased tree; exits 1 if any state fell below its record
+# Gate B (feel) is judged here, on the Mac the oracle's timings were recorded on; CI only reports it.
+if [ -f scripts/gate-b.mjs ]; then node scripts/gate-b.mjs --show 0; fi
 npm run -s docs
 git checkout -q -- README.md   # the timeline is main's to refresh
-if [ -n "$(git status --porcelain)" ]; then git add -A docs parity/gate-a && git commit -q -m "Re-record Gate A and regenerate docs after rebase"; fi
+if [ -n "$(git status --porcelain)" ]; then git add -A docs parity && git commit -q -m "Re-record the gates and regenerate docs after rebase"; fi
 npm run -s check
 [ "${DRY:-}" = 1 ] && { echo "land: dry run, rebased and checked; not pushed"; exit 0; }
 git push -q --force-with-lease -u origin "$branch"
