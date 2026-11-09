@@ -6,11 +6,13 @@
 //                              inventory for that state). One file per state, so lanes on different states never collide.
 //   npm run gate -- --only <state>   one state
 //   npm run gate -- --url http://localhost:3170   use an app that is already running
+//   Ports are free ones picked per run (--port, --chrome-port to fix them), so worktrees can gate in parallel.
 //
 // A run with zero cases fails. A pass count lower than the recorded one fails (QUALITY.md);
 // --accept records a lower count on purpose, and says so.
 import { spawn } from 'node:child_process';
-import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { createServer } from 'node:net';
+import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { connect } from './oracle/cdp.mjs';
 import { collect } from './oracle/collect.mjs';
 import { controls, namedElements, claims } from './lib/controls.mjs';
@@ -21,7 +23,9 @@ const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] :
 const ACCEPT = args.includes('--accept');
 // --ci: compare against the recorded run, write nothing (a pull request's check).
 const CI = args.includes('--ci');
-const APP_PORT = 3170, CHROME_PORT = Number(opt('chrome-port') || 9334);
+// Each run takes free ports of its own, so lanes in different worktrees can gate at the same time.
+const freePort = () => new Promise((ok, no) => { const s = createServer().once('error', no).listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => ok(port)); }); });
+const APP_PORT = Number(opt('port')) || await freePort(), CHROME_PORT = Number(opt('chrome-port')) || await freePort();
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const TOL = 1; // pt, each edge
 const STYLE_KEYS = ['background-color', 'color', 'border-radius', 'font-size', 'font-weight', 'line-height'];
@@ -40,15 +44,15 @@ if (!states.length) { console.error('Gate A: no captured states in fixtures/stat
 
 const kids = [];
 const stop = () => kids.forEach((k) => { try { k.kill('SIGTERM'); } catch {} });
-process.on('exit', stop);
+process.on('exit', () => { stop(); try { rmSync(PROFILE, { recursive: true, force: true }); } catch {} });
 process.on('SIGINT', () => process.exit(130));
 
 let base = opt('url');
 if (!base) {
   base = `http://localhost:${APP_PORT}`;
   // Measure only the app this run started: a busy port could be anything.
-  if (await fetch(base).then(() => true, () => false)) { console.error(`Gate A: port ${APP_PORT} is already in use. Stop that server, or pass --url to measure it on purpose.`); process.exit(1); }
-  const app = spawn('pnpm', ['-s', 'dev'], { cwd: path('app'), stdio: ['ignore', 'pipe', 'pipe'] });
+  if (await fetch(base).then(() => true, () => false)) { console.error(`Gate A: port ${APP_PORT} is already in use. Pass another --port, or --url to measure that server on purpose.`); process.exit(1); }
+  const app = spawn('pnpm', ['-s', 'dev', '--port', String(APP_PORT), '--strictPort'], { cwd: path('app'), stdio: ['ignore', 'pipe', 'pipe'] });
   kids.push(app);
   let log = '';
   app.stdout.on('data', (d) => (log += d)); app.stderr.on('data', (d) => (log += d));
@@ -56,7 +60,8 @@ if (!base) {
   // Up = it answers at all. The home page needs a Barkpark login, which CI does not have; the gate pages do not.
   await until(async () => (await fetch(base)).status > 0, 90000, `the app on ${base}`);
 }
-mkdirSync(path('.cache', 'gate-chrome'), { recursive: true });
+const PROFILE = path('.cache', `gate-chrome-${CHROME_PORT}`); // one Chrome profile per run: a shared one hands the second Chrome to the first
+mkdirSync(PROFILE, { recursive: true });
 
 const items = allItems();
 const owner = (name) => items.find((i) => claims(i, name))?.id ?? null;
@@ -79,7 +84,7 @@ for (const state of states) {
     console.log(`Gate A · ${state.id} · 0/${theirs.length} pass (no scene yet)`);
     continue;
   }
-  const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${path('.cache', 'gate-chrome')}`, `--window-size=${w},${h}`, `--force-device-scale-factor=${dpr}`, 'about:blank'], { stdio: 'ignore' });
+  const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, `--window-size=${w},${h}`, `--force-device-scale-factor=${dpr}`, 'about:blank'], { stdio: 'ignore' });
   kids.push(chrome);
   await until(async () => (await fetch(`http://127.0.0.1:${CHROME_PORT}/json/version`)).ok, 15000, 'headless Chrome');
   const page = await connect(undefined, CHROME_PORT);
