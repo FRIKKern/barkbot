@@ -135,7 +135,7 @@ function compare(oracle, ours, focusAtEnd, skipped = []) {
     const k = oracle.filter((x) => x.kind === m.kind).indexOf(m);
     const o = nth(ours, m.kind, k);
     const key = `${m.kind}#${k + 1}`;
-    if (!o) { cases.push({ key, pass: false, oracle: m.t, why: m.kind === 'label:status' ? 'ours never shows it: the oracle\'s own summary of the turn (say-hi has no tool call), which no Barkpark event carries' : 'ours never shows it' }); return; }
+    if (!o) { cases.push({ key, pass: false, oracle: m.t, why: m.kind === 'label:status' ? 'ours never shows it: the oracle\'s own summary of the turn, which no Barkpark event carries' : 'ours never shows it' }); return; }
     const lag = Math.round(o.t - m.t);
     const why = [];
     if (Math.abs(lag) > W) why.push(`${lag > 0 ? 'late' : 'early'} by ${Math.abs(lag)} ms`);
@@ -214,10 +214,16 @@ function uiTime(milestones, rail, log, arrivals) {
   const got = (a, want) => a.length >= want.length && kinds(a.slice(0, want.length)) === kinds(want);
   if (!send || !got(events, steps) || !got(flips, states))
     return { log, precondition: { pass: false, why: `the page got ${send ? 'the send answer' : 'no send answer'}, ${events.length}/${steps.length} scripted events (${kinds(events)}) and ${flips.length}/${states.length} state flips (${kinds(flips)})` } };
-  const at = (a, script) => a.slice(0, script.length).map((x, i) => ({ t: x.t, at: script[i].t }));
-  const causes = [{ t: send.t, at: accept }, ...at(events, steps), ...at(flips, states)].sort((a, b) => a.t - b.t);
+  const at = (a, script, state = false) => a.slice(0, script.length).map((x, i) => ({ t: x.t, at: script[i].t, state }));
+  const causes = [{ t: send.t, at: accept }, ...at(events, steps), ...at(flips, states, true)].sort((a, b) => a.t - b.t);
+  // A state flip causes only what follows the bot's state (the row, the rail's Working). Every
+  // other moment comes from the send or the turn's events, so it counts from those: the line
+  // leaving after the reply follows turn_completed, even when an idle flip lands in between
+  // (say-hi-2: the flip at 4744 sits between the reply at 4643 and the line gone at ~4882; the
+  // two streams' timers drift apart under load, and the line was charged that drift, 299 ms).
+  const byState = new Set(['working', 'rail:working']);
   const timed = log.map((m) => {
-    const c = causes.filter((x) => x.t <= m.t).at(-1);
+    const c = causes.filter((x) => x.t <= m.t && (!x.state || byState.has(m.kind))).at(-1);
     return c ? { ...m, t: Math.round((c.at + m.t - c.t) * 10) / 10, raw: m.t } : m;
   });
   const late = causes.map((c) => c.t - c.at);
