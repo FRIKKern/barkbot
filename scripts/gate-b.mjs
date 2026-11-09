@@ -79,8 +79,8 @@ function armAndSend() {
   const tx = document.querySelector('.transcript');
   const read = () => ({
     empty: !prompt.textContent.trim(),
-    user: [...tx.querySelectorAll('[role=article] [data-role=user]')].map((b) => b.textContent.trim().length),
-    assistant: [...tx.querySelectorAll('[role=article] [data-role=assistant]')].map((b) => b.textContent.trim().length),
+    user: [...tx.querySelectorAll('[role=article] [data-role=user]')].map((b) => (b.querySelector('.bubble-text') ?? b).textContent.trim().length),
+    assistant: [...tx.querySelectorAll('[role=article] [data-role=assistant]')].map((b) => (b.querySelector('.bubble-text') ?? b).textContent.trim().length),
     working: !!tx.querySelector('.working'),
     leaving: tx.querySelector('.working.leaving') ? parseFloat(getComputedStyle(tx.querySelector('.working.leaving')).transitionDuration) * 1000 : null,
     label: tx.querySelector('.working .work-label')?.textContent.trim() ?? '',
