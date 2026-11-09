@@ -7,7 +7,7 @@
   2
  ],
  "cases": 78,
- "pass": 77,
+ "pass": 78,
  "results": [
   {
    "key": "aside:Bots",
@@ -95,8 +95,7 @@
   },
   {
    "key": "control:Hide",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Add to Slack",
@@ -323,7 +322,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:38:22.821Z",
+ "run": "2026-11-09T07:55:41.977Z",
  "inventory": {
   "id": "oracle-settings",
   "controls": [
@@ -405,7 +404,7 @@
    {
     "name": "Hide",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Add to Slack",
@@ -493,7 +492,7 @@
     "ours": true
    }
   ],
-  "missing": 1,
+  "missing": 0,
   "untracked": []
  }
 }
