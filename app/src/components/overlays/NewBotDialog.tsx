@@ -5,6 +5,7 @@
 import {useState} from 'react'
 import {Icon} from '../Composer'
 import {colours, shapeRows} from './data'
+import {fit} from '../parts'
 
 // Plain shapes in a 36 x 36 box, one per captured shape name.
 const shapes: Record<string, string> = {
@@ -23,7 +24,7 @@ const shapes: Record<string, string> = {
   hex: 'M18 4l12 7v14l-12 7-12-7V11z',
 }
 
-function Shape({name, size}: {name: string; size: number}) {
+export function Shape({name, size}: {name: string; size: number}) {
   return (
     <svg className="shape" viewBox="0 0 36 36" width={size} height={size} aria-hidden="true">
       <path d={shapes[name]} />
@@ -52,40 +53,58 @@ export function NewBotDialog({onClose}: {onClose?: () => void}) {
               <Shape name={shape} size={96} />
             </span>
             <input aria-label="Bot name" className="new-bot-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} />
-            <div className="new-bot-looks">
-              <div aria-label="Character shape" className="shapes">
-                {shapeRows.map((row) => (
-                  <div key={row[0]} className="shape-row">
-                    {row.map((s) => (
-                      <button key={s} aria-label={`${s} character shape`} aria-pressed={s === shape} className="shape-btn" onClick={() => setShape(s)}>
-                        <span>
-                          <Shape name={s} size={36} />
-                        </span>
-                        {s === shape && <span className="shape-on" />}
-                      </button>
-                    ))}
-                  </div>
-                ))}
-              </div>
-              <div aria-label="Character color" className="swatches">
-                {colours.map(([c, rgb]) => (
-                  <button key={c} aria-label={`${c} character color`} aria-pressed={c === colour} className="swatch" onClick={() => setColour(c)}>
-                    <span style={{background: rgb}} />
-                  </button>
-                ))}
-              </div>
-            </div>
+            <CharacterLooks shape={shape} colour={colour} onShape={setShape} onColour={setColour} />
           </div>
         </div>
         <div className="dialog-foot">
           <button className="pill" onClick={onClose}>
-            <span>Cancel</span>
+            <span style={fit('Cancel')}>Cancel</span>
           </button>
           <button className="pill primary" disabled={!name.trim()}>
-            <span>Create</span>
+            <span style={fit('Create')}>Create</span>
           </button>
         </div>
       </div>
     </>
+  )
+}
+
+// The 13 shapes and 11 colours, shared by Create New Bot and the avatar editor (oracle-edit-avatar):
+// both lay them out the same way, rows of 5, 5, 3 and 6, 5.
+export function CharacterLooks({
+  shape,
+  colour,
+  onShape,
+  onColour,
+}: {
+  shape: string
+  colour: string
+  onShape: (s: string) => void
+  onColour: (c: string) => void
+}) {
+  return (
+    <div className="new-bot-looks">
+      <div aria-label="Character shape" className="shapes">
+        {shapeRows.map((row) => (
+          <div key={row[0]} className="shape-row">
+            {row.map((s) => (
+              <button key={s} aria-label={`${s} character shape`} aria-pressed={s === shape} className="shape-btn" onClick={() => onShape(s)}>
+                <span>
+                  <Shape name={s} size={36} />
+                </span>
+                {s === shape && <span className="shape-on" />}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div aria-label="Character color" className="swatches">
+        {colours.map(([c, rgb]) => (
+          <button key={c} aria-label={`${c} character color`} aria-pressed={c === colour} className="swatch" onClick={() => onColour(c)}>
+            <span style={{background: rgb}} />
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }

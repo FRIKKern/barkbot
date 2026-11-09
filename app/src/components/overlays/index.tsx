@@ -11,17 +11,21 @@ import type {Scene} from '../Shell'
 import {AccountMenu, ComposerMenu} from './Menus'
 import {LanguagePicker, SpeedPicker, VoicePicker} from './Pickers'
 import {NewBotDialog} from './NewBotDialog'
+import {AvatarEditor, ConnectApps, Settings} from './Views'
 
 type Open = {name: string; picked?: string}
-type Render = (o: {picked?: string; scene?: Scene; close: () => void}) => ReactNode
+type Render = (o: {picked?: string; scene?: Scene; close: () => void; go: (name: string) => void}) => ReactNode
 
 const overlays: Record<string, Render> = {
   'composer-menu': ({close}) => <ComposerMenu onPick={close} />,
-  'account-menu': ({close}) => <AccountMenu onPick={close} />,
+  'account-menu': ({close, go}) => <AccountMenu onPick={close} onSettings={() => go('settings')} />,
   'voice-picker': ({picked, scene, close}) => <VoicePicker picked={picked ?? scene?.voice?.voice} onPick={close} />,
   'speed-picker': ({picked, scene, close}) => <SpeedPicker picked={picked ?? scene?.voice?.speed} onPick={close} />,
   'language-picker': ({picked, scene, close}) => <LanguagePicker picked={picked ?? scene?.voice?.language} onPick={close} />,
   'new-bot-dialog': ({close}) => <NewBotDialog onClose={close} />,
+  'connect-apps': ({close}) => <ConnectApps onClose={close} />,
+  'edit-avatar': () => <AvatarEditor />,
+  settings: ({close}) => <Settings onClose={close} />,
 }
 
 const pickers: Record<string, string> = {
@@ -40,20 +44,31 @@ function triggered(el: Element | null): Open | null {
   if (label === 'Composer actions') return {name: 'composer-menu'}
   if (label === 'Open account menu') return {name: 'account-menu'}
   if (label === 'New Bot') return {name: 'new-bot-dialog'}
+  if (label === 'Connect apps') return {name: 'connect-apps'}
+  if (label === 'Edit Bot avatar') return {name: 'edit-avatar'}
   return null
 }
 
 // `scene` is optional so the frame can pass it when it wants the pickers to follow the scene's
 // voice settings; without it a picker opens on its row's value (or the oracle's captured pick).
-export function Overlay({name, scene}: {name?: string; scene?: Scene}) {
+// `onOpenChange` hears which overlay is shown (its name, or null when none), whether a scene holds
+// it or a click opened it, so the frame can mark the trigger (aria-expanded, a pressed look).
+export function Overlay({name, scene, onOpenChange}: {name?: string; scene?: Scene; onOpenChange?: (name: string | null) => void}) {
   const [open, setOpen] = useState<Open | null>(null)
   const layer = useRef<HTMLDivElement>(null)
   const held = !!name
+  const shownName = held ? name : (open?.name ?? null)
+  const tell = useRef(onOpenChange)
+  tell.current = onOpenChange
+  useEffect(() => {
+    tell.current?.(shownName ?? null)
+  }, [shownName])
   useEffect(() => {
     if (held) return
     const onClick = (e: MouseEvent) => {
       const target = e.target as Element
-      if (layer.current?.contains(target)) return
+      // The path as dispatched: a pick inside the layer may already have re-rendered it.
+      if (layer.current && e.composedPath().includes(layer.current)) return
       const next = triggered(target)
       setOpen((cur) => (next && cur?.name !== next.name ? next : null))
     }
@@ -74,6 +89,7 @@ export function Overlay({name, scene}: {name?: string; scene?: Scene}) {
         picked: shown.picked,
         scene,
         close: () => !held && setOpen(null),
+        go: (n: string) => !held && setOpen({name: n}),
       })}
     </div>
   )

@@ -18,7 +18,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:25:08.247Z",
+ "run": "2026-11-09T07:55:41.977Z",
  "inventory": {
   "id": "oracle-new-bot-named",
   "controls": [
@@ -75,12 +75,12 @@
    {
     "name": "Close",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Edit Bot avatar",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Bot name",
@@ -90,47 +90,47 @@
    {
     "name": "Activity",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Library",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Hide",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Add to Slack",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Create a routine",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Bot's computer",
     "item": "F4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Voice",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Speed",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Language",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Close dialog",
@@ -268,7 +268,7 @@
     "ours": true
    }
   ],
-  "missing": 11,
+  "missing": 0,
   "untracked": []
  }
 }

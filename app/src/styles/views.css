@@ -1,0 +1,118 @@
+/* Views over the main screen: Connect Apps, the avatar editor, Settings. Numbers read from
+   fixtures/states/oracle-{connect-apps,edit-avatar,settings}.json (1040 x 760 pt). */
+
+/* A neutral placeholder for what the fixture keeps only as a length (owner data, counts, copy). */
+.ph { display: inline-block; vertical-align: middle; border-radius: 4px; background: var(--wash-08); }
+
+/* ── Shared: 900 x 666 centred, 1 pt border, over the scrim (overlays.css) ── */
+.view { position: fixed; z-index: 31; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 900px; height: 666px; border: 1px solid var(--wash-10); border-radius: 14px; font-size: 13px; letter-spacing: normal; color: var(--ink); overflow: hidden; display: flex; flex-direction: column; }
+.view-close { position: absolute; z-index: 1; top: 10px; right: 10px; border-radius: 9999px; display: grid; place-items: center; }
+.view-scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.view-scroll::-webkit-scrollbar { display: none; }
+
+/* ── Connect Apps ── */
+.connect-apps { background: var(--bg-raised); }
+.ca-close { width: 28px; height: 28px; color: var(--ink-64); }
+.ca-close > span { width: 20px; height: 20px; display: grid; place-items: center; }
+.ca-close .icon { width: 16px; height: 16px; }
+.ca-head { height: 48px; flex: none; }
+.ca-body { padding: 4px 32px 32px; }
+.ca-title { position: relative; height: 24px; }
+.ca-title h2 { margin: 0; font-size: 17px; font-weight: 500; line-height: 24px; letter-spacing: 0.17px; }
+/* Your plugins: right-aligned on the title, 2 pt above it. */
+.ca-plugins-wrap { position: absolute; right: 0; top: -2px; }
+.ca-plugins { height: 28px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 4px; border-radius: 8px; color: var(--ink-66); font-size: 12px; line-height: 16px; letter-spacing: normal; }
+.ca-plugins > .icon { width: 12px; height: 12px; color: var(--ink-54); }
+.ca-stack { display: flex; }
+.ca-stack > span { width: 20px; height: 20px; border: 1px solid var(--bg-raised); border-radius: 6px; background: var(--bg-raised); }
+.ca-stack > span + span { margin-left: -6px; }
+.ca-stack > span > span { display: block; width: 18px; height: 18px; border: 0.5px solid var(--wash-06); border-radius: 5px; background: rgb(59 59 59); }
+.ca-tools { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+.ca-search-row { display: flex; gap: 8px; height: 32px; }
+.ca-search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 0 8px 0 12px; background: var(--bg-raised); border: 0.5px solid var(--wash-06); border-radius: 9999px; }
+.ca-search > .icon { width: 14px; height: 14px; flex: none; color: var(--ink-54); }
+.ca-search input { flex: 1; min-width: 0; height: 20px; font-size: 14px; line-height: 20px; letter-spacing: 0.14px; outline: none; }
+.ca-search input::placeholder { color: var(--ink-40); }
+.ca-templates { flex: none; display: flex; align-items: center; gap: 6px; padding: 0 10px 0 6px; background: var(--bg-raised); border: 0.5px solid var(--wash-06); border-radius: 9999px; }
+.ca-templates-icon { width: 18px; height: 18px; display: grid; place-items: center; }
+.ca-templates-chev { width: 16px; height: 16px; display: grid; place-items: center; color: var(--ink-54); }
+.ca-templates-chev .icon { width: 12px; height: 12px; }
+.ca-cats { margin: 0 -8px; padding: 0 8px; height: 28px; display: flex; gap: 8px; }
+.ca-cat { height: 28px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 10px; border-radius: 9999px; background: var(--wash-04); }
+.ca-cat[aria-pressed='true'] { background: var(--ink); color: rgb(18 18 18); }
+.ca-cat > span { width: 16px; height: 16px; display: grid; place-items: center; }
+.ca-cat .icon { width: 12px; height: 12px; }
+.ca-sections { margin: 20px -12px 0; display: flex; flex-direction: column; gap: 24px; }
+.ca-sec-head { height: 34px; display: flex; align-items: center; justify-content: space-between; }
+.ca-sec-head h3 { margin: 0; padding: 7px 12px; font-size: 14px; font-weight: 500; line-height: 20px; letter-spacing: 0.14px; }
+.ca-viewall { height: 20px; margin-right: 4px; padding: 0 6px; border-radius: 9999px; color: var(--ink-66); font-size: 12px; line-height: 16px; letter-spacing: 0.505px; } /* 0.18px in the oracle; the stand-in face runs 2.6 pt short */
+.ca-grid { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; }
+.ca-app { height: 64px; padding: 12px; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
+.ca-open { flex: 1; min-width: 0; height: 40px; display: flex; align-items: center; gap: 10px; border-radius: 6px; text-align: left; }
+.ca-tile { width: 40px; height: 40px; flex: none; border: 0.5px solid var(--wash-06); border-radius: 11px; background: rgb(59 59 59); }
+.ca-name { flex: 1; min-width: 0; }
+.ca-name > span { display: block; }
+.ca-name > span > span { display: block; width: fit-content; max-width: 100%; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-connect { height: 26px; padding: 4px 10px; border: 1px solid transparent; border-radius: 13px; background: var(--wash-04); font-size: 12px; line-height: 16px; letter-spacing: 0.18px; }
+/* The label sits centred in a 74.9 pt slot, so Connect and its other states keep one width. */
+.ca-connect > span { display: block; width: 74.9px; text-align: center; }
+
+/* ── Avatar editor: under the avatar, centred on it ── */
+.avatar-editor { right: 11.5px; top: 138px; width: 297px; border: 0.5px solid var(--wash-06); font-size: 13px; letter-spacing: normal; }
+.avatar-head { height: 42.5px; padding: 8px; display: flex; align-items: flex-start; justify-content: space-between; }
+.avatar-tabs { display: flex; gap: 2px; }
+.avatar-tab { height: 26px; padding: 0 8px; border-radius: 9999px; color: var(--ink-66); }
+.avatar-tab[aria-selected='true'] { background: var(--wash-04); color: var(--ink); }
+.avatar-reset { height: 22px; margin-top: 2px; padding: 0 8px; border: 1px solid transparent; border-radius: 8px; color: var(--ink-66); }
+.avatar-body { padding: 12px; }
+
+/* ── Settings: sidebar 198, page 700. Its titles carry trailing room the capture measured
+   (h2 +9.4, h3 +17.8 past the word), so the info marks sit where the oracle's do. ── */
+.settings { background: var(--bg); }
+.set-wrap { flex: 1; min-height: 0; display: flex; }
+.set-nav { width: 198px; flex: none; padding: 16px 12.5px 0 12px; display: flex; flex-direction: column; gap: 2px; }
+.set-tab { height: 32px; display: flex; align-items: center; gap: 9px; padding: 0 9px; border-radius: 8px; text-align: left; }
+.set-tab[aria-current='page'] { background: var(--wash-08); }
+.set-tab .icon { width: 15px; height: 15px; flex: none; }
+.set-tab > span { display: block; }
+.set-page { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.set-close { width: 32px; height: 32px; color: var(--ink-54); line-height: normal; }
+.set-close .icon { width: 14px; height: 14px; }
+.set-head { height: 62px; flex: none; padding: 32px 32px 0; }
+.set-head > div { display: flex; align-items: center; gap: 8px; }
+.set-head h2 { margin: 0; padding-right: 9.4px; font-size: 17px; font-weight: 500; line-height: 24px; letter-spacing: 0.17px; }
+.set-info { width: 16px; height: 16px; flex: none; display: grid; place-items: center; color: var(--ink-64); }
+.set-info .icon { width: 12px; height: 12px; }
+.set-body { padding: 22px 32px 32px; display: flex; flex-direction: column; gap: 28px; }
+.set-promo { padding: 16px; display: flex; justify-content: space-between; border-radius: 12px; box-shadow: var(--wash-04) 0 0 0 1px; }
+.set-promo-text { width: 340px; }
+.set-promo-text p { margin: 0; font-weight: 510; line-height: 21px; width: fit-content; }
+.set-promo-text p.set-promo-copy { width: auto; height: 54px; margin-top: 4px; padding-top: 4px; display: flex; flex-direction: column; gap: 8px; }
+.set-cta { margin-top: 16px; height: 32px; padding: 0 12px; border-radius: 9999px; background: var(--ink); color: rgb(18 18 18); line-height: 20px; letter-spacing: normal; }
+.set-cta > span { display: block; }
+.set-promo-art { width: 250px; height: 127px; border-radius: 8px; background: var(--wash-04); }
+.set-group-head { height: 16px; display: flex; align-items: center; gap: 8px; }
+.set-group-head h3 { margin: 0; padding-right: 17.8px; font-size: 12px; font-weight: 425; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-66); }
+.set-card { margin-top: 8px; padding: 8px 0; border-radius: 14px; background: var(--bg-raised); }
+.set-account { height: 72px; padding: 0 16px; display: flex; align-items: center; gap: 14px; }
+.set-who { flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; }
+.set-avatar { width: 44px; height: 44px; flex: none; border-radius: 9999px; border: 0.5px solid var(--wash-04); background: var(--wash-04); }
+.set-id { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.set-id > span:first-child { height: 18px; display: flex; align-items: center; }
+.set-email { height: 20px; display: flex; align-items: center; gap: 8px; }
+.set-copy { width: 20px; height: 20px; border-radius: 6px; display: grid; place-items: center; color: var(--ink-66); }
+.set-copy .icon { width: 14px; height: 14px; }
+.set-actions { display: flex; gap: 8px; }
+.set-actions .pill { box-shadow: var(--wash-04) 0 0 0 0.5px inset; }
+.set-row { height: 48px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; }
+.set-row.short { height: 40px; }
+.set-row > div { display: flex; align-items: center; }
+.set-label { height: 20px; display: flex; align-items: center; gap: 6px; }
+.set-label > span:first-child { display: block; line-height: 18px; letter-spacing: 0.195px; }
+.set-select { height: 28px; display: flex; align-items: center; gap: 4px; padding: 0 5px 0 7px; border: 1px solid var(--wash-04); border-radius: 10px; letter-spacing: -0.08px; }
+.set-select > span { display: block; }
+.set-select .icon { width: 10px; height: 10px; color: var(--ink-64); }
+.set-switch { position: relative; width: 32px; height: 20px; border-radius: 9999px; background: rgb(17 109 210); color: rgb(255 255 255); font-size: 0; line-height: 0; box-shadow: var(--wash-04) 0 0 0 0.5px inset; }
+.set-switch[aria-checked='false'] { background: var(--wash-10); }
+.set-switch > span { position: absolute; top: 2px; left: 14px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); }
+.set-switch[aria-checked='false'] > span { left: 2px; }

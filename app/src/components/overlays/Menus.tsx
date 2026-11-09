@@ -5,6 +5,7 @@
 import type {ReactNode} from 'react'
 import {Icon} from '../Composer'
 import {weeklyUsage} from './data'
+import {fit} from '../parts'
 
 function Item({icon, label, trail, onPick}: {icon: ReactNode; label: string; trail?: ReactNode; onPick?: () => void}) {
   return (
@@ -44,7 +45,7 @@ export function ComposerMenu({onPick}: {onPick?: () => void}) {
   )
 }
 
-export function AccountMenu({onPick}: {onPick?: () => void}) {
+export function AccountMenu({onPick, onSettings}: {onPick?: () => void; onSettings?: () => void}) {
   return (
     <div role="presentation" className="pop menu-pop account-menu">
       <div role="menu" aria-label="Account" className="menu">
@@ -56,7 +57,7 @@ export function AccountMenu({onPick}: {onPick?: () => void}) {
             trail={
               <span className="menu-trail">
                 <span>
-                  <span>{weeklyUsage}</span>
+                  <span style={fit(weeklyUsage)}>{weeklyUsage}</span>
                 </span>
                 {chevron}
               </span>
@@ -84,7 +85,7 @@ export function AccountMenu({onPick}: {onPick?: () => void}) {
               <Icon d="M8 5.75a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5zM8 1.75v1.5M8 12.75v1.5M1.75 8h1.5M12.75 8h1.5M3.6 3.6l1.05 1.05M11.35 11.35l1.05 1.05M3.6 12.4l1.05-1.05M11.35 4.65l1.05-1.05" />
             }
             label="Settings"
-            onPick={onPick}
+            onPick={onSettings ?? onPick}
           />
         </div>
         <div role="group" className="menu-group">

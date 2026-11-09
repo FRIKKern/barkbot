@@ -7,7 +7,7 @@
   2
  ],
  "cases": 45,
- "pass": 43,
+ "pass": 45,
  "results": [
   {
    "key": "aside:Bots",
@@ -175,13 +175,11 @@
   },
   {
    "key": "control:Cancel",
-   "pass": false,
-   "why": "box off by 1.1,0,-0.7,0"
+   "pass": true
   },
   {
    "key": "span:Cancel",
-   "pass": false,
-   "why": "box off by 1.1,0,-0.7,0"
+   "pass": true
   },
   {
    "key": "control:Create",
@@ -192,7 +190,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:24:04.321Z",
+ "run": "2026-11-09T07:40:28.828Z",
  "inventory": {
   "id": "oracle-new-bot-dialog",
   "controls": [

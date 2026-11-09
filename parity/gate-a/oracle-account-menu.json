@@ -7,7 +7,7 @@
   2
  ],
  "cases": 52,
- "pass": 50,
+ "pass": 52,
  "results": [
   {
    "key": "aside:Bots",
@@ -171,13 +171,11 @@
   },
   {
    "key": "span:Weekly usage",
-   "pass": false,
-   "why": "box off by 0,0,-1.4,0"
+   "pass": true
   },
   {
    "key": "span:12% used",
-   "pass": false,
-   "why": "box off by -1.4,0,1.4,0"
+   "pass": true
   },
   {
    "key": "control:Get Grok Bot for mobile",
@@ -220,7 +218,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:05:51.676Z",
+ "run": "2026-11-09T07:40:28.828Z",
  "inventory": {
   "id": "oracle-account-menu",
   "controls": [
