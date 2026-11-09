@@ -1,30 +1,34 @@
 {
  "id": "2026-11-08-storage",
  "captured": "2026-11-08T21:26:56.435Z",
- "cases": 16,
- "pass": 14,
+ "cases": 17,
+ "pass": 15,
  "results": [
+  {
+   "key": "replay: every scripted event reached the page",
+   "pass": true
+  },
   {
    "key": "user#1",
    "pass": true,
    "oracle": 419.3,
-   "ours": 424.2,
-   "lag": 5
+   "ours": 421.9,
+   "lag": 3
   },
   {
    "key": "status:working#1",
    "pass": true,
    "oracle": 1234.8,
-   "ours": 1237.1,
-   "lag": 2
+   "ours": 1237.9,
+   "lag": 3
   },
   {
    "key": "working#1",
    "pass": false,
    "oracle": 2013.8,
-   "ours": 1237.1,
-   "lag": -777,
-   "why": "early by 777 ms"
+   "ours": 1237.9,
+   "lag": -776,
+   "why": "early by 776 ms"
   },
   {
    "key": "label:status#1",
@@ -36,29 +40,29 @@
    "key": "assistant#1",
    "pass": true,
    "oracle": 3514.2,
-   "ours": 3518.1,
-   "lag": 4
+   "ours": 3516.2,
+   "lag": 2
   },
   {
    "key": "label:typing#1",
    "pass": true,
    "oracle": 8978.4,
-   "ours": 8984.9,
-   "lag": 7
+   "ours": 9001.1,
+   "lag": 23
   },
   {
    "key": "status:replied#1",
    "pass": true,
    "oracle": 9822.8,
-   "ours": 9928.1,
-   "lag": 105
+   "ours": 9926.2,
+   "lag": 103
   },
   {
    "key": "assistant#2",
    "pass": true,
    "oracle": 9822.8,
-   "ours": 9827.6,
-   "lag": 5
+   "ours": 9824.9,
+   "lag": 2
   },
   {
    "key": "nothing extra",
@@ -67,7 +71,7 @@
   {
    "key": "budget: composer clears in 1 frame",
    "pass": true,
-   "ours": 0.3
+   "ours": 0.2
   },
   {
    "key": "budget: focus stays in Prompt",
@@ -76,17 +80,17 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 240.5
+   "ours": 241.3000000000011
   },
   {
    "key": "budget: own bubble ≤ 440 ms",
    "pass": true,
-   "ours": 424.2
+   "ours": 421.9
   },
   {
    "key": "budget: working line ≤ 2.0 s",
    "pass": true,
-   "ours": 1237.1
+   "ours": 1237.9
   },
   {
    "key": "history after a reconnect (stored as today: the last message)",
@@ -137,43 +141,55 @@
  "ours": [
   {
    "kind": "clear",
-   "t": 0.3
+   "t": 0.2
   },
   {
    "kind": "user",
-   "t": 424.2,
-   "len": 40
+   "t": 421.9,
+   "len": 40,
+   "raw": 423.9
   },
   {
    "kind": "working",
-   "t": 1237.1
+   "t": 1237.9,
+   "raw": 1239.4
   },
   {
    "kind": "status:working",
-   "t": 1237.1
+   "t": 1237.9,
+   "raw": 1239.4
   },
   {
    "kind": "assistant",
-   "t": 3518.1,
-   "len": 41
+   "t": 3516.2,
+   "len": 41,
+   "raw": 3519
   },
   {
    "kind": "label:typing",
-   "t": 8984.9
+   "t": 9001.1,
+   "raw": 9004.2
   },
   {
    "kind": "assistant",
-   "t": 9827.6,
-   "len": 288
+   "t": 9824.9,
+   "len": 288,
+   "raw": 9825.9
   },
   {
    "kind": "working-gone",
-   "t": 10068.1
+   "t": 10066.2,
+   "raw": 10067.2
   },
   {
    "kind": "status:replied",
-   "t": 9928.1
+   "t": 9926.2,
+   "raw": 9927.2
   }
  ],
- "run": "2026-11-09T08:26:30.763Z"
+ "standInLate": [
+  1,
+  3
+ ],
+ "run": "2026-11-09T08:54:04.571Z"
 }

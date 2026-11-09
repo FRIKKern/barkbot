@@ -1,29 +1,33 @@
 {
  "id": "2026-11-08-say-hi-2",
  "captured": "2026-11-08T21:39:32.645Z",
- "cases": 11,
- "pass": 10,
+ "cases": 12,
+ "pass": 11,
  "results": [
+  {
+   "key": "replay: every scripted event reached the page",
+   "pass": true
+  },
   {
    "key": "user#1",
    "pass": true,
    "oracle": 1561.5,
-   "ours": 1568.1,
-   "lag": 7
+   "ours": 1564.7,
+   "lag": 3
   },
   {
    "key": "status:working#1",
    "pass": true,
    "oracle": 2231,
-   "ours": 2236.8,
-   "lag": 6
+   "ours": 2234.2,
+   "lag": 3
   },
   {
    "key": "working#1",
    "pass": true,
    "oracle": 2231,
-   "ours": 2236.8,
-   "lag": 6
+   "ours": 2234.2,
+   "lag": 3
   },
   {
    "key": "label:status#1",
@@ -35,15 +39,15 @@
    "key": "assistant#1",
    "pass": true,
    "oracle": 4642.7,
-   "ours": 4647.5,
-   "lag": 5
+   "ours": 4646.8,
+   "lag": 4
   },
   {
    "key": "status:replied#1",
    "pass": true,
    "oracle": 4743.9,
-   "ours": 4748.5,
-   "lag": 5
+   "ours": 4746.2,
+   "lag": 2
   },
   {
    "key": "nothing extra",
@@ -61,7 +65,7 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 241
+   "ours": 239.39999999999964
   },
   {
    "key": "history after a reconnect (stored as today: the last message)",
@@ -103,30 +107,40 @@
   },
   {
    "kind": "user",
-   "t": 1568.1,
-   "len": 29
+   "t": 1564.7,
+   "len": 29,
+   "raw": 1568.6
   },
   {
    "kind": "working",
-   "t": 2236.8
+   "t": 2234.2,
+   "raw": 2237.5
   },
   {
    "kind": "status:working",
-   "t": 2236.8
+   "t": 2234.2,
+   "raw": 2237.5
   },
   {
    "kind": "assistant",
-   "t": 4647.5,
-   "len": 12
+   "t": 4646.8,
+   "len": 12,
+   "raw": 4649.4
   },
   {
    "kind": "working-gone",
-   "t": 4888.5
+   "t": 4886.2,
+   "raw": 4888.8
   },
   {
    "kind": "status:replied",
-   "t": 4748.5
+   "t": 4746.2,
+   "raw": 4748.8
   }
  ],
- "run": "2026-11-09T08:26:30.762Z"
+ "standInLate": [
+  2,
+  4
+ ],
+ "run": "2026-11-09T08:54:04.570Z"
 }
