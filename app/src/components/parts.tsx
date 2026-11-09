@@ -2,6 +2,16 @@
 import type {ReactNode} from 'react'
 import {Icon} from './Composer'
 
+// Words where the stand-in face (SF Pro, item F6) runs more than Gate A's 1 pt off the oracle's
+// face carry their own tracking, so the box matches. Width gap measured in
+// fixtures/states/oracle-turn-1040.json, divided over the word's characters.
+const FIT: Record<string, string> = {
+  "Bot's computer": '0.081px', // 1.6 pt too wide at 0.195px
+  Speed: '0.435px', // 1.2 pt too narrow at 0.195px
+  '1x': '-0.68px', // 1.2 pt too wide at -0.08px
+}
+export const fit = (word: string) => (FIT[word] ? {letterSpacing: FIT[word]} : undefined)
+
 export function Section({title, children}: {title: string; children: ReactNode}) {
   return (
     <section className="section">
@@ -33,11 +43,11 @@ export function Pick({label, value}: {label: string; value: string}) {
   return (
     <li className="pick">
       <span className="pick-label">
-        <span>{label}</span>
+        <span style={fit(label)}>{label}</span>
       </span>
       <button role="combobox" aria-expanded="false" aria-label={label} className="pick-value">
         <span className="pick-text">
-          <span>{value}</span>
+          <span style={fit(value)}>{value}</span>
         </span>
         <Icon d="M4.5 6.5L8 10l3.5-3.5" />
       </button>
