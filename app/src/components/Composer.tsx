@@ -2,6 +2,7 @@
 // sends nothing; focus stays in Prompt after a send. While there is a draft the voice-chat
 // button turns into send (scale .5 -> 1, 200 ms, measured).
 import {useRef, useState, type ReactNode} from 'react'
+import {Keys, Tooltip, useHover} from './tips'
 
 export function Composer({placeholder, onSend, disabled}: {placeholder: string; onSend?: (text: string) => void; disabled?: boolean}) {
   const box = useRef<HTMLDivElement>(null)
@@ -44,10 +45,17 @@ export function Composer({placeholder, onSend, disabled}: {placeholder: string; 
             }
           }}
         />
-        <Round label="Start voice input">
+        <Round
+          label="Start voice input"
+          tip={
+            <>
+              Click or hold <Keys keys={['⌘', 'D']} /> to dictate
+            </>
+          }
+        >
           <Icon d="M8 2.5a2 2 0 0 1 2 2v3a2 2 0 0 1-4 0v-3a2 2 0 0 1 2-2zM4.5 7.5a3.5 3.5 0 0 0 7 0M8 11v2" />
         </Round>
-        <Round label={draft ? 'Send' : 'Start voice chat'} voice onClick={draft ? submit : undefined}>
+        <Round label={draft ? 'Send' : 'Start voice chat'} tip={draft ? undefined : 'Start voice chat'} voice onClick={draft ? submit : undefined}>
           <span className={`swap${draft ? ' on' : ''}`}>
             <Icon d="M3 6.5v3M5.5 4.5v7M8 3v10M10.5 5v6M13 6.5v3" />
             <Icon d="M8 13V3M3.5 7.5L8 3l4.5 4.5" />
@@ -58,11 +66,15 @@ export function Composer({placeholder, onSend, disabled}: {placeholder: string; 
   )
 }
 
-function Round({label, voice, onClick, children}: {label: string; voice?: boolean; onClick?: () => void; children: ReactNode}) {
+function Round({label, tip, voice, onClick, children}: {label: string; tip?: ReactNode; voice?: boolean; onClick?: () => void; children: ReactNode}) {
+  const h = useHover()
   return (
-    <button className={`round${voice ? ' voice' : ''}`} aria-label={label} onMouseDown={(e) => e.preventDefault()} onClick={onClick}>
-      {children}
-    </button>
+    <>
+      <button className={`round${voice ? ' voice' : ''}`} aria-label={label} onMouseDown={(e) => e.preventDefault()} onClick={onClick} {...h.on}>
+        {children}
+      </button>
+      {tip && <Tooltip box={h.box}>{tip}</Tooltip>}
+    </>
   )
 }
 

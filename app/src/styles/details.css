@@ -45,3 +45,11 @@
 .library-empty { padding: 0 16px; text-align: center; }
 .library-empty > div { padding: 16px 0; }
 .library-empty p { margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.14px; color: var(--ink-54); }
+
+/* Hover (oracle-hover-*): rows, the computer card, pickers and the unselected tab wash 4%, the name 8%. */
+.row:hover, .computer:hover, .pick-value:hover, .tab:not([aria-selected='true']):hover { background: var(--wash-04); }
+.who-name:hover { background: var(--wash-08); }
+/* Suggested's Hide shows while the pointer is anywhere over the window (N3; button 979.5,236,38.5,24). */
+.section-title { position: relative; }
+.section-hide { position: absolute; right: 6px; top: -3px; height: 24px; padding: 0 6px; border-radius: 6px; font-size: 12px; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-66); visibility: hidden; }
+:root:hover .section-hide { visibility: visible; }

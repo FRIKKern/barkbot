@@ -12,11 +12,12 @@ const FIT: Record<string, string> = {
 }
 export const fit = (word: string) => (FIT[word] ? {letterSpacing: FIT[word]} : undefined)
 
-export function Section({title, children}: {title: string; children: ReactNode}) {
+export function Section({title, action, children}: {title: string; action?: ReactNode; children: ReactNode}) {
   return (
     <section className="section">
       <div className="section-title">
         <span>{title}</span>
+        {action}
       </div>
       <ul className="card">{children}</ul>
     </section>
