@@ -24,8 +24,8 @@
    "key": "user#1",
    "pass": true,
    "oracle": 309.5,
-   "ours": 311.2,
-   "lag": 2
+   "ours": 310.9,
+   "lag": 1
   },
   {
    "key": "status:working#1",
@@ -33,7 +33,7 @@
    "oracle": 750.4,
    "ours": 311.1,
    "lag": -439,
-   "why": "early by 439 ms; out of order: after user#1"
+   "why": "early by 439 ms"
   },
   {
    "key": "working#2",
@@ -57,15 +57,15 @@
    "key": "status:replied#1",
    "pass": true,
    "oracle": 8785.4,
-   "ours": 8890.8,
-   "lag": 105
+   "ours": 8888.5,
+   "lag": 103
   },
   {
    "key": "assistant#1",
    "pass": true,
    "oracle": 8785.4,
-   "ours": 8789.2,
-   "lag": 4
+   "ours": 8788.4,
+   "lag": 3
   },
   {
    "key": "nothing extra",
@@ -74,7 +74,7 @@
   {
    "key": "budget: composer clears in 1 frame",
    "pass": true,
-   "ours": 0.5
+   "ours": 0.3
   },
   {
    "key": "budget: focus stays in Prompt",
@@ -88,7 +88,7 @@
   {
    "key": "budget: own bubble ≤ 440 ms",
    "pass": true,
-   "ours": 311.2
+   "ours": 310.9
   },
   {
    "key": "budget: working line ≤ 2.0 s",
@@ -143,35 +143,35 @@
  "ours": [
   {
    "kind": "clear",
-   "t": 0.5
+   "t": 0.3
   },
   {
    "kind": "status:working",
    "t": 311.1,
-   "raw": 314.3
+   "raw": 312.9
   },
   {
    "kind": "user",
-   "t": 311.2,
+   "t": 310.9,
    "len": 54,
-   "raw": 316.2
+   "raw": 314.5
   },
   {
    "kind": "assistant",
-   "t": 8789.2,
+   "t": 8788.4,
    "len": 1214,
-   "raw": 8792.8
+   "raw": 8790.2
   },
   {
    "kind": "status:replied",
-   "t": 8890.8,
-   "raw": 8894.4
+   "t": 8888.5,
+   "raw": 8890.3
   }
  ],
  "standInLate": [
-  2,
-  7
+  1,
+  4
  ],
  "skipped": [],
- "run": "2026-11-09T22:19:33.558Z"
+ "run": "2026-11-09T22:35:46.188Z"
 }
