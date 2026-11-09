@@ -6,7 +6,7 @@
   760,
   2
  ],
- "cases": 39,
+ "cases": 67,
  "pass": 0,
  "scene": false,
  "results": [
@@ -204,9 +204,149 @@
    "key": "span:Auto-detect",
    "pass": false,
    "why": "no scene"
+  },
+  {
+   "key": "bubble:user#1 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#1 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#1 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#1 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "strong#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "strong#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "code#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "code#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#2 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "strong#3",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "strong#4",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "code#3",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "code#4",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "strong#5",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "strong#6",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "code#5",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "code#6",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#4 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#4 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": false,
+   "why": "no scene"
   }
  ],
- "run": "2026-11-09T07:59:32.879Z",
+ "run": "2026-11-09T08:04:30.318Z",
  "inventory": {
   "id": "oracle-main-980",
   "controls": [

@@ -16,6 +16,7 @@ import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync
 import { connect } from './oracle/cdp.mjs';
 import { collect } from './oracle/collect.mjs';
 import { controls, namedElements, claims } from './lib/controls.mjs';
+import { transcriptCases, transcriptKeys } from './lib/transcript.mjs';
 import { path, ROOT, items as allItems } from './lib/data.mjs';
 
 const args = process.argv.slice(2);
@@ -78,11 +79,15 @@ for (const state of states) {
   const [w, h, dpr] = state.viewport;
   // A hover state scores only what the hover changed (fixture `changed`), not the screen again.
   const theirs = namedElements(state).filter(({ key }) => !state.changed || state.changed.includes(key));
+  // The transcript's look (lib/transcript.mjs), words left out: in every state but a hover's,
+  // which scores only what the hover changes.
+  const talk = !state.changed;
   // A captured state the app has no scene for yet scores 0: every case is open work.
   if ((await fetch(`${base}/gate/${state.id}`)).status === 404) {
-    report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: theirs.length, pass: 0, scene: false, results: theirs.map(({ key }) => ({ key, pass: false, why: 'no scene' })) });
+    const keys = [...theirs.map(({ key }) => key), ...(talk ? transcriptKeys(state) : [])];
+    report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: keys.length, pass: 0, scene: false, results: keys.map((key) => ({ key, pass: false, why: 'no scene' })) });
     inventory.states.push(inventoryOf(state, null));
-    console.log(`Gate A · ${state.id} · 0/${theirs.length} pass (no scene yet)`);
+    console.log(`Gate A · ${state.id} · 0/${keys.length} pass (no scene yet)`);
     continue;
   }
   const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, `--window-size=${w},${h}`, `--force-device-scale-factor=${dpr}`, 'about:blank'], { stdio: 'ignore' });
@@ -94,7 +99,7 @@ for (const state of states) {
   // --throttle <n>: slow this Chrome's CPU n times, to rehearse a slow CI runner.
   if (opt('throttle')) await page.send('Emulation.setCPUThrottlingRate', { rate: Number(opt('throttle')) });
   await page.send('Page.navigate', { url: `${base}/gate/${state.id}` });
-  await until(() => page.evaluate(() => document.readyState === 'complete' && !!document.querySelector('.app') && document.fonts.status === 'loaded'), 30000, `/gate/${state.id}`);
+  await until(() => page.evaluate(() => document.readyState === 'complete' && !!document.querySelector('.app') && document.fonts.status === 'loaded' && !document.querySelector('[data-transcript]:not([data-hydrated])')), 30000, `/gate/${state.id}`);
   await wait(300);
   if (state.pointer) {
     // Rest our pointer on our control of the same name, as the capture did on the oracle's.
@@ -143,6 +148,7 @@ for (const state of states) {
     }
     return { key, pass: !why.length, why: why.join('; ') || undefined };
   });
+  if (talk) cases.push(...transcriptCases(state, ours));
   const pass = cases.filter((c) => c.pass).length;
   report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: cases.length, pass, results: cases });
 
