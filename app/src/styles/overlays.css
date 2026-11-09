@@ -13,7 +13,7 @@
 .menu-icon .icon { width: 14px; height: 14px; }
 .menu-label { flex: 1; min-width: 0; height: 18px; }
 .menu-label > span { display: block; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* Trailing value and chevron (Weekly usage "12% used ›", Support ↗): 20 pt after the label, half ink. */
+/* Trailing value and chevron (Weekly usage: the usage text and ›; Support ↗): 20 pt after the label, half ink. */
 .menu-trail { flex: none; margin-left: 14px; display: flex; align-items: center; gap: 8px; color: rgb(245 245 245 / 0.5); }
 .menu-trail > span { display: flex; align-items: center; height: 20px; }
 .menu-trail > span > span { color: var(--ink-54); }
