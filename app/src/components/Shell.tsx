@@ -46,7 +46,7 @@ export function Shell({scene, transcript, composer}: {scene: Scene; transcript?:
       </main>
 
       {scene.panelOpen && <Details scene={scene} />}
-      <Overlay name={scene.overlay} />
+      <Overlay name={scene.overlay} scene={scene} />
     </div>
   )
 }
