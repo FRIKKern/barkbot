@@ -4,6 +4,6 @@
  "journey": "J02",
  "title": "Every captured width matches: 1040, 1280, 1600 (oracle-main-*)",
  "status": "done",
- "gate": "Gate A: oracle-main-720 14/14, -880 39/39, -1040 (turn) 39/39, -1280 39/39, -1600 39/39, -2000 40/40, oracle-panel-closed 14/14",
- "evidence": "Every frame case passes at every captured width. The composer is the main column less 16 each side, up to 960 (#3). The 1280 capture had held a hovered Composer actions; recaptured 2026-11-09 with the pointer parked (sweep park()), it reads like the other widths. Narrow (2026-11-09): below 800 Shell closes the panel itself and leaves it closed on widening (closed at 720, open at 880: bracketed, not measured); the 720 scene starts open so the rule is what closes it. A conversation column under 552 shows Share as its 36 pt icon (472 icon, 632 label: bracketed)."
+ "gate": "Gate A: oracle-main-720 14/14, -790 14/14, -800 39/39, -820 39/39, -880 39/39, -980 39/39, -1000 40/40, -1040 (turn) 39/39, -1280 39/39, -1600 39/39, -2000 40/40, oracle-panel-closed 14/14",
+ "evidence": "Every frame case passes at every captured width. The composer is the main column less 16 each side, up to 960 (#3). The 1280 capture had held a hovered Composer actions; recaptured 2026-11-09 with the pointer parked (sweep park()), it reads like the other widths. Edges measured on the oracle (2026-11-09): below 800 Shell closes the panel itself and leaves it closed on widening (790 closed, 800 open); the 720 and 790 scenes start open so the rule does the closing. From 800 to 840 the column holds at 424 and the panel gives way (min(320, width - 88 - 424)), its content reflowing. A column under 592 shows Share as its 36 pt icon (572 icon, 592 label)."
 }
