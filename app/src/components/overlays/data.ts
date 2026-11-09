@@ -69,8 +69,10 @@ export const colours: [string, string][] = [
   ['Gray', 'rgb(119, 119, 119)'],
 ]
 
-// The account menu's usage line as captured; real usage replaces it when the menu is wired.
-export const weeklyUsage = '12% used'
+// The account menu's usage line. The fixtures redact it (O2: a textLength of 7, as in "0% used"),
+// so this is a placeholder of that length; real usage replaces it when the menu is wired. The
+// menu's width follows this text.
+export const weeklyUsage = '–% used'
 
 // oracle-connect-apps: the filters and the sections on screen when captured. App names are
 // third-party product names: text only, never their logos (neutral tiles stand in). Only

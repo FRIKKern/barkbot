@@ -116,3 +116,45 @@
 .set-switch[aria-checked='false'] { background: var(--wash-10); }
 .set-switch > span { position: absolute; top: 2px; left: 14px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); }
 .set-switch[aria-checked='false'] > span { left: 2px; }
+
+/* ── Settings pages beside General (oracle-settings-computer, -permissions, -updates) ── */
+.set-drow { min-height: 58px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.set-drow > div:first-child { flex: 0 1 auto; min-width: 0; }
+.set-drow.fill > div:first-child { flex: 1; }
+.set-drow > div:nth-child(2) { flex: none; display: flex; }
+.set-nested { display: block; line-height: 18px; letter-spacing: 0.195px; }
+.set-nested > span { line-height: 18px; }
+.set-desc { display: flex; flex-direction: column; justify-content: center; gap: 8px; height: 18px; color: var(--ink-66); line-height: 18px; letter-spacing: 0.195px; }
+.set-desc.two { height: 36px; }
+.set-label > span:first-child bdi { letter-spacing: 0.195px; }
+.set-device { height: 57.5px; padding-left: 14px; display: flex; align-items: center; }
+.set-device-icon { width: 18px; height: 18px; flex: none; display: grid; place-items: center; color: var(--ink-66); }
+.set-device-icon .icon { width: 14px; height: 14px; }
+.set-device > div { flex: 1; min-width: 0; height: 57.5px; padding: 10px 14px; }
+.set-device > div > div { width: fit-content; }
+.set-device-name { height: 18px; display: flex; align-items: center; gap: 7px; }
+.set-device-name > span:first-child { height: 18px; display: flex; align-items: center; }
+.set-device-info { width: 18px; height: 18px; display: grid; place-items: center; color: var(--ink-64); }
+.set-device-info .icon { width: 14px; height: 14px; }
+.set-device-state { display: block; height: 19.5px; padding-top: 1.5px; color: var(--ink-66); line-height: 18px; letter-spacing: 0.195px; }
+.set-device-state > span { display: block; height: 18px; }
+.set-dot { display: inline-block; vertical-align: top; margin: 6px 6px 0 0; width: 6px; height: 6px; border-radius: 50%; background: rgb(14 159 90); }
+.set-block { padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+.set-block > .set-drow { padding: 0; min-height: 0; }
+.set-status { height: 34px; padding: 8px 12px; border-radius: 10px; background: color(srgb 0.301961 0.607843 1 / 0.09); box-shadow: rgba(24, 132, 252, 0.15) 0 0 0 0.5px inset; }
+.set-status > div { display: flex; align-items: center; gap: 6px; width: fit-content; color: rgb(77 155 255); }
+.set-status .icon { width: 14px; height: 14px; }
+.set-status span { line-height: 18px; letter-spacing: 0.195px; }
+.set-danger { height: 30px; padding: 0 12px; border-radius: 9999px; background: rgb(207 43 53); line-height: 18px; letter-spacing: 0.195px; }
+.set-danger > span { display: block; }
+.set-rules { display: flex; flex-direction: column; gap: 24px; }
+.set-rule > div { height: 34px; padding-left: 14px; display: flex; align-items: flex-end; justify-content: space-between; }
+.set-rule-head { height: 16px; display: flex; align-items: center; gap: 6px; }
+.set-rule h3 { margin: 0; font-size: 12px; font-weight: 425; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-66); }
+.set-rule p { margin: 2px 0 0; height: 16px; display: flex; align-items: center; color: var(--ink-54); font-size: 12px; line-height: 16px; letter-spacing: 0.12px; }
+.set-add { height: 24px; padding: 0 8px; border-radius: 9999px; background: var(--wash-04); font-size: 12px; line-height: 16px; letter-spacing: 0.12px; }
+.set-add > span { display: block; }
+.set-uptodate { display: block; color: var(--ink-66); line-height: 18px; letter-spacing: 0.195px; }
+.set-notes { margin: 0 1.5px 0 2px; } /* the line is 138.5 on the oracle, 1.5 past its last icon */
+.set-check { height: 30px; padding: 0 12px; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; box-shadow: var(--wash-04) 0 0 0 0.5px inset; }
+.set-card.flush { margin-top: 0; }

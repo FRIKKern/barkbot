@@ -39,9 +39,13 @@ const overlays: Record<string, Render> = {
   'connect-apps': ({close}) => <ConnectApps onClose={close} />,
   'edit-avatar': () => <AvatarEditor />,
   settings: ({close}) => <Settings onClose={close} />,
+  // A scene can open Settings on another page (oracle-settings-computer, ...); the tabs switch it.
+  'settings-computer': ({close}) => <Settings page="Computer" onClose={close} />,
+  'settings-permissions': ({close}) => <Settings page="Permissions" onClose={close} />,
+  'settings-updates': ({close}) => <Settings page="Updates" onClose={close} />,
 }
 
-const modals = new Set(['new-bot-dialog', 'connect-apps', 'settings'])
+const modals = new Set(['new-bot-dialog', 'connect-apps', 'settings', 'settings-computer', 'settings-permissions', 'settings-updates'])
 const rows = '[role=menuitem], [role=option]'
 
 const pickers: Record<string, string> = {

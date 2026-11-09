@@ -3,7 +3,7 @@
  "slice": "S2",
  "journey": null,
  "title": "Settings, Computer / Permissions / Updates pages (oracle-settings-computer, -permissions, -updates). Look only: the device name is the owner's Mac (length only); Usage & Billing and Vault are never captured (O2)",
- "status": "open",
+ "status": "done",
  "controls": [
   "Route traffic through this computer",
   "Reset Bot's Computer",
@@ -12,5 +12,7 @@
   "Add Rule to Allow without Asking",
   "Automatic Updates",
   "Check for Updates"
- ]
+ ],
+ "gate": "Gate A oracle-settings-computer 98/98, oracle-settings-permissions 93/93, oracle-settings-updates 93/93",
+ "evidence": "app/src/components/overlays/Views.tsx (ComputerPage, PermissionsPage, UpdatesPage); the Settings tabs switch to them, click-tested headless. The device name (the owner's Mac) and every description are placeholders of the captured size (lengths only, O2). Look only: the switches toggle, Execution on this computer, Reset, Add Rule and Check for Updates do nothing yet (0005); Vault and Usage & Billing still show General (never captured)."
 }

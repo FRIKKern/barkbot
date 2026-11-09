@@ -30,7 +30,8 @@
 .composer-menu .rec circle:last-child { fill: currentColor; }
 
 /* Account: its foot 4 pt above the account button (698 -> 694), left 17, 248.8 wide. */
-.account-menu { left: 17px; bottom: 66px; width: 248.8px; }
+/* Its width follows its rows: the usage text sets it (oracle-account-menu, 0.79.3: 243 with a 7-character usage). */
+.account-menu { left: 17px; bottom: 66px; width: max-content; }
 
 /* ── Pickers: 4 pt above the row's button, right edges aligned (1016.5); 13/18 ── */
 .picker { right: 23.5px; width: 200px; transform: translateY(-100%); font-size: 13px; font-weight: 425; line-height: 18px; letter-spacing: -0.08px; }
