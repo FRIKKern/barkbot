@@ -15,13 +15,15 @@ const BOT_NAME = () => process.env.BARKBOT_NAME || 'BarkBot'
 
 // The bot's name as the person last renamed it (the details panel's Bot name field). Barkpark has
 // no bot record yet, so it is a per-account pref (/v1/prefs, docs/contracts/user-prefs.md in
-// Barkpark): phase 1 is one bot under the owner's own login. Unset, the bot is BARKBOT_NAME.
+// Barkpark) under the owner's own login. Unset, the bot is BARKBOT_NAME.
+// phase 1: one bot; moves to a barkbot.bot document when there are many.
 const PREF_KEY = 'barkbot.bot'
 const prefPath = () => {
   const c = conf()
   return `/w/${c.workspace}/p/${c.project}/v1/prefs/${encodeURIComponent(c.dataset)}/${PREF_KEY}`
 }
 
+// Reads the pref. phase 1: one bot; moves to a barkbot.bot document when there are many.
 async function savedName(): Promise<string | null> {
   try {
     const {value} = await bp<{value: {name?: unknown} | null}>(prefPath())
@@ -73,6 +75,7 @@ export const renameBot = createServerFn({method: 'POST'})
     return name
   })
   .handler(async ({data: name}) => {
+    // Writes the pref. phase 1: one bot; moves to a barkbot.bot document when there are many.
     await bp(prefPath(), {method: 'PUT', json: {value: {name}}})
     return {name}
   })
