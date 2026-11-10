@@ -8,6 +8,7 @@ import { roadmapSvg } from './generate-roadmap.mjs';
 import { journeysSvg, parityMd } from './generate-parity.mjs';
 import { heroSvg } from './generate-hero.mjs';
 import { controls, claims } from './lib/controls.mjs';
+import { turnTraces } from './lib/turn-traces.mjs';
 
 const fails = [];
 const ran = {};
@@ -114,8 +115,28 @@ for (const f of stateFiles) {
   else if (!s.cases) fail(`gate: the Gate A run for ${id} checked nothing`);
 }
 
+// 7b. Gate B: every turn trace names its oracle version; each one Gate B judges has a recorded
+// run that checked something; no record is left for a trace it no longer judges (superseded by a
+// re-record on a newer oracle, scripts/lib/turn-traces.mjs), so no stale score is read as current.
+const turns = turnTraces();
+for (const t of turns.unversioned) { rule('turn records', 1); fail(`traces: ${t.id} names no oracle_version: re-record it`); }
+for (const t of turns.judged) {
+  rule('turn records', 1);
+  const file = path('parity', 'gate-b', `${t.id}.json`);
+  const s = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
+  if (!s) fail(`gate: no Gate B run for ${t.id}: run npm run gate:b`);
+  else if (!s.cases) fail(`gate: the Gate B run for ${t.id} checked nothing`);
+}
+for (const f of readdirSync(path('parity', 'gate-b')).filter((x) => x.endsWith('.json'))) {
+  rule('turn records', 1);
+  const id = f.replace(/\.json$/, '');
+  const old = turns.superseded.find((x) => x.trace.id === id);
+  if (old) fail(`gate: parity/gate-b/${f} is the run of a superseded trace (oracle ${old.trace.oracle_version}; ${old.by.map((t) => t.id).join(', ')} replace it): remove it`);
+  else if (!turns.judged.some((t) => t.id === id)) fail(`gate: parity/gate-b/${f} has no turn trace in traces/`);
+}
+
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records']) {
+for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

@@ -1,6 +1,7 @@
 {
  "id": "2026-11-10-say-hi",
  "recipe": "say-hi",
+ "oracle_version": "0.79.3",
  "bot": "Oracle",
  "captured": "2026-11-10T22:42:48.372Z",
  "engine": "electron",

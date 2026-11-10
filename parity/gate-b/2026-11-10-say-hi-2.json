@@ -1,59 +1,58 @@
 {
- "id": "2026-11-08-say-hi-2",
- "captured": "2026-11-08T21:39:32.645Z",
- "cases": 13,
- "pass": 11,
+ "id": "2026-11-10-say-hi-2",
+ "captured": "2026-11-10T22:43:08.525Z",
+ "oracle_version": "0.79.3",
+ "cases": 15,
+ "pass": 14,
  "results": [
   {
    "key": "replay: every scripted event reached the page",
    "pass": true
   },
   {
+   "key": "replay: the window had focus for the whole turn, as the oracle's",
+   "pass": true
+  },
+  {
    "key": "user#1",
    "pass": true,
-   "oracle": 1561.5,
-   "ours": 1564.8,
-   "lag": 3
+   "oracle": 274.6,
+   "ours": 276.9,
+   "lag": 2
   },
   {
    "key": "status:working#1",
    "pass": true,
-   "oracle": 2231,
-   "ours": 2235.2,
-   "lag": 4
+   "oracle": 920.9,
+   "ours": 924.1,
+   "lag": 3
   },
   {
    "key": "working#1",
    "pass": true,
-   "oracle": 2231,
-   "ours": 2235,
-   "lag": 4
-  },
-  {
-   "key": "rail:working#1",
-   "pass": false,
-   "oracle": 2231,
-   "why": "ours never shows it"
+   "oracle": 931.8,
+   "ours": 934,
+   "lag": 2
   },
   {
    "key": "label:status#1",
    "pass": false,
-   "oracle": 3999.7,
+   "oracle": 1730.7,
    "why": "ours never shows it: the oracle's own summary of the turn, which no Barkpark event carries"
-  },
-  {
-   "key": "assistant#1",
-   "pass": true,
-   "oracle": 4642.7,
-   "ours": 4647.7,
-   "lag": 5
   },
   {
    "key": "status:replied#1",
    "pass": true,
-   "oracle": 4743.9,
-   "ours": 4745.3,
-   "lag": 1
+   "oracle": 2339.6,
+   "ours": 2442.7,
+   "lag": 103
+  },
+  {
+   "key": "assistant#1",
+   "pass": true,
+   "oracle": 2339.6,
+   "ours": 2341.6,
+   "lag": 2
   },
   {
    "key": "nothing extra",
@@ -71,7 +70,17 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 237.60000000000036
+   "ours": 241.0999999999999
+  },
+  {
+   "key": "budget: own bubble ≤ 440 ms",
+   "pass": true,
+   "ours": 276.9
+  },
+  {
+   "key": "budget: working line ≤ 2.0 s",
+   "pass": true,
+   "ours": 934
   },
   {
    "key": "history after a reconnect (one row, every message joined, as Barkpark stores a turn since #25471)",
@@ -81,33 +90,29 @@
  "oracle": [
   {
    "kind": "user",
-   "t": 1561.5,
+   "t": 274.6,
    "len": 29
   },
   {
    "kind": "status:working",
-   "t": 2231
+   "t": 920.9
   },
   {
    "kind": "working",
-   "t": 2231
-  },
-  {
-   "kind": "rail:working",
-   "t": 2231
+   "t": 931.8
   },
   {
    "kind": "label:status",
-   "t": 3999.7
-  },
-  {
-   "kind": "assistant",
-   "t": 4642.7,
-   "len": 12
+   "t": 1730.7
   },
   {
    "kind": "status:replied",
-   "t": 4743.9
+   "t": 2339.6
+  },
+  {
+   "kind": "assistant",
+   "t": 2339.6,
+   "len": 13
   }
  ],
  "ours": [
@@ -117,44 +122,41 @@
   },
   {
    "kind": "user",
-   "t": 1564.8,
+   "t": 276.9,
    "len": 29,
-   "raw": 1569.6
-  },
-  {
-   "kind": "working",
-   "t": 2235,
-   "raw": 2238.3
+   "raw": 295.2
   },
   {
    "kind": "status:working",
-   "t": 2235.2,
-   "raw": 2238.3
+   "t": 924.1,
+   "raw": 941.8
+  },
+  {
+   "kind": "working",
+   "t": 934,
+   "raw": 950.6
   },
   {
    "kind": "assistant",
-   "t": 4647.7,
-   "len": 12,
-   "raw": 4652
+   "t": 2341.6,
+   "len": 13,
+   "raw": 2358.9
   },
   {
    "kind": "working-gone",
-   "t": 4885.3,
-   "raw": 4889.6
+   "t": 2582.7,
+   "raw": 2600
   },
   {
    "kind": "status:replied",
-   "t": 4745.3,
-   "raw": 4749.6
+   "t": 2442.7,
+   "raw": 2460
   }
  ],
  "standInLate": [
-  2,
-  5
+  17,
+  18
  ],
- "skipped": [
-  "budget: own bubble ≤ 440 ms: not judged, the oracle's own is 1561.5 ms",
-  "budget: working line ≤ 2.0 s: not judged, the oracle's own is 2231 ms"
- ],
- "run": "2026-11-09T23:19:10.366Z"
+ "skipped": [],
+ "run": "2026-11-10T23:01:23.347Z"
 }
