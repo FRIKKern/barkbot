@@ -1,0 +1,1188 @@
+{
+ "id": "2026-11-10-storage",
+ "recipe": "storage",
+ "bot": "Oracle",
+ "captured": "2026-11-10T22:43:27.055Z",
+ "engine": "electron",
+ "durationS": 11.32,
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "note": "times in ms from the gesture; samples are [eventIndex, t, opacity, transform, y]; scroll is [t, scrollTop, scrollHeight]",
+ "events": [
+  {
+   "t": 4.7,
+   "type": "remove",
+   "kind": "main",
+   "tag": "br"
+  },
+  {
+   "t": 5.5,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-label",
+   "value": "Send message",
+   "tag": "button"
+  },
+  {
+   "t": 277.8,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-label",
+   "value": "Start voice chat",
+   "tag": "button"
+  },
+  {
+   "t": 277.8,
+   "type": "add",
+   "kind": "bubble:user",
+   "tag": "div",
+   "role": "article",
+   "data": "enter index pending role rowKey",
+   "box": [
+    104,
+    584,
+    600,
+    52
+   ],
+   "textLength": 55
+  },
+  {
+   "t": 1280.3,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  },
+  {
+   "t": 1280.3,
+   "type": "attr",
+   "kind": "bubble:user",
+   "name": "aria-busy",
+   "tag": "div"
+  },
+  {
+   "t": 1335.4,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 1335.4,
+   "type": "add",
+   "kind": "other",
+   "tag": "span",
+   "box": [
+    -1,
+    -1,
+    127,
+    20
+   ],
+   "text": "Oracle is working",
+   "textLength": 17
+  },
+  {
+   "t": 1335.4,
+   "type": "add",
+   "kind": "main",
+   "tag": "div",
+   "data": "rowKey",
+   "box": [
+    104,
+    636,
+    600,
+    52
+   ]
+  },
+  {
+   "t": 1495.7,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-label",
+   "value": "11:43:16 PM",
+   "tag": "time"
+  },
+  {
+   "t": 2227.7,
+   "type": "add",
+   "kind": "main",
+   "tag": "span",
+   "box": [
+    145,
+    665,
+    129,
+    20
+   ],
+   "text": "Checking the storage",
+   "textLength": 20
+  },
+  {
+   "t": 4166.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 4166.7,
+   "type": "add",
+   "kind": "other",
+   "tag": "span",
+   "box": [
+    -1,
+    -1,
+    104,
+    20
+   ],
+   "text": "Oracle replied",
+   "textLength": 14
+  },
+  {
+   "t": 4166.7,
+   "type": "add",
+   "kind": "bubble:assistant",
+   "tag": "div",
+   "role": "article",
+   "data": "enter index rowKey",
+   "box": [
+    104,
+    508,
+    600,
+    141
+   ],
+   "textLength": 276
+  },
+  {
+   "t": 4233.1,
+   "type": "add",
+   "kind": "rail",
+   "tag": "span",
+   "role": "status",
+   "label": "Unread activity",
+   "box": [
+    52,
+    164,
+    8,
+    8
+   ]
+  },
+  {
+   "t": 4233.1,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-label",
+   "value": "Oracle, Unread activity",
+   "tag": "button"
+  },
+  {
+   "t": 5216.9,
+   "type": "remove",
+   "kind": "other",
+   "tag": "div"
+  },
+  {
+   "t": 5216.9,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  }
+ ],
+ "samples": [
+  [
+   3,
+   279.8,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   290.6,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   302.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   319.5,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   335.9,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   352.6,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   369.5,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   386.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   402.9,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   419.2,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   436,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   452.9,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   468.8,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   486.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   502.5,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   519,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   535.8,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   552.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   569.4,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   586,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   602.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   619.6,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   635.9,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   652.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   669.4,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   686,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   702.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   719.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   736,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   752.6,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   768.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   785.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   802.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   818.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   836,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   852.2,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   869.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   885.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   902.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   918.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   936,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   952.5,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   968.8,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   986,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1002.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1019.2,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1035.4,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1052.2,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1069.4,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1086,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1102.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1119.5,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1136,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1152.6,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1168.5,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1186,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1202.6,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1219.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1236,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1252.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1269,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1286.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1302.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ],
+  [
+   3,
+   1321.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 2990)",
+   584
+  ]
+ ],
+ "scroll": [
+  [
+   2.1,
+   2342,
+   3102
+  ],
+  [
+   279.8,
+   2406,
+   3166
+  ]
+ ],
+ "animations": [
+  {
+   "type": "CSSAnimation",
+   "name": "sand-12vywve-B",
+   "timing": {
+    "duration": 2400,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -10
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -9
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": -800,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -7
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": -1600,
+    "easing": "linear",
+    "iterations": "infinite",
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "ease-out",
+     "opacity": "0",
+     "transform": "translateY(0px) scale(0.6)"
+    },
+    {
+     "offset": 0.25,
+     "easing": "ease-out",
+     "opacity": "1"
+    },
+    {
+     "offset": 1,
+     "easing": "ease-out",
+     "opacity": "0",
+     "transform": "translateY(-12px) scale(1)"
+    }
+   ],
+   "look": {
+    "color": "rgba(245, 245, 245, 0.54)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgba(245, 245, 245, 0.54)",
+    "transform-origin": "2.71875px 5.5px"
+   },
+   "target": {
+    "kind": "panel",
+    "tag": "span",
+    "box": [
+     996,
+     398,
+     5,
+     11
+    ]
+   },
+   "t": -5
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 38
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 39
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 39
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "linear",
+     "transform": "scale(0.5)"
+    },
+    {
+     "offset": 1,
+     "easing": "linear",
+     "transform": "scale(1)"
+    }
+   ],
+   "look": {
+    "color": "rgb(18, 18, 18)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(18, 18, 18)",
+    "transform-origin": "8px 8px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "i",
+    "data": "iconName size",
+    "box": [
+     676,
+     716,
+     11,
+     11
+    ]
+   },
+   "t": 39
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 290
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 290
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 291
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 291
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18i4fvi-B",
+   "timing": {
+    "duration": 1000,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": 291
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18re5ia-B",
+   "timing": {
+    "duration": 120,
+    "delay": 1985,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 291
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1rqlz9z-B",
+   "timing": {
+    "duration": 240,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(12px)"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(0px)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 24px"
+   },
+   "target": {
+    "kind": "bubble:user",
+    "tag": "div",
+    "box": [
+     104,
+     595,
+     600,
+     48
+    ],
+    "textLength": 45
+   },
+   "t": 291
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-top-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 1327
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-bottom-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 1328
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-left-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 1328
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-right-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "linear",
+     "borderRightColor": "rgba(245, 245, 245, 0.22)"
+    },
+    {
+     "offset": 1,
+     "easing": "linear",
+     "borderRightColor": "rgba(245, 245, 245, 0.1)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 22px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "box": [
+     104,
+     700,
+     600,
+     44
+    ]
+   },
+   "t": 1328
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-11nrck8-B",
+   "timing": {
+    "duration": 180,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 2238
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-iekrje-B",
+   "timing": {
+    "duration": 340,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 2238
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-gcq4cg-B",
+   "timing": {
+    "duration": 180,
+    "delay": 220,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 2238
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-gcq4cg-B",
+   "timing": {
+    "duration": 180,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 2238
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1ofn8cw-B",
+   "timing": {
+    "duration": 2200,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": "infinite",
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "steps(60)",
+     "backgroundPositionX": "200%",
+     "backgroundPositionY": "0px"
+    },
+    {
+     "offset": 1,
+     "easing": "steps(60)",
+     "backgroundPositionX": "-200%",
+     "backgroundPositionY": "0px"
+    }
+   ],
+   "look": {
+    "color": "rgba(0, 0, 0, 0)",
+    "background-image": "linear-gradient(90deg, color(srgb 0.960784 0.960784 0.960784 / 0.4) 0%, color(srgb 0.960784 0.960784 0.960784 / 0.4) 25%, rgb(245, 245, 245) 60%, color(srgb 0.960784 0.960784 0.960784 / 0.4) 75%, colo",
+    "background-size": "200% 100%",
+    "background-clip": "text",
+    "-webkit-text-fill-color": "rgba(0, 0, 0, 0)",
+    "transform-origin": "69.8438px 11px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "span",
+    "box": [
+     145,
+     665,
+     129,
+     20
+    ],
+    "text": "Checking the storage",
+    "textLength": 20
+   },
+   "t": 2238
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1rqlz9z-B",
+   "timing": {
+    "duration": 240,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(12px)"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(0px)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 68.5px"
+   },
+   "target": {
+    "kind": "bubble:assistant",
+    "tag": "div",
+    "box": [
+     104,
+     522,
+     600,
+     137
+    ],
+    "textLength": 266
+   },
+   "t": 4169
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1uvc5f5-B",
+   "timing": {
+    "duration": 140,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 4237
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18re5ia-B",
+   "timing": {
+    "duration": 130,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "0"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "1"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "4px 4px"
+   },
+   "target": {
+    "kind": "rail",
+    "tag": "span",
+    "role": "status",
+    "label": "Unread activity",
+    "box": [
+     52,
+     164,
+     8,
+     8
+    ]
+   },
+   "t": 4237
+  }
+ ]
+}

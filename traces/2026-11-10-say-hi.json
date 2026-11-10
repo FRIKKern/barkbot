@@ -1,0 +1,758 @@
+{
+ "id": "2026-11-10-say-hi",
+ "recipe": "say-hi",
+ "bot": "Oracle",
+ "captured": "2026-11-10T22:42:48.372Z",
+ "engine": "electron",
+ "durationS": 12.927,
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "note": "times in ms from the gesture; samples are [eventIndex, t, opacity, transform, y]; scroll is [t, scrollTop, scrollHeight]",
+ "events": [
+  {
+   "t": 34,
+   "type": "remove",
+   "kind": "main",
+   "tag": "br"
+  },
+  {
+   "t": 35.4,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-label",
+   "value": "Send message",
+   "tag": "button"
+  },
+  {
+   "t": 382.2,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-label",
+   "value": "Start voice chat",
+   "tag": "button"
+  },
+  {
+   "t": 382.2,
+   "type": "add",
+   "kind": "main",
+   "tag": "div",
+   "data": "index rowKey",
+   "box": [
+    104,
+    542,
+    600,
+    54
+   ],
+   "text": "Today 11:42 PM",
+   "textLength": 14
+  },
+  {
+   "t": 382.2,
+   "type": "add",
+   "kind": "bubble:user",
+   "tag": "div",
+   "role": "article",
+   "data": "enter index pending role rowKey",
+   "box": [
+    104,
+    596,
+    600,
+    40
+   ],
+   "textLength": 44
+  },
+  {
+   "t": 926.3,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  },
+  {
+   "t": 926.3,
+   "type": "attr",
+   "kind": "bubble:user",
+   "name": "aria-busy",
+   "tag": "div"
+  },
+  {
+   "t": 1257.1,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 1257.1,
+   "type": "add",
+   "kind": "other",
+   "tag": "span",
+   "box": [
+    -1,
+    -1,
+    127,
+    20
+   ],
+   "text": "Oracle is working",
+   "textLength": 17
+  },
+  {
+   "t": 1541.6,
+   "type": "add",
+   "kind": "main",
+   "tag": "div",
+   "data": "rowKey",
+   "box": [
+    104,
+    636,
+    600,
+    52
+   ]
+  },
+  {
+   "t": 4509.2,
+   "type": "add",
+   "kind": "main",
+   "tag": "span",
+   "box": [
+    149,
+    661,
+    91,
+    22
+   ],
+   "text": "Mulling it over",
+   "textLength": 15
+  },
+  {
+   "t": 5559.4,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 5559.4,
+   "type": "add",
+   "kind": "other",
+   "tag": "span",
+   "box": [
+    -1,
+    -1,
+    104,
+    20
+   ],
+   "text": "Oracle replied",
+   "textLength": 14
+  },
+  {
+   "t": 5559.4,
+   "type": "add",
+   "kind": "bubble:assistant",
+   "tag": "div",
+   "role": "article",
+   "data": "enter index rowKey",
+   "box": [
+    104,
+    596,
+    600,
+    52
+   ],
+   "textLength": 27
+  },
+  {
+   "t": 6555,
+   "type": "add",
+   "kind": "rail",
+   "tag": "span",
+   "role": "status",
+   "label": "Unread activity",
+   "box": [
+    52,
+    164,
+    8,
+    8
+   ]
+  },
+  {
+   "t": 6555,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-label",
+   "value": "Oracle, Unread activity",
+   "tag": "button"
+  },
+  {
+   "t": 6625.4,
+   "type": "remove",
+   "kind": "other",
+   "tag": "div"
+  },
+  {
+   "t": 6625.4,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  }
+ ],
+ "samples": [],
+ "scroll": [],
+ "animations": [
+  {
+   "type": "CSSAnimation",
+   "name": "sand-12vywve-B",
+   "timing": {
+    "duration": 2400,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -27
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -27
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": -800,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -25
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": -1600,
+    "easing": "linear",
+    "iterations": "infinite",
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "ease-out",
+     "opacity": "0",
+     "transform": "translateY(0px) scale(0.6)"
+    },
+    {
+     "offset": 0.25,
+     "easing": "ease-out",
+     "opacity": "1"
+    },
+    {
+     "offset": 1,
+     "easing": "ease-out",
+     "opacity": "0",
+     "transform": "translateY(-12px) scale(1)"
+    }
+   ],
+   "look": {
+    "color": "rgba(245, 245, 245, 0.54)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgba(245, 245, 245, 0.54)",
+    "transform-origin": "2.71875px 5.5px"
+   },
+   "target": null,
+   "t": -24
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-top-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 38
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-bottom-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 38
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-left-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 38
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-right-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 38
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 38
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 38
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 39
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "linear",
+     "transform": "scale(0.5)"
+    },
+    {
+     "offset": 1,
+     "easing": "linear",
+     "transform": "scale(1)"
+    }
+   ],
+   "look": {
+    "color": "rgb(18, 18, 18)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(18, 18, 18)",
+    "transform-origin": "8px 8px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "i",
+    "data": "iconName size",
+    "box": [
+     678,
+     718,
+     8,
+     8
+    ]
+   },
+   "t": 39
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 451
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 451
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 451
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 451
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18i4fvi-B",
+   "timing": {
+    "duration": 1000,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": 451
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18re5ia-B",
+   "timing": {
+    "duration": 120,
+    "delay": 1940,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 452
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1rqlz9z-B",
+   "timing": {
+    "duration": 240,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(12px)"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(0px)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 18px"
+   },
+   "target": {
+    "kind": "bubble:user",
+    "tag": "div",
+    "box": [
+     104,
+     607,
+     600,
+     36
+    ],
+    "textLength": 34
+   },
+   "t": 452
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-iekrje-B",
+   "timing": {
+    "duration": 340,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 1542
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-11nrck8-B",
+   "timing": {
+    "duration": 180,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 1543
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-gcq4cg-B",
+   "timing": {
+    "duration": 180,
+    "delay": 220,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "0",
+     "transform": "translateY(4px)"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "1",
+     "transform": "translateY(0px)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "277.75px 0px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "span",
+    "box": [
+     145,
+     672,
+     511,
+     0
+    ]
+   },
+   "t": 1543
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1ofn8cw-B",
+   "timing": {
+    "duration": 2200,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": 4512
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-gcq4cg-B",
+   "timing": {
+    "duration": 180,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "0",
+     "transform": "translateY(4px)"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "1",
+     "transform": "translateY(0px)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "45.3164px 11px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "span",
+    "box": [
+     149,
+     659,
+     91,
+     22
+    ],
+    "text": "Mulling it over",
+    "textLength": 15
+   },
+   "t": 4512
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1uvc5f5-B",
+   "timing": {
+    "duration": 140,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "forwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "1",
+     "transform": "scale(1)"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "0",
+     "transform": "scale(0.92)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "0px 18px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "data": "activity grokState role exiting continuedPrev",
+    "box": [
+     104,
+     651,
+     578,
+     35
+    ],
+    "text": "Mulling it over",
+    "textLength": 15
+   },
+   "t": 5534
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1rqlz9z-B",
+   "timing": {
+    "duration": 240,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(12px)"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(0px)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 24px"
+   },
+   "target": {
+    "kind": "bubble:assistant",
+    "tag": "div",
+    "box": [
+     104,
+     610,
+     600,
+     48
+    ],
+    "textLength": 17
+   },
+   "t": 5556
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18re5ia-B",
+   "timing": {
+    "duration": 130,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "0"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "1"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "4px 4px"
+   },
+   "target": {
+    "kind": "rail",
+    "tag": "span",
+    "role": "status",
+    "label": "Unread activity",
+    "box": [
+     52,
+     164,
+     8,
+     8
+    ]
+   },
+   "t": 6622
+  }
+ ]
+}
