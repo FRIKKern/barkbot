@@ -19,9 +19,8 @@
   --bg-rail: rgb(14 14 14);     /* aside "Bots" */
   --bg-raised: rgb(31 31 31);   /* pill 52, Share 60, Close 156, composer 129, cards */
   --badge: rgb(246 148 18);     /* span "Main Bot" */
-  --unread: rgb(77 155 255);    /* STAND-IN: the unread dot's colour is not in trace say-hi-2; this is the
-                                   nearest captured dot, the same 8×8 status dot on the account face
-                                   ("New update available", oracle-composer-menu) */
+  --unread: rgb(77 155 255);    /* read on the oracle's own dot (0.79.3, 2026-11-11): an 8×8 round span inside
+                                   the status span at 51.75, 163.5; computed background rgb(77, 155, 255) */
   --face: rgb(108 108 108);     /* sampled from the capture's avatar pixels */
   --rail: 88px;
   --details: 320px;
