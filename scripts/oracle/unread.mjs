@@ -66,7 +66,7 @@ if (sending) {
   await run(page, sending);
   await wait(500);
   // Settings, from the account menu: a real pointer press on each (menus open on pointerdown).
-  for (const sel of ['button[aria-label="Open account menu"]', '[role=menuitem]']) {
+  for (const sel of ['button[aria-label^="Open account menu"]', '[role=menuitem]']) {
     const at = await page.evaluate((sel) => {
       const e = sel === '[role=menuitem]' ? [...document.querySelectorAll(sel)].find((m) => m.innerText.trim() === 'Settings') : document.querySelector(sel);
       if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 };

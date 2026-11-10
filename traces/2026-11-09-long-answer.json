@@ -1,6 +1,7 @@
 {
  "id": "2026-11-09-long-answer",
  "recipe": "long-answer",
+ "oracle_version": "0.79.3",
  "bot": "Oracle",
  "captured": "2026-11-09T22:04:46.857Z",
  "engine": "electron",

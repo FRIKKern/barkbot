@@ -1,66 +1,65 @@
 {
- "id": "2026-11-08-say-hi",
- "captured": "2026-11-08T21:28:09.048Z",
+ "id": "2026-11-10-storage",
+ "captured": "2026-11-10T22:43:27.055Z",
+ "oracle_version": "0.79.3",
  "cases": 16,
- "pass": 14,
+ "pass": 15,
  "results": [
   {
    "key": "replay: every scripted event reached the page",
    "pass": true
   },
   {
+   "key": "replay: the window had no focus for the whole turn, as the oracle's",
+   "pass": true
+  },
+  {
    "key": "user#1",
    "pass": true,
-   "oracle": 304.3,
-   "ours": 306.3,
+   "oracle": 273.1,
+   "ours": 274.9,
    "lag": 2
   },
   {
    "key": "status:working#1",
    "pass": true,
-   "oracle": 939.8,
-   "ours": 942.2,
+   "oracle": 1330.7,
+   "ours": 1332.5,
    "lag": 2
   },
   {
    "key": "working#1",
    "pass": true,
-   "oracle": 939.8,
-   "ours": 941.7,
+   "oracle": 1330.7,
+   "ours": 1332.3,
    "lag": 2
-  },
-  {
-   "key": "rail:working#1",
-   "pass": false,
-   "oracle": 939.8,
-   "why": "ours never shows it"
   },
   {
    "key": "label:status#1",
    "pass": false,
-   "oracle": 2390.8,
+   "oracle": 2223,
    "why": "ours never shows it: the oracle's own summary of the turn, which no Barkpark event carries"
-  },
-  {
-   "key": "label:typing#1",
-   "pass": true,
-   "oracle": 3293,
-   "ours": 3310.2,
-   "lag": 17
-  },
-  {
-   "key": "assistant#1",
-   "pass": true,
-   "oracle": 3351.7,
-   "ours": 3356.3,
-   "lag": 5
   },
   {
    "key": "status:replied#1",
    "pass": true,
-   "oracle": 3437.6,
-   "ours": 3455.3,
-   "lag": 18
+   "oracle": 4162,
+   "ours": 4163.9,
+   "lag": 2
+  },
+  {
+   "key": "assistant#1",
+   "pass": true,
+   "oracle": 4162,
+   "ours": 4163.9,
+   "lag": 2
+  },
+  {
+   "key": "rail:unread#1",
+   "pass": true,
+   "oracle": 4228.4,
+   "ours": 4230.6,
+   "lag": 2
   },
   {
    "key": "nothing extra",
@@ -78,17 +77,17 @@
   {
    "key": "budget: working line gone ≤ 250 ms after the reply",
    "pass": true,
-   "ours": 239
+   "ours": 241.40000000000055
   },
   {
    "key": "budget: own bubble ≤ 440 ms",
    "pass": true,
-   "ours": 306.3
+   "ours": 274.9
   },
   {
    "key": "budget: working line ≤ 2.0 s",
    "pass": true,
-   "ours": 941.7
+   "ours": 1332.3
   },
   {
    "key": "history after a reconnect (one row, every message joined, as Barkpark stores a turn since #25471)",
@@ -98,37 +97,33 @@
  "oracle": [
   {
    "kind": "user",
-   "t": 304.3,
-   "len": 29
+   "t": 273.1,
+   "len": 40
   },
   {
    "kind": "status:working",
-   "t": 939.8
+   "t": 1330.7
   },
   {
    "kind": "working",
-   "t": 939.8
-  },
-  {
-   "kind": "rail:working",
-   "t": 939.8
+   "t": 1330.7
   },
   {
    "kind": "label:status",
-   "t": 2390.8
-  },
-  {
-   "kind": "label:typing",
-   "t": 3293
-  },
-  {
-   "kind": "assistant",
-   "t": 3351.7,
-   "len": 29
+   "t": 2223
   },
   {
    "kind": "status:replied",
-   "t": 3437.6
+   "t": 4162
+  },
+  {
+   "kind": "assistant",
+   "t": 4162,
+   "len": 261
+  },
+  {
+   "kind": "rail:unread",
+   "t": 4228.4
   }
  ],
  "ours": [
@@ -138,46 +133,46 @@
   },
   {
    "kind": "user",
-   "t": 306.3,
-   "len": 29,
-   "raw": 309.3
-  },
-  {
-   "kind": "status:working",
-   "t": 942.2,
-   "raw": 944.3
+   "t": 274.9,
+   "len": 40,
+   "raw": 278.8
   },
   {
    "kind": "working",
-   "t": 941.7,
-   "raw": 946.5
+   "t": 1332.3,
+   "raw": 1335.3
   },
   {
-   "kind": "label:typing",
-   "t": 3310.2,
-   "raw": 3313.5
+   "kind": "status:working",
+   "t": 1332.5,
+   "raw": 1335.3
   },
   {
    "kind": "assistant",
-   "t": 3356.3,
-   "len": 29,
-   "raw": 3359
-  },
-  {
-   "kind": "working-gone",
-   "t": 3595.3,
-   "raw": 3598
+   "t": 4163.9,
+   "len": 261,
+   "raw": 4167.4
   },
   {
    "kind": "status:replied",
-   "t": 3455.3,
-   "raw": 3458
+   "t": 4163.9,
+   "raw": 4167.4
+  },
+  {
+   "kind": "rail:unread",
+   "t": 4230.6,
+   "raw": 4234.2
+  },
+  {
+   "kind": "working-gone",
+   "t": 4405.3,
+   "raw": 4408.8
   }
  ],
  "standInLate": [
-  2,
-  5
+  3,
+  4
  ],
  "skipped": [],
- "run": "2026-11-09T23:19:10.367Z"
+ "run": "2026-11-10T23:03:26.183Z"
 }

@@ -15,8 +15,10 @@ export type Bubble = {
   heights?: number[]
 }
 /** The working line. `held`: the turn has started but the bot's state is not Working yet, so the
- *  row waits (the oracle's row comes with its rail's Working, not with the turn's start). */
-export type Working = {label: string; leaving: boolean; first: boolean; held: boolean} | null
+ *  row waits (the oracle's row comes with its rail's Working, not with the turn's start).
+ *  `ended`: the turn is over and the line is about to leave; the status says "replied" from then,
+ *  with the reply bubble (0.79.3: the same ms in all four turn traces), not when the line goes. */
+export type Working = {label: string; leaving: boolean; first: boolean; held: boolean; ended?: boolean} | null
 /** The bot's state from Barkpark's fleet stream (agent_state); null until the stream has said. */
 export type BotState = 'working' | 'blocked' | 'idle' | 'unknown' | null
 const busy = (s: BotState) => s === null || s === 'working' || s === 'blocked'
@@ -80,7 +82,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
   // A new model message in the same turn keeps what the line said, unless that was "Typing…".
   const resume = useCallback(() => {
     if (leave.current) clearTimeout(leave.current), (leave.current = null)
-    setWorking((w) => (w && !w.leaving && w.label !== 'Typing…' ? w : {label: '', leaving: false, first: fresh(w), held: held(w)}))
+    setWorking((w) => (w && !w.leaving && w.label !== 'Typing…' ? (w.ended ? {...w, ended: false} : w) : {label: '', leaving: false, first: fresh(w), held: held(w)}))
   }, [])
   const land = useCallback((b: Omit<Bubble, 'key'>) => {
     if (b.role === 'assistant' && typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
@@ -106,6 +108,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
   const end = useCallback(() => {
     // Measured: the line goes ~100 ms after the reply lands, then a 140 ms exit.
     if (typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
+    setWorking((w) => (w ? {...w, ended: true} : w))
     leave.current = setTimeout(() => {
       setWorking((w) => (w ? {...w, leaving: true} : w))
       leave.current = setTimeout(() => setWorking(null), 140)

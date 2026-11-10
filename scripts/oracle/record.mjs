@@ -134,12 +134,16 @@ await Promise.all(pending);
 for (const a of anims) { a.t = a.wall - tStart.wall; delete a.wall; }
 data.animations = anims;
 const trace = {
-  id, recipe, bot, captured: new Date().toISOString(), engine: 'electron', durationS: (Date.now() - started) / 1000,
+  id, recipe,
+  // Which oracle this is: Gate B judges a recipe's turns on the newest version only (scripts/lib/turn-traces.mjs).
+  oracle_version: await page.evaluate(() => navigator.userAgent.match(/GrokBot\/([\d.]+)/)?.[1] ?? null),
+  bot, captured: new Date().toISOString(), engine: 'electron', durationS: (Date.now() - started) / 1000,
   viewport: await page.evaluate(() => [innerWidth, innerHeight, devicePixelRatio]),
   note: 'times in ms from the gesture; samples are [eventIndex, t, opacity, transform, y]; scroll is [t, scrollTop, scrollHeight]',
   ...data,
 };
 mkdirSync(path('traces'), { recursive: true });
 writeFileSync(path('traces', `${id}.json`), JSON.stringify(trace, null, 1) + '\n');
+if (!trace.oracle_version) console.error(`traces/${id}.json: the oracle's version is not in its user agent; add oracle_version by hand, or Gate B refuses the trace`);
 console.log(`traces/${id}.json: ${data.events.length} events, ${anims.length} animations, ${data.samples.length} samples, ${data.scroll.length} scroll steps`);
 page.close();

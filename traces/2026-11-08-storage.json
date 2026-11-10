@@ -1,6 +1,7 @@
 {
  "id": "2026-11-08-storage",
  "recipe": "storage",
+ "oracle_version": "0.79.2",
  "bot": "Oracle",
  "captured": "2026-11-08T21:26:56.435Z",
  "engine": "electron",

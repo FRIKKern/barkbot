@@ -1,5 +1,6 @@
 // Gate B (turn, H5): a recorded oracle turn replayed in ours, compared moment by moment.
-// Each trace in traces/ that holds a send is played into /gate-b/<trace> (the real transcript,
+// Each trace in traces/ that holds a send (and is not superseded by a re-record of its recipe on
+// a newer oracle version: scripts/lib/turn-traces.mjs; each one is printed) is played into /gate-b/<trace> (the real transcript,
 // composer and conversation hook, fed by app/src/server/replay.ts instead of Barkpark), and
 // what appears is timed inside the page and compared with what the oracle showed.
 //
@@ -9,12 +10,15 @@
 //   --url <base> measures an app that is already running; ports are free ones per run.
 //
 // Cases per trace (app/src/chat/turn.ts reads the trace):
-//   each oracle moment  own bubble, working line and status, the rail's Working, each label, each
-//                       reply bubble, "replied":
+//   each oracle moment  own bubble, working line and status, the rail's Working and its Unread
+//                       dot, each label, each reply bubble, "replied":
 //                       ours shows the same kind, in the same order, within ±150 ms (the
 //                       oracle's own spread between runs: "replied" 0–101 ms after the reply);
 //                       a label also says the same words
 //   nothing extra       ours shows no moment the oracle did not
+//   window focus        the page's window has focus as the oracle's had (CDP focus emulation, as
+//                       scripts/behaviour.mjs uses): none where the trace's tile gained the Unread
+//                       dot, focus everywhere else, so a dot the oracle did not show is an extra
 //   timing              ours is counted from the arrival that caused each moment (uiTime below):
 //                       what the UI adds is judged, the stand-in server's own lateness is not
 //   history             after the turn the stream drops and reconnects; the stored rows it
@@ -26,11 +30,12 @@
 // A run with zero cases fails. A pass count lower than the recorded one fails (--accept records it).
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
-import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { connect } from './oracle/cdp.mjs';
 import { RECIPES as recipes } from './oracle/recipes.mjs';
 import { path } from './lib/data.mjs';
-import { oracleTurn, replayScript, stateScript, filler } from '../app/src/chat/turn.ts';
+import { turnTraces } from './lib/turn-traces.mjs';
+import { oracleTurn, replayScript, stateScript, filler, awayAtReply } from '../app/src/chat/turn.ts';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -54,9 +59,12 @@ const ONLY = opt('only');
 // sends since Barkpark #25471 (1c4a128565). --shape legacy plays the older host; it compares only.
 const SHAPE = opt('shape') === 'legacy' ? 'legacy' : 'items';
 if (SHAPE !== 'items' && !CI) { console.error('Gate B: --shape legacy compares only; add --ci'); process.exit(2); }
-const traces = readdirSync(path('traces')).filter((f) => f.endsWith('.json') && (!ONLY || f === `${ONLY}.json`))
-  .map((f) => JSON.parse(readFileSync(path('traces', f), 'utf8')))
-  .filter((t) => recipes[t.recipe]?.kind === 'send');
+const all = turnTraces();
+if (all.unversioned.length) { console.error(`Gate B: ${all.unversioned.map((t) => t.id).join(', ')} name${all.unversioned.length > 1 ? '' : 's'} no oracle_version: nothing says which oracle was recorded. Re-record (scripts/oracle/record.mjs writes it)`); process.exit(1); }
+const notJudged = all.superseded.map(({ trace, by }) => `Gate B · ${trace.id} · not judged: recorded on ${trace.oracle_version}, superseded by ${by.map((t) => t.id).join(', ')} (${by[0].oracle_version})`);
+const old = all.superseded.find(({ trace }) => trace.id === ONLY);
+if (old) { console.error(`Gate B: ${ONLY} is superseded by ${old.by.map((t) => t.id).join(', ')} (oracle ${old.by[0].oracle_version}); it is not judged`); process.exit(1); }
+const traces = all.judged.filter((t) => !ONLY || t.id === ONLY);
 if (!traces.length) { console.error('Gate B: no recorded turns in traces/: nothing to compare is a failure'); process.exit(1); }
 
 const PROFILE = path('.cache', `gate-b-chrome-${CHROME_PORT}`); // one Chrome profile per run
@@ -98,6 +106,8 @@ function armAndSend() {
     status: tx.querySelector('[role=status]')?.textContent.trim() ?? '',
     focus: document.activeElement === prompt,
     rail: [...document.querySelectorAll('.rail-tile[aria-label]')].some((b) => b.getAttribute('aria-label').split(', ').includes('Working')),
+    unread: [...document.querySelectorAll('.rail-tile[aria-label]')].some((b) => b.getAttribute('aria-label').split(', ').includes('Unread activity')),
+    window: document.hasFocus(),
   });
   const log = [];
   let was = read();
@@ -116,6 +126,8 @@ function armAndSend() {
     if (now.status !== was.status && / is working$/.test(now.status)) log.push({ kind: 'status:working', t });
     if (now.status !== was.status && / replied$/.test(now.status)) log.push({ kind: 'status:replied', t });
     if (now.rail && !was.rail) log.push({ kind: 'rail:working', t });
+    if (now.unread && !was.unread) log.push({ kind: 'rail:unread', t });
+    if (now.window !== was.window) log.push({ kind: 'window', t });
     if (!now.focus && was.focus) log.push({ kind: 'blur', t });
     was = now;
   };
@@ -123,7 +135,8 @@ function armAndSend() {
   mo.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true });
   prompt.addEventListener('blur', look);
   const arrivals = () => (window.__arrivals ?? []).filter((a) => a.t >= t0).map((a) => ({ ...a, t: Math.round((a.t - t0) * 10) / 10 }));
-  window.__gateB = { log, stop: () => { mo.disconnect(); look(); return { log, focus: document.activeElement === prompt, arrivals: arrivals() }; } };
+  addEventListener('focus', look); addEventListener('blur', look);
+  window.__gateB = { log, window: was.window, stop: () => { mo.disconnect(); look(); return { log, focus: document.activeElement === prompt, window: was.window, arrivals: arrivals() }; } };
   prompt.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true }));
   return true;
 }
@@ -150,7 +163,7 @@ function compare(oracle, ours, focusAtEnd, skipped = []) {
     matched.push({ key, m, o });
     cases.push({ key, pass: !why.length, oracle: m.t, ours: o.t, lag, why: why.join('; ') || undefined });
   });
-  const counted = new Set(['user', 'working', 'label:status', 'label:typing', 'assistant', 'status:working', 'status:replied', 'rail:working']);
+  const counted = new Set(['user', 'working', 'label:status', 'label:typing', 'assistant', 'status:working', 'status:replied', 'rail:working', 'rail:unread']);
   const extra = ours.filter((o) => counted.has(o.kind) && !matched.some((x) => x.o === o));
   cases.push({ key: 'nothing extra', pass: !extra.length, why: extra.length ? extra.map((o) => `${o.kind}${o.text ? ` "${o.text}"` : ''} at ${o.t}`).join(', ') : undefined });
 
@@ -177,6 +190,9 @@ async function play(trace, sent) {
   const { milestones } = oracleTurn(trace);
   const [w, h, dpr] = trace.viewport;
   await page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: dpr, mobile: false });
+  // The window's focus, as the oracle's was when the reply landed (header: window focus).
+  const away = awayAtReply(milestones);
+  await page.send('Emulation.setFocusEmulationEnabled', { enabled: !away });
   await page.send('Page.navigate', { url: `${base}/gate-b/${trace.id}?shape=${SHAPE}` });
   await until(() => page.evaluate(() => document.readyState === 'complete' && document.querySelector('[data-gate-b]')?.dataset.gateB === 'ready' && document.fonts.status === 'loaded'), 30000, `/gate-b/${trace.id}`);
   const run = await page.evaluate(() => document.querySelector('[data-gate-b]').dataset.run);
@@ -189,12 +205,15 @@ async function play(trace, sent) {
   const status = async () => (await fetch(`${base}/api/gate-b/${trace.id}?run=${run}&status`)).json().catch(() => null);
   await until(async () => (await status())?.connects >= 2, 5000, 'the reconnect').catch(() => {});
   await wait(500);
-  const { log, focus, arrivals } = await page.evaluate(() => window.__gateB.stop());
+  const { log, focus, arrivals, window: focusAtEnd } = await page.evaluate(() => window.__gateB.stop());
+  const focusAtSend = await page.evaluate(() => window.__gateB.window);
+  // Held for the whole turn, or the Unread case (and "nothing extra") judged another window.
+  const windowHeld = focusAtSend === !away && focusAtEnd === !away && !log.some((m) => m.kind === 'window');
   const final = await page.evaluate(() => {
     const len = (role) => [...document.querySelectorAll(`.transcript [role=article] [data-role=${role}], .transcript [role=article][data-role=${role}]`)].map((b) => (b.querySelector('.bubble-text') ?? b).textContent.trim().length);
     return { user: len('user'), assistant: len('assistant') };
   });
-  return { milestones, log, focus, arrivals, final, status: await status() };
+  return { milestones, log, focus, arrivals, final, status: await status(), away, windowHeld };
 }
 
 // What the UI adds, not what the stand-in delivers: each moment counts from the arrival that
@@ -221,7 +240,7 @@ function uiTime(milestones, fleet, log, arrivals) {
   // leaving after the reply follows turn_completed, even when an idle flip lands in between
   // (say-hi-2: the flip at 4744 sits between the reply at 4643 and the line gone at ~4882; the
   // two streams' timers drift apart under load, and the line was charged that drift, 299 ms).
-  const byState = new Set(['working', 'rail:working']);
+  const byState = new Set(['working', 'rail:working', 'rail:unread']);
   const timed = log.map((m) => {
     const c = causes.filter((x) => x.t <= m.t && (!x.state || byState.has(m.kind))).at(-1);
     return c ? { ...m, t: Math.round((c.at + m.t - c.t) * 10) / 10, raw: m.t } : m;
@@ -247,18 +266,21 @@ for (const trace of traces) {
   const live = await play(trace, sent);
   const ui = uiTime(milestones, fleet, live.log, live.arrivals);
   const skipped = [];
-  const cases = [{ key: 'replay: every scripted event reached the page', pass: ui.precondition.pass, why: ui.precondition.why }, ...compare(milestones, ui.log, live.focus, skipped)];
+  const cases = [{ key: 'replay: every scripted event reached the page', pass: ui.precondition.pass, why: ui.precondition.why },
+    { key: `replay: the window ${live.away ? 'had no focus' : 'had focus'} for the whole turn, as the oracle's`, pass: live.windowHeld, why: live.windowHeld ? undefined : 'the page\'s window focus was not what the trace needs, or changed mid-turn: the Unread dot was judged in another window' },
+    ...compare(milestones, ui.log, live.focus, skipped)];
   cases.push(historyCase('history after a reconnect (one row, every message joined, as Barkpark stores a turn since #25471)', milestones, live));
   const pass = cases.filter((c) => c.pass).length;
-  report.push({ id: trace.id, captured: trace.captured, cases: cases.length, pass, results: cases, oracle: milestones.map(({ text, ...m }) => m), ours: ui.log.map(({ text, ...m }) => m), standInLate: ui.precondition.late, skipped });
+  report.push({ id: trace.id, captured: trace.captured, oracle_version: trace.oracle_version, cases: cases.length, pass, results: cases, oracle: milestones.map(({ text, ...m }) => m), ours: ui.log.map(({ text, ...m }) => m), standInLate: ui.precondition.late, skipped });
   console.log(`Gate B · ${trace.id} · ${pass}/${cases.length} pass`);
   for (const k of skipped) console.log(`  · ${k}`);
   for (const c of cases.filter((x) => !x.pass).slice(0, Number(opt('show') ?? 20))) console.log(`  ✗ ${c.key}: ${c.why}`);
 }
 page.close();
+for (const line of notJudged) console.log(line);
 
 const total = report.reduce((n, s) => n + s.cases, 0), passed = report.reduce((n, s) => n + s.pass, 0);
-console.log(`Gate B · all ${report.length} turns · ${passed}/${total} pass`);
+console.log(`Gate B · all ${report.length} turns${ONLY ? '' : ` on oracle ${[...new Set(report.map((s) => s.oracle_version))].join(', ')}`} · ${passed}/${total} pass`);
 if (!total) { console.error('Gate B: zero cases: a gate with nothing to check fails'); process.exit(1); }
 // --dump <file>: this run's full report, numbers included (for hunting a flaky case).
 if (opt('dump')) writeFileSync(opt('dump'), JSON.stringify(report, null, 1));

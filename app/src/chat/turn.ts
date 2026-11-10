@@ -9,6 +9,10 @@
 //   the rail says Working → the bot's state flips (fleet stream, event: state; stateScript);
 //                           0.79.3 never says it on the open bot: the line is the witness (fromRow);
 //                           a moment of its own (rail:working), judged like the others.
+//   the rail gains        → the bot's state flips to idle in a window without focus: the tile's
+//   "Unread activity"       own moment (rail:unread). It trails the reply by a time the oracle's
+//                           own side sets (66 ms in storage, 996 ms in say-hi, both 0.79.3), so
+//                           the idle flip is scripted at the dot, as Working's is at the rail.
 //                           The row waits for it: in storage the row came with the rail,
 //                           779 ms after "is working", not with the turn's start.
 //   "Typing…" label       → text_delta from then until the bubble, in ~50 ms chunks
@@ -20,7 +24,7 @@
 // turn (say-hi calls no tool), and a host's tool items (task-f13fc4b4dc2af6de) name tools, not
 // that. The oracle's DOM shows no tool call either, so the script sends none; Gate B says so.
 
-export type Kind = 'user' | 'working' | 'label:status' | 'label:typing' | 'assistant' | 'status:working' | 'status:replied' | 'rail:working'
+export type Kind = 'user' | 'working' | 'label:status' | 'label:typing' | 'assistant' | 'status:working' | 'status:replied' | 'rail:working' | 'rail:unread'
 export type Milestone = {kind: Kind; t: number; len?: number; text?: string}
 export type TraceEvent = {t: number; type: string; kind: string; tag?: string; role?: string; data?: string; text?: string; textLength?: number; name?: string; value?: string}
 export type Trace = {id: string; recipe: string; bot: string; viewport: [number, number, number]; events: TraceEvent[]}
@@ -52,25 +56,41 @@ export function oracleTurn(trace: Trace): {clear: number; milestones: Milestone[
     else if (e.kind === 'other' && e.tag === 'span' && e.text?.endsWith(' replied')) out.push({kind: 'status:replied', t: at(e)})
   }
   const rail: RailState[] = []
+  // Whether the tile said Unread before this label. Before the first one nobody saw it: a first
+  // label that says Working too was unread already (0.79.2 storage: "Oracle, Unread activity,
+  // Working" as the turn starts), since no reply lands in the event that starts the turn.
+  let unread: boolean | null = null
   for (const e of trace.events) {
     if (e.type !== 'attr' || e.kind !== 'rail' || e.name !== 'aria-label' || e.t < clear.t || typeof e.value !== 'string') continue
-    const state = e.value.split(', ').includes('Working') ? 'working' : 'idle'
+    const says = e.value.split(', ')
+    const state = says.includes('Working') ? 'working' : 'idle'
     if (rail.at(-1)?.state !== state) rail.push({t: at(e), state})
+    const now = says.includes('Unread activity')
+    if (now && !(unread ?? state === 'working')) out.push({kind: 'rail:unread', t: at(e)})
+    unread = now
   }
   // The rail turning to Working is a moment too: it comes with the bot's state, not the turn.
   for (const r of rail) if (r.state === 'working') out.push({kind: 'rail:working', t: r.t})
   out.sort((a, b) => a.t - b.t) // stable: same-ms moments keep the trace's order
-  return {clear: clear.t, milestones: out, rail, fleet: rail.length ? rail : fromRow(out)}
+  // The rail's times are the state's only where the rail said Working (up to 0.79.2).
+  return {clear: clear.t, milestones: out, rail, fleet: rail.some((r) => r.state === 'working') ? rail : fromRow(out)}
 }
+
+/** True when the oracle's window had no focus as the reply landed: the tile's Unread dot is the
+ *  trace's only witness of that (traces/2026-11-09-unread.json: a reply in a focused window sets none). */
+export const awayAtReply = (m: Milestone[]) => m.some((x) => x.kind === 'rail:unread')
 
 /** The bot's state as Barkpark's fleet stream sends it. Up to Grok 0.79.2 the open bot's tile said
  *  Working, so the rail's times are the state's. 0.79.3 never says Working on the open bot
  *  (long-answer), so the working line, which shows with the state, is its only witness: Working at
- *  the line, idle at the reply. */
+ *  the line, idle at the reply. Where the tile gained Unread (a window without focus), that is the
+ *  rail showing the state go idle: idle then, never before the reply. */
 function fromRow(m: Milestone[]): RailState[] {
   const line = m.find((x) => x.kind === 'working')
   const reply = m.filter((x) => x.kind === 'assistant').at(-1)
-  return line ? [{t: line.t, state: 'working'}, ...(reply ? [{t: reply.t, state: 'idle' as const}] : [])] : []
+  const dot = m.find((x) => x.kind === 'rail:unread' && reply && x.t >= reply.t)
+  const idle = dot ?? reply
+  return line ? [{t: line.t, state: 'working'}, ...(idle ? [{t: idle.t, state: 'idle' as const}] : [])] : []
 }
 
 /** Neutral words of exactly n characters, no space at either end (O2: no conversation text). */
