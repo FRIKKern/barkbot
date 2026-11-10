@@ -7,10 +7,12 @@
 //   node scripts/behaviour.mjs --url http://localhost:3170   use an app that is already running
 //
 // Exits 1 if any rule fails, or if a precondition does not hold (then nothing was measured).
+// The app it starts talks to a stand-in Barkpark (below), never a real one.
 // Sources: traces/2026-11-09-rename.json, traces/2026-11-09-unread.json,
 // traces/2026-11-09-long-answer.json (all Grok 0.79.3).
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
+import { createServer as httpServer } from 'node:http';
 import { mkdirSync, rmSync } from 'node:fs';
 import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
@@ -31,10 +33,29 @@ const kids = [];
 process.on('exit', () => { kids.forEach((k) => { try { k.kill('SIGTERM'); } catch {} }); try { rmSync(PROFILE, { recursive: true, force: true }); } catch {} });
 process.on('SIGINT', () => process.exit(130));
 
+// A stand-in Barkpark for the live page (/): it answers what loadChat asks (no computer enrolled;
+// the saved bot name) and keeps every write, so the rename-persists rules can count them.
+const stub = { name: null, reads: 0, writes: [], other: [] };
+const PREF = '/w/default/p/default/v1/prefs/production/barkbot.bot';
+const STUB_PORT = await freePort();
+await new Promise((ok) => httpServer((req, res) => {
+  let body = '';
+  req.on('data', (c) => (body += c));
+  req.on('end', () => {
+    const json = (code, v) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(v)); };
+    if (req.url === PREF && req.method === 'GET') { stub.reads++; return json(200, { key: 'barkbot.bot', dataset: 'production', value: stub.name === null ? null : { name: stub.name } }); }
+    if (req.url === PREF && req.method === 'PUT') { const { value } = JSON.parse(body); stub.writes.push(value); stub.name = value?.name ?? null; return json(200, { key: 'barkbot.bot', dataset: 'production', value }); }
+    if (req.url.startsWith('/w/default/v1/chat-hosts')) return json(200, { hosts: [] });
+    stub.other.push(`${req.method} ${req.url}`);
+    json(404, { error: { code: 'not_found', message: 'not in the stand-in' } });
+  });
+}).listen(STUB_PORT, '127.0.0.1', ok));
+
 let base = opt('url');
 if (!base) {
   base = `http://localhost:${APP_PORT}`;
-  kids.push(spawn('pnpm', ['-s', 'dev', '--port', String(APP_PORT), '--strictPort'], { cwd: path('app'), stdio: 'ignore' }));
+  const env = { ...process.env, BARKPARK_URL: `http://127.0.0.1:${STUB_PORT}`, BARKPARK_TOKEN: 'stand-in', BARKPARK_WORKSPACE: 'default', BARKPARK_PROJECT: 'default', BARKPARK_DATASET: 'production', BARKBOT_NAME: 'BarkBot' };
+  kids.push(spawn('pnpm', ['-s', 'dev', '--port', String(APP_PORT), '--strictPort'], { cwd: path('app'), stdio: 'ignore', env }));
   await until(async () => (await fetch(base)).status > 0, 90000, `the app on ${base}`);
 }
 mkdirSync(PROFILE, { recursive: true });
@@ -174,6 +195,45 @@ check('control: focused again, the next reply sets no dot', s.focus && !s.dot, s
 await drive(['Oracle', 'Grookie']); s = await rail();
 check('Working: not on the open bot; still on a bot that is not open (control)', s.tiles[1] === 'Oracle' && s.tiles[0] === 'Grookie, Main Bot, Working', s);
 await drive([]);
+
+// ── Rename persists: the live page (/) saves the name to Barkpark (task-c3e0bc88ce28833d) ─────
+// Grok keeps a renamed bot's name across a restart. Ours saves it as a Barkpark pref on Enter or
+// a click away, and loadChat reads it back. Counted at the stand-in, so a write is a write.
+if (opt('url')) console.log('Behaviour · rename persists: not run with --url (it needs the stand-in Barkpark)');
+else {
+  console.log('Behaviour · rename persists (the live page, against the stand-in Barkpark)');
+  const live = async () => ({ ...(await name()), tiles: await ev(() => [...document.querySelectorAll('.rail-tile[aria-label]')].map((t) => t.getAttribute('aria-label'))) });
+  const reload = async (want) => {
+    await open(`${base}/`); await windowFocus(true);
+    // Typing before React owns the field would be lost when it hydrates (seen on a cold dev server).
+    await until(async () => (await name()).react !== undefined, 30000, 'React to own the Bot name field');
+    // A name that never comes back is a failed rule below, not a crash here.
+    await until(async () => (await live()).header === want, 10000, `the live page to show "${want}"`).catch(() => {});
+    const l = await live(); field = l.rect; return l;
+  };
+  const reads = stub.reads;
+  s = await reload('BarkBot');
+  precondition('the live page read the saved name from the stand-in (unset), shows BarkBot, and wrote nothing',
+    stub.reads > reads && stub.writes.length === 0 && s.value === 'BarkBot' && s.placeholder === 'Message BarkBot' && s.tiles.includes('BarkBot'), { reads: stub.reads, writes: stub.writes, other: stub.other, s });
+
+  await into(); await key('End'); await typeIn(' Two'); await key('Escape'); await wait(300);
+  await into(); await clear(); await key('Enter'); await wait(300);
+  s = await live();
+  check('Escape and an empty name write nothing to Barkpark (control: the next rule\'s rename writes)', stub.writes.length === 0 && s.header === 'BarkBot', { writes: stub.writes, s });
+
+  await into(); await key('End'); await typeIn(' Two'); await key('Enter');
+  await until(async () => stub.writes.length > 0, 5000, 'the rename to reach the stand-in').catch(() => {});
+  s = await live();
+  check('Enter: writes the name once, and the live composer says "Message BarkBot Two" at once', stub.writes.length === 1 && stub.writes[0]?.name === 'BarkBot Two' && s.placeholder === 'Message BarkBot Two' && s.header === 'BarkBot Two', { writes: stub.writes, s });
+
+  s = await reload('BarkBot Two');
+  check('reload: header, rail tile and placeholder show the saved name (control: "BarkBot" before the rename)', s.value === 'BarkBot Two' && s.tiles.includes('BarkBot Two') && s.placeholder === 'Message BarkBot Two' && stub.writes.length === 1, { writes: stub.writes, s });
+
+  await into(); await key('End'); await typeIn('X'); await click(400, 300);
+  await until(async () => stub.writes.length > 1, 5000, 'the click-away rename to reach the stand-in').catch(() => {});
+  s = await reload('BarkBot TwoX');
+  check('click away: writes too, and a reload keeps it', stub.writes.length === 2 && stub.writes[1]?.name === 'BarkBot TwoX' && s.tiles.includes('BarkBot TwoX'), { writes: stub.writes, s });
+}
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
 process.exit(failed ? 1 : 0);

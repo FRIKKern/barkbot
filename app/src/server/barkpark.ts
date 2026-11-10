@@ -5,24 +5,30 @@ import {readFileSync} from 'node:fs'
 import {homedir} from 'node:os'
 import {join} from 'node:path'
 
-type Conf = {url: string; token: string; workspace: string}
+type Conf = {url: string; token: string; workspace: string; project: string; dataset: string}
 let cached: Conf | null = null
 
 /**
- * Where Barkpark is and who we are: BARKPARK_URL, BARKPARK_TOKEN and BARKPARK_WORKSPACE from
+ * Where Barkpark is and who we are: BARKPARK_URL, BARKPARK_TOKEN, BARKPARK_WORKSPACE, _PROJECT and _DATASET from
  * the repo's .env, else the owner's own `bp` login on this machine. Phase 1 runs on the
  * owner's Mac, so the owner's login is the honest default; nothing is copied anywhere.
  */
 export function conf(): Conf {
   if (cached) return cached
-  let bp: {server?: string; token?: string; workspace?: string} = {}
+  let bp: {server?: string; token?: string; workspace?: string; project?: string; dataset?: string} = {}
   try {
     bp = JSON.parse(readFileSync(join(homedir(), '.config', 'barkpark', 'config.json'), 'utf8'))
   } catch {}
   const url = process.env.BARKPARK_URL || bp.server
   const token = process.env.BARKPARK_TOKEN || bp.token
   if (!url || !token) throw new Error('No Barkpark: set BARKPARK_URL and BARKPARK_TOKEN in .env, or log in with bp')
-  cached = {url: url.replace(/\/$/, ''), token, workspace: process.env.BARKPARK_WORKSPACE || bp.workspace || 'default'}
+  cached = {
+    url: url.replace(/\/$/, ''),
+    token,
+    workspace: process.env.BARKPARK_WORKSPACE || bp.workspace || 'default',
+    project: process.env.BARKPARK_PROJECT || bp.project || 'default',
+    dataset: process.env.BARKPARK_DATASET || bp.dataset || 'production',
+  }
   return cached
 }
 

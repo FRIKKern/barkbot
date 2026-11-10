@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react'
 import {Shell} from '../components/Shell'
 import {Transcript} from '../components/Transcript'
 import {Composer} from '../components/Composer'
-import {loadChat, startChat} from '../chat/api'
+import {loadChat, renameBot, startChat} from '../chat/api'
 import {useConversation} from '../chat/useConversation'
 
 // The bot, live: its computer and conversation come from Barkpark (loadChat). No made-up data:
@@ -25,6 +25,19 @@ function Home() {
   const convo = useConversation(sessionId)
   const [opening, setOpening] = useState(false)
   const [waiting, setWaiting] = useState<string | null>(null)
+  // The bot's name as renamed in the details panel: the composer and the transcript follow it at
+  // once, and it is saved to Barkpark, so a reload shows it too (loadChat reads it back).
+  const [name, setName] = useState(chat.bot)
+  const [renameError, setRenameError] = useState<string | null>(null)
+  const rename = async (_bot: string, next: string) => {
+    setName(next)
+    try {
+      await renameBot({data: next})
+      setRenameError(null)
+    } catch (e) {
+      setRenameError(`The new name was not saved: ${(e as Error).message}`)
+    }
+  }
 
   const send = async (text: string) => {
     if (!chat.host) return
@@ -52,20 +65,21 @@ function Home() {
   return (
     <Shell
       scene={{bots: [{name: chat.bot}], active: chat.bot, panelOpen: true, computer, voice: VOICE}}
+      onRenameBot={rename}
       workingBots={convo.botState === 'working' ? [chat.bot] : []}
       transcript={
         chat.host ? (
-          <Transcript bot={chat.bot} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error} />
+          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? renameError} />
         ) : (
           <div className="transcript">
             <p className="chat-note">
-              {chat.bot} has no computer yet. Enroll one: <code>npm run host:enroll</code>, then <code>npm run host</code>.{' '}
+              {name} has no computer yet. Enroll one: <code>npm run host:enroll</code>, then <code>npm run host</code>.{' '}
               <button className="link" onClick={() => router.invalidate()}>Check again</button>
             </p>
           </div>
         )
       }
-      composer={<Composer placeholder={`Message ${chat.bot}`} onSend={send} disabled={!chat.host || opening || !!waiting} />}
+      composer={<Composer placeholder={`Message ${name}`} onSend={send} disabled={!chat.host || opening || !!waiting} />}
     />
   )
 }
