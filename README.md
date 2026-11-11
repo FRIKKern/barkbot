@@ -23,12 +23,15 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## What happened
 
 <!-- timeline:start -->
-- **Today** · 28 changes
-  - Oracle: the width edges, measured — five widths kept
-  - Narrow and wide windows: the panel closes itself below 800, compact Share ([#9](https://github.com/FRIKKern/barkbot/pull/9))
-- **Yesterday** · 11 changes
-  - S1: talk through Barkpark (server side, transcript, working line, composer)
-  - S0 closed on the board; Gate B moves to S1 with the transcript it needs
+- **Today** · 2 changes
+  - The unread dot's colour is the oracle's own, read on its dot ([#34](https://github.com/FRIKKern/barkbot/pull/34))
+  - Gate B judges the turns re-recorded on Grok 0.79.3, and the rail's Unread dot ([#33](https://github.com/FRIKKern/barkbot/pull/33))
+- **Yesterday** · 5 changes
+  - Name the rename pref as phase 1: one bot ([#32](https://github.com/FRIKKern/barkbot/pull/32))
+  - A bot rename is saved to Barkpark (a per-account pref) and survives a reload ([#31](https://github.com/FRIKKern/barkbot/pull/31))
+- **This week** · 60 changes
+  - Bot name: rename as the oracle does, and the name follows everywhere ([#27](https://github.com/FRIKKern/barkbot/pull/27))
+  - Oracle: the rename field has no focus look; the name reaches the tile and the placeholder ([#26](https://github.com/FRIKKern/barkbot/pull/26))
 <!-- timeline:end -->
 
 ## Where things live (one fact, one home)

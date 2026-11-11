@@ -4,5 +4,5 @@
  "journey": "J01",
  "title": "App shell: TanStack Start; the Barkpark token lives only in server functions",
  "status": "partial",
- "evidence": "app/src/server/barkpark.ts (server-only; token from .env or the owner's bp login); app/src/chat/api.ts loadChat/startChat/sendMessage; /api/chat/$id/events passes Barkpark's stream through. Browser bundle has no token code (build checked). Missing: a real turn end to end (T6)."
+ "evidence": "app/src/server/barkpark.ts (server-only; token from .env or the owner's bp login); app/src/chat/api.ts loadChat/startChat/sendMessage; /api/chat/$id/events passes Barkpark's stream through. Browser bundle has no token code (build checked). A real turn ran end to end through the app on 2026-11-11 (T6). Missing: a gate that proves it on each change."
 }
