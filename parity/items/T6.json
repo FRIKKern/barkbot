@@ -3,6 +3,7 @@
  "slice": "S1",
  "journey": "J01",
  "title": "A registered chat host on the owner's Mac runs real claude -p",
- "status": "partial",
- "evidence": "npm run host:enroll / npm run host (scripts/host.sh): one locked folder ~/BarkBot/home, claude in plan mode. Enrollment is owner-only: the owner issues it in Studio > Chat hosts. Seen live 2026-11-11 on guerrilla (after Barkpark #25636 and #25679): the host 'BarkBot Mac' is online with claude installed and signed in; a message posted to a registered_host session answered 202 and came back as session_started, turn_started, text_delta, item_completed, turn_completed in about 12 s. Missing: a repeatable check (this was one live run by hand)."
+ "status": "done",
+ "evidence": "npm run host:enroll / npm run host (scripts/host.sh): one locked folder ~/BarkBot/home, claude in plan mode. Enrollment is owner-only: the owner issues it in Studio > Chat hosts. Seen live 2026-11-11 on guerrilla (after Barkpark #25636 and #25679): the host 'BarkBot Mac' is online with claude installed and signed in; a message posted to a registered_host session answered 202 and came back as session_started, turn_started, text_delta, item_completed, turn_completed in about 12 s. Repeatable since: scripts/turn-live.mjs sends one turn through the app's own page and reloads it (2026-11-11: a reply in 11.5 s, 7 + 7 bubbles, the same after a reload).",
+ "gate": "npm run turn:live (owner-run: needs the owner's Barkpark login and the enrolled Mac online; not in land or CI). Record: parity/live/turn.json. Seen to fail both ways on 2026-11-11: no computer by that name, and the host stopped (no reply in 90 s)."
 }

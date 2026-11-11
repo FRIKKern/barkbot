@@ -19,6 +19,7 @@
     "gate:ci": "node scripts/gate.mjs --ci",
     "gate:b": "node scripts/gate-b.mjs",
     "behaviour": "node scripts/behaviour.mjs",
+    "turn:live": "node scripts/turn-live.mjs",
     "land": "sh scripts/land.sh"
   }
 }
