@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-22 of 44 items done, 10 partial, 3 open, 9 not yet read on the oracle.
+23 of 44 items done, 10 partial, 2 open, 9 not yet read on the oracle.
 Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an item file, never this page.
 
 ## S0 Harness
@@ -54,7 +54,7 @@ Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an it
 | Id | Item | Journey | Status | Gate or evidence |
 |---|---|---|---|---|
 | C1 | Cancel a reply: it stops at once and nothing is left running | J05 | ? unread | — |
-| C2 | Come back later: transcript and Claude session resume after a restart | J06 | ○ open | — |
+| C2 | Come back later: transcript and Claude session resume after a restart | J06 | ✓ done | Gate: npm run turn:live -- --resume (owner-run: needs the owner's Barkpark login, the enrolled Mac, and a person to restart npm run host). Record: parity/live/resume.json.. Evidence: scripts/turn-live.mjs --resume: gives the bot a code made up for the run, the host program is stopped and started, a fresh page shows the conversation again (9 + 9 bubbles), and the bot gives the code back (2026-11-12, restart within 5 s). The transcript is Barkpark's stored rows (asked for from 0, #35); the memory is Claude's own session, which the host resumes by provider_session_id. Not covered: a restart of the Mac itself, and a restart in the middle of a reply. |
 
 ## S4 Things
 
