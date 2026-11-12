@@ -1,0 +1,18 @@
+{
+ "ran": "2026-11-12T22:58:44.550Z",
+ "barkbot": "4f1ae7fb0f",
+ "restart_window_ms": 4717,
+ "reply_ms": [
+  6245,
+  5454
+ ],
+ "bubbles_before_restart": [
+  9,
+  9
+ ],
+ "bubbles_at_end": [
+  10,
+  10
+ ],
+ "code_returned": true
+}
