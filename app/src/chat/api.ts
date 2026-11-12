@@ -52,6 +52,11 @@ export const loadChat = createServerFn({method: 'GET'}).handler(async (): Promis
   return {bot, host, sessionId: mine[0]?.id ?? null, startedAt: mine[0]?.inserted_at ?? null}
 })
 
+/** Is the bot's computer reachable right now? The page asks every few seconds: Barkpark accepts a
+ *  message for a computer that is off (202) and answers it only when the computer is back, so
+ *  without this a send looked like it went nowhere (seen live 2026-11-11). */
+export const computerOnline = createServerFn({method: 'GET'}).handler(async (): Promise<boolean> => (await findHost())?.online ?? false)
+
 /** A new conversation on the bot's computer. Claude starts in plan mode (the host's default). */
 export const startChat = createServerFn({method: 'POST'})
   .validator((hostId: string) => hostId)
