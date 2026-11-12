@@ -35,7 +35,7 @@ process.on('SIGINT', () => process.exit(130));
 
 // A stand-in Barkpark for the live page (/): it answers what loadChat asks (no computer enrolled;
 // the saved bot name) and keeps every write, so the rename-persists rules can count them.
-const stub = { name: null, reads: 0, writes: [], other: [] };
+const stub = { name: null, reads: 0, writes: [], other: [], hosts: [] };
 const PREF = '/w/default/p/default/v1/prefs/production/barkbot.bot';
 const STUB_PORT = await freePort();
 await new Promise((ok) => httpServer((req, res) => {
@@ -45,7 +45,8 @@ await new Promise((ok) => httpServer((req, res) => {
     const json = (code, v) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(v)); };
     if (req.url === PREF && req.method === 'GET') { stub.reads++; return json(200, { key: 'barkbot.bot', dataset: 'production', value: stub.name === null ? null : { name: stub.name } }); }
     if (req.url === PREF && req.method === 'PUT') { const { value } = JSON.parse(body); stub.writes.push(value); stub.name = value?.name ?? null; return json(200, { key: 'barkbot.bot', dataset: 'production', value }); }
-    if (req.url.startsWith('/w/default/v1/chat-hosts')) return json(200, { hosts: [] });
+    if (req.url.startsWith('/w/default/v1/chat-hosts')) return json(200, { hosts: stub.hosts });
+    if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: [] });
     stub.other.push(`${req.method} ${req.url}`);
     json(404, { error: { code: 'not_found', message: 'not in the stand-in' } });
   });
@@ -233,6 +234,25 @@ else {
   await until(async () => stub.writes.length > 1, 5000, 'the click-away rename to reach the stand-in').catch(() => {});
   s = await reload('BarkBot TwoX');
   check('click away: writes too, and a reload keeps it', stub.writes.length === 2 && stub.writes[1]?.name === 'BarkBot TwoX' && s.tiles.includes('BarkBot TwoX'), { writes: stub.writes, s });
+
+  // The bot's computer stops and comes back while the page is open (seen live 2026-11-11: a
+  // message sent to a stopped computer showed no reply and no reason).
+  console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
+  const host = (online) => [{ id: '00000000-0000-4000-8000-000000000001', name: 'BarkBot Mac', online, enrolled: true, revoked: false }];
+  const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
+  stub.hosts = host(true);
+  await open(`${base}/`);
+  await until(async () => (await computer()).state === 'Asleep', 30000, 'the live page with a computer that is on').catch(() => {});
+  let c = await computer();
+  precondition('the live page shows a reachable computer and no alert', c.state === 'Asleep' && c.alert === null, c);
+  stub.hosts = host(false);
+  await until(async () => (await computer()).alert !== null, 10000, 'the page to notice').catch(() => {});
+  c = await computer();
+  check('the computer stops: within 10 s the card says Unreachable and the conversation says why (control: neither, while it was on)', c.state === 'Unreachable' && /unreachable/.test(c.alert ?? '') && /npm run host/.test(c.alert ?? ''), c);
+  stub.hosts = host(true);
+  await until(async () => (await computer()).alert === null, 10000, 'the page to notice').catch(() => {});
+  c = await computer();
+  check('the computer comes back: the alert goes and the card is as before', c.state === 'Asleep' && c.alert === null, c);
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);

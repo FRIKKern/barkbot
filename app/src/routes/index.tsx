@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react'
 import {Shell} from '../components/Shell'
 import {Transcript} from '../components/Transcript'
 import {Composer} from '../components/Composer'
-import {loadChat, renameBot, startChat} from '../chat/api'
+import {computerOnline, loadChat, renameBot, startChat} from '../chat/api'
 import {useConversation} from '../chat/useConversation'
 
 // The bot, live: its computer and conversation come from Barkpark (loadChat). No made-up data:
@@ -61,7 +61,17 @@ function Home() {
     }
   }, [waiting, convo.ready, convo.send])
 
-  const computer = !chat.host ? 'Unreachable' : chat.host.online ? 'Asleep' : 'Unreachable'
+  // The computer can stop and come back while the page is open: ask again every few seconds.
+  // A failed ask keeps the last answer (the page may be the thing that is offline).
+  const [online, setOnline] = useState(chat.host?.online ?? false)
+  useEffect(() => {
+    if (!chat.host) return
+    setOnline(chat.host.online)
+    const t = setInterval(() => void computerOnline().then(setOnline, () => {}), 5000)
+    return () => clearInterval(t)
+  }, [chat.host])
+  const offline = chat.host && !online ? `${name}'s computer is unreachable. Messages wait until it is back. Start it with: npm run host` : null
+  const computer = online ? 'Asleep' : 'Unreachable'
   return (
     <Shell
       scene={{bots: [{name: chat.bot}], active: chat.bot, panelOpen: true, computer, voice: VOICE}}
@@ -69,7 +79,7 @@ function Home() {
       workingBots={convo.botState === 'working' ? [chat.bot] : []}
       transcript={
         chat.host ? (
-          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? renameError} />
+          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? renameError ?? offline} />
         ) : (
           <div className="transcript">
             <p className="chat-note">
