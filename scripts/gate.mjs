@@ -29,6 +29,7 @@ const freePort = () => new Promise((ok, no) => { const s = createServer().once('
 const APP_PORT = Number(opt('port')) || await freePort(), CHROME_PORT = Number(opt('chrome-port')) || await freePort();
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const TOL = 1; // pt, each edge
+const STATE_MS = Number(opt('state-ms')) || 120000; // one state, start to measured
 const STYLE_KEYS = ['background-color', 'color', 'border-radius', 'font-size', 'font-weight', 'line-height'];
 const DEFAULTS = { 'background-color': 'rgba(0, 0, 0, 0)', 'border-radius': '0px' };
 
@@ -90,48 +91,69 @@ for (const state of states) {
     console.log(`Gate A · ${state.id} · 0/${keys.length} pass (no scene yet)`);
     continue;
   }
-  const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, `--window-size=${w},${h}`, `--force-device-scale-factor=${dpr}`, 'about:blank'], { stdio: 'ignore' });
-  kids.push(chrome);
-  await until(async () => (await fetch(`http://127.0.0.1:${CHROME_PORT}/json/version`)).ok, 15000, 'headless Chrome');
-  const page = await connect(undefined, CHROME_PORT);
-  await page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: dpr, mobile: false });
-  await page.send('Page.enable');
-  // --throttle <n>: slow this Chrome's CPU n times, to rehearse a slow CI runner.
-  if (opt('throttle')) await page.send('Emulation.setCPUThrottlingRate', { rate: Number(opt('throttle')) });
-  await page.send('Page.navigate', { url: `${base}/gate/${state.id}` });
-  await until(() => page.evaluate(() => document.readyState === 'complete' && !!document.querySelector('.app') && document.fonts.status === 'loaded' && !document.querySelector('[data-transcript]:not([data-hydrated])')), 30000, `/gate/${state.id}`);
-  await wait(300);
-  if (state.pointer) {
-    // Rest our pointer on our control of the same name, as the capture did on the oracle's.
-    const hit = controls(await page.evaluate(collect)).filter((c) => c.name === state.pointer.over)[state.pointer.nth ?? 0];
-    if (hit) { const [x, y, bw, bh] = hit.e.box; await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + bw / 2, y: y + bh / 2 }); await wait(400); }
-  }
-  // A capture taken with the pointer parked in the window: rest ours at the same point.
-  if (state.parked && !state.pointer) { await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: state.parked[0], y: state.parked[1] }); await wait(400); }
-  // The capture's last step (fixture `act`), replayed on ours the same way.
-  const act = state.act;
-  if (act?.type) { await page.send('Input.insertText', { text: act.type }); await wait(400); }
-  if (act?.wheel || act?.hoverRole) {
-    const el = (await page.evaluate(collect)).elements.find((e) => e.role === (act.wheel || act.hoverRole) && e.box[2] > 0 && e.box[3] > 0);
-    if (el) {
-      const [x, y, bw, bh] = el.box;
-      if (act.hoverRole) await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + bw / 2, y: y + Math.min(bh, 32) / 2 });
-      else for (let i = 0; i < 10; i++) await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + bw / 2, y: y + bh / 2, deltaX: 0, deltaY: 400 });
-      await wait(600);
+  // One state, in a Chrome of its own. A Chrome that drops its connection or stops answering
+  // must not hang or kill the run (seen on the shared Mac, 2026-11-11 and -13): each try has a
+  // time limit, the Chrome is gone before the next one starts on the same port, and a state
+  // that fails is tried once more before the run stops, naming it.
+  const measure = async () => {
+    let chrome, page;
+    try {
+    chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, `--window-size=${w},${h}`, `--force-device-scale-factor=${dpr}`, 'about:blank'], { stdio: 'ignore' });
+    kids.push(chrome);
+    await until(async () => (await fetch(`http://127.0.0.1:${CHROME_PORT}/json/version`)).ok, 15000, 'headless Chrome');
+    page = await connect(undefined, CHROME_PORT);
+    await page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: dpr, mobile: false });
+    await page.send('Page.enable');
+    // --throttle <n>: slow this Chrome's CPU n times, to rehearse a slow CI runner.
+    if (opt('throttle')) await page.send('Emulation.setCPUThrottlingRate', { rate: Number(opt('throttle')) });
+    await page.send('Page.navigate', { url: `${base}/gate/${state.id}` });
+    await until(() => page.evaluate(() => document.readyState === 'complete' && !!document.querySelector('.app') && document.fonts.status === 'loaded' && !document.querySelector('[data-transcript]:not([data-hydrated])')), 30000, `/gate/${state.id}`);
+    await wait(300);
+    if (state.pointer) {
+      // Rest our pointer on our control of the same name, as the capture did on the oracle's.
+      const hit = controls(await page.evaluate(collect)).filter((c) => c.name === state.pointer.over)[state.pointer.nth ?? 0];
+      if (hit) { const [x, y, bw, bh] = hit.e.box; await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + bw / 2, y: y + bh / 2 }); await wait(400); }
     }
+    // A capture taken with the pointer parked in the window: rest ours at the same point.
+    if (state.parked && !state.pointer) { await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: state.parked[0], y: state.parked[1] }); await wait(400); }
+    // The capture's last step (fixture `act`), replayed on ours the same way.
+    const act = state.act;
+    if (act?.type) { await page.send('Input.insertText', { text: act.type }); await wait(400); }
+    if (act?.wheel || act?.hoverRole) {
+      const el = (await page.evaluate(collect)).elements.find((e) => e.role === (act.wheel || act.hoverRole) && e.box[2] > 0 && e.box[3] > 0);
+      if (el) {
+        const [x, y, bw, bh] = el.box;
+        if (act.hoverRole) await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + bw / 2, y: y + Math.min(bh, 32) / 2 });
+        else for (let i = 0; i < 10; i++) await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + bw / 2, y: y + bh / 2, deltaX: 0, deltaY: 400 });
+        await wait(600);
+      }
+    }
+    // Tooltips and hover cards arrive after a delay that a slow runner stretches: when a state lists
+    // what it changed, wait (up to 3 s) until ours shows every one of those keys before measuring.
+    if (state.changed) {
+      const want = new Set(state.changed);
+      for (let t = 0; t < 30; t++) { const have = new Set(namedElements(await page.evaluate(collect)).map((c) => c.key)); if ([...want].every((k) => have.has(k))) break; await wait(100); }
+      await wait(150);
+    }
+      return await page.evaluate(collect);
+    } finally {
+      try { page?.close(); } catch {}
+      if (chrome) {
+        const gone = new Promise((ok) => chrome.once('exit', ok));
+        chrome.kill('SIGTERM');
+        await Promise.race([gone, wait(5000).then(() => { try { chrome.kill('SIGKILL'); } catch {} })]);
+        kids.splice(kids.indexOf(chrome), 1);
+      }
+      // The port is free again only when nothing answers on it.
+      await until(async () => !(await fetch(`http://127.0.0.1:${CHROME_PORT}/json/version`).then(() => true, () => false)), 10000, 'the last Chrome to be gone').catch(() => {});
+    }
+  };
+  const limited = () => { let t; return Promise.race([measure(), new Promise((_, no) => { t = setTimeout(() => no(new Error(`no answer within ${STATE_MS / 1000} s`)), STATE_MS); })]).finally(() => clearTimeout(t)); };
+  let ours;
+  try { ours = await limited(); } catch (e) {
+    console.error(`Gate A · ${state.id} · the browser failed (${e?.message ?? e?.type ?? e}); trying once more`);
+    try { ours = await limited(); } catch (e2) { console.error(`Gate A: ${state.id} could not be measured: ${e2?.message ?? e2?.type ?? e2}`); process.exit(1); }
   }
-  // Tooltips and hover cards arrive after a delay that a slow runner stretches: when a state lists
-  // what it changed, wait (up to 3 s) until ours shows every one of those keys before measuring.
-  if (state.changed) {
-    const want = new Set(state.changed);
-    for (let t = 0; t < 30; t++) { const have = new Set(namedElements(await page.evaluate(collect)).map((c) => c.key)); if ([...want].every((k) => have.has(k))) break; await wait(100); }
-    await wait(150);
-  }
-  const ours = await page.evaluate(collect);
-  page.close();
-  chrome.kill('SIGTERM');
-  kids.splice(kids.indexOf(chrome), 1);
-  await wait(300);
 
   // Gate A: same name, box within 1 pt on every edge, the same look.
   const mine = new Map(namedElements(ours).map((c) => [c.key, c]));

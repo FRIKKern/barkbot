@@ -18,7 +18,7 @@ export async function mainPage(port = PORT) {
 export async function connect(target, port = PORT) {
   const t = target || (await mainPage(port));
   const ws = new WebSocket(t.webSocketDebuggerUrl);
-  await new Promise((ok, bad) => { ws.onopen = ok; ws.onerror = bad; });
+  await new Promise((ok, bad) => { ws.onopen = ok; ws.onerror = () => bad(new Error(`could not connect to the browser on port ${port}`)); });
   let id = 0;
   const waiting = new Map();
   const listeners = new Map();
@@ -30,7 +30,14 @@ export async function connect(target, port = PORT) {
       msg.error ? bad(new Error(msg.error.message)) : ok(msg.result);
     } else if (msg.method) (listeners.get(msg.method) || []).forEach((f) => f(msg.params));
   };
+  // A connection that drops fails every call still waiting, and every later one: without
+  // this a caller waited forever on a browser that was gone.
+  let closed = null;
+  const drop = (why) => { closed = closed || new Error(why); for (const { bad } of waiting.values()) bad(closed); waiting.clear(); };
+  ws.onclose = () => drop('the browser closed the connection');
+  ws.onerror = () => drop('the connection to the browser failed');
   const send = (method, params = {}) => new Promise((ok, bad) => {
+    if (closed) return bad(closed);
     waiting.set(++id, { ok, bad });
     ws.send(JSON.stringify({ id, method, params }));
   });
