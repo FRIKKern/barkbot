@@ -13,7 +13,8 @@
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import { createServer as httpServer } from 'node:http';
-import { mkdirSync, rmSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 
@@ -35,7 +36,7 @@ process.on('SIGINT', () => process.exit(130));
 
 // A stand-in Barkpark for the live page (/): it answers what loadChat asks (no computer enrolled;
 // the saved bot name) and keeps every write, so the rename-persists rules can count them.
-const stub = { name: null, reads: 0, writes: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null };
+const stub = { name: null, reads: 0, writes: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map() };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 const PREF = '/w/default/p/default/v1/prefs/production/barkbot.bot';
@@ -57,6 +58,10 @@ await new Promise((ok) => httpServer((req, res) => {
       if (req.url !== '/v1/chat/events') { stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
       return;
     }
+    // Pictures, as Barkpark: an upload answers the sha256 of its bytes; a message names pictures by id.
+    if (/^\/v1\/chat\/sessions\/[^/]+\/attachments$/.test(req.url) && req.method === 'POST') { const { data } = JSON.parse(body); const bytes = Buffer.from(data, 'base64'); const id = createHash('sha256').update(bytes).digest('hex'); stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type: 'image/png', byte_size: bytes.length } }); }
+    if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const id = req.url.split('/').pop(); return stub.pictures.has(id) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(id) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
+    if (/^\/v1\/chat\/sessions\/[^/]+\/messages$/.test(req.url) && req.method === 'POST') { stub.sent.push(JSON.parse(body)); return json(202, { accepted: true }); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/answer$/.test(req.url) && req.method === 'POST') { stub.choices.push(JSON.parse(body)); res.writeHead(204); return res.end(); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/approval$/.test(req.url) && req.method === 'POST') { stub.answers.push(JSON.parse(body)); res.writeHead(204); return res.end(); }
     stub.other.push(`${req.method} ${req.url}`);
@@ -338,6 +343,37 @@ else {
   const n = stub.answers.length;
   if (k.allow) { await click(...k.allow); await until(() => stub.answers.length > n, 5000, 'the answer').catch(() => {}); }
   check('a reload while the bot waits: the card is back and Allow answers that ask (control: no card when the bot is idle and the row is stale)', !idleShown && k.shown && /asks to write a\.txt/.test(k.what ?? '') && stub.answers.at(-1)?.request_id === 'ask-9' && stub.answers.length === n + 1, { idleShown, k, answers: stub.answers.slice(n) });
+
+  // A picture goes with a message (Barkpark: store it for the conversation, then name it by id).
+  console.log('Behaviour · a picture with a message (the live page, against the stand-in Barkpark)');
+  // A 1x1 png, written for this run: the chooser is given a real file, as a person's pick is.
+  const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+  const pngPath = path('.cache', `behaviour-picture-${CHROME_PORT}.png`); writeFileSync(pngPath, PNG);
+  const pngId = createHash('sha256').update(PNG).digest('hex');
+  stub.rows = []; stub.fleet = 'idle';
+  await open(`${base}/`);
+  await until(() => stub.streams.length > 0, 30000, 'the conversation stream').catch(() => {});
+  await page.send('DOM.enable');
+  const { root } = await page.send('DOM.getDocument');
+  const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' });
+  precondition('the composer has a file chooser, and nothing has been stored or sent', !!nodeId && stub.uploads.length === 0 && stub.sent.length === 0, { nodeId, uploads: stub.uploads, sent: stub.sent });
+  await page.send('DOM.setFileInputFiles', { nodeId, files: [pngPath] });
+  const waiting = () => ev(() => ({ chips: [...document.querySelectorAll('.picture-chip .picture-name')].map((x) => x.textContent), send: document.querySelector('.composer .round.voice')?.getAttribute('aria-label') }));
+  await until(async () => (await waiting()).chips.length === 1, 5000, 'the chip').catch(() => {});
+  let w = await waiting();
+  check('a picked picture waits as a chip, the round button says Send, and nothing is stored or sent yet', w.chips.length === 1 && /behaviour-picture/.test(w.chips[0]) && w.send === 'Send' && stub.uploads.length === 0 && stub.sent.length === 0, { w, uploads: stub.uploads.length, sent: stub.sent.length });
+  await ev(() => document.querySelector('.prompt').focus());
+  await page.send('Input.insertText', { text: 'look' }); await key('Enter');
+  await until(() => stub.sent.length > 0, 8000, 'the message to reach the stand-in').catch(() => {});
+  await until(async () => (await ev(() => document.querySelector('.bubble-images img')?.naturalWidth ?? 0)) > 0, 8000, 'the picture to show in the bubble').catch(() => {});
+  w = await waiting();
+  const shown = await ev(() => ({ imgs: [...document.querySelectorAll('.bubble-user .bubble-images img')].map((i) => [i.getAttribute('src'), i.naturalWidth]), text: [...document.querySelectorAll('.bubble-user .bubble-text')].at(-1)?.textContent }));
+  check('Enter: the picture is stored once, the message names it by id, the chip is gone, and the bubble shows the picture above the words', stub.uploads.length === 1 && stub.uploads[0] === pngId && stub.sent.length === 1 && stub.sent[0].content === 'look' && JSON.stringify(stub.sent[0].attachments) === JSON.stringify([pngId]) && w.chips.length === 0 && shown.imgs.length === 1 && shown.imgs[0][0].endsWith(`/attachments/${pngId}`) && shown.imgs[0][1] === 1 && shown.text === 'look', { uploads: stub.uploads, sent: stub.sent, w, shown });
+  await ev(() => document.querySelector('.prompt').focus());
+  await page.send('Input.insertText', { text: 'words only' }); await key('Enter');
+  await until(() => stub.sent.length > 1, 8000, 'the second message').catch(() => {});
+  check('a message without a picture names none (control)', stub.sent.length === 2 && !('attachments' in stub.sent[1]) && stub.uploads.length === 1, { sent: stub.sent });
+  rmSync(pngPath, { force: true });
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);

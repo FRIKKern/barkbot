@@ -1,24 +1,80 @@
 // The message box. Enter sends and clears at once (oracle: 3 ms); Shift+Enter adds a line and
 // sends nothing; focus stays in Prompt after a send. While there is a draft the voice-chat
 // button turns into send (scale .5 -> 1, 200 ms, measured).
-import {useRef, useState, type ReactNode} from 'react'
+import {useEffect, useRef, useState, type ReactNode} from 'react'
 import {Keys, Tooltip, useHover} from './tips'
 
-export function Composer({placeholder, onSend, disabled}: {placeholder: string; onSend?: (text: string) => void; disabled?: boolean}) {
+/** A picture waiting in the composer: its name for the chip, its bytes as base64 for the send. */
+export type Picture = {name: string; data: string}
+const PICTURE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
+const MAX_PICTURES = 4 // Barkpark takes four a message
+const MAX_BYTES = 3_000_000 // and 3 MB a picture
+/** The composer menu's "Attach files" asks the composer to open its file chooser. */
+export const ATTACH_EVENT = 'barkbot:attach'
+
+const base64 = (f: File) =>
+  new Promise<string>((ok, no) => {
+    const r = new FileReader()
+    r.onload = () => ok(String(r.result).split(',')[1] ?? '')
+    r.onerror = () => no(r.error)
+    r.readAsDataURL(f)
+  })
+
+export function Composer({placeholder, onSend, disabled}: {placeholder: string; onSend?: (text: string, pictures: Picture[]) => void; disabled?: boolean}) {
   const box = useRef<HTMLDivElement>(null)
+  const chooser = useRef<HTMLInputElement>(null)
   const [draft, setDraft] = useState(false)
+  const [pictures, setPictures] = useState<Picture[]>([])
+  const [refused, setRefused] = useState<string | null>(null)
+  const ready = draft || pictures.length > 0
+  useEffect(() => {
+    const open = () => chooser.current?.click()
+    window.addEventListener(ATTACH_EVENT, open)
+    return () => window.removeEventListener(ATTACH_EVENT, open)
+  }, [])
+  // Pictures only for now: that is what Barkpark stores for a conversation. Anything else is
+  // refused here, with the reason, instead of failing after the send.
+  const add = async (files: File[]) => {
+    setRefused(null)
+    const next = [...pictures]
+    for (const f of files) {
+      if (!PICTURE_TYPES.includes(f.type)) setRefused(`${f.name} is not a picture (png, jpeg, gif or webp)`)
+      else if (f.size > MAX_BYTES) setRefused(`${f.name} is over 3 MB`)
+      else if (next.length >= MAX_PICTURES) setRefused('A message takes four pictures at most')
+      else next.push({name: f.name, data: await base64(f)})
+    }
+    setPictures(next)
+  }
   const submit = () => {
     const el = box.current
     if (!el || !onSend || disabled) return
     const text = el.innerText.replace(/\n+$/, '').trim()
-    if (!text) return
+    if (!text && !pictures.length) return
     el.replaceChildren()
     setDraft(false)
+    const sent = pictures
+    setPictures([])
+    setRefused(null)
     el.focus()
-    onSend(text)
+    onSend(text, sent)
   }
   return (
     <div className="composer-wrap">
+      {(pictures.length > 0 || refused) && (
+        // Waiting pictures, above the box so the box itself never moves. The oracle's own look is not read yet (A1).
+        <div className="composer-pictures">
+          {pictures.map((p, i) => (
+            <span className="picture-chip" key={`${p.name}-${i}`}>
+              <span className="picture-name">{p.name}</span>
+              <button aria-label={`Remove ${p.name}`} onClick={() => setPictures((all) => all.filter((_, j) => j !== i))}>
+                ×
+              </button>
+            </span>
+          ))}
+          {refused && <span className="picture-refused" role="alert">{refused}</span>}
+        </div>
+      )}
+      <input ref={chooser} type="file" accept={PICTURE_TYPES.join(',')} multiple hidden onChange={(e) => { void add([...(e.target.files ?? [])]); e.target.value = '' }} />
       <div className="composer">
         <Round label="Composer actions">
           <Icon d="M8 3v10M3 8h10" />
@@ -38,6 +94,11 @@ export function Composer({placeholder, onSend, disabled}: {placeholder: string; 
             if (!el.innerText.trim()) el.replaceChildren()
             setDraft(!!el.innerText.trim())
           }}
+          onPaste={(e) => {
+            // A pasted picture is attached; pasted words go in as words.
+            const files = [...e.clipboardData.files]
+            if (files.length) { e.preventDefault(); void add(files) }
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
               e.preventDefault()
@@ -55,8 +116,8 @@ export function Composer({placeholder, onSend, disabled}: {placeholder: string; 
         >
           <Icon d="M8 2.5a2 2 0 0 1 2 2v3a2 2 0 0 1-4 0v-3a2 2 0 0 1 2-2zM4.5 7.5a3.5 3.5 0 0 0 7 0M8 11v2" />
         </Round>
-        <Round label={draft ? 'Send' : 'Start voice chat'} tip={draft ? undefined : 'Start voice chat'} voice onClick={draft ? submit : undefined}>
-          <span className={`swap${draft ? ' on' : ''}`}>
+        <Round label={ready ? 'Send' : 'Start voice chat'} tip={ready ? undefined : 'Start voice chat'} voice onClick={ready ? submit : undefined}>
+          <span className={`swap${ready ? ' on' : ''}`}>
             <Icon d="M3 6.5v3M5.5 4.5v7M8 3v10M10.5 5v6M13 6.5v3" />
             <Icon d="M8 13V3M3.5 7.5L8 3l4.5 4.5" />
           </span>

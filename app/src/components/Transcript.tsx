@@ -104,7 +104,7 @@ function QuestionCard({bot, questions, locked, onChoose}: {bot: string; question
   )
 }
 
-export function Transcript({bot, startedAt, bubbles, working, error, ask, onAnswer, onChoose}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void}) {
+export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void}) {
   const box = useRef<HTMLDivElement>(null)
   const pinned = useRef(true)
   useLayoutEffect(() => {
@@ -138,9 +138,20 @@ export function Transcript({bot, startedAt, bubbles, working, error, ask, onAnsw
           <div role="article" key={b.key} className={`turn turn-${b.role}${i > 0 && bubbles[i - 1].role !== b.role ? ' turn-change' : ''}${bubbles[i - 1]?.role === b.role ? ' group-prev' : ''}${bubbles[i + 1]?.role === b.role ? ' group-next' : ''}`}>
             <div role="article" className={`bubble bubble-${b.role}`} data-role={b.role}>
               <span className="sr-only">{b.role === 'user' ? 'You' : bot}</span>
-              <div className="bubble-text">
-                {b.role === 'assistant' ? <Rich text={b.text} heights={b.heights} /> : <p style={heightStyle(b.heights?.[0])}>{b.text}</p>}
-              </div>
+              {/* Pictures sent with the message. The oracle's picture grid is not read yet (A2): plain. */}
+              {b.images && b.images.length > 0 && (
+                <div className="bubble-images">
+                  {b.images.map((id) => {
+                    const src = picture?.(id)
+                    return src ? <img key={id} src={src} alt="Attached picture" loading="lazy" /> : null
+                  })}
+                </div>
+              )}
+              {(b.text || !b.images?.length) && (
+                <div className="bubble-text">
+                  {b.role === 'assistant' ? <Rich text={b.text} heights={b.heights} /> : <p style={heightStyle(b.heights?.[0])}>{b.text}</p>}
+                </div>
+              )}
             </div>
           </div>
         ))}

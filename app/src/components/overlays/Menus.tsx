@@ -3,7 +3,7 @@
 // Rows that would leave the app (Attach files, Teach a task, Log out ...) render 1:1 and do
 // nothing yet (0005).
 import type {ReactNode} from 'react'
-import {Icon} from '../Composer'
+import {ATTACH_EVENT, Icon} from '../Composer'
 import {weeklyUsage} from './data'
 
 function Item({icon, label, trail, onPick}: {icon: ReactNode; label: string; trail?: ReactNode; onPick?: () => void}) {
@@ -27,7 +27,10 @@ export function ComposerMenu({onPick}: {onPick?: () => void}) {
         <Item
           icon={<Icon d="M10.5 5.5l-4.25 4.25a1.25 1.25 0 0 0 1.77 1.77l4.6-4.6a2.5 2.5 0 0 0-3.54-3.54L4.5 8a3.75 3.75 0 0 0 5.3 5.3l3.7-3.7" />}
           label="Attach files"
-          onPick={onPick}
+          onPick={() => {
+            onPick?.()
+            window.dispatchEvent(new Event(ATTACH_EVENT))
+          }}
         />
         <Item
           icon={

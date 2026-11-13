@@ -15,6 +15,7 @@ import { Route as GateStateRouteImport } from './routes/gate.$state'
 import { Route as ApiChatEventsRouteImport } from './routes/api/chat.events'
 import { Route as ApiGateBTraceRouteImport } from './routes/api/gate-b.$trace'
 import { Route as ApiChatIdEventsRouteImport } from './routes/api/chat.$id.events'
+import { Route as ApiChatIdAttachmentsAidRouteImport } from './routes/api/chat.$id.attachments.$aid'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const ApiChatIdEventsRoute = ApiChatIdEventsRouteImport.update({
   path: '/api/chat/$id/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatIdAttachmentsAidRoute = ApiChatIdAttachmentsAidRouteImport.update({
+  id: '/api/chat/$id/attachments/$aid',
+  path: '/api/chat/$id/attachments/$aid',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/api/chat/events': typeof ApiChatEventsRoute
   '/api/gate-b/$trace': typeof ApiGateBTraceRoute
   '/api/chat/$id/events': typeof ApiChatIdEventsRoute
+  '/api/chat/$id/attachments/$aid': typeof ApiChatIdAttachmentsAidRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/api/chat/events': typeof ApiChatEventsRoute
   '/api/gate-b/$trace': typeof ApiGateBTraceRoute
   '/api/chat/$id/events': typeof ApiChatIdEventsRoute
+  '/api/chat/$id/attachments/$aid': typeof ApiChatIdAttachmentsAidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/api/chat/events': typeof ApiChatEventsRoute
   '/api/gate-b/$trace': typeof ApiGateBTraceRoute
   '/api/chat/$id/events': typeof ApiChatIdEventsRoute
+  '/api/chat/$id/attachments/$aid': typeof ApiChatIdAttachmentsAidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/api/chat/events'
     | '/api/gate-b/$trace'
     | '/api/chat/$id/events'
+    | '/api/chat/$id/attachments/$aid'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/api/chat/events'
     | '/api/gate-b/$trace'
     | '/api/chat/$id/events'
+    | '/api/chat/$id/attachments/$aid'
   id:
     | '__root__'
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/api/chat/events'
     | '/api/gate-b/$trace'
     | '/api/chat/$id/events'
+    | '/api/chat/$id/attachments/$aid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +118,7 @@ export interface RootRouteChildren {
   ApiChatEventsRoute: typeof ApiChatEventsRoute
   ApiGateBTraceRoute: typeof ApiGateBTraceRoute
   ApiChatIdEventsRoute: typeof ApiChatIdEventsRoute
+  ApiChatIdAttachmentsAidRoute: typeof ApiChatIdAttachmentsAidRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatIdEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/$id/attachments/$aid': {
+      id: '/api/chat/$id/attachments/$aid'
+      path: '/api/chat/$id/attachments/$aid'
+      fullPath: '/api/chat/$id/attachments/$aid'
+      preLoaderRoute: typeof ApiChatIdAttachmentsAidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -162,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatEventsRoute: ApiChatEventsRoute,
   ApiGateBTraceRoute: ApiGateBTraceRoute,
   ApiChatIdEventsRoute: ApiChatIdEventsRoute,
+  ApiChatIdAttachmentsAidRoute: ApiChatIdAttachmentsAidRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

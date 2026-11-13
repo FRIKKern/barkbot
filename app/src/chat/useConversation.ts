@@ -4,13 +4,15 @@
 // is doing) shows while the run goes; a reply bubble lands whole when its text ends ("Typing…"
 // while it is written); the line leaves once the turn ends.
 import {useCallback, useEffect, useRef, useState} from 'react'
-import {answerApproval, answerQuestion, sendMessage} from './api'
+import {answerApproval, answerQuestion, sendMessage, uploadPicture} from './api'
 
 export type Bubble = {
   key: string
   role: 'user' | 'assistant'
   text: string
   seq?: number
+  /** Picture ids sent with the message (Barkpark's attachments); shown above its words. */
+  images?: string[]
   /** Gate scenes only: each paragraph's height on the oracle, kept whatever the placeholder words do. */
   heights?: number[]
 }
@@ -86,11 +88,13 @@ const flat = (s: string) => s.replace(/\s+/g, '')
 
 /** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay.
  *  `fleet` is the stream of every bot's state (Barkpark's /v1/chat/events: snapshot, then state). */
-export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string) => Promise<unknown>; answer?: (sessionId: string, requestId: string, decision: 'allow' | 'deny') => Promise<unknown>; choose?: (sessionId: string, requestId: string, answers: Answers) => Promise<unknown>}
+export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string, attachments?: string[]) => Promise<unknown>; upload?: (sessionId: string, data: string) => Promise<{id: string}>; picture?: (sessionId: string, id: string) => string; answer?: (sessionId: string, requestId: string, decision: 'allow' | 'deny') => Promise<unknown>; choose?: (sessionId: string, requestId: string, answers: Answers) => Promise<unknown>}
 export const barkpark: Transport = {
   events: (id) => `/api/chat/${id}/events`,
   fleet: () => '/api/chat/events',
-  send: (id, content) => sendMessage({data: {id, content}}),
+  send: (id, content, attachments) => sendMessage({data: {id, content, attachments}}),
+  upload: (id, data) => uploadPicture({data: {id, data}}),
+  picture: (id, aid) => `/api/chat/${id}/attachments/${aid}`,
   answer: (id, requestId, decision) => answerApproval({data: {id, requestId, decision}}),
   choose: (id, requestId, answers) => answerQuestion({data: {id, requestId, answers}}),
 }
@@ -138,6 +142,11 @@ export function useConversation(sessionId: string | null, transport: Transport =
       if (b.seq !== undefined) {
         if (all.some((x) => x.seq === b.seq)) return all
         const want = flat(b.text)
+        // A message of pictures alone has no words to claim by: it claims the live bubble with the same pictures.
+        if (!want) {
+          const same = (x: Bubble) => x.seq === undefined && x.role === b.role && !flat(x.text) && (x.images ?? []).join() === (b.images ?? []).join()
+          return all.some(same) ? all.map((x) => (same(x) && !all.slice(0, all.indexOf(x)).some(same) ? {...x, seq: b.seq} : x)) : [...all, {...b, key: `seq-${b.seq}`}]
+        }
         for (let i = 0; i < all.length; i++) {
           let got = ''
           let j = i
@@ -168,9 +177,10 @@ export function useConversation(sessionId: string | null, transport: Transport =
     const es = new EventSource(transport.events(sessionId))
     es.onopen = () => setReady(true)
     es.addEventListener('message', (e) => {
-      const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string; metadata?: Frame}
-      if ((m.role === 'user' || m.role === 'assistant') && m.source_markdown) {
-        land({role: m.role, text: m.source_markdown, seq: m.seq})
+      const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string; metadata?: Frame; attachments?: {id: string}[]}
+      const images = (m.attachments ?? []).map((a) => a.id).filter((x) => typeof x === 'string')
+      if ((m.role === 'user' || m.role === 'assistant') && (m.source_markdown || images.length)) {
+        land({role: m.role, text: m.source_markdown ?? '', seq: m.seq, ...(images.length ? {images} : {})})
         // A row after a stored ask: that ask is over.
         return setAsk((a) => (a?.stored ? null : a))
       }
@@ -297,12 +307,18 @@ export function useConversation(sessionId: string | null, transport: Transport =
   }, [sessionId, transport, land, show, resume, typingSoon, end])
 
   const send = useCallback(
-    async (content: string) => {
+    async (content: string, pictures: string[] = []) => {
       if (!sessionId) return
       setError(null)
       try {
-        await transport.send(sessionId, content)
-        land({role: 'user', text: content})
+        // Each picture is stored for the conversation first; the message then names them by id.
+        const ids: string[] = []
+        for (const data of pictures) {
+          if (!transport.upload) throw new Error('This conversation cannot take pictures')
+          ids.push((await transport.upload(sessionId, data)).id)
+        }
+        await transport.send(sessionId, content, ids.length ? ids : undefined)
+        land({role: 'user', text: content, ...(ids.length ? {images: ids} : {})})
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e))
       }
@@ -344,5 +360,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
     [sessionId, transport, ask],
   )
 
-  return {bubbles, working, botState, error, ready, send, ask: ask?.stored && botState !== 'blocked' ? null : ask, answer, choose}
+  const picture = useCallback((id: string) => (sessionId && transport.picture ? transport.picture(sessionId, id) : null), [sessionId, transport])
+
+  return {bubbles, working, botState, error, ready, send, picture, ask: ask?.stored && botState !== 'blocked' ? null : ask, answer, choose}
 }

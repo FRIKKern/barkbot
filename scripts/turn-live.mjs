@@ -9,6 +9,8 @@
 //                                   card, find the file in the bot's folder. Writes parity/live/approve.json.
 //   npm run turn:live -- --question the bot asks a question (Q2): press its second choice, and the bot must reply with
 //                                   that choice. Writes parity/live/question.json.
+//   npm run turn:live -- --picture  a picture with the message (A1/A2): a square of a colour picked for the run; the
+//                                   bot must name the colour. Writes parity/live/picture.json.
 //   npm run turn:live -- --resume   come back later (C2): give the bot a made-up code, wait while YOU stop and
 //                                   start the bot's computer (then Enter), reload, ask for the code. Writes parity/live/resume.json.
 //
@@ -20,6 +22,7 @@ import { createServer } from 'node:net';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { deflateSync } from 'node:zlib';
 import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 
@@ -32,8 +35,18 @@ const PROFILE = path('.cache', `live-chrome-${CHROME_PORT}`);
 const MESSAGE = 'Say hi in one short sentence.';
 const RESUME = args.includes('--resume');
 const APPROVE = args.includes('--approve');
+const PICTURE = args.includes('--picture');
 const QUESTION = args.includes('--question');
 const REPLY_MS = Number(opt('reply-ms')) || 90000;
+// A square png of one colour, made here: no file from anywhere else is ever sent.
+function squarePng(n, [r, g, b]) {
+  const crcTable = Array.from({ length: 256 }, (_, i) => { let c = i; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+  const crc = (buf) => { let c = 0xffffffff; for (const x of buf) c = crcTable[(c ^ x) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+  const chunk = (type, data) => { const len = Buffer.alloc(4); len.writeUInt32BE(data.length); const body = Buffer.concat([Buffer.from(type), data]); const sum = Buffer.alloc(4); sum.writeUInt32BE(crc(body)); return Buffer.concat([len, body, sum]); };
+  const head = Buffer.alloc(13); head.writeUInt32BE(n, 0); head.writeUInt32BE(n, 4); head[8] = 8; head[9] = 2;
+  const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(n * 3).map((_, i) => [r, g, b][i % 3])]);
+  return Buffer.concat([Buffer.from('\x89PNG\r\n\x1a\n', 'latin1'), chunk('IHDR', head), chunk('IDAT', deflateSync(Buffer.concat(Array(n).fill(row)))), chunk('IEND', Buffer.alloc(0))]);
+}
 const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
 async function until(fn, ms, what) {
   const end = Date.now() + ms;
@@ -146,6 +159,34 @@ try {
     if (!low.includes(want.toLowerCase()) || offered.some((o) => o !== want && low.includes(o.toLowerCase()))) stopWith('the bot\'s reply does not name the pressed choice alone: the answer did not reach it');
     record('question.json', { choices_offered: offered.length, pressed: 2, reply_names_the_choice: true, reply_ms: Date.now() - t0 });
     console.log(`Live question: ok · ${offered.length} choices offered · pressed B · the bot replied with that choice · ${((Date.now() - t0) / 1000).toFixed(1)} s`);
+    process.exit(0);
+  }
+  if (PICTURE) {
+    // A picture goes with the message (A1/A2): a square of one colour, picked for this run, made
+    // here. The bot is asked for the colour in one word, so a reply naming it (and neither other)
+    // can only come from the bot having seen the picture.
+    const colours = { red: [220, 30, 30], green: [30, 160, 60], blue: [40, 70, 220] };
+    const name = Object.keys(colours)[Math.floor(Math.random() * 3)];
+    const file = path('.cache', `live-picture-${CHROME_PORT}.png`);
+    writeFileSync(file, squarePng(64, colours[name]));
+    const before = await settled();
+    if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
+    await page.send('DOM.enable');
+    const { root } = await page.send('DOM.getDocument');
+    const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' });
+    if (!nodeId) stopWith('the composer has no file chooser');
+    await page.send('DOM.setFileInputFiles', { nodeId, files: [file] });
+    await until(() => page.evaluate(() => document.querySelectorAll('.picture-chip').length === 1), 5000, 'the picture to wait as a chip');
+    const r = await turn('What colour is this square? Reply with one word: red, green or blue.');
+    rmSync(file, { force: true });
+    const said = (await page.evaluate(() => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].at(-1)?.textContent ?? '')).toLowerCase();
+    const shown = await page.evaluate(() => [...document.querySelectorAll('.bubble-user .bubble-images img')].at(-1)?.naturalWidth ?? 0);
+    if (!said.includes(name) || Object.keys(colours).some((c) => c !== name && said.includes(c))) stopWith('the bot\'s reply does not name the picture\'s colour alone: it did not see the picture');
+    if (shown !== 64) stopWith('our own bubble does not show the picture that was sent');
+    await open();
+    await until(() => page.evaluate(() => ([...document.querySelectorAll('.bubble-user .bubble-images img')].at(-1)?.naturalWidth ?? 0) === 64), 20000, 'the picture to show again after a reload');
+    record('picture.json', { picture_px: 64, reply_names_the_colour: true, shown_in_bubble: true, shown_after_reload: true, reply_ms: r.ms });
+    console.log(`Live picture: ok · the bot named the square's colour · the picture shows in the bubble and after a reload · ${(r.ms / 1000).toFixed(1)} s`);
     process.exit(0);
   }
   if (RESUME) {

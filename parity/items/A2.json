@@ -3,5 +3,6 @@
  "slice": "S4",
  "journey": "J08",
  "title": "Picture grid with a +N tile; each opens large",
- "status": "unknown"
+ "status": "partial",
+ "evidence": "A message's pictures show in its bubble, side by side, served through /api/chat/<session>/attachments/<id> (Transcript.tsx bubble-images), live and from Barkpark's stored rows after a reload. Live: npm run turn:live -- --picture (2026-11-13, Barkpark attachments T1-T6 on prod: a square of a colour picked for the run was attached, the bot named the colour, the picture showed in the bubble and again after a reload; parity/live/picture.json). scripts/behaviour.mjs: 3 rules against the stand-in (a chip and nothing sent; stored once and named by id; a message without a picture names none). Missing: the +N tile and opening a picture large; the oracle's picture grid has never been captured (it needs a send with pictures), so the look is plain."
 }
