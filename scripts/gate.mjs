@@ -95,8 +95,10 @@ for (const state of states) {
   // must not hang or kill the run (seen on the shared Mac, 2026-11-11 and -13): each try has a
   // time limit, the Chrome is gone before the next one starts on the same port, and a state
   // that fails is tried once more before the run stops, naming it.
+  let chrome; // this try's Chrome: the time limit kills it, which fails whatever the try is waiting on
   const measure = async () => {
-    let chrome, page;
+    let page;
+    chrome = undefined;
     try {
     chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, `--window-size=${w},${h}`, `--force-device-scale-factor=${dpr}`, 'about:blank'], { stdio: 'ignore' });
     kids.push(chrome);
@@ -148,7 +150,16 @@ for (const state of states) {
       await until(async () => !(await fetch(`http://127.0.0.1:${CHROME_PORT}/json/version`).then(() => true, () => false)), 10000, 'the last Chrome to be gone').catch(() => {});
     }
   };
-  const limited = () => { let t; return Promise.race([measure(), new Promise((_, no) => { t = setTimeout(() => no(new Error(`no answer within ${STATE_MS / 1000} s`)), STATE_MS); })]).finally(() => clearTimeout(t)); };
+  // A try that runs out of time is not left running: its Chrome is killed (every call waiting on
+  // it then fails), and the try's own clean-up finishes before the next try starts on the port.
+  const limited = async () => {
+    const run = measure();
+    let t;
+    const late = new Promise((_, no) => { t = setTimeout(() => no(new Error(`no answer within ${STATE_MS / 1000} s`)), STATE_MS); });
+    try { return await Promise.race([run, late]); }
+    catch (e) { try { chrome?.kill('SIGKILL'); } catch {} await run.catch(() => {}); throw e; }
+    finally { clearTimeout(t); }
+  };
   let ours;
   try { ours = await limited(); } catch (e) {
     console.error(`Gate A · ${state.id} · the browser failed (${e?.message ?? e?.type ?? e}); trying once more`);
