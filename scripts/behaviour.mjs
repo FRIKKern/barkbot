@@ -35,7 +35,7 @@ process.on('SIGINT', () => process.exit(130));
 
 // A stand-in Barkpark for the live page (/): it answers what loadChat asks (no computer enrolled;
 // the saved bot name) and keeps every write, so the rename-persists rules can count them.
-const stub = { name: null, reads: 0, writes: [], other: [], hosts: [], sessions: [], answers: [], streams: [] };
+const stub = { name: null, reads: 0, writes: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 const PREF = '/w/default/p/default/v1/prefs/production/barkbot.bot';
@@ -51,9 +51,13 @@ await new Promise((ok) => httpServer((req, res) => {
     if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: stub.sessions });
     if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
       res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' }); res.write(': open\n\n');
+      // As Barkpark: the stored rows first (a fresh page asks from 0), and the fleet's snapshot.
+      if (req.url === '/v1/chat/events') { if (stub.fleet) res.write(`event: snapshot\ndata: ${JSON.stringify({ sessions: stub.sessions.map((x) => ({ session_id: x.id, agent_state: stub.fleet })) })}\n\n`); }
+      else if (req.headers['last-event-id'] !== undefined) stub.rows.forEach((r) => res.write(`id: ${r.seq}\nevent: message\ndata: ${JSON.stringify(r)}\n\n`));
       if (req.url !== '/v1/chat/events') { stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
       return;
     }
+    if (/^\/v1\/chat\/sessions\/[^/]+\/answer$/.test(req.url) && req.method === 'POST') { stub.choices.push(JSON.parse(body)); res.writeHead(204); return res.end(); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/approval$/.test(req.url) && req.method === 'POST') { stub.answers.push(JSON.parse(body)); res.writeHead(204); return res.end(); }
     stub.other.push(`${req.method} ${req.url}`);
     json(404, { error: { code: 'not_found', message: 'not in the stand-in' } });
@@ -291,6 +295,49 @@ else {
   k = await card();
   if (k.deny) { await click(...k.deny); await until(() => stub.answers.length > 1, 5000, 'the answer to reach the stand-in').catch(() => {}); }
   check('Deny: answers the new ask with deny', /asks to run a command/.test(k.what ?? '') && stub.answers.length === 2 && stub.answers[1].request_id === 'ask-2' && stub.answers[1].decision === 'deny', { k, answers: stub.answers });
+
+  // The bot asks the person to choose (claude's AskUserQuestion, seen live 2026-11-13).
+  console.log('Behaviour · the bot asks a question (the live page, against the stand-in Barkpark)');
+  const choices = () => ev(() => [...document.querySelectorAll('.ask-choice')].map((b) => { const r = b.getBoundingClientRect(); return { letter: b.querySelector('.ask-letter')?.textContent, label: b.querySelector('.ask-label')?.textContent, at: [r.x + r.width / 2, r.y + r.height / 2], pressed: b.getAttribute('aria-pressed') }; }));
+  const sendAt = () => ev(() => { const b = document.querySelector('.ask .ask-allow'); const r = b?.getBoundingClientRect(); return b ? { at: [r.x + r.width / 2, r.y + r.height / 2], disabled: b.disabled } : null; });
+  say('control_completed', { native: { kind: 'control_completed', operation: 'answer_approval' } });
+  await until(async () => !(await card()).shown, 5000, 'the last card to go').catch(() => {});
+  const posted = stub.answers.length;
+  asks('q-1', 'AskUserQuestion', { questions: [{ question: 'Which fruit?', header: 'Fruit', multiSelect: false, options: [{ label: 'apple', description: 'red' }, { label: 'pear' }, { label: 'plum' }] }] });
+  await until(async () => (await choices()).length === 3, 5000, 'the question card').catch(() => {});
+  await wait(600);
+  let c2 = await choices();
+  check('a question: its choices are lettered A, B, C, and nothing is answered (control: the approval card has no choices)', c2.map((x) => x.letter + x.label).join() === 'Aapple,Bpear,Cplum' && stub.choices.length === 0 && !(await sendAt()), { c2, choices: stub.choices });
+  if (c2[1]) { await click(...c2[1].at); await until(() => stub.choices.length > 0, 5000, 'the choice to reach the stand-in').catch(() => {}); await click(...c2[1].at); await wait(300); }
+  check('pressing B answers that question once with "pear", as a choice and not as leave', stub.choices.length === 1 && stub.choices[0].request_id === 'q-1' && JSON.stringify(stub.choices[0].answers) === '{"Which fruit?":"pear"}' && stub.answers.length === posted, { choices: stub.choices, answers: stub.answers.length - posted });
+  say('control_completed', { native: { kind: 'control_completed', operation: 'answer_approval' } });
+  await until(async () => (await choices()).length === 0, 5000, 'the question card to go').catch(() => {});
+  asks('q-2', 'AskUserQuestion', { questions: [{ question: 'Which days?', multiSelect: true, options: ['Mon', 'Tue', 'Wed'] }, { question: 'Morning or evening?', multiSelect: false, options: ['Morning', 'Evening'] }] });
+  await until(async () => (await choices()).length === 5, 5000, 'the second question card').catch(() => {});
+  c2 = await choices();
+  const before = (await sendAt())?.disabled;
+  if (c2.length === 5) { await click(...c2[0].at); await click(...c2[2].at); await click(...c2[4].at); await wait(200); }
+  const ready = await sendAt();
+  if (ready && !ready.disabled) { await click(...ready.at); await until(() => stub.choices.length > 1, 5000, 'the choices to reach the stand-in').catch(() => {}); }
+  check('two questions, one pick-several: Send waits until each has a choice, then answers both', before === true && stub.choices.length === 2 && JSON.stringify(stub.choices[1]?.answers) === '{"Which days?":["Mon","Wed"],"Morning or evening?":"Evening"}', { before, ready, choices: stub.choices });
+
+  // A reload in the middle of an ask: Barkpark's stored row brings the card back, but only while
+  // the bot is waiting on the person (a stopped turn leaves its row "pending" for ever).
+  console.log('Behaviour · an ask after a reload (the live page, against the stand-in Barkpark)');
+  stub.rows = [{ seq: 1, role: 'user', source_markdown: 'please', metadata: {} }, { seq: 2, role: 'approval', source_markdown: 'Write', metadata: { request_id: 'ask-9', tool_name: 'Write', input: { file_path: '/bot/home/a.txt', content: 'x' }, approval_status: 'pending' } }];
+  stub.fleet = 'idle';
+  await open(`${base}/`);
+  await until(async () => (await ev(() => document.querySelectorAll('.bubble').length)) === 1, 15000, 'the stored conversation').catch(() => {});
+  await wait(800);
+  k = await card();
+  const idleShown = k.shown;
+  stub.fleet = 'blocked';
+  await open(`${base}/`);
+  await until(async () => (await card()).shown, 10000, 'the card after the reload').catch(() => {});
+  k = await card();
+  const n = stub.answers.length;
+  if (k.allow) { await click(...k.allow); await until(() => stub.answers.length > n, 5000, 'the answer').catch(() => {}); }
+  check('a reload while the bot waits: the card is back and Allow answers that ask (control: no card when the bot is idle and the row is stale)', !idleShown && k.shown && /asks to write a\.txt/.test(k.what ?? '') && stub.answers.at(-1)?.request_id === 'ask-9' && stub.answers.length === n + 1, { idleShown, k, answers: stub.answers.slice(n) });
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);

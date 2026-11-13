@@ -59,6 +59,17 @@
 .ask-deny { background: rgb(255 255 255 / 0.08); color: var(--ink); }
 .ask-allow { background: var(--ink); color: rgb(17 17 17); }
 .ask-buttons button:disabled { opacity: 0.5; }
+/* The question card (Q2 unread on the oracle): the choices are rows, each with its letter. */
+.ask-question { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.ask-question + .ask-question { margin-top: 14px; }
+.ask-question .ask-what { padding: 0; margin-bottom: 4px; }
+.ask-choice { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 12px; text-align: left; background: rgb(255 255 255 / 0.06); color: var(--ink); }
+.ask-choice:hover:not(:disabled), .ask-choice[aria-pressed='true'] { background: rgb(255 255 255 / 0.14); }
+.ask-letter { flex: none; width: 22px; height: 22px; border-radius: 6px; background: rgb(255 255 255 / 0.1); font-size: 12px; line-height: 22px; text-align: center; }
+.ask-choice-text { display: flex; flex-direction: column; min-width: 0; }
+.ask-label { font-size: 15px; line-height: 22px; }
+.ask-note { font-size: 13px; line-height: 18px; color: var(--ink-66); }
+.ask-question:disabled .ask-choice { opacity: 0.5; }
 .chat-error { margin: 12px 0 0; font-size: 13px; line-height: 18px; color: rgb(255 140 120); }
 .chat-note { max-width: 600px; margin: 0 auto; font-size: 13px; line-height: 18px; color: var(--ink-66); }
 .chat-note code { font-size: 12px; }

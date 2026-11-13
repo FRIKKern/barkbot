@@ -7,6 +7,8 @@
 //   npm run turn:live -- --url http://localhost:3000   use an app that is already running
 //   npm run turn:live -- --approve  the bot asks leave (Q1): ask for a file with a made-up name, press Allow on each
 //                                   card, find the file in the bot's folder. Writes parity/live/approve.json.
+//   npm run turn:live -- --question the bot asks a question (Q2): press its second choice, and the bot must reply with
+//                                   that choice. Writes parity/live/question.json.
 //   npm run turn:live -- --resume   come back later (C2): give the bot a made-up code, wait while YOU stop and
 //                                   start the bot's computer (then Enter), reload, ask for the code. Writes parity/live/resume.json.
 //
@@ -30,6 +32,7 @@ const PROFILE = path('.cache', `live-chrome-${CHROME_PORT}`);
 const MESSAGE = 'Say hi in one short sentence.';
 const RESUME = args.includes('--resume');
 const APPROVE = args.includes('--approve');
+const QUESTION = args.includes('--question');
 const REPLY_MS = Number(opt('reply-ms')) || 90000;
 const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
 async function until(fn, ms, what) {
@@ -119,6 +122,30 @@ try {
     rmSync(file);
     record('approve.json', { cards_allowed: r.allowed, reply_ms: r.ms, file_written: true, bubbles_at_end: [r.after.user, r.after.bot] });
     console.log(`Live approve: ok · ${r.allowed} cards allowed · the file was written (and removed again) · reply in ${(r.ms / 1000).toFixed(1)} s`);
+    process.exit(0);
+  }
+  if (QUESTION) {
+    // The bot asks, the page answers by pressing the second choice. The three words are made up
+    // for this run and the bot is told to reply with the chosen one only, so a reply holding the
+    // second word (and neither other) can only come from the press.
+    const pool = ['maple', 'cedar', 'birch', 'aspen', 'rowan', 'hazel', 'alder', 'elder'].sort(() => Math.random() - 0.5).slice(0, 3);
+    const before = await settled();
+    if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
+    const t0 = Date.now();
+    await page.evaluate(() => document.querySelector('.prompt').focus());
+    await page.send('Input.insertText', { text: `Use your AskUserQuestion tool to ask me which tree I prefer: ${pool.join(', ')}. After I answer, reply with only the tree I chose.` });
+    await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
+    await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+    let offered = [];
+    await until(async () => { offered = await page.evaluate(() => [...document.querySelectorAll('.ask-choice .ask-label')].map((x) => x.textContent)); return offered.length >= 2; }, REPLY_MS, 'the question card');
+    const want = offered[1];
+    await page.evaluate(() => document.querySelectorAll('.ask-choice')[1].click());
+    let after, said = '';
+    await until(async () => { after = await seen(); said = await page.evaluate(() => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].at(-1)?.textContent ?? ''); return after.bot > before.bot && !after.working && !after.asking && said.length > 0; }, REPLY_MS, 'the bot to reply after the choice');
+    const low = said.toLowerCase();
+    if (!low.includes(want.toLowerCase()) || offered.some((o) => o !== want && low.includes(o.toLowerCase()))) stopWith('the bot\'s reply does not name the pressed choice alone: the answer did not reach it');
+    record('question.json', { choices_offered: offered.length, pressed: 2, reply_names_the_choice: true, reply_ms: Date.now() - t0 });
+    console.log(`Live question: ok · ${offered.length} choices offered · pressed B · the bot replied with that choice · ${((Date.now() - t0) / 1000).toFixed(1)} s`);
     process.exit(0);
   }
   if (RESUME) {

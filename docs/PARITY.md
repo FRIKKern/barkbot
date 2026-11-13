@@ -2,7 +2,7 @@
 
 [![Journeys: one tile per journey, one dot per parity item](images/journeys.svg)](../JOURNEYS.md)
 
-23 of 44 items done, 11 partial, 2 open, 8 not yet read on the oracle.
+23 of 44 items done, 12 partial, 2 open, 7 not yet read on the oracle.
 Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an item file, never this page.
 
 ## S0 Harness
@@ -68,8 +68,8 @@ Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an it
 
 | Id | Item | Journey | Status | Gate or evidence |
 |---|---|---|---|---|
-| Q1 | Approval card: nothing happens until I press | J10 | ◐ partial | Evidence: It works, its look is not the oracle's yet. useConversation.ts takes Barkpark's approval_requested (plan mode asks for the plan, then each step) and Transcript.tsx shows a plain card: what the bot asks, the plan, command or file text, Deny and Allow; nothing is sent until a press (chat/api.ts answerApproval). scripts/behaviour.mjs: 4 rules against the stand-in (card and no answer; Allow once; the card goes when confirmed; Deny). Live: npm run turn:live -- --approve (2026-11-13: 2 cards allowed, the file was in the bot's folder; parity/live/approve.json). Missing: the oracle's approval card has never been captured (it needs a send that makes the oracle ask), so the look, the wording and where the card sits are unread; a card does not come back after a reload in the middle of an ask. |
-| Q2 | Question card with lettered choices | J11 | ? unread | — |
+| Q1 | Approval card: nothing happens until I press | J10 | ◐ partial | Evidence: It works, its look is not the oracle's yet. useConversation.ts takes Barkpark's approval_requested (plan mode asks for the plan, then each step) and Transcript.tsx shows a plain card: what the bot asks, the plan, command or file text, Deny and Allow; nothing is sent until a press (chat/api.ts answerApproval). scripts/behaviour.mjs: 4 rules against the stand-in (card and no answer; Allow once; the card goes when confirmed; Deny). Live: npm run turn:live -- --approve (2026-11-13: 2 cards allowed, the file was in the bot's folder; parity/live/approve.json). Missing: the oracle's approval card has never been captured (it needs a send that makes the oracle ask), so the look, the wording and where the card sits are unread. A reload in the middle of an ask brings the card back from Barkpark's stored row, only while the bot's state is blocked (behaviour rule 'an ask after a reload'). |
+| Q2 | Question card with lettered choices | J11 | ◐ partial | Evidence: It works; its look is not the oracle's yet. claude's AskUserQuestion arrives as Barkpark's approval_requested with the questions; Transcript.tsx QuestionCard letters each choice A, B, C. One single-choice question answers on a press; several questions or a pick-several are sent with Send once each has a choice (chat/api.ts answerQuestion posts /answer; Barkpark checks every choice against what the bot offered). scripts/behaviour.mjs: 3 rules. Live: npm run turn:live -- --question (2026-11-13, after Barkpark #25825: 3 choices offered, B pressed, the bot replied with that choice; parity/live/question.json). Missing: the oracle's question card has never been captured, so look and wording are unread. |
 | Q3 | Activity: open work such as a pull request and its state | J13 | ? unread | — |
 
 ## S6 Own computer
