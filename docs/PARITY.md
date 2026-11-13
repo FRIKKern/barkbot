@@ -53,7 +53,7 @@ Generated from [`parity/items/`](../parity/items/) by `npm run docs`. Edit an it
 
 | Id | Item | Journey | Status | Gate or evidence |
 |---|---|---|---|---|
-| C1 | Cancel a reply: it stops at once and nothing is left running | J05 | ? unread | — |
+| C1 | Cancel a reply: it stops at once and nothing is left running | J05 | ? unread | Evidence: Not read on the oracle: where its cancel is, is unknown. What is known: in all four 0.79.3 turn traces the composer's round button says 'Send message' and then 'Start voice chat' for the whole reply; it never becomes a Stop. So no Stop is built into our composer (it would be a guess). The plumbing works, checked live 2026-11-13: POST /v1/chat/sessions/:id/interrupt stops a streaming reply in under 1 s, the partial text is stored, and the host has no child process left. Barkpark #25811 makes the stopped turn end as turn_completed/interrupted instead of an error. Needs: a capture of the oracle cancelling a reply (a send, so the owner's OK). |
 | C2 | Come back later: transcript and Claude session resume after a restart | J06 | ✓ done | Gate: npm run turn:live -- --resume (owner-run: needs the owner's Barkpark login, the enrolled Mac, and a person to restart npm run host). Record: parity/live/resume.json.. Evidence: scripts/turn-live.mjs --resume: gives the bot a code made up for the run, the host program is stopped and started, a fresh page shows the conversation again (9 + 9 bubbles), and the bot gives the code back (2026-11-12, restart within 5 s). The transcript is Barkpark's stored rows (asked for from 0, #35); the memory is Claude's own session, which the host resumes by provider_session_id. Not covered: a restart of the Mac itself, and a restart in the middle of a reply. |
 
 ## S4 Things
