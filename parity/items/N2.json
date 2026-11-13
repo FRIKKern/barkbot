@@ -3,5 +3,6 @@
  "slice": "S7",
  "journey": null,
  "title": "Message actions on hover",
- "status": "unknown"
+ "status": "unknown",
+ "evidence": "Looked at on the oracle 2026-11-13 (0.79.3, look only): resting the pointer on a message shows nothing. No element labelled 'Message actions…' is in the page before or during a hover (pointer moved onto the last bubble in steps, window in front, 0.9 s wait). Yet such an element exists at times: the long-answer trace shows a div 'Message actions for … message at <time>' being removed at the moment of a send. Each message is a role=article with tabindex=0, so the actions may come with keyboard focus or a secondary click. Neither is a recipe yet, so neither was tried. Next: a look-only recipe that Tab-focuses a message, then one for a secondary click."
 }
