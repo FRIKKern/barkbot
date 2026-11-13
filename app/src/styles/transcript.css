@@ -22,6 +22,9 @@
 .turn-user.group-prev .bubble { border-top-right-radius: 6px; }
 /* The text: 22 pt lines, paragraphs 10 apart; bold at 600; code a quiet chip (articles 98-105). */
 .bubble-text { line-height: 22px; }
+/* Pictures in a message (A2 unread on the oracle): plain, side by side. */
+.bubble-images { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 4px; }
+.bubble-images img { display: block; max-width: 240px; max-height: 240px; border-radius: 10px; }
 .bubble-text p { margin: 0; }
 .bubble-text p + p { margin-top: 10px; }
 .bubble-text strong { font-weight: 600; }

@@ -2,7 +2,7 @@ import {createFileRoute, useRouter} from '@tanstack/react-router'
 import {useEffect, useState} from 'react'
 import {Shell} from '../components/Shell'
 import {Transcript} from '../components/Transcript'
-import {Composer} from '../components/Composer'
+import {Composer, type Picture} from '../components/Composer'
 import {computerOnline, loadChat, renameBot, startChat} from '../chat/api'
 import {useConversation} from '../chat/useConversation'
 
@@ -24,7 +24,7 @@ function Home() {
   const sessionId = started?.sessionId ?? chat.sessionId
   const convo = useConversation(sessionId)
   const [opening, setOpening] = useState(false)
-  const [waiting, setWaiting] = useState<string | null>(null)
+  const [waiting, setWaiting] = useState<{text: string; pictures: string[]} | null>(null)
   // The bot's name as renamed in the details panel: the composer and the transcript follow it at
   // once, and it is saved to Barkpark, so a reload shows it too (loadChat reads it back).
   const [name, setName] = useState(chat.bot)
@@ -39,12 +39,13 @@ function Home() {
     }
   }
 
-  const send = async (text: string) => {
+  const send = async (text: string, pictures: Picture[] = []) => {
     if (!chat.host) return
-    if (sessionId && convo.ready) return convo.send(text)
+    const data = pictures.map((p) => p.data)
+    if (sessionId && convo.ready) return convo.send(text, data)
     // The first message opens the conversation on the bot's computer, then goes once the
     // live stream is open, so its run is seen from the start.
-    setWaiting(text)
+    setWaiting({text, pictures: data})
     if (!sessionId && !opening) {
       setOpening(true)
       try {
@@ -57,7 +58,7 @@ function Home() {
   useEffect(() => {
     if (waiting && convo.ready) {
       setWaiting(null)
-      void convo.send(waiting)
+      void convo.send(waiting.text, waiting.pictures)
     }
   }, [waiting, convo.ready, convo.send])
 
@@ -79,7 +80,7 @@ function Home() {
       workingBots={convo.botState === 'working' ? [chat.bot] : []}
       transcript={
         chat.host ? (
-          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? renameError ?? offline} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
+          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? renameError ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
         ) : (
           <div className="transcript">
             <p className="chat-note">

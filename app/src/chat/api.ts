@@ -66,10 +66,21 @@ export const startChat = createServerFn({method: 'POST'})
   })
 
 export const sendMessage = createServerFn({method: 'POST'})
-  .validator((d: {id: string; content: string}) => d)
+  .validator((d: {id: string; content: string; attachments?: string[]}) => d)
   .handler(async ({data}) => {
-    await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`, {method: 'POST', json: {content: data.content}})
+    // Pictures go by id: each was stored for this conversation first (uploadPicture below).
+    const json = data.attachments?.length ? {content: data.content, attachments: data.attachments} : {content: data.content}
+    await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`, {method: 'POST', json})
     return {accepted: true}
+  })
+
+/** Stores one picture for a conversation and answers its id. Barkpark takes png, jpeg, gif and
+ *  webp up to 3 MB and reads the type from the bytes themselves, never from the file's name. */
+export const uploadPicture = createServerFn({method: 'POST'})
+  .validator((d: {id: string; data: string}) => d)
+  .handler(async ({data}) => {
+    const r = await bp<{attachment: {id: string; media_type: string; byte_size: number}}>(`/v1/chat/sessions/${encodeURIComponent(data.id)}/attachments`, {method: 'POST', json: {data: data.data}})
+    return {id: r.attachment.id}
   })
 
 /** The person's answer to what the bot asked leave for. Barkpark passes it to the bot's computer;
