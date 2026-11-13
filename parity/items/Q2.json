@@ -3,5 +3,6 @@
  "slice": "S5",
  "journey": "J11",
  "title": "Question card with lettered choices",
- "status": "unknown"
+ "status": "partial",
+ "evidence": "It works against the stand-in; its look is not the oracle's yet. claude's AskUserQuestion arrives as Barkpark's approval_requested with the questions; Transcript.tsx QuestionCard letters each choice A, B, C. One single-choice question answers on a press; several questions or a pick-several are sent with Send once each has a choice (chat/api.ts answerQuestion posts /answer; Barkpark checks every choice against what the bot offered). scripts/behaviour.mjs: 3 rules. Missing: a live run (npm run turn:live -- --question is written; it needs Barkpark #25825 on prod, which stores a host's question so /answer can find it); the oracle's question card has never been captured, so look and wording are unread."
 }

@@ -84,6 +84,15 @@ export const answerApproval = createServerFn({method: 'POST'})
     return {answered: true}
   })
 
+/** The person's choice for a question the bot asked. Barkpark checks every choice against what
+ *  the bot offered and rebuilds the answer itself, so only an offered choice can get through. */
+export const answerQuestion = createServerFn({method: 'POST'})
+  .validator((d: {id: string; requestId: string; answers: Record<string, string | string[]>}) => d)
+  .handler(async ({data}) => {
+    await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/answer`, {method: 'POST', json: {request_id: data.requestId, answers: data.answers}})
+    return {answered: true}
+  })
+
 /** Saves the bot's new name. Details never sends an empty one (it puts the old name back); this
  *  refuses one anyway, so no path can save a blank bot. */
 export const renameBot = createServerFn({method: 'POST'})

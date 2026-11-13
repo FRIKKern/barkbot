@@ -1,7 +1,7 @@
 // The conversation: a time row, the bubbles, and the working line, pinned to the bottom while
 // anything lands (measured on the oracle: 0 pt from the bottom on every frame).
-import {Fragment, useLayoutEffect, useRef, type ReactNode} from 'react'
-import type {Ask, Bubble, Working} from '../chat/useConversation'
+import {Fragment, useLayoutEffect, useRef, useState, type ReactNode} from 'react'
+import type {Answers, Ask, Bubble, Question, Working} from '../chat/useConversation'
 import {filler} from '../chat/turn'
 
 /** A message as lengths only (O2): what a gate scene holds (gate/transcripts.ts). */
@@ -60,7 +60,51 @@ const timeOf = (iso: string) => {
   return `${today ? 'Today' : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} ${t}`
 }
 
-export function Transcript({bot, startedAt, bubbles, working, error, ask, onAnswer}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void}) {
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+// The bot's question, its choices lettered. One single-choice question answers on a press; more
+// than one question, or a pick-several, is sent with Send once every question has a choice.
+// The oracle's own question card is not read yet (Q2): this one is plain on purpose.
+function QuestionCard({bot, questions, locked, onChoose}: {bot: string; questions: Question[]; locked: boolean; onChoose?: (answers: Answers) => void}) {
+  const [picked, setPicked] = useState<Record<string, string[]>>({})
+  const direct = questions.length === 1 && !questions[0].multi
+  const answers = (p: Record<string, string[]>): Answers => Object.fromEntries(questions.map((q) => [q.question, q.multi ? p[q.question] ?? [] : (p[q.question] ?? [])[0]]))
+  const complete = questions.every((q) => (picked[q.question] ?? []).length > 0)
+  const press = (q: Question, label: string) => {
+    if (direct) return onChoose?.({[q.question]: label})
+    setPicked((p) => {
+      const had = p[q.question] ?? []
+      return {...p, [q.question]: q.multi ? (had.includes(label) ? had.filter((x) => x !== label) : [...had, label]) : [label]}
+    })
+  }
+  return (
+    <div className="ask" role="group" aria-label={`${bot} asks you something`}>
+      {questions.map((q) => (
+        <fieldset className="ask-question" key={q.question} disabled={locked}>
+          <legend className="ask-what">{q.question}</legend>
+          {q.options.map((o, i) => (
+            <button className="ask-choice" key={o.label} aria-pressed={direct ? undefined : (picked[q.question] ?? []).includes(o.label)} onClick={() => press(q, o.label)}>
+              <span className="ask-letter" aria-hidden="true">{LETTERS[i] ?? '·'}</span>
+              <span className="ask-choice-text">
+                <span className="ask-label">{o.label}</span>
+                {o.description && <span className="ask-note">{o.description}</span>}
+              </span>
+            </button>
+          ))}
+        </fieldset>
+      ))}
+      {!direct && (
+        <div className="ask-buttons">
+          <button className="ask-allow" disabled={locked || !complete} onClick={() => onChoose?.(answers(picked))}>
+            Send
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function Transcript({bot, startedAt, bubbles, working, error, ask, onAnswer, onChoose}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void}) {
   const box = useRef<HTMLDivElement>(null)
   const pinned = useRef(true)
   useLayoutEffect(() => {
@@ -113,7 +157,8 @@ export function Transcript({bot, startedAt, bubbles, working, error, ask, onAnsw
             </span>
           </div>
         )}
-        {ask && (
+        {ask?.questions && <QuestionCard key={ask.id} bot={bot} questions={ask.questions} locked={!!ask.answering} onChoose={onChoose} />}
+        {ask && !ask.questions && (
           // The oracle's own approval card is not read yet (Q1): this one is plain on purpose.
           <div className="ask" role="group" aria-label={`${bot} asks to ${ask.what}`}>
             <p className="ask-what">

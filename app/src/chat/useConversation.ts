@@ -4,7 +4,7 @@
 // is doing) shows while the run goes; a reply bubble lands whole when its text ends ("Typing…"
 // while it is written); the line leaves once the turn ends.
 import {useCallback, useEffect, useRef, useState} from 'react'
-import {answerApproval, sendMessage} from './api'
+import {answerApproval, answerQuestion, sendMessage} from './api'
 
 export type Bubble = {
   key: string
@@ -42,13 +42,33 @@ export function toolLabel(name: string, input: Frame | undefined): string {
 
 /** What the bot asks leave for before it goes on (Barkpark's approval_requested): nothing happens
  *  until the person answers. `detail` is the plan, the command or the file's new text. */
-export type Ask = {id: string; what: string; detail: string | null; answering: 'allow' | 'deny' | null}
+export type Question = {question: string; header: string | null; multi: boolean; options: {label: string; description: string | null}[]}
+/** `questions`: the bot asks the person to choose (claude's AskUserQuestion), not for leave. */
+/** `stored`: read back from Barkpark's stored rows on a fresh page, not heard live. Such a row
+ *  stays "pending" for ever if its turn was stopped, so it is shown only while the bot's state
+ *  says it is waiting on the person (blocked). */
+export type Ask = {id: string; what: string; detail: string | null; answering: 'allow' | 'deny' | 'choice' | null; questions?: Question[]; stored?: boolean}
+export type Answers = Record<string, string | string[]>
+// The bot's questions as it sent them; a choice given as a bare word is a label with no note.
+function questionsOf(input: Frame | undefined): Question[] {
+  const text = (v: unknown) => (typeof v === 'string' && v.trim() ? v : null)
+  return (Array.isArray(input?.questions) ? (input!.questions as Frame[]) : [])
+    .map((q) => ({
+      question: String(q?.question ?? ''),
+      header: text(q?.header),
+      multi: q?.multiSelect === true,
+      options: (Array.isArray(q?.options) ? (q.options as unknown[]) : []).map((o) => (typeof o === 'string' ? {label: o, description: null} : {label: String((o as Frame)?.label ?? ''), description: text((o as Frame)?.description)})).filter((o) => o.label),
+    }))
+    .filter((q) => q.question && q.options.length)
+}
 // The question, in plain words. The bot's computer runs claude in plan mode, so the first ask of
 // a piece of work is its plan (ExitPlanMode); then each step that changes something.
 export function askOf(id: string, tool: string, input: Frame | undefined): Ask {
   const file = typeof input?.file_path === 'string' ? input.file_path.split('/').pop() : null
   const text = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null)
   const base = {id, answering: null}
+  const questions = tool === 'AskUserQuestion' ? questionsOf(input) : []
+  if (questions.length) return {...base, what: 'ask you something', detail: null, questions}
   switch (tool) {
     case 'ExitPlanMode': return {...base, what: 'start on this plan', detail: text(input?.plan)}
     case 'Write': return {...base, what: `write ${file ?? 'a file'}`, detail: text(input?.content)}
@@ -66,12 +86,13 @@ const flat = (s: string) => s.replace(/\s+/g, '')
 
 /** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay.
  *  `fleet` is the stream of every bot's state (Barkpark's /v1/chat/events: snapshot, then state). */
-export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string) => Promise<unknown>; answer?: (sessionId: string, requestId: string, decision: 'allow' | 'deny') => Promise<unknown>}
+export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string) => Promise<unknown>; answer?: (sessionId: string, requestId: string, decision: 'allow' | 'deny') => Promise<unknown>; choose?: (sessionId: string, requestId: string, answers: Answers) => Promise<unknown>}
 export const barkpark: Transport = {
   events: (id) => `/api/chat/${id}/events`,
   fleet: () => '/api/chat/events',
   send: (id, content) => sendMessage({data: {id, content}}),
   answer: (id, requestId, decision) => answerApproval({data: {id, requestId, decision}}),
+  choose: (id, requestId, answers) => answerQuestion({data: {id, requestId, answers}}),
 }
 
 /** One conversation. `transport` must be stable (module-level or memoized): a new one reconnects. */
@@ -147,8 +168,16 @@ export function useConversation(sessionId: string | null, transport: Transport =
     const es = new EventSource(transport.events(sessionId))
     es.onopen = () => setReady(true)
     es.addEventListener('message', (e) => {
-      const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string}
-      if ((m.role === 'user' || m.role === 'assistant') && m.source_markdown) land({role: m.role, text: m.source_markdown, seq: m.seq})
+      const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string; metadata?: Frame}
+      if ((m.role === 'user' || m.role === 'assistant') && m.source_markdown) {
+        land({role: m.role, text: m.source_markdown, seq: m.seq})
+        // A row after a stored ask: that ask is over.
+        return setAsk((a) => (a?.stored ? null : a))
+      }
+      // An ask that was still waiting when the page loaded (a reload in the middle of one).
+      const meta = m.metadata
+      if (['approval', 'plan', 'question'].includes(m.role) && meta?.approval_status === 'pending' && typeof meta.request_id === 'string')
+        setAsk((a) => (a && !a.stored ? a : {...askOf(meta.request_id, String(meta.tool_name ?? 'a tool'), meta.input), stored: true}))
     })
     es.addEventListener('chat', (e) => {
       const f = JSON.parse((e as MessageEvent).data) as Frame
@@ -298,5 +327,22 @@ export function useConversation(sessionId: string | null, transport: Transport =
     [sessionId, transport, ask],
   )
 
-  return {bubbles, working, botState, error, ready, send, ask, answer}
+  // The same for a question: one set of choices per ask.
+  const choose = useCallback(
+    async (answers: Answers) => {
+      if (!sessionId || !ask || ask.answering || !transport.choose) return
+      const id = ask.id
+      setAsk((a) => (a?.id === id ? {...a, answering: 'choice'} : a))
+      setError(null)
+      try {
+        await transport.choose(sessionId, id, answers)
+      } catch (e) {
+        setAsk((a) => (a?.id === id ? {...a, answering: null} : a))
+        setError(`Your answer did not reach the bot: ${e instanceof Error ? e.message : String(e)}`)
+      }
+    },
+    [sessionId, transport, ask],
+  )
+
+  return {bubbles, working, botState, error, ready, send, ask: ask?.stored && botState !== 'blocked' ? null : ask, answer, choose}
 }
