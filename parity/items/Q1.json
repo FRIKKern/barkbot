@@ -3,5 +3,6 @@
  "slice": "S5",
  "journey": "J10",
  "title": "Approval card: nothing happens until I press",
- "status": "unknown"
+ "status": "partial",
+ "evidence": "It works, its look is not the oracle's yet. useConversation.ts takes Barkpark's approval_requested (plan mode asks for the plan, then each step) and Transcript.tsx shows a plain card: what the bot asks, the plan, command or file text, Deny and Allow; nothing is sent until a press (chat/api.ts answerApproval). scripts/behaviour.mjs: 4 rules against the stand-in (card and no answer; Allow once; the card goes when confirmed; Deny). Live: npm run turn:live -- --approve (2026-11-13: 2 cards allowed, the file was in the bot's folder; parity/live/approve.json). Missing: the oracle's approval card has never been captured (it needs a send that makes the oracle ask), so the look, the wording and where the card sits are unread; a card does not come back after a reload in the middle of an ask."
 }

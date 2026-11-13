@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="814" viewBox="0 0 1200 814" role="img" aria-labelledby="t d">
 <title id="t">BarkBot journeys</title>
-<desc id="d">23 of 44 items done, 10 partial, 2 open, 9 not yet read on the oracle. J01: partial. J02: partial. J03: done. J04: partial. J05: unknown. J06: done. J07: unknown. J08: unknown. J09: unknown. J10: unknown. J11: unknown. J12: partial. J13: unknown.</desc>
+<desc id="d">23 of 44 items done, 11 partial, 2 open, 8 not yet read on the oracle. J01: partial. J02: partial. J03: done. J04: partial. J05: unknown. J06: done. J07: unknown. J08: unknown. J09: unknown. J10: partial. J11: unknown. J12: partial. J13: unknown.</desc>
 <style>
   svg { --bg:#f7f6f3; --card:#ffffff; --line:#e4e1da; --ink:#1c1b19; --muted:#6e6b64; --done:#2f7d52; --now:#c27a12; --todo:#a29f97; --unk:#8569b3; --nowbg:#fff5e3; --accent:#e8962e; }
   @media (prefers-color-scheme: dark) {
@@ -17,8 +17,8 @@
 <text x="40" y="102" font-size="19" class="muted">The spec of "works". Each passes when the oracle and BarkBot end the same way.</text>
 <text x="1160" y="70" font-size="40" font-weight="700" text-anchor="end">23<tspan class="muted" font-weight="400"> / 44</tspan></text>
 <text x="1160" y="102" font-size="16" text-anchor="end" class="muted">parity items done</text>
-<rect x="40" y="124" width="1120" height="8" rx="4" class="track"/><rect x="40" y="124" width="585.4545454545455" height="8" class="done"/><rect x="625.4545454545455" y="124" width="254.54545454545453" height="8" class="now"/><rect x="880" y="124" width="50.90909090909091" height="8" class="todo"/><rect x="930.9090909090909" y="124" width="229.0909090909091" height="8" class="unk"/>
-<text x="40" y="168" font-size="16"><tspan class="done">● done 23</tspan><tspan class="now" dx="24">● partial 10</tspan><tspan class="todo" dx="24">● open 2</tspan><tspan class="unk" dx="24">● not yet read on the oracle 9</tspan></text>
+<rect x="40" y="124" width="1120" height="8" rx="4" class="track"/><rect x="40" y="124" width="585.4545454545455" height="8" class="done"/><rect x="625.4545454545455" y="124" width="280" height="8" class="now"/><rect x="905.4545454545455" y="124" width="50.90909090909091" height="8" class="todo"/><rect x="956.3636363636364" y="124" width="203.63636363636363" height="8" class="unk"/>
+<text x="40" y="168" font-size="16"><tspan class="done">● done 23</tspan><tspan class="now" dx="24">● partial 11</tspan><tspan class="todo" dx="24">● open 2</tspan><tspan class="unk" dx="24">● not yet read on the oracle 8</tspan></text>
 <text x="1160" y="168" font-size="16" text-anchor="end" class="muted">one dot per item</text>
 <g data-journey="J01">
 <rect x="40" y="214" width="211.2" height="168" rx="12" class="card"/>
@@ -109,11 +109,11 @@
 <g data-journey="J10">
 <rect x="948.8" y="398" width="211.2" height="168" rx="12" class="card"/>
 <text x="966.8" y="428" font-size="15" font-weight="700">J10<tspan class="muted" font-weight="400" dx="8">S5</tspan></text>
-<text x="1142" y="428" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="unk">UNREAD</text>
+<text x="1142" y="428" font-size="12" font-weight="700" letter-spacing="1.2" text-anchor="end" class="now">PARTIAL</text>
 <text x="966.8" y="456" font-size="14">The bot asks before</text>
 <text x="966.8" y="475" font-size="14">acting; nothing happens</text>
 <text x="966.8" y="494" font-size="14">until I press</text>
-<circle cx="974.8" cy="544" r="5" class="unk"/><text x="1142" y="549" font-size="12" text-anchor="end" class="muted">0/1</text>
+<circle cx="974.8" cy="544" r="5" class="now"/><text x="1142" y="549" font-size="12" text-anchor="end" class="muted">0/1</text>
 </g>
 <g data-journey="J11">
 <rect x="40" y="582" width="211.2" height="168" rx="12" class="card"/>

@@ -4,7 +4,7 @@
 // is doing) shows while the run goes; a reply bubble lands whole when its text ends ("Typing…"
 // while it is written); the line leaves once the turn ends.
 import {useCallback, useEffect, useRef, useState} from 'react'
-import {sendMessage} from './api'
+import {answerApproval, sendMessage} from './api'
 
 export type Bubble = {
   key: string
@@ -40,17 +40,38 @@ export function toolLabel(name: string, input: Frame | undefined): string {
   }
 }
 
+/** What the bot asks leave for before it goes on (Barkpark's approval_requested): nothing happens
+ *  until the person answers. `detail` is the plan, the command or the file's new text. */
+export type Ask = {id: string; what: string; detail: string | null; answering: 'allow' | 'deny' | null}
+// The question, in plain words. The bot's computer runs claude in plan mode, so the first ask of
+// a piece of work is its plan (ExitPlanMode); then each step that changes something.
+export function askOf(id: string, tool: string, input: Frame | undefined): Ask {
+  const file = typeof input?.file_path === 'string' ? input.file_path.split('/').pop() : null
+  const text = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null)
+  const base = {id, answering: null}
+  switch (tool) {
+    case 'ExitPlanMode': return {...base, what: 'start on this plan', detail: text(input?.plan)}
+    case 'Write': return {...base, what: `write ${file ?? 'a file'}`, detail: text(input?.content)}
+    case 'Edit': case 'MultiEdit': case 'NotebookEdit': return {...base, what: `change ${file ?? 'a file'}`, detail: text(input?.new_string)}
+    case 'Bash': return {...base, what: 'run a command', detail: text(input?.command)}
+    case 'WebFetch': return {...base, what: 'read a web page', detail: text(input?.url)}
+    case 'WebSearch': return {...base, what: 'search the web', detail: text(input?.query)}
+    default: return {...base, what: `use ${tool}`, detail: null}
+  }
+}
+
 let n = 0
 const key = () => `local-${++n}`
 const flat = (s: string) => s.replace(/\s+/g, '')
 
 /** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay.
  *  `fleet` is the stream of every bot's state (Barkpark's /v1/chat/events: snapshot, then state). */
-export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string) => Promise<unknown>}
+export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string) => Promise<unknown>; answer?: (sessionId: string, requestId: string, decision: 'allow' | 'deny') => Promise<unknown>}
 export const barkpark: Transport = {
   events: (id) => `/api/chat/${id}/events`,
   fleet: () => '/api/chat/events',
   send: (id, content) => sendMessage({data: {id, content}}),
+  answer: (id, requestId, decision) => answerApproval({data: {id, requestId, decision}}),
 }
 
 /** One conversation. `transport` must be stable (module-level or memoized): a new one reconnects. */
@@ -58,6 +79,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
   const [bubbles, setBubbles] = useState<Bubble[]>([])
   const [working, setWorking] = useState<Working>(null)
   const [error, setError] = useState<string | null>(null)
+  const [ask, setAsk] = useState<Ask | null>(null)
   const [ready, setReady] = useState(false) // the live stream is open: a send now cannot miss its run
   const text = useRef<string | null>(null) // the reply block being written, not shown until it ends
   const leave = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -118,6 +140,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
   useEffect(() => {
     setBubbles([])
     setWorking(null)
+    setAsk(null)
     setReady(false)
     setBotState(null)
     if (!sessionId) return
@@ -191,16 +214,29 @@ export function useConversation(sessionId: string | null, transport: Transport =
           if (ev.native?.params?.item?.type === 'text') message()
           return
         }
+        case 'approval_requested': {
+          // The turn waits here until the person answers; the text so far lands first.
+          const t = (text.current ?? '').trim()
+          text.current = ''
+          if (t) land({role: 'assistant', text: t})
+          return setAsk(askOf(String(ev.approval_id), String(ev.native?.tool_name ?? 'a tool'), ev.native?.input))
+        }
+        case 'control_completed':
+          // The bot's computer has the answer: the card goes, the turn goes on.
+          if (ev.native?.operation === 'answer_approval') setAsk(null)
+          return
         case 'turn_completed': {
           const t = (text.current ?? '').trim()
           text.current = null
           if (t) land({role: 'assistant', text: t})
+          setAsk(null)
           return end()
         }
         case 'error':
         case 'process_failed':
         case 'protocol_error':
           text.current = null
+          setAsk(null)
           setError(typeof ev.error === 'string' ? ev.error : ev.error?.result ?? 'The run failed on the bot\'s computer')
           return end()
       }
@@ -245,5 +281,22 @@ export function useConversation(sessionId: string | null, transport: Transport =
     [sessionId, transport, land],
   )
 
-  return {bubbles, working, botState, error, ready, send}
+  // One answer per ask: the buttons lock while it is on its way, and open again if it fails.
+  const answer = useCallback(
+    async (decision: 'allow' | 'deny') => {
+      if (!sessionId || !ask || ask.answering || !transport.answer) return
+      const id = ask.id
+      setAsk((a) => (a?.id === id ? {...a, answering: decision} : a))
+      setError(null)
+      try {
+        await transport.answer(sessionId, id, decision)
+      } catch (e) {
+        setAsk((a) => (a?.id === id ? {...a, answering: null} : a))
+        setError(`Your answer did not reach the bot: ${e instanceof Error ? e.message : String(e)}`)
+      }
+    },
+    [sessionId, transport, ask],
+  )
+
+  return {bubbles, working, botState, error, ready, send, ask, answer}
 }

@@ -35,7 +35,9 @@ process.on('SIGINT', () => process.exit(130));
 
 // A stand-in Barkpark for the live page (/): it answers what loadChat asks (no computer enrolled;
 // the saved bot name) and keeps every write, so the rename-persists rules can count them.
-const stub = { name: null, reads: 0, writes: [], other: [], hosts: [] };
+const stub = { name: null, reads: 0, writes: [], other: [], hosts: [], sessions: [], answers: [], streams: [] };
+// The stand-in's side of a conversation's event stream: say an event to every open page.
+const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 const PREF = '/w/default/p/default/v1/prefs/production/barkbot.bot';
 const STUB_PORT = await freePort();
 await new Promise((ok) => httpServer((req, res) => {
@@ -46,7 +48,13 @@ await new Promise((ok) => httpServer((req, res) => {
     if (req.url === PREF && req.method === 'GET') { stub.reads++; return json(200, { key: 'barkbot.bot', dataset: 'production', value: stub.name === null ? null : { name: stub.name } }); }
     if (req.url === PREF && req.method === 'PUT') { const { value } = JSON.parse(body); stub.writes.push(value); stub.name = value?.name ?? null; return json(200, { key: 'barkbot.bot', dataset: 'production', value }); }
     if (req.url.startsWith('/w/default/v1/chat-hosts')) return json(200, { hosts: stub.hosts });
-    if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: [] });
+    if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: stub.sessions });
+    if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
+      res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' }); res.write(': open\n\n');
+      if (req.url !== '/v1/chat/events') { stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
+      return;
+    }
+    if (/^\/v1\/chat\/sessions\/[^/]+\/approval$/.test(req.url) && req.method === 'POST') { stub.answers.push(JSON.parse(body)); res.writeHead(204); return res.end(); }
     stub.other.push(`${req.method} ${req.url}`);
     json(404, { error: { code: 'not_found', message: 'not in the stand-in' } });
   });
@@ -253,6 +261,36 @@ else {
   await until(async () => (await computer()).alert === null, 10000, 'the page to notice').catch(() => {});
   c = await computer();
   check('the computer comes back: the alert goes and the card is as before', c.state === 'Asleep' && c.alert === null, c);
+
+  // The bot asks leave before it acts (Barkpark's approval_requested, seen live 2026-11-13: plan
+  // mode asks for its plan, then for each step). Nothing may be answered until the person presses.
+  console.log('Behaviour · the bot asks leave (the live page, against the stand-in Barkpark)');
+  const SESSION = '00000000-0000-4000-8000-0000000000aa';
+  stub.sessions = [{ id: SESSION, execution_target: 'registered_host', execution_host_id: host(true)[0].id, inserted_at: '2026-11-13T10:00:00Z', status: 'active' }];
+  const card = () => ev(() => { const c = document.querySelector('.ask'); const r = (q) => { const b = c?.querySelector(q)?.getBoundingClientRect(); return b ? [b.x + b.width / 2, b.y + b.height / 2] : null; };
+    return { shown: !!c, what: c?.querySelector('.ask-what')?.textContent ?? null, detail: c?.querySelector('.ask-detail')?.textContent ?? null, allow: r('.ask-allow'), deny: r('.ask-deny'), locked: !!c?.querySelector('.ask-allow')?.disabled }; });
+  const asks = (id, tool, input) => say('approval_requested', { approval_id: id, native: { kind: 'approval_requested', approval_id: id, tool_name: tool, input } });
+  await open(`${base}/`);
+  await until(() => stub.streams.length > 0, 30000, 'the live page to open its conversation stream').catch(() => {});
+  let k = await card();
+  precondition('the live page has a conversation open and shows no card', stub.streams.length > 0 && !k.shown && stub.answers.length === 0, { streams: stub.streams.length, k, other: stub.other, page: await ev(() => ({ state: document.querySelector('.computer-state')?.textContent, note: document.querySelector('.chat-note')?.textContent ?? null, err: document.querySelector('.chat-error')?.textContent ?? null })) });
+  say('turn_started'); asks('ask-1', 'Write', { file_path: '/bot/home/notes.txt', content: 'hi' });
+  await until(async () => (await card()).shown, 5000, 'the card').catch(() => {});
+  await wait(600);
+  k = await card();
+  check('the bot asks: a card says what for and what with, and nothing is answered (control: no card before the ask)', k.shown && /asks to write notes\.txt/.test(k.what ?? '') && k.detail === 'hi' && stub.answers.length === 0, { k, answers: stub.answers });
+  if (k.allow) { await click(...k.allow); await until(() => stub.answers.length > 0, 5000, 'the answer to reach the stand-in').catch(() => {}); await click(...k.allow); await wait(300); }
+  k = await card();
+  check('Allow: answers that ask once, with allow; a second press sends nothing; the card stays until the bot\'s computer has it', stub.answers.length === 1 && stub.answers[0].request_id === 'ask-1' && stub.answers[0].decision === 'allow' && k.shown && k.locked, { k, answers: stub.answers });
+  say('control_completed', { native: { kind: 'control_completed', operation: 'answer_approval' } });
+  await until(async () => !(await card()).shown, 5000, 'the card to go').catch(() => {});
+  k = await card();
+  check('the answer is confirmed: the card goes', !k.shown, k);
+  asks('ask-2', 'Bash', { command: 'ls' });
+  await until(async () => (await card()).shown, 5000, 'the second card').catch(() => {});
+  k = await card();
+  if (k.deny) { await click(...k.deny); await until(() => stub.answers.length > 1, 5000, 'the answer to reach the stand-in').catch(() => {}); }
+  check('Deny: answers the new ask with deny', /asks to run a command/.test(k.what ?? '') && stub.answers.length === 2 && stub.answers[1].request_id === 'ask-2' && stub.answers[1].decision === 'deny', { k, answers: stub.answers });
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
