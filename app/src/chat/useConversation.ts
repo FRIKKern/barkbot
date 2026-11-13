@@ -176,7 +176,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
     if (!sessionId) return
     const es = new EventSource(transport.events(sessionId))
     es.onopen = () => setReady(true)
-    es.addEventListener('message', (e) => {
+    const row = (e: Event) => {
       const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string; metadata?: Frame; attachments?: {id: string}[]}
       const images = (m.attachments ?? []).map((a) => a.id).filter((x) => typeof x === 'string')
       if ((m.role === 'user' || m.role === 'assistant') && (m.source_markdown || images.length)) {
@@ -188,7 +188,18 @@ export function useConversation(sessionId: string | null, transport: Transport =
       const meta = m.metadata
       if (['approval', 'plan', 'question'].includes(m.role) && meta?.approval_status === 'pending' && typeof meta.request_id === 'string')
         setAsk((a) => (a && !a.stored ? a : {...askOf(meta.request_id, String(meta.tool_name ?? 'a tool'), meta.input), stored: true}))
-    })
+    }
+    es.addEventListener('message', row)
+    // Barkpark sends a stored row only when a stream opens (from the asked-for cursor), never as
+    // it is written (seen live 2026-11-13). So after a turn heard from its middle, the rows are
+    // asked for once more: the whole reply is among them, and a row already shown is not doubled.
+    let again: EventSource | null = null
+    const rows = () => {
+      again?.close()
+      const more = (again = new EventSource(transport.events(sessionId)))
+      more.addEventListener('message', row)
+      setTimeout(() => more.close(), 4000)
+    }
     es.addEventListener('chat', (e) => {
       const f = JSON.parse((e as MessageEvent).data) as Frame
       if (import.meta.env.DEV) console.debug('[chat]', f.type, f.subtype ?? f.event?.type ?? '')
@@ -281,6 +292,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
         case 'turn_completed': {
           whole()
           text.current = null
+          if (tail) rows()
           started = tail = false
           setAsk(null)
           return end()
@@ -314,6 +326,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
     })
     return () => {
       es.close()
+      again?.close()
       fleet?.close()
       bot.current = null
       if (leave.current) clearTimeout(leave.current)
