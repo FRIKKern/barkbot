@@ -50,6 +50,15 @@
 @keyframes label-in { from { opacity: 0; transform: translateY(4px); } }
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
+/* The approval card. Not measured on the oracle yet (Q1 unread): plain, in the app's own inks. */
+.ask { margin-top: 14px; max-width: 560px; padding: 12px 14px; border-radius: 18px; background: rgb(255 255 255 / 0.04); }
+.ask-what { margin: 0; font-size: 15px; line-height: 22px; }
+.ask-detail { margin: 8px 0 0; max-height: 220px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/18px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink-66); }
+.ask-buttons { margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px; }
+.ask-buttons button { height: 32px; padding: 0 14px; border-radius: 16px; font-size: 13px; line-height: 18px; }
+.ask-deny { background: rgb(255 255 255 / 0.08); color: var(--ink); }
+.ask-allow { background: var(--ink); color: rgb(17 17 17); }
+.ask-buttons button:disabled { opacity: 0.5; }
 .chat-error { margin: 12px 0 0; font-size: 13px; line-height: 18px; color: rgb(255 140 120); }
 .chat-note { max-width: 600px; margin: 0 auto; font-size: 13px; line-height: 18px; color: var(--ink-66); }
 .chat-note code { font-size: 12px; }

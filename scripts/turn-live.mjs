@@ -5,6 +5,8 @@
 //
 //   npm run turn:live            start the app and a headless Chrome, send one turn, reload, stop both
 //   npm run turn:live -- --url http://localhost:3000   use an app that is already running
+//   npm run turn:live -- --approve  the bot asks leave (Q1): ask for a file with a made-up name, press Allow on each
+//                                   card, find the file in the bot's folder. Writes parity/live/approve.json.
 //   npm run turn:live -- --resume   come back later (C2): give the bot a made-up code, wait while YOU stop and
 //                                   start the bot's computer (then Enter), reload, ask for the code. Writes parity/live/resume.json.
 //
@@ -13,7 +15,9 @@
 // Passing writes parity/live/turn.json. Exits 1 if any step fails; then nothing is written.
 import { spawn, execFileSync } from 'node:child_process';
 import { createServer } from 'node:net';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 
@@ -25,6 +29,7 @@ const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/M
 const PROFILE = path('.cache', `live-chrome-${CHROME_PORT}`);
 const MESSAGE = 'Say hi in one short sentence.';
 const RESUME = args.includes('--resume');
+const APPROVE = args.includes('--approve');
 const REPLY_MS = Number(opt('reply-ms')) || 90000;
 const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
 async function until(fn, ms, what) {
@@ -58,6 +63,7 @@ const seen = () => page.evaluate(() => {
     bot: bot.length,
     lastBot: bot.at(-1)?.querySelector('.bubble-text')?.textContent.length ?? 0,
     working: !!document.querySelector('.working'),
+    asking: !!document.querySelector('.ask'),
     error: !!document.querySelector('.chat-error'),
     noComputer: /has no computer yet/.test(document.body.textContent),
     prompt: !!prompt,
@@ -75,7 +81,8 @@ const settled = async () => {
 };
 
 // One turn: type, Enter, wait for our bubble and then the reply. Counts and times only.
-const turn = async (text) => {
+const turn = async (text, { allow = false } = {}) => {
+  let allowed = 0;
   const before = await settled();
   if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
   const t0 = Date.now();
@@ -85,8 +92,13 @@ const turn = async (text) => {
   await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
   await until(async () => (await seen()).user === before.user + 1, 10000, 'our own message to show as a bubble');
   let after;
-  await until(async () => { after = await seen(); return after.bot > before.bot && after.lastBot > 0 && !after.working; }, REPLY_MS, `a reply within ${REPLY_MS / 1000} s (is npm run host running?)`);
-  return { before, after, ms: Date.now() - t0 };
+  await until(async () => {
+    // --approve: press Allow on each card the bot shows, as a person would.
+    if (allow && await page.evaluate(() => { const b = document.querySelector('.ask-allow:not(:disabled)'); if (b) b.click(); return !!b; })) { allowed++; await wait(500); }
+    after = await seen();
+    return after.bot > before.bot && after.lastBot > 0 && !after.working && !after.asking;
+  }, allow ? REPLY_MS * 2 : REPLY_MS, `a reply within ${REPLY_MS / 1000} s (is npm run host running?)`);
+  return { before, after, ms: Date.now() - t0, allowed };
 };
 const commit = () => { try { return execFileSync('git', ['rev-parse', '--short=10', 'HEAD'], { cwd: path(), encoding: 'utf8' }).trim(); } catch { return null; } };
 const record = (file, r) => { mkdirSync(path('parity', 'live'), { recursive: true }); writeFileSync(path('parity', 'live', file), JSON.stringify({ ran: new Date().toISOString(), barkbot: commit(), ...r }, null, 1) + '\n'); };
@@ -94,6 +106,21 @@ const computer = () => page.evaluate(() => document.querySelector('.computer-sta
 
 try {
   await open();
+  if (APPROVE) {
+    // The bot's computer runs claude in plan mode: work that changes something asks leave first
+    // (its plan, then each step). The file's name is made up for this run, so finding it in the
+    // bot's folder afterwards can only come from this turn.
+    const name = `barkbot-check-${1000 + Math.floor(Math.random() * 9000)}.txt`;
+    const file = join(process.env.BARKBOT_HOME || join(homedir(), 'BarkBot', 'home'), name);
+    if (existsSync(file)) stopWith(`${name} is already in the bot's folder`);
+    const r = await turn(`Create a file called ${name} in your folder with the word hi in it. Then reply with just: done`, { allow: true });
+    if (!r.allowed) stopWith('the bot never asked leave: no approval card was shown');
+    if (!existsSync(file)) stopWith(`Allow was pressed ${r.allowed} times and the bot replied, but ${name} is not in its folder`);
+    rmSync(file);
+    record('approve.json', { cards_allowed: r.allowed, reply_ms: r.ms, file_written: true, bubbles_at_end: [r.after.user, r.after.bot] });
+    console.log(`Live approve: ok · ${r.allowed} cards allowed · the file was written (and removed again) · reply in ${(r.ms / 1000).toFixed(1)} s`);
+    process.exit(0);
+  }
   if (RESUME) {
     // The code is made up for this run, so a reply that holds it can only come from the earlier
     // turn: Claude's own session, resumed on the restarted computer (--resume in the host).

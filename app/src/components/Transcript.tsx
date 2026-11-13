@@ -1,7 +1,7 @@
 // The conversation: a time row, the bubbles, and the working line, pinned to the bottom while
 // anything lands (measured on the oracle: 0 pt from the bottom on every frame).
 import {Fragment, useLayoutEffect, useRef, type ReactNode} from 'react'
-import type {Bubble, Working} from '../chat/useConversation'
+import type {Ask, Bubble, Working} from '../chat/useConversation'
 import {filler} from '../chat/turn'
 
 /** A message as lengths only (O2): what a gate scene holds (gate/transcripts.ts). */
@@ -60,13 +60,13 @@ const timeOf = (iso: string) => {
   return `${today ? 'Today' : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} ${t}`
 }
 
-export function Transcript({bot, startedAt, bubbles, working, error}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null}) {
+export function Transcript({bot, startedAt, bubbles, working, error, ask, onAnswer}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void}) {
   const box = useRef<HTMLDivElement>(null)
   const pinned = useRef(true)
   useLayoutEffect(() => {
     const el = box.current
     if (el && pinned.current) el.scrollTop = el.scrollHeight
-  }, [bubbles, working, error])
+  }, [bubbles, working, error, ask])
   // Pinned also when the words reflow (a font arrives, a panel opens or closes, the window resizes).
   useLayoutEffect(() => {
     const el = box.current
@@ -113,13 +113,30 @@ export function Transcript({bot, startedAt, bubbles, working, error}: {bot: stri
             </span>
           </div>
         )}
+        {ask && (
+          // The oracle's own approval card is not read yet (Q1): this one is plain on purpose.
+          <div className="ask" role="group" aria-label={`${bot} asks to ${ask.what}`}>
+            <p className="ask-what">
+              {bot} asks to {ask.what}
+            </p>
+            {ask.detail && <pre className="ask-detail">{ask.detail}</pre>}
+            <div className="ask-buttons">
+              <button className="ask-deny" disabled={!!ask.answering} onClick={() => onAnswer?.('deny')}>
+                Deny
+              </button>
+              <button className="ask-allow" disabled={!!ask.answering} onClick={() => onAnswer?.('allow')}>
+                Allow
+              </button>
+            </div>
+          </div>
+        )}
         {error && (
           <p className="chat-error" role="alert">
             {error}
           </p>
         )}
         <div className="sr-only" role="status" aria-live="polite">
-          {working && !working.leaving && !working.ended ? `${bot} is working` : bubbles.at(-1)?.role === 'assistant' ? `${bot} replied` : ''}
+          {ask ? `${bot} asks to ${ask.what}` : working && !working.leaving && !working.ended ? `${bot} is working` : bubbles.at(-1)?.role === 'assistant' ? `${bot} replied` : ''}
         </div>
       </div>
     </div>

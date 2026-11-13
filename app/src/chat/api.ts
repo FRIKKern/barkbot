@@ -72,6 +72,18 @@ export const sendMessage = createServerFn({method: 'POST'})
     return {accepted: true}
   })
 
+/** The person's answer to what the bot asked leave for. Barkpark passes it to the bot's computer;
+ *  an allow lets exactly the asked step go on, a deny tells the bot no. */
+export const answerApproval = createServerFn({method: 'POST'})
+  .validator((d: {id: string; requestId: string; decision: 'allow' | 'deny'}) => {
+    if (d.decision !== 'allow' && d.decision !== 'deny') throw new Error('An answer is allow or deny')
+    return d
+  })
+  .handler(async ({data}) => {
+    await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/approval`, {method: 'POST', json: {request_id: data.requestId, decision: data.decision}})
+    return {answered: true}
+  })
+
 /** Saves the bot's new name. Details never sends an empty one (it puts the old name back); this
  *  refuses one anyway, so no path can save a blank bot. */
 export const renameBot = createServerFn({method: 'POST'})

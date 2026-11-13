@@ -79,7 +79,7 @@ function Home() {
       workingBots={convo.botState === 'working' ? [chat.bot] : []}
       transcript={
         chat.host ? (
-          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? renameError ?? offline} />
+          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? renameError ?? offline} ask={convo.ask} onAnswer={convo.answer} />
         ) : (
           <div className="transcript">
             <p className="chat-note">
