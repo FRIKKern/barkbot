@@ -64,3 +64,9 @@ export function bpStream(path: string, signal: AbortSignal, lastEventId?: string
     signal,
   })
 }
+
+/** The history cursor a conversation's stream is opened with. Barkpark replays stored rows only
+ *  after a Last-Event-ID, and none when there is no header, so a first connect asks from 0
+ *  (a reloaded page showed an empty conversation, seen live 2026-11-11). The real stream route
+ *  and Gate B's stand-in both take their cursor from here, so the gate measures this rule. */
+export const historyCursor = (request: Request): string => request.headers.get('last-event-id') ?? '0'

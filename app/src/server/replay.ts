@@ -89,7 +89,10 @@ function sseResponse(start: (write: (s: string) => void, close: () => void) => v
 }
 
 /** The stored rows after the turn, as Barkpark replays them on connect. */
-function history(m: Milestone[], since: number): string {
+function history(m: Milestone[], cursor: string | null): string {
+  // As Barkpark: no Last-Event-ID, no stored rows at all (chat_controller replay(conn, _id, nil)).
+  if (cursor === null) return ''
+  const since = Number(cursor) || 0
   const user = m.find((x) => x.kind === 'user')
   const replies = m.filter((x) => x.kind === 'assistant').map((x) => filler(x.len ?? 0))
   if (!user || !replies.length) return ''
@@ -97,9 +100,9 @@ function history(m: Milestone[], since: number): string {
   return rows.slice(since).join('') // rows after Last-Event-ID, as Barkpark replays
 }
 
-export function replayStream(id: string, request: Request): Response {
+/** `cursor` is the Last-Event-ID the app would send Barkpark (server/barkpark historyCursor). */
+export function replayStream(id: string, request: Request, cursor: string | null): Response {
   const url = new URL(request.url)
-  const since = Number(request.headers.get('last-event-id') ?? 0) || 0
   const run = url.searchParams.get('run')
   if (!run || !RUN.test(run)) return new Response('no such run', {status: 404})
   if (url.searchParams.has('status')) {
@@ -122,7 +125,7 @@ export function replayStream(id: string, request: Request): Response {
     r.connects++
     write('retry: 50\n\n') // reconnect soon after a drop; the first bytes also open the EventSource
     if (r.sent) {
-      const h = history(r.milestones, since)
+      const h = history(r.milestones, cursor)
       r.rows += (h.match(/^event: message$/gm) ?? []).length
       write(h)
     }

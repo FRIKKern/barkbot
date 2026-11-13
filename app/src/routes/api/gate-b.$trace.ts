@@ -1,4 +1,5 @@
 import {createFileRoute} from '@tanstack/react-router'
+import {historyCursor} from '../../server/barkpark'
 import {replaySend, replayStream} from '../../server/replay'
 
 // Gate B's event stream and send for one recorded oracle turn (server/replay.ts).
@@ -8,7 +9,7 @@ export const Route = createFileRoute('/api/gate-b/$trace')({
     handlers: {
       GET: ({request, params}) => {
         if (!import.meta.env.DEV) return new Response('not found', {status: 404})
-        return replayStream(params.trace, request)
+        return replayStream(params.trace, request, historyCursor(request))
       },
       POST: ({request}) => {
         if (!import.meta.env.DEV) return new Response('not found', {status: 404})
