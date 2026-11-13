@@ -219,10 +219,21 @@ export function useConversation(sessionId: string | null, transport: Transport =
     // (task-f13fc4b4dc2af6de) also sends each tool call (item {type: tool_use, name, input}) and
     // each text block's edges (item {type: text}); an older one sends a turn_started per model
     // message instead. Either way a message that ends lands as its own bubble.
-    const message = () => {
+    // A page that opens in the middle of a reply (a reload) hears only the rest of it: the turn's
+    // start is not replayed. That tail is not a message, so nothing of such a turn lands from the
+    // live events; its stored row, which follows the turn's end, is the whole reply.
+    let started = false
+    let tail = false
+    const part = () => {
+      if (!started) tail = true
+    }
+    const whole = () => {
       const t = (text.current ?? '').trim()
+      if (t && !tail) land({role: 'assistant', text: t})
+    }
+    const message = () => {
+      whole()
       text.current = ''
-      if (t) land({role: 'assistant', text: t})
       resume()
     }
     es.addEventListener('runtime', (e) => {
@@ -233,10 +244,12 @@ export function useConversation(sessionId: string | null, transport: Transport =
           // An older host sends one per model message (message_start), so a second one in a
           // turn means the text before it is a whole message: it lands now, not lost (Gate B,
           // storage: a sentence, a tool, then the answer are two bubbles).
+          started = true
           return message()
         case 'text_delta': {
           const d = ev.native?.params?.delta ?? ev.native?.delta
           if (typeof d !== 'string') return
+          part()
           if (text.current === null) text.current = ''
           if (!text.current) typingSoon()
           text.current += d
@@ -244,20 +257,21 @@ export function useConversation(sessionId: string | null, transport: Transport =
         }
         case 'item_started': {
           const it = ev.native?.params?.item
+          part()
           if (it?.type !== 'text' && typeof it?.name === 'string') show(toolLabel(it.name, it.input))
           return
         }
         case 'item_completed': {
           // A text block ended: its text is a whole message. (Barkpark puts a paragraph break in
           // front of the next block's first delta; the bubble is trimmed.)
+          part()
           if (ev.native?.params?.item?.type === 'text') message()
           return
         }
         case 'approval_requested': {
           // The turn waits here until the person answers; the text so far lands first.
-          const t = (text.current ?? '').trim()
+          whole()
           text.current = ''
-          if (t) land({role: 'assistant', text: t})
           return setAsk(askOf(String(ev.approval_id), String(ev.native?.tool_name ?? 'a tool'), ev.native?.input))
         }
         case 'control_completed':
@@ -265,9 +279,9 @@ export function useConversation(sessionId: string | null, transport: Transport =
           if (ev.native?.operation === 'answer_approval') setAsk(null)
           return
         case 'turn_completed': {
-          const t = (text.current ?? '').trim()
+          whole()
           text.current = null
-          if (t) land({role: 'assistant', text: t})
+          started = tail = false
           setAsk(null)
           return end()
         }
@@ -275,6 +289,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
         case 'process_failed':
         case 'protocol_error':
           text.current = null
+          started = tail = false
           setAsk(null)
           setError(typeof ev.error === 'string' ? ev.error : ev.error?.result ?? 'The run failed on the bot\'s computer')
           return end()

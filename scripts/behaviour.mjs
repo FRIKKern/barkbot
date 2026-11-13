@@ -374,6 +374,30 @@ else {
   await until(() => stub.sent.length > 1, 8000, 'the second message').catch(() => {});
   check('a message without a picture names none (control)', stub.sent.length === 2 && !('attachments' in stub.sent[1]) && stub.uploads.length === 1, { sent: stub.sent });
   rmSync(pngPath, { force: true });
+
+  // A reload in the middle of a reply: the fresh page hears only the rest of the turn (Barkpark
+  // replays stored rows, not a running turn's events; seen live 2026-11-13). The tail is not a
+  // message; the stored row that follows the turn's end is the whole reply.
+  console.log('Behaviour · a page that opens mid-reply (the live page, against the stand-in Barkpark)');
+  const row = (r) => { stub.rows.push(r); stub.streams.forEach((res) => res.write(`id: ${r.seq}\nevent: message\ndata: ${JSON.stringify(r)}\n\n`)); };
+  const replies = () => ev(() => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].map((x) => x.textContent));
+  const textItem = { native: { params: { item: { type: 'text' } } } };
+  stub.rows = [{ seq: 1, role: 'user', source_markdown: 'tell me about tides' }];
+  await open(`${base}/`);
+  await until(() => stub.streams.length > 0, 30000, 'the fresh page to open its stream').catch(() => {});
+  await until(async () => (await ev(() => document.querySelectorAll('.bubble').length)) === 1, 8000, 'the stored message').catch(() => {});
+  say('text_delta', { native: { delta: 'and that is why the sea' } }); say('text_delta', { native: { delta: ' comes back.' } });
+  say('item_completed', textItem); say('turn_completed');
+  await wait(600);
+  const tailOnly = await replies();
+  row({ seq: 2, role: 'assistant', source_markdown: 'The moon pulls, and that is why the sea comes back.' });
+  await until(async () => (await replies()).length > 0, 5000, 'the stored reply').catch(() => {});
+  const wholeReply = await replies();
+  check('a page opened mid-reply shows no half reply; the stored row lands as the one whole bubble', tailOnly.length === 0 && wholeReply.length === 1 && wholeReply[0] === 'The moon pulls, and that is why the sea comes back.', { tailOnly, wholeReply });
+  say('turn_started'); say('item_started', textItem); say('text_delta', { native: { delta: 'Twice a day.' } }); say('item_completed', textItem); say('turn_completed');
+  await until(async () => (await replies()).length > 1, 5000, 'the next turn\'s reply').catch(() => {});
+  const next = await replies();
+  check('the next turn, heard from its start, lands live as before (control)', next.length === 2 && next[1] === 'Twice a day.', { next });
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);

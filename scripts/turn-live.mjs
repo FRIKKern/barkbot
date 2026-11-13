@@ -11,6 +11,11 @@
 //                                   that choice. Writes parity/live/question.json.
 //   npm run turn:live -- --picture  a picture with the message (A1/A2): a square of a colour picked for the run; the
 //                                   bot must name the colour. Writes parity/live/picture.json.
+//   npm run turn:live -- --tool     a turn with a tool (T5): a file with a made-up code is put in the bot's folder, the
+//                                   bot reads it and replies with the code; the working line must name the tool.
+//                                   Writes parity/live/tool.json.
+//   npm run turn:live -- --midreload reload while the bot is still replying (T5): the reply must finish on the
+//                                   fresh page, once, and stay once after another reload. Writes parity/live/midreload.json.
 //   npm run turn:live -- --resume   come back later (C2): give the bot a made-up code, wait while YOU stop and
 //                                   start the bot's computer (then Enter), reload, ask for the code. Writes parity/live/resume.json.
 //
@@ -37,6 +42,8 @@ const RESUME = args.includes('--resume');
 const APPROVE = args.includes('--approve');
 const PICTURE = args.includes('--picture');
 const QUESTION = args.includes('--question');
+const TOOL = args.includes('--tool');
+const MIDRELOAD = args.includes('--midreload');
 const REPLY_MS = Number(opt('reply-ms')) || 90000;
 // A square png of one colour, made here: no file from anywhere else is ever sent.
 function squarePng(n, [r, g, b]) {
@@ -187,6 +194,64 @@ try {
     await until(() => page.evaluate(() => ([...document.querySelectorAll('.bubble-user .bubble-images img')].at(-1)?.naturalWidth ?? 0) === 64), 20000, 'the picture to show again after a reload');
     record('picture.json', { picture_px: 64, reply_names_the_colour: true, shown_in_bubble: true, shown_after_reload: true, reply_ms: r.ms });
     console.log(`Live picture: ok · the bot named the square's colour · the picture shows in the bubble and after a reload · ${(r.ms / 1000).toFixed(1)} s`);
+    process.exit(0);
+  }
+  if (TOOL) {
+    // The code is made up for this run and lives only in a file in the bot's folder, so a reply
+    // holding it can only come from the bot's tool reading that file. Reading asks no leave.
+    const code = `${['kiwi', 'plum', 'fig', 'lime'][Math.floor(Math.random() * 4)]}-${1000 + Math.floor(Math.random() * 9000)}`;
+    const name = `barkbot-read-${1000 + Math.floor(Math.random() * 9000)}.txt`;
+    const home = process.env.BARKBOT_HOME || join(homedir(), 'BarkBot', 'home');
+    if (!existsSync(home)) stopWith(`the bot's folder ${home} is not on this computer`);
+    const file = join(home, name);
+    writeFileSync(file, code + '\n');
+    // The working line's labels while the turn runs: which were seen, not what any reply said.
+    const labels = new Set();
+    const watch = setInterval(async () => { try { const l = await page.evaluate(() => document.querySelector('.working .work-label')?.textContent.trim() ?? ''); if (l) labels.add(l); } catch {} }, 100);
+    let r;
+    try { r = await turn(`Read the file ${name} in your folder and reply with only what it says.`, { allow: true }); } finally { clearInterval(watch); rmSync(file, { force: true }); }
+    const knows = await page.evaluate((c) => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].at(-1)?.textContent.includes(c) ?? false, code);
+    if (!knows) stopWith('the bot did not reply with what the file says: its tool did not read it');
+    const tools = [...labels].filter((l) => l !== 'Typing…');
+    if (!tools.length) stopWith('the working line never said what the bot was doing: no tool label was shown');
+    await open();
+    let again;
+    await until(async () => { again = await seen(); return again.user === r.after.user && again.bot === r.after.bot; }, 20000, `the reloaded page to show ${r.after.user} + ${r.after.bot} bubbles again`);
+    record('tool.json', { file_read: true, tool_labels_seen: tools.length, cards_allowed: r.allowed, reply_ms: r.ms, bubbles_after: [r.after.user, r.after.bot], after_reload: [again.user, again.bot] });
+    console.log(`Live tool: ok · the bot read the file and gave its code · ${tools.length} tool label(s) on the working line · ${(r.ms / 1000).toFixed(1)} s · the same after a reload`);
+    process.exit(0);
+  }
+  if (MIDRELOAD) {
+    // A long reply, and a reload while it is still coming. The last word is made up for this run,
+    // so the fresh page showing it means the reply finished there. Then: one user bubble more, not
+    // two, and the same counts after one more reload (nothing doubled, nothing lost).
+    const end = `END-${1000 + Math.floor(Math.random() * 9000)}`;
+    const before = await settled();
+    if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
+    const t0 = Date.now();
+    await page.evaluate(() => document.querySelector('.prompt').focus());
+    await page.send('Input.insertText', { text: `Write about 400 words on how tides work, in plain paragraphs, no tools. Finish with a last line that says only ${end}` });
+    await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
+    await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+    await until(async () => { const s = await seen(); return s.user === before.user + 1 && s.working; }, REPLY_MS, 'the bot to start working');
+    const done = () => page.evaluate((e) => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].some((x) => x.textContent.includes(e)), end);
+    if (await done()) stopWith('the reply was already whole before the reload: nothing was tested');
+    const reloadAt = Date.now() - t0;
+    await open();
+    if (await done()) stopWith('the reply was already whole when the fresh page came up: nothing was tested');
+    try { await until(async () => (await done()) && !(await seen()).working, REPLY_MS, 'the reply to finish on the reloaded page'); }
+    catch (e) { const s = await seen(); stopWith(`${e.message} (whole reply shown: ${await done()}, still working: ${s.working}, bubbles ${s.user - before.user} + ${s.bot - before.bot} new, newest reply ${s.lastBot} characters, error line: ${s.error})`); }
+    const after = await settled();
+    if (after.user !== before.user + 1) stopWith(`our message shows ${after.user - before.user} times after the reload, not once`);
+    if (after.bot <= before.bot) stopWith('no reply bubble on the reloaded page');
+    const ends = () => page.evaluate((e) => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].filter((x) => x.textContent.includes(e)).length, end);
+    if (await ends() !== 1) stopWith('the reply shows more than once on the reloaded page');
+    await open();
+    let again;
+    await until(async () => { again = await settled(); return again.user === after.user && again.bot === after.bot; }, 20000, `one more reload to show ${after.user} + ${after.bot} bubbles again`);
+    if (await ends() !== 1) stopWith('the reply shows more than once after one more reload');
+    record('midreload.json', { reloaded_at_ms: reloadAt, finished_on_fresh_page: true, reply_ms: Date.now() - t0, bubbles_before: [before.user, before.bot], bubbles_after: [after.user, after.bot], after_second_reload: [again.user, again.bot] });
+    console.log(`Live mid-reload: ok · reloaded ${(reloadAt / 1000).toFixed(1)} s in · the reply finished on the fresh page, once · the same after one more reload`);
     process.exit(0);
   }
   if (RESUME) {
