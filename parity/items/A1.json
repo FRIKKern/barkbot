@@ -3,8 +3,9 @@
  "slice": "S4",
  "journey": "J07",
  "title": "File card: name and size, readable by the bot",
- "status": "unknown",
+ "status": "partial",
  "controls": [
   "Attach files"
- ]
+ ],
+ "evidence": "Pictures only, and the look is not the oracle's. Composer.tsx: Attach files (the composer menu) or a paste puts up to four pictures above the box as chips with the file's name (not its size); on send each is stored for the conversation and the message names it by id (chat/api.ts uploadPicture, sendMessage), and the bot's computer fetches it and hands it to claude. Live: npm run turn:live -- --picture (2026-11-13, Barkpark attachments T1-T6 on prod: a square of a colour picked for the run was attached, the bot named the colour, the picture showed in the bubble and again after a reload; parity/live/picture.json). scripts/behaviour.mjs: 3 rules against the stand-in (a chip and nothing sent; stored once and named by id; a message without a picture names none). Missing: files that are not pictures (Barkpark stores png, jpeg, gif and webp only; decision task-b47b4dcd04d7e4de); the size on the chip; the oracle's file card has never been captured (it needs a send with a file)."
 }
