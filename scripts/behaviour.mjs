@@ -401,6 +401,31 @@ else {
   await until(async () => (await replies()).length > 1, 5000, 'the next turn\'s reply').catch(() => {});
   const next = await replies();
   check('the next turn, heard from its start, lands live as before (control)', next.length === 2 && next[1] === 'Twice a day.', { next });
+
+  // The bot's own summary of the turn (Barkpark #26296: event runtime, kind status, once a turn
+  // after turn_started and before the first text): the working line says it, as plain words.
+  console.log('Behaviour · the working line says the bot\'s summary (the live page, against the stand-in Barkpark)');
+  const line = () => ev(() => { const r = document.querySelector('.working:not(.leaving)'); return r ? (r.querySelector('.work-label')?.textContent ?? '') : null; });
+  stub.rows = []; stub.fleet = 'working';
+  await open(`${base}/`);
+  await until(() => stub.streams.length > 0, 30000, 'the fresh page to open its stream').catch(() => {});
+  await wait(300);
+  say('turn_started');
+  await until(async () => (await line()) !== null, 5000, 'the working line').catch(() => {});
+  await wait(400);
+  const bare = await line();
+  say('status', { native: { kind: 'status', label: 'Explaining <b>ocean</b> tides' } });
+  await until(async () => (await line()) === 'Explaining <b>ocean</b> tides', 3000, 'the label').catch(() => {});
+  const said = await line();
+  const html = await ev(() => !!document.querySelector('.work-label b'));
+  check('a status event shows its words on the working line, as text and not markup (control: before it the line has none)', bare === '' && said === 'Explaining <b>ocean</b> tides' && !html, { bare, said, html });
+  say('item_started', textItem); say('text_delta', { native: { delta: 'The moon pulls.' } });
+  await until(async () => (await line()) === 'Typing…', 3000, 'Typing…').catch(() => {});
+  say('status', { native: { kind: 'status', label: 'Too late' } });
+  await wait(400);
+  const late = await line();
+  check('once its text streams the line says Typing…, and a status after that is ignored', late === 'Typing…', { late });
+  say('item_completed', textItem); say('turn_completed');
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);

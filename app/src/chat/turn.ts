@@ -20,9 +20,11 @@
 //                           one, turn_started (Claude's host sends one per model message, so
 //                           a new one means the text before it is a whole message)
 //   a bubble with no "Typing…" before it gets its text in one delta at the bubble's time.
-// The oracle's own summary labels ("Saying hello") have no Barkpark event: they summarise the
-// turn (say-hi calls no tool), and a host's tool items (task-f13fc4b4dc2af6de) name tools, not
-// that. The oracle's DOM shows no tool call either, so the script sends none; Gate B says so.
+//   a summary label       → status {label}: the oracle's own summary of the turn ("Mulling it
+//   ("Mulling it over")     over"), once a turn, at the label's time. Barkpark sends it as
+//                           `event: runtime` {kind: status, native: {kind: status, label}} after
+//                           turn_started and before the first text (Barkpark #26296).
+// The oracle's DOM shows no tool call, so the script sends none.
 
 export type Kind = 'user' | 'working' | 'label:status' | 'label:typing' | 'assistant' | 'status:working' | 'status:replied' | 'rail:working' | 'rail:unread'
 export type Milestone = {kind: Kind; t: number; len?: number; text?: string}
@@ -124,6 +126,8 @@ export function replayScript(milestones: Milestone[], shape: Shape = 'items'): {
   if (!starts.length) return {accept, steps}
   const start = Math.min(...starts)
   steps.push({t: start, data: runtime('turn_started')})
+  const status = first('label:status')
+  if (status?.text) steps.push({t: status.t, data: runtime('status', {label: status.text})})
   const replies = milestones.filter((m) => m.kind === 'assistant')
   let from = start
   replies.forEach((b, i) => {

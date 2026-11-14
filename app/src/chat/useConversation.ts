@@ -240,6 +240,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
     // live events; its stored row, which follows the turn's end, is the whole reply.
     let started = false
     let tail = false
+    let spoke = false // the turn has sent text: a summary label that comes after it is too late
     const part = () => {
       if (!started) tail = true
     }
@@ -262,9 +263,20 @@ export function useConversation(sessionId: string | null, transport: Transport =
           // storage: a sentence, a tool, then the answer are two bubbles).
           started = true
           return message()
+        case 'status': {
+          // The bot's own summary of the turn ("Explaining ocean tides"), once a turn, before its
+          // first text (Barkpark #26296): the working line says it. Plain words, 60 at most; one
+          // that comes after the text has started is ignored, so it never covers "Typing…".
+          const label = ev.native?.label ?? ev.label
+          if (typeof label !== 'string' || spoke) return
+          const words = label.replace(/\s+/g, ' ').trim().slice(0, 60)
+          if (words) show(words)
+          return
+        }
         case 'text_delta': {
           const d = ev.native?.params?.delta ?? ev.native?.delta
           if (typeof d !== 'string') return
+          spoke = true
           part()
           if (text.current === null) text.current = ''
           if (!text.current) typingSoon()
@@ -298,7 +310,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
           whole()
           text.current = null
           if (tail) rows()
-          started = tail = false
+          started = tail = spoke = false
           setAsk(null)
           return end()
         }
@@ -306,7 +318,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
         case 'process_failed':
         case 'protocol_error':
           text.current = null
-          started = tail = false
+          started = tail = spoke = false
           setAsk(null)
           setError(typeof ev.error === 'string' ? ev.error : ev.error?.result ?? 'The run failed on the bot\'s computer')
           return end()
