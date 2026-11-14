@@ -187,11 +187,11 @@ try {
     const r = await turn('What colour is this square? Reply with one word: red, green or blue.');
     rmSync(file, { force: true });
     const said = (await page.evaluate(() => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].at(-1)?.textContent ?? '')).toLowerCase();
-    const shown = await page.evaluate(() => [...document.querySelectorAll('.bubble-user .bubble-images img')].at(-1)?.naturalWidth ?? 0);
+    const shown = await page.evaluate(() => [...document.querySelectorAll('.turn-attached .picture-tiles img')].at(-1)?.naturalWidth ?? 0);
     if (!said.includes(name) || Object.keys(colours).some((c) => c !== name && said.includes(c))) stopWith('the bot\'s reply does not name the picture\'s colour alone: it did not see the picture');
     if (shown !== 64) stopWith('our own bubble does not show the picture that was sent');
     await open();
-    await until(() => page.evaluate(() => ([...document.querySelectorAll('.bubble-user .bubble-images img')].at(-1)?.naturalWidth ?? 0) === 64), 20000, 'the picture to show again after a reload');
+    await until(() => page.evaluate(() => ([...document.querySelectorAll('.turn-attached .picture-tiles img')].at(-1)?.naturalWidth ?? 0) === 64), 20000, 'the picture to show again after a reload');
     record('picture.json', { picture_px: 64, reply_names_the_colour: true, shown_in_bubble: true, shown_after_reload: true, reply_ms: r.ms });
     console.log(`Live picture: ok · the bot named the square's colour · the picture shows in the bubble and after a reload · ${(r.ms / 1000).toFixed(1)} s`);
     process.exit(0);

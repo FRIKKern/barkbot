@@ -365,10 +365,10 @@ else {
   await ev(() => document.querySelector('.prompt').focus());
   await page.send('Input.insertText', { text: 'look' }); await key('Enter');
   await until(() => stub.sent.length > 0, 8000, 'the message to reach the stand-in').catch(() => {});
-  await until(async () => (await ev(() => document.querySelector('.bubble-images img')?.naturalWidth ?? 0)) > 0, 8000, 'the picture to show in the bubble').catch(() => {});
+  await until(async () => (await ev(() => document.querySelector('.picture-tiles img')?.naturalWidth ?? 0)) > 0, 8000, 'the picture to show above the bubble').catch(() => {});
   w = await waiting();
-  const shown = await ev(() => ({ imgs: [...document.querySelectorAll('.bubble-user .bubble-images img')].map((i) => [i.getAttribute('src'), i.naturalWidth]), text: [...document.querySelectorAll('.bubble-user .bubble-text')].at(-1)?.textContent }));
-  check('Enter: the picture is stored once, the message names it by id, the chip is gone, and the bubble shows the picture above the words', stub.uploads.length === 1 && stub.uploads[0] === pngId && stub.sent.length === 1 && stub.sent[0].content === 'look' && JSON.stringify(stub.sent[0].attachments) === JSON.stringify([pngId]) && w.chips.length === 0 && shown.imgs.length === 1 && shown.imgs[0][0].endsWith(`/attachments/${pngId}`) && shown.imgs[0][1] === 1 && shown.text === 'look', { uploads: stub.uploads, sent: stub.sent, w, shown });
+  const shown = await ev(() => ({ imgs: [...document.querySelectorAll('.turn-attached .picture-tiles img')].map((i) => [i.getAttribute('src'), i.naturalWidth]), text: [...document.querySelectorAll('.bubble-user .bubble-text')].at(-1)?.textContent }));
+  check('Enter: the picture is stored once, the message names it by id, the chip is gone, and the picture shows as a tile above the message\'s words (oracle 1.0.3: its own row above the bubble)', stub.uploads.length === 1 && stub.uploads[0] === pngId && stub.sent.length === 1 && stub.sent[0].content === 'look' && JSON.stringify(stub.sent[0].attachments) === JSON.stringify([pngId]) && w.chips.length === 0 && shown.imgs.length === 1 && shown.imgs[0][0].endsWith(`/attachments/${pngId}`) && shown.imgs[0][1] === 1 && shown.text === 'look', { uploads: stub.uploads, sent: stub.sent, w, shown });
   await ev(() => document.querySelector('.prompt').focus());
   await page.send('Input.insertText', { text: 'words only' }); await key('Enter');
   await until(() => stub.sent.length > 1, 8000, 'the second message').catch(() => {});
