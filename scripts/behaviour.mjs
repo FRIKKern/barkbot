@@ -97,7 +97,9 @@ const windowFocus = async (on) => { await page.send('Emulation.setFocusEmulation
 
 async function open(url) {
   await page.send('Page.navigate', { url });
-  await until(() => ev(() => document.readyState === 'complete' && !!document.querySelector('.app')), 30000, url);
+  // Loaded is not live: a cold dev server can take seconds more to hydrate (seen 2026-11-14: 3.4 s
+  // after load on a first page), and a page read before React owns it fails on what it never ran.
+  await until(() => ev(() => { const a = document.querySelector('.app'); return document.readyState === 'complete' && !!a && Object.keys(a).some((k) => k.startsWith('__reactFiber$')); }), 30000, url);
   await wait(500);
 }
 
