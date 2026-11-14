@@ -11,6 +11,9 @@
 //                                   that choice. Writes parity/live/question.json.
 //   npm run turn:live -- --picture  a picture with the message (A1/A2): a square of a colour picked for the run; the
 //                                   bot must name the colour. Writes parity/live/picture.json.
+//   npm run turn:live -- --file     a text file with the message (A1): a made-up code in a file made for the run;
+//                                   the bot must reply with the code, and the message shows the file card, also
+//                                   after a reload. Writes parity/live/file.json.
 //   npm run turn:live -- --tool     a turn with a tool (T5): a file with a made-up code is put in the bot's folder, the
 //                                   bot reads it and replies with the code; the working line must name the tool.
 //                                   Writes parity/live/tool.json.
@@ -41,6 +44,7 @@ const MESSAGE = 'Say hi in one short sentence.';
 const RESUME = args.includes('--resume');
 const APPROVE = args.includes('--approve');
 const PICTURE = args.includes('--picture');
+const FILE = args.includes('--file');
 const QUESTION = args.includes('--question');
 const TOOL = args.includes('--tool');
 const MIDRELOAD = args.includes('--midreload');
@@ -194,6 +198,38 @@ try {
     await until(() => page.evaluate(() => ([...document.querySelectorAll('.turn-attached .picture-tiles img')].at(-1)?.naturalWidth ?? 0) === 64), 20000, 'the picture to show again after a reload');
     record('picture.json', { picture_px: 64, reply_names_the_colour: true, shown_in_bubble: true, shown_after_reload: true, reply_ms: r.ms });
     console.log(`Live picture: ok · the bot named the square's colour · the picture shows in the bubble and after a reload · ${(r.ms / 1000).toFixed(1)} s`);
+    process.exit(0);
+  }
+  if (FILE) {
+    // A text file goes with the message (A1): it holds a code made up for this run, and the file
+    // exists only in .cache for the run, never in the bot's folder. So a reply holding the code can
+    // only come from the bot having read the attachment Barkpark passed to its computer.
+    const code = `${['kiwi', 'plum', 'fig', 'lime'][Math.floor(Math.random() * 4)]}-${1000 + Math.floor(Math.random() * 9000)}`;
+    const name = `barkbot-note-${1000 + Math.floor(Math.random() * 9000)}.txt`;
+    const file = path('.cache', name);
+    writeFileSync(file, `The code is ${code}.\n`);
+    const before = await settled();
+    if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
+    await page.send('DOM.enable');
+    const { root } = await page.send('DOM.getDocument');
+    const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' });
+    if (!nodeId) stopWith('the composer has no file chooser');
+    await page.send('DOM.setFileInputFiles', { nodeId, files: [file] });
+    await until(() => page.evaluate((n) => [...document.querySelectorAll('.composer-attachments [role=listitem]')].map((x) => x.getAttribute('aria-label')).join() === n, name), 5000, 'the file to wait in the box');
+    let r;
+    try { r = await turn('Reply with only the code written in the attached file.'); } catch (e) {
+      // A computer that cannot take files yet (Barkpark's 422) leaves a plain line and the draft.
+      const line = await page.evaluate(() => document.querySelector('.composer-refused')?.textContent ?? null);
+      stopWith(line ? `the message was not sent: ${line}` : e.message);
+    } finally { rmSync(file, { force: true }); }
+    const knows = await page.evaluate((c) => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].at(-1)?.textContent.includes(c) ?? false, code);
+    const card = () => page.evaluate((n) => [...document.querySelectorAll('.turn-attached .file-card')].filter((x) => x.getAttribute('aria-label') === `Open ${n}`).length, name);
+    if (!knows) stopWith('the bot did not reply with the code in the file: it did not read the attachment');
+    if ((await card()) !== 1) stopWith('our own message does not show the file card for the file that was sent');
+    await open();
+    await until(async () => (await card()) === 1, 20000, 'the file card to show again after a reload (from the stored row)');
+    record('file.json', { file_bytes: `The code is ${code}.\n`.length, reply_has_the_code: true, card_in_message: true, card_after_reload: true, reply_ms: r.ms });
+    console.log(`Live file: ok · the bot replied with the code in the file · the file card shows in the message and after a reload · ${(r.ms / 1000).toFixed(1)} s`);
     process.exit(0);
   }
   if (TOOL) {
