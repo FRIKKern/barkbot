@@ -1,11 +1,26 @@
 // The conversation: a time row, the bubbles, and the working line, pinned to the bottom while
 // anything lands (measured on the oracle: 0 pt from the bottom on every frame).
-import {Fragment, useLayoutEffect, useRef, useState, type ReactNode} from 'react'
-import type {Answers, Ask, Bubble, Question, Working} from '../chat/useConversation'
+import {Fragment, useLayoutEffect, useRef, type ReactNode} from 'react'
+import type {Answers, Ask, Bubble, Working} from '../chat/useConversation'
 import {filler} from '../chat/turn'
+import {AnsweredCard, QuestionCard} from './Cards'
 
 /** A message as lengths only (O2): what a gate scene holds (gate/transcripts.ts). */
 export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; height?: number; marks?: {tag: 'strong' | 'code'; len: number}[]}[]}
+/** A card in a gate scene (scripts/lib/cards.mjs sceneCard): a question waiting (choices) or answered. */
+export type SceneCard = {card: 'question'; question: string; choices?: string[]; answered?: {letter: string; label: string}}
+export type SceneRow = SceneBubble | SceneCard
+
+/** A scene's conversation: its bubbles and answered cards, and the question still waiting (the last row), as the live page holds them. */
+export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null} {
+  const last = rows.at(-1)
+  const waiting = last && 'card' in last && last.choices ? last : null
+  const ask: Ask | null = waiting ? {id: 'scene-ask', what: 'ask you something', detail: null, answering: null, questions: [{question: waiting.question, header: null, multi: false, options: (waiting.choices ?? []).map((label) => ({label, description: null}))}]} : null
+  const bubbles = (waiting ? rows.slice(0, -1) : rows).flatMap((r, i): Bubble[] =>
+    'card' in r ? (r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question, ...r.answered}}] : []) : fromLengths([r]).map((b) => ({...b, key: `scene-${i}`})),
+  )
+  return {bubbles, ask}
+}
 
 /** Placeholder words of the captured lengths, bold runs and code spans (one word, like a path) in their order. */
 export function fromLengths(list: SceneBubble[]): Bubble[] {
@@ -53,55 +68,14 @@ function Rich({text, heights}: {text: string; heights?: number[]}) {
   )
 }
 
+// Two bubbles of one speaker in a row close their corners where they meet; a card between them parts them (oracle-choice-answered).
+const joins = (a: Bubble | undefined, b: Bubble) => !!a && !a.answered && a.role === b.role
+
 const timeOf = (iso: string) => {
   const d = new Date(iso)
   const today = new Date().toDateString() === d.toDateString()
   const t = d.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'})
   return `${today ? 'Today' : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} ${t}`
-}
-
-const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-
-// The bot's question, its choices lettered. One single-choice question answers on a press; more
-// than one question, or a pick-several, is sent with Send once every question has a choice.
-// The oracle's own question card is not read yet (Q2): this one is plain on purpose.
-function QuestionCard({bot, questions, locked, onChoose}: {bot: string; questions: Question[]; locked: boolean; onChoose?: (answers: Answers) => void}) {
-  const [picked, setPicked] = useState<Record<string, string[]>>({})
-  const direct = questions.length === 1 && !questions[0].multi
-  const answers = (p: Record<string, string[]>): Answers => Object.fromEntries(questions.map((q) => [q.question, q.multi ? p[q.question] ?? [] : (p[q.question] ?? [])[0]]))
-  const complete = questions.every((q) => (picked[q.question] ?? []).length > 0)
-  const press = (q: Question, label: string) => {
-    if (direct) return onChoose?.({[q.question]: label})
-    setPicked((p) => {
-      const had = p[q.question] ?? []
-      return {...p, [q.question]: q.multi ? (had.includes(label) ? had.filter((x) => x !== label) : [...had, label]) : [label]}
-    })
-  }
-  return (
-    <div className="ask" role="group" aria-label={`${bot} asks you something`}>
-      {questions.map((q) => (
-        <fieldset className="ask-question" key={q.question} disabled={locked}>
-          <legend className="ask-what">{q.question}</legend>
-          {q.options.map((o, i) => (
-            <button className="ask-choice" key={o.label} aria-pressed={direct ? undefined : (picked[q.question] ?? []).includes(o.label)} onClick={() => press(q, o.label)}>
-              <span className="ask-letter" aria-hidden="true">{LETTERS[i] ?? '·'}</span>
-              <span className="ask-choice-text">
-                <span className="ask-label">{o.label}</span>
-                {o.description && <span className="ask-note">{o.description}</span>}
-              </span>
-            </button>
-          ))}
-        </fieldset>
-      ))}
-      {!direct && (
-        <div className="ask-buttons">
-          <button className="ask-allow" disabled={locked || !complete} onClick={() => onChoose?.(answers(picked))}>
-            Send
-          </button>
-        </div>
-      )}
-    </div>
-  )
 }
 
 export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void}) {
@@ -134,8 +108,13 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
             <time dateTime={startedAt}>{timeOf(startedAt)}</time>
           </div>
         )}
-        {bubbles.map((b, i) => (
-          <div role="article" key={b.key} className={`turn turn-${b.role}${i > 0 && bubbles[i - 1].role !== b.role ? ' turn-change' : ''}${bubbles[i - 1]?.role === b.role ? ' group-prev' : ''}${bubbles[i + 1]?.role === b.role ? ' group-next' : ''}`}>
+        {bubbles.map((b, i) => b.answered ? (
+          // An answered question: a card in a row of its own, no bubble (oracle-choice-answered, article 134).
+          <div role="article" key={b.key} className="turn turn-card">
+            <AnsweredCard {...b.answered} />
+          </div>
+        ) : (
+          <div role="article" key={b.key} className={`turn turn-${b.role}${i > 0 && bubbles[i - 1].role !== b.role ? ' turn-change' : ''}${joins(bubbles[i - 1], b) ? ' group-prev' : ''}${joins(bubbles[i + 1], b) ? ' group-next' : ''}`}>
             <div role="article" className={`bubble bubble-${b.role}`} data-role={b.role}>
               <span className="sr-only">{b.role === 'user' ? 'You' : bot}</span>
               {/* Pictures sent with the message. The oracle's picture grid is not read yet (A2): plain. */}
@@ -168,10 +147,14 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
             </span>
           </div>
         )}
-        {ask?.questions && <QuestionCard key={ask.id} bot={bot} questions={ask.questions} locked={!!ask.answering} onChoose={onChoose} />}
+        {ask?.questions && (
+          <div role="article" className="turn turn-card turn-ask">
+            <QuestionCard key={ask.id} bot={bot} questions={ask.questions} locked={!!ask.answering} onChoose={onChoose} />
+          </div>
+        )}
         {ask && !ask.questions && (
           // The oracle's own approval card is not read yet (Q1): this one is plain on purpose.
-          <div className="ask" role="group" aria-label={`${bot} asks to ${ask.what}`}>
+          <div className="ask ask-leave" role="group" aria-label={`${bot} asks to ${ask.what}`}>
             <p className="ask-what">
               {bot} asks to {ask.what}
             </p>
@@ -191,8 +174,9 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
             {error}
           </p>
         )}
-        <div className="sr-only" role="status" aria-live="polite">
-          {ask ? `${bot} asks to ${ask.what}` : working && !working.leaving && !working.ended ? `${bot} is working` : bubbles.at(-1)?.role === 'assistant' ? `${bot} replied` : ''}
+        {/* Said aloud, out of sight; a question is said as the oracle says it (oracle-ask-choice: span 291). */}
+        <div className="sr-status" role="status" aria-live="polite">
+          <span>{ask?.questions ? `${bot} asked: ${ask.questions[0].question}` : ask ? `${bot} asks to ${ask.what}` : working && !working.leaving && !working.ended ? `${bot} is working` : bubbles.at(-1)?.role === 'assistant' ? `${bot} replied` : ''}</span>
         </div>
       </div>
     </div>

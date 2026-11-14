@@ -28,7 +28,9 @@
 .bubble-text p { margin: 0; }
 .bubble-text p + p { margin-top: 10px; }
 .bubble-text strong { font-weight: 600; }
-.bubble-text code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 0.93em; letter-spacing: normal; padding: 0 5.25px; border-radius: 4px; background: rgb(245 245 245 / 0.02); color: var(--ink-66); }
+/* Code: 4 a side (1.0.3, oracle-ask-choice code 96: 224.2 around 216.2). Our monospace runs 0.25 a letter
+   narrower than the oracle's (8.40 against 8.65 at 13.95): the spacing makes it up, at 10 letters (0.79.3, 94.5) and 25. */
+.bubble-text code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 0.93em; letter-spacing: 0.25px; padding: 0 4px; border-radius: 4px; background: rgb(245 245 245 / 0.02); color: var(--ink-66); }
 @keyframes bubble-in { from { transform: translateY(12px); } }   /* slides, no fade */
 
 /* Working line: 16 below the last bubble, 35 tall; the face (20 pt, centre x +22) is never still;
@@ -54,30 +56,22 @@
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
 /* The approval card. Not measured on the oracle yet (Q1 unread): plain, in the app's own inks. */
-.ask { margin-top: 14px; max-width: 560px; padding: 12px 14px; border-radius: 18px; background: rgb(255 255 255 / 0.04); }
-.ask-what { margin: 0; font-size: 15px; line-height: 22px; }
+.ask-leave { margin-top: 14px; max-width: 560px; padding: 12px 14px; border-radius: 18px; background: rgb(255 255 255 / 0.04); }
+.ask-leave .ask-what { margin: 0; font-size: 15px; line-height: 22px; }
 .ask-detail { margin: 8px 0 0; max-height: 220px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/18px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink-66); }
 .ask-buttons { margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px; }
 .ask-buttons button { height: 32px; padding: 0 14px; border-radius: 16px; font-size: 13px; line-height: 18px; }
 .ask-deny { background: rgb(255 255 255 / 0.08); color: var(--ink); }
 .ask-allow { background: var(--ink); color: rgb(17 17 17); }
 .ask-buttons button:disabled { opacity: 0.5; }
-/* The question card (Q2 unread on the oracle): the choices are rows, each with its letter. */
-.ask-question { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.ask-question + .ask-question { margin-top: 14px; }
-.ask-question .ask-what { padding: 0; margin-bottom: 4px; }
-.ask-choice { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 12px; text-align: left; background: rgb(255 255 255 / 0.06); color: var(--ink); }
-.ask-choice:hover:not(:disabled), .ask-choice[aria-pressed='true'] { background: rgb(255 255 255 / 0.14); }
-.ask-letter { flex: none; width: 22px; height: 22px; border-radius: 6px; background: rgb(255 255 255 / 0.1); font-size: 12px; line-height: 22px; text-align: center; }
-.ask-choice-text { display: flex; flex-direction: column; min-width: 0; }
-.ask-label { font-size: 15px; line-height: 22px; }
-.ask-note { font-size: 13px; line-height: 18px; color: var(--ink-66); }
-.ask-question:disabled .ask-choice { opacity: 0.5; }
+/* The question card: styles/cards.css. */
 .chat-error { margin: 12px 0 0; font-size: 13px; line-height: 18px; color: rgb(255 140 120); }
 .chat-note { max-width: 600px; margin: 0 auto; font-size: 13px; line-height: 18px; color: var(--ink-66); }
 .chat-note code { font-size: 12px; }
 .link { text-decoration: underline; color: var(--ink); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* The conversation's live status, out of sight at the window's corner as the oracle's (1.0.3: div 290 at -1,-1, 1 x 1; its span in 16 pt type). */
+.sr-status { position: fixed; left: -1px; top: -1px; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; font-size: 16px; line-height: normal; letter-spacing: 0.1px; }   /* the stand-in face, 0.1 a letter narrower at 16 (296.2 for the 39 of "Oracle asked: ...") */
 
 @media (prefers-reduced-motion: reduce) {
   .bubble, .working, .work-mark, .work-squash, .work-tilt, .work-label { animation: none !important; }

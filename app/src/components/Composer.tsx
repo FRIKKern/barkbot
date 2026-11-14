@@ -20,6 +20,10 @@ const base64 = (f: File) =>
     r.readAsDataURL(f)
   })
 
+/** What the empty box says: while the bot waits on a question, that it can be answered here (oracle 1.0.3, the
+ *  composer while oracle-ask-choice waits; a placeholder is drawn, not read by Gate A); else whom you write to. */
+export const placeholderFor = (bot: string, ask?: {questions?: unknown[]} | null) => (ask?.questions?.length ? 'Type your answer, or talk about something else' : bot ? `Message ${bot}` : 'Message')
+
 export function Composer({placeholder, onSend, disabled}: {placeholder: string; onSend?: (text: string, pictures: Picture[]) => void; disabled?: boolean}) {
   const box = useRef<HTMLDivElement>(null)
   const chooser = useRef<HTMLInputElement>(null)

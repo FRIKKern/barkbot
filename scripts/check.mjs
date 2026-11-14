@@ -9,6 +9,7 @@ import { journeysSvg, parityMd } from './generate-parity.mjs';
 import { heroSvg } from './generate-hero.mjs';
 import { controls, claims } from './lib/controls.mjs';
 import { turnTraces } from './lib/turn-traces.mjs';
+import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
 
 const fails = [];
 const ran = {};
@@ -84,7 +85,7 @@ for (const f of tracked) {
 // 6. Inventory, offline: every control in every captured state belongs to an item (its `controls`).
 const stateFiles = readdirSync(path('fixtures', 'states')).filter((f) => f.endsWith('.json'));
 for (const f of stateFiles) {
-  const state = JSON.parse(read('fixtures', 'states', f));
+  const state = judged(JSON.parse(read('fixtures', 'states', f)));
   for (const name of new Set(controls(state).map((c) => c.name))) {
     rule('controls tracked', 1);
     if (!its.some((i) => claims(i, name))) fail(`inventory: ${f} has control "${name}" that no item in parity/items/ claims`);
@@ -92,17 +93,28 @@ for (const f of stateFiles) {
 }
 
 // 6b. Every captured state comes from ONE oracle version. A Grok update moves numbers, so a
-// mix means some states were measured on a different app: re-capture the stale ones.
+// mix means some states were measured on a different app: re-capture the stale ones. The one
+// way past it is a named exception (scripts/lib/versions.mjs): that state, that version, a reason.
 const versions = new Map();
 for (const f of stateFiles) {
   rule('one oracle version', 1);
+  const id = f.replace(/\.json$/, '');
   const v = JSON.parse(read('fixtures', 'states', f)).version;
+  const ex = exception(id);
   if (!v) fail(`fixtures: ${f} names no oracle version: re-capture it`);
-  else versions.set(v, [...(versions.get(v) || []), f]);
+  else if (ex && v !== ex.version) fail(`fixtures: ${f} is excepted for ${ex.version} but was captured on ${v}: re-capture it, or correct the exception`);
+  else if (!ex) versions.set(v, [...(versions.get(v) || []), f]);
 }
+const [baseline] = [...versions].sort((a, b) => b[1].length - a[1].length)[0] ?? [];
 if (versions.size > 1) {
-  const [main] = [...versions].sort((a, b) => b[1].length - a[1].length)[0];
+  const main = baseline;
   for (const [v, fs] of versions) if (v !== main) fail(`fixtures: ${fs.length} state(s) captured on ${v}, the rest on ${main}: re-capture ${fs.slice(0, 4).join(', ')}${fs.length > 4 ? ', …' : ''}`);
+}
+for (const ex of EXCEPTIONS) {
+  rule('one oracle version', 1);
+  if (!stateFiles.includes(`${ex.id}.json`)) fail(`fixtures: the version exception for ${ex.id} names no state in fixtures/states: remove it`);
+  if (!ex.version || !ex.reason) fail(`fixtures: the version exception for ${ex.id} needs a version and a reason`);
+  if (ex.version === baseline) fail(`fixtures: ${ex.id} is excepted for ${ex.version}, which is the baseline itself: remove the exception`);
 }
 
 // 7. Gate A has a recorded run for every captured state, and it checked something.

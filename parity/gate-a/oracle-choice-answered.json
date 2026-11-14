@@ -1,0 +1,223 @@
+{
+ "id": "oracle-choice-answered",
+ "captured": "2026-11-14",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 38,
+ "pass": 38,
+ "results": [
+  {
+   "key": "aside:Bots",
+   "pass": true
+  },
+  {
+   "key": "control:Bot tile",
+   "pass": true
+  },
+  {
+   "key": "control:Bot tile#2",
+   "pass": true
+  },
+  {
+   "key": "control:New Bot",
+   "pass": true
+  },
+  {
+   "key": "control:Connect apps",
+   "pass": true
+  },
+  {
+   "key": "control:Open account menu",
+   "pass": true
+  },
+  {
+   "key": "control:View conversation details",
+   "pass": true
+  },
+  {
+   "key": "span:Oracle",
+   "pass": true
+  },
+  {
+   "key": "control:Share",
+   "pass": true
+  },
+  {
+   "key": "span:Share",
+   "pass": true
+  },
+  {
+   "key": "control:Prompt",
+   "pass": true
+  },
+  {
+   "key": "control:Composer actions",
+   "pass": true
+  },
+  {
+   "key": "control:Start voice input",
+   "pass": true
+  },
+  {
+   "key": "control:Start voice chat",
+   "pass": true
+  },
+  {
+   "key": "span:Oracle replied",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#1 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#1 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": true
+  },
+  {
+   "key": "code#1",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": true
+  },
+  {
+   "key": "code#2",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#5 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#5 place",
+   "pass": true
+  },
+  {
+   "key": "card#1 parts",
+   "pass": true
+  },
+  {
+   "key": "card#1 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#1 text:Which tree do you prefer?#1",
+   "pass": true
+  },
+  {
+   "key": "card#1 text:B#1",
+   "pass": true
+  },
+  {
+   "key": "card#1 text:Cedar#1",
+   "pass": true
+  }
+ ],
+ "run": "2026-11-14T10:10:05.383Z",
+ "inventory": {
+  "id": "oracle-choice-answered",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": true
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": true
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": true
+   }
+  ],
+  "missing": 0,
+  "untracked": []
+ }
+}

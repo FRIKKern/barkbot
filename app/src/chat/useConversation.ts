@@ -15,6 +15,8 @@ export type Bubble = {
   images?: string[]
   /** Gate scenes only: each paragraph's height on the oracle, kept whatever the placeholder words do. */
   heights?: number[]
+  /** A question the person answered, shown as its card in place of a bubble (gate scenes; the live page clears an ask once answered). */
+  answered?: {question: string; letter: string; label: string}
 }
 /** The working line. `held`: the turn has started but the bot's state is not Working yet, so the
  *  row waits (the oracle's row comes with its rail's Working, not with the turn's start).

@@ -1,13 +1,13 @@
 // The three panes: rail, conversation, details. Sizes and colours come from the captured
 // oracle state fixtures/states/oracle-turn-1040.json (see styles.css). The bots' faces are
 // plain stand-ins of the same size (O2): never the oracle's mascot art.
-import {useEffect, useRef, useState, type ReactNode} from 'react'
-import {Composer, Icon} from './Composer'
+import {useEffect, useMemo, useRef, useState, type ReactNode} from 'react'
+import {Composer, Icon, placeholderFor} from './Composer'
 import {Rail} from './Rail'
 import {Details} from './Details'
 import {Face} from './parts'
 import {Overlay} from './overlays'
-import {Transcript, fromLengths, type SceneBubble} from './Transcript'
+import {Transcript, fromScene, type SceneRow} from './Transcript'
 
 export type Scene = {
   bots: {name: string; main?: boolean}[]
@@ -21,7 +21,7 @@ export type Scene = {
   /** An open menu, picker or dialog, by name (components/overlays). */
   overlay?: string
   /** The conversation on screen, as lengths (gate/transcripts.ts); `time` shows its time row. */
-  transcript?: {bubbles: SceneBubble[]; time?: string}
+  transcript?: {bubbles: SceneRow[]; time?: string}
 }
 
 // The scene is where the page starts; what the person does from there (panel, tab, the bot they
@@ -56,6 +56,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
     return () => narrow.removeEventListener('change', onChange)
   }, [])
   const scene: Scene = {...start, panelOpen, active: picked ?? start.active}
+  const talk = useMemo(() => (start.transcript ? fromScene(start.transcript.bubbles) : null), [start.transcript])
   const unread = useUnread(workingBots)
   const active = scene.active ?? ''
   // A bot's name as the person renamed it in the details panel. On Enter the header pill, the
@@ -91,12 +92,12 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
           </button>
         </header>
         {transcript ??
-          (scene.transcript ? (
-            <Transcript bot={active} startedAt={scene.transcript.time ?? null} bubbles={fromLengths(scene.transcript.bubbles)} working={null} error={null} />
+          (talk ? (
+            <Transcript bot={active} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} />
           ) : (
             <div className="transcript" />
           ))}
-        {composer ?? <Composer placeholder={shown ? `Message ${shown}` : 'Message'} />}
+        {composer ?? <Composer placeholder={placeholderFor(shown, talk?.ask)} />}
       </main>
 
       <Details scene={{...scene, overlay: opened ?? scene.overlay}} name={shown} onRename={(n) => {

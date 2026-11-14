@@ -1,6 +1,8 @@
 # Captures from Grok Bot 1.0.3 (2026-11-14)
 
-Six looks the owner approved a send each for, read on the throwaway Oracle bot. They wait here, outside `fixtures/states/` and `traces/`, because every gated state must come from one oracle version (`npm run check`, rule 6b) and the gated ones are 0.79.3. They move in when the gated states are captured again on 1.0.3.
+Six looks the owner approved a send each for, read on the throwaway Oracle bot. Every gated state must come from one oracle version (`npm run check`, rule 6b), and the gated ones are 0.79.3. The card states move into `fixtures/states/` as named exceptions to that rule ([0008](../../docs/decisions/0008-card-states-from-a-newer-oracle.md), `scripts/lib/versions.mjs`); the rest wait here, outside `fixtures/states/` and `traces/`.
+
+Moved, and gated by Gate A: `oracle-ask-choice`, `oracle-choice-answered`.
 
 | Look | State | What it shows |
 |---|---|---|
