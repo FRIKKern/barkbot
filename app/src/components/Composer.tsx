@@ -5,11 +5,17 @@
 import {useEffect, useLayoutEffect, useRef, useState, type ReactNode} from 'react'
 import {Keys, Tooltip, useHover} from './tips'
 import {Attachments, type Picture, type WaitingFile} from './Attachments'
+import {fileSize} from '../chat/useConversation'
 
-export type {Picture} from './Attachments'
+export type {Picture, WaitingFile} from './Attachments'
 const PICTURE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
-const MAX_PICTURES = 4 // Barkpark takes four a message
-const MAX_BYTES = 3_000_000 // and 3 MB a picture
+// A text file or PDF. Barkpark reads the type from the bytes (UTF-8 text or a PDF), so a file the
+// browser cannot name ('' or octet-stream) is let through for Barkpark to judge at the send.
+const FILE_TYPES = /^(text\/.+|application\/(pdf|json|xml|javascript|x-yaml|yaml|toml|x-sh|sql|octet-stream)|)$/
+const MAX_ATTACHMENTS = 4 // Barkpark takes four a message, pictures and files together
+const MAX_BYTES = 3_000_000 // and 3 MB each
+// A name Barkpark refuses rather than cleans: no / or \, no control or format character, 255 bytes at most.
+const sendableName = (name: string) => name !== '.' && name !== '..' && !/[\/\\\p{Cc}\p{Cf}]/u.test(name) && new TextEncoder().encode(name).length <= 255
 /** The composer menu's "Attach files" asks the composer to open its file chooser. */
 export const ATTACH_EVENT = 'barkbot:attach'
 
@@ -28,7 +34,11 @@ export const placeholderFor = (bot: string, ask?: {questions?: unknown[]} | null
 /** Where a gate scene's composer starts: words typed, and what waits to go with them. */
 export type ComposerStart = {draft?: string; pictures?: Picture[]; files?: WaitingFile[]}
 
-export function Composer({placeholder, onSend, disabled, start}: {placeholder: string; onSend?: (text: string, pictures: Picture[]) => void; disabled?: boolean; start?: ComposerStart}) {
+/** Sends what the box holds. It may answer why nothing was sent (a file refused, a computer that cannot take
+ *  files): the box then shows that in a plain line and gets its draft back. */
+export type OnSend = (text: string, pictures: Picture[], files: WaitingFile[]) => Promise<string | null | void> | void
+
+export function Composer({placeholder, onSend, disabled, start}: {placeholder: string; onSend?: OnSend; disabled?: boolean; start?: ComposerStart}) {
   const box = useRef<HTMLDivElement>(null)
   const chooser = useRef<HTMLInputElement>(null)
   const [draft, setDraft] = useState(!!start?.draft)
@@ -49,35 +59,52 @@ export function Composer({placeholder, onSend, disabled, start}: {placeholder: s
     window.addEventListener(ATTACH_EVENT, open)
     return () => window.removeEventListener(ATTACH_EVENT, open)
   }, [])
-  // Pictures only for now: that is what Barkpark stores for a conversation. Anything else is
+  // Pictures, text files and PDFs: what Barkpark stores for a conversation. Anything else is
   // refused here, with the reason, instead of failing after the send.
-  const add = async (files: File[]) => {
+  const add = async (picked: File[]) => {
     setRefused(null)
-    const next = [...pictures]
-    for (const f of files) {
-      if (!PICTURE_TYPES.includes(f.type)) setRefused(`${f.name} is not a picture (png, jpeg, gif or webp)`)
+    const pics = [...pictures]
+    const docs = [...files]
+    for (const f of picked) {
+      const picture = PICTURE_TYPES.includes(f.type)
+      if (!picture && !FILE_TYPES.test(f.type)) setRefused(`${f.name} is not a picture, a text file or a PDF`)
       else if (f.size > MAX_BYTES) setRefused(`${f.name} is over 3 MB`)
-      else if (next.length >= MAX_PICTURES) setRefused('A message takes four pictures at most')
+      else if (!f.size) setRefused(`${f.name} is empty`)
+      else if (pics.length + docs.length >= MAX_ATTACHMENTS) setRefused('A message takes four pictures and files at most')
+      else if (!picture && !sendableName(f.name)) setRefused(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
       else {
         const data = await base64(f)
-        next.push({name: f.name, data, src: `data:${f.type};base64,${data}`})
+        if (picture) pics.push({name: f.name, data, src: `data:${f.type};base64,${data}`})
+        else docs.push({name: f.name, size: fileSize(f.size), data})
       }
     }
-    setPictures(next)
+    setPictures(pics)
+    setFiles(docs)
   }
-  const submit = () => {
+  const submit = async () => {
     const el = box.current
     if (!el || !onSend || disabled) return
     const text = el.innerText.replace(/\n+$/, '').trim()
-    if (!text && !pictures.length) return
+    if (!text && !pictures.length && !files.length) return
     el.replaceChildren()
     setDraft(false)
-    const sent = pictures
+    const sent = {pictures, files}
     setPictures([])
     setFiles([])
     setRefused(null)
     el.focus()
-    onSend(text, sent)
+    const why = await onSend(text, sent.pictures, sent.files)
+    if (!why) return
+    // Nothing went: the words and what waited with them come back, and the line says why.
+    setRefused(why)
+    setPictures((now) => [...sent.pictures, ...now])
+    setFiles((now) => [...sent.files, ...now])
+    if (text && !el.innerText.trim()) {
+      const p = document.createElement('p')
+      p.textContent = text
+      el.replaceChildren(p)
+      setDraft(true)
+    }
   }
   const waiting = pictures.length > 0 || files.length > 0
   return (
@@ -88,8 +115,16 @@ export function Composer({placeholder, onSend, disabled, start}: {placeholder: s
           <span className="picture-refused" role="alert">{refused}</span>
         </div>
       )}
-      <input ref={chooser} type="file" accept={PICTURE_TYPES.join(',')} multiple hidden onChange={(e) => { void add([...(e.target.files ?? [])]); e.target.value = '' }} />
-      <div className={`composer${waiting ? ' waiting' : ''}`}>
+      <input ref={chooser} type="file" accept={[...PICTURE_TYPES, 'text/*', 'application/pdf', '.txt', '.md', '.csv', '.json', '.log', '.pdf'].join(',')} multiple hidden onChange={(e) => { void add([...(e.target.files ?? [])]); e.target.value = '' }} />
+      <div
+        className={`composer${waiting ? ' waiting' : ''}`}
+        // A picture or file dropped on the box waits as a picked one does.
+        onDragOver={(e) => { if (e.dataTransfer.types.includes('Files')) e.preventDefault() }}
+        onDrop={(e) => {
+          const dropped = [...e.dataTransfer.files]
+          if (dropped.length) { e.preventDefault(); void add(dropped) }
+        }}
+      >
         {waiting && <Attachments pictures={pictures} files={files} onRemovePicture={(i) => setPictures((all) => all.filter((_, j) => j !== i))} onRemoveFile={(i) => setFiles((all) => all.filter((_, j) => j !== i))} />}
         <Round label="Composer actions" area="act">
           <Icon d="M8 3v10M3 8h10" />
@@ -110,7 +145,7 @@ export function Composer({placeholder, onSend, disabled, start}: {placeholder: s
             setDraft(!!el.innerText.trim())
           }}
           onPaste={(e) => {
-            // A pasted picture is attached; pasted words go in as words.
+            // A pasted picture or file is attached; pasted words go in as words.
             const files = [...e.clipboardData.files]
             if (files.length) { e.preventDefault(); void add(files) }
           }}

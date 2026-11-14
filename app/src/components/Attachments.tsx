@@ -6,8 +6,8 @@ import {FileName, PageMark} from './Cards'
 
 /** A picture waiting: its name, its bytes as base64 for the send, and what draws its thumbnail. */
 export type Picture = {name: string; data: string; src?: string}
-/** A file waiting, by name and size. Barkpark takes pictures only (task-b47b4dcd04d7e4de): gate scenes alone hold one. */
-export type WaitingFile = {name: string; size: string}
+/** A text file or PDF waiting, by name and size, and its bytes as base64 for the send (a gate scene's has none). */
+export type WaitingFile = {name: string; size: string; data?: string}
 
 function Cross() {
   return (

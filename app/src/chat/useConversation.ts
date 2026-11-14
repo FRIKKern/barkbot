@@ -4,7 +4,7 @@
 // is doing) shows while the run goes; a reply bubble lands whole when its text ends ("Typing…"
 // while it is written); the line leaves once the turn ends.
 import {useCallback, useEffect, useRef, useState} from 'react'
-import {answerApproval, answerQuestion, sendMessage, uploadPicture} from './api'
+import {answerApproval, answerQuestion, sendMessage, uploadAttachment, type AttachmentRef} from './api'
 
 export type Bubble = {
   key: string
@@ -15,8 +15,7 @@ export type Bubble = {
   images?: string[]
   /** Gate scenes only: each paragraph's height on the oracle, kept whatever the placeholder words do. */
   heights?: number[]
-  /** Files sent with the message, by name and size: shown as a file card above its words. Barkpark takes pictures
-   *  only today (task-b47b4dcd04d7e4de), so only gate scenes carry one yet. */
+  /** Text files and PDFs sent with the message, by name and size: shown as a file card above its words. */
   files?: {name: string; size: string}[]
   /** A question the person answered, shown as its card in place of a bubble (gate scenes; the live page clears an ask once answered). */
   answered?: {question: string; letter: string; label: string}
@@ -89,16 +88,27 @@ export function askOf(id: string, tool: string, input: Frame | undefined): Ask {
 
 let n = 0
 const key = () => `local-${++n}`
+
+/** What goes with a message, as base64: a picture, or a text file or PDF (`file`, named by its name). */
+export type Outgoing = {data: string; name: string; file?: boolean}
+/** One stored attachment, as Barkpark answers the upload. */
+type Stored = {id: string; media_type: string; byte_size: number}
+const isPicture = (mediaType?: string) => !mediaType || mediaType.startsWith('image/')
+/** A file's size as its card says it. */
+export const fileSize = (bytes: number) => (bytes < 1000 ? `${bytes} B` : bytes < 1_000_000 ? `${Math.round(bytes / 1000)} KB` : `${(bytes / 1_000_000).toFixed(1)} MB`)
+/** Why a message did not go, said plainly; the draft stays in the box. */
+export const CANNOT_TAKE_FILES = "The bot's computer cannot take this file yet, so nothing was sent. Update its chat host, or send the words alone."
+
 const flat = (s: string) => s.replace(/\s+/g, '')
 
 /** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay.
  *  `fleet` is the stream of every bot's state (Barkpark's /v1/chat/events: snapshot, then state). */
-export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string, attachments?: string[]) => Promise<unknown>; upload?: (sessionId: string, data: string) => Promise<{id: string}>; picture?: (sessionId: string, id: string) => string; answer?: (sessionId: string, requestId: string, decision: 'allow' | 'deny') => Promise<unknown>; choose?: (sessionId: string, requestId: string, answers: Answers) => Promise<unknown>}
+export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string, attachments?: AttachmentRef[]) => Promise<unknown>; upload?: (sessionId: string, data: string) => Promise<Stored | {refused: string}>; picture?: (sessionId: string, id: string) => string; answer?: (sessionId: string, requestId: string, decision: 'allow' | 'deny') => Promise<unknown>; choose?: (sessionId: string, requestId: string, answers: Answers) => Promise<unknown>}
 export const barkpark: Transport = {
   events: (id) => `/api/chat/${id}/events`,
   fleet: () => '/api/chat/events',
   send: (id, content, attachments) => sendMessage({data: {id, content, attachments}}),
-  upload: (id, data) => uploadPicture({data: {id, data}}),
+  upload: (id, data) => uploadAttachment({data: {id, data}}),
   picture: (id, aid) => `/api/chat/${id}/attachments/${aid}`,
   answer: (id, requestId, decision) => answerApproval({data: {id, requestId, decision}}),
   choose: (id, requestId, answers) => answerQuestion({data: {id, requestId, answers}}),
@@ -149,7 +159,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
         const want = flat(b.text)
         // A message of pictures alone has no words to claim by: it claims the live bubble with the same pictures.
         if (!want) {
-          const same = (x: Bubble) => x.seq === undefined && x.role === b.role && !flat(x.text) && (x.images ?? []).join() === (b.images ?? []).join()
+          const same = (x: Bubble) => x.seq === undefined && x.role === b.role && !flat(x.text) && (x.images ?? []).join() === (b.images ?? []).join() && (x.files ?? []).map((f) => f.name).join() === (b.files ?? []).map((f) => f.name).join()
           return all.some(same) ? all.map((x) => (same(x) && !all.slice(0, all.indexOf(x)).some(same) ? {...x, seq: b.seq} : x)) : [...all, {...b, key: `seq-${b.seq}`}]
         }
         for (let i = 0; i < all.length; i++) {
@@ -182,10 +192,13 @@ export function useConversation(sessionId: string | null, transport: Transport =
     const es = new EventSource(transport.events(sessionId))
     es.onopen = () => setReady(true)
     const row = (e: Event) => {
-      const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string; metadata?: Frame; attachments?: {id: string}[]}
-      const images = (m.attachments ?? []).map((a) => a.id).filter((x) => typeof x === 'string')
-      if ((m.role === 'user' || m.role === 'assistant') && (m.source_markdown || images.length)) {
-        land({role: m.role, text: m.source_markdown ?? '', seq: m.seq, ...(images.length ? {images} : {})})
+      const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string; metadata?: Frame; attachments?: {id: string; media_type?: string; byte_size?: number | null; name?: string}[]}
+      // A stored row names its pictures by id, and its text files and PDFs by id, type, size and name.
+      const held = (m.attachments ?? []).filter((a) => typeof a.id === 'string')
+      const images = held.filter((a) => isPicture(a.media_type)).map((a) => a.id)
+      const files = held.filter((a) => !isPicture(a.media_type)).map((a) => ({name: a.name || 'file', size: typeof a.byte_size === 'number' ? fileSize(a.byte_size) : ''}))
+      if ((m.role === 'user' || m.role === 'assistant') && (m.source_markdown || held.length)) {
+        land({role: m.role, text: m.source_markdown ?? '', seq: m.seq, ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
         // A row after a stored ask: that ask is over.
         return setAsk((a) => (a?.stored ? null : a))
       }
@@ -351,22 +364,32 @@ export function useConversation(sessionId: string | null, transport: Transport =
     }
   }, [sessionId, transport, land, show, resume, typingSoon, end])
 
+  /** Sends a message with what goes with it. Answers null once it is sent, or the plain words for why it was not
+   *  (a file Barkpark does not take, a computer that cannot take files): then nothing was sent and the draft stays. */
   const send = useCallback(
-    async (content: string, pictures: string[] = []) => {
-      if (!sessionId) return
+    async (content: string, outgoing: Outgoing[] = []): Promise<string | null> => {
+      if (!sessionId) return null
       setError(null)
       try {
-        // Each picture is stored for the conversation first; the message then names them by id.
-        const ids: string[] = []
-        for (const data of pictures) {
-          if (!transport.upload) throw new Error('This conversation cannot take pictures')
-          ids.push((await transport.upload(sessionId, data)).id)
+        // Each is stored for the conversation first; the message then names a picture by its id,
+        // a text file or PDF by its id and its name.
+        const refs: AttachmentRef[] = []
+        const images: string[] = []
+        const files: {name: string; size: string}[] = []
+        for (const o of outgoing) {
+          if (!transport.upload) throw new Error('This conversation cannot take pictures or files')
+          const r = await transport.upload(sessionId, o.data)
+          if ('refused' in r) return `${o.name} was not taken: ${r.refused}`
+          if (o.file && !isPicture(r.media_type)) refs.push({id: r.id, name: o.name}), files.push({name: o.name, size: fileSize(r.byte_size)})
+          else refs.push(r.id), images.push(r.id)
         }
-        await transport.send(sessionId, content, ids.length ? ids : undefined)
-        land({role: 'user', text: content, ...(ids.length ? {images: ids} : {})})
+        const sent = (await transport.send(sessionId, content, refs.length ? refs : undefined)) as {refused?: string} | undefined
+        if (sent?.refused) return CANNOT_TAKE_FILES
+        land({role: 'user', text: content, ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e))
       }
+      return null
     },
     [sessionId, transport, land],
   )
