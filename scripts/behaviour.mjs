@@ -319,6 +319,10 @@ else {
   check('pressing B answers that question once with "pear", as a choice and not as leave', stub.choices.length === 1 && stub.choices[0].request_id === 'q-1' && JSON.stringify(stub.choices[0].answers) === '{"Which fruit?":"pear"}' && stub.answers.length === posted, { choices: stub.choices, answers: stub.answers.length - posted });
   say('control_completed', { native: { kind: 'control_completed', operation: 'answer_approval' } });
   await until(async () => (await choices()).length === 0, 5000, 'the question card to go').catch(() => {});
+  const kept = () => ev(() => [...document.querySelectorAll('.turn-card [aria-label="Your answer"]')].map((g) => ({ q: g.closest('.qcard')?.querySelector('.qcard-q')?.textContent, letter: g.querySelector('.ask-letter')?.textContent, label: g.querySelector('.ask-label')?.textContent, rows: g.querySelectorAll('.qcard-row').length })));
+  await until(async () => (await kept()).length > 0, 3000, 'the answered card').catch(() => {});
+  const k1 = await kept();
+  check('once the bot has the answer, the card stays in the conversation answered: the question and only B pear (control: no choices left to press)', k1.length === 1 && k1[0].q === 'Which fruit?' && k1[0].letter === 'B' && k1[0].label === 'pear' && k1[0].rows === 1 && (await choices()).length === 0, { k1 });
   asks('q-2', 'AskUserQuestion', { questions: [{ question: 'Which days?', multiSelect: true, options: ['Mon', 'Tue', 'Wed'] }, { question: 'Morning or evening?', multiSelect: false, options: ['Morning', 'Evening'] }] });
   await until(async () => (await choices()).length === 5, 5000, 'the second question card').catch(() => {});
   c2 = await choices();
