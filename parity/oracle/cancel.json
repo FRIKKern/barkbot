@@ -1,0 +1,57 @@
+{
+ "ran": "2026-11-14T09:07:15.146Z",
+ "bot": "Oracle",
+ "oracle_version": "1.0.3",
+ "new_labels": [
+  {
+   "label": "Open the remaining 8 images full screen",
+   "ms": 436
+  },
+  {
+   "label": "Reply to your message",
+   "ms": 436
+  },
+  {
+   "label": "More message actions",
+   "ms": 436
+  },
+  {
+   "label": "Start voice chat",
+   "ms": 436
+  },
+  {
+   "label": "status: Oracle replied",
+   "ms": 436
+  },
+  {
+   "label": "status: Oracle is working",
+   "ms": 2266
+  },
+  {
+   "label": "Add reaction",
+   "ms": 8662
+  },
+  {
+   "label": "Reply to Oracle message",
+   "ms": 8662
+  },
+  {
+   "label": "Scroll to bottom",
+   "ms": 53541
+  }
+ ],
+ "pressed": {
+  "how": "Escape (no Stop label on screen)",
+  "t": 53541
+ },
+ "reply_chars_at_press": 1274,
+ "reply_chars_at_end": 1274,
+ "reply_kept_growing": true,
+ "labels_at_end": [
+  "Open the remaining 8 images full screen",
+  "Start voice chat"
+ ],
+ "status_at_end": [
+  "Oracle replied"
+ ]
+}
