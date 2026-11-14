@@ -90,6 +90,7 @@ export function askOf(id: string, tool: string, input: Frame | undefined): Ask {
 let n = 0
 const key = () => `local-${++n}`
 const flat = (s: string) => s.replace(/\s+/g, '')
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 /** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay.
  *  `fleet` is the stream of every bot's state (Barkpark's /v1/chat/events: snapshot, then state). */
@@ -110,6 +111,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
   const [working, setWorking] = useState<Working>(null)
   const [error, setError] = useState<string | null>(null)
   const [ask, setAsk] = useState<Ask | null>(null)
+  const answered = useRef<{id: string; cards: NonNullable<Bubble['answered']>[]} | null>(null) // an answer given, until its card goes
   const [ready, setReady] = useState(false) // the live stream is open: a send now cannot miss its run
   const text = useRef<string | null>(null) // the reply block being written, not shown until it ends
   const leave = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -149,13 +151,13 @@ export function useConversation(sessionId: string | null, transport: Transport =
         const want = flat(b.text)
         // A message of pictures alone has no words to claim by: it claims the live bubble with the same pictures.
         if (!want) {
-          const same = (x: Bubble) => x.seq === undefined && x.role === b.role && !flat(x.text) && (x.images ?? []).join() === (b.images ?? []).join()
+          const same = (x: Bubble) => x.seq === undefined && !x.answered && x.role === b.role && !flat(x.text) && (x.images ?? []).join() === (b.images ?? []).join()
           return all.some(same) ? all.map((x) => (same(x) && !all.slice(0, all.indexOf(x)).some(same) ? {...x, seq: b.seq} : x)) : [...all, {...b, key: `seq-${b.seq}`}]
         }
         for (let i = 0; i < all.length; i++) {
           let got = ''
           let j = i
-          while (j < all.length && all[j].seq === undefined && all[j].role === b.role && got.length < want.length) got += flat(all[j++].text)
+          while (j < all.length && all[j].seq === undefined && !all[j].answered && all[j].role === b.role && got.length < want.length) got += flat(all[j++].text)
           if (j > i && got === want) return all.map((x, k) => (k >= i && k < j ? {...x, seq: b.seq} : x))
         }
       }
@@ -176,6 +178,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
     setBubbles([])
     setWorking(null)
     setAsk(null)
+    answered.current = null // another conversation: an answer given in the last one stays there
     setReady(false)
     setBotState(null)
     if (!sessionId) return
@@ -397,6 +400,13 @@ export function useConversation(sessionId: string | null, transport: Transport =
       setError(null)
       try {
         await transport.choose(sessionId, id, answers)
+        // Once the bot takes the answer the card stays in the conversation, answered (oracle 1.0.3,
+        // oracle-choice-answered): one per single-choice question, its chosen row alone.
+        answered.current = {id, cards: (ask.questions ?? []).flatMap((q) => {
+          const label = answers[q.question]
+          const i = q.options.findIndex((o) => o.label === label)
+          return !q.multi && typeof label === 'string' && i >= 0 ? [{question: q.question, letter: LETTERS[i] ?? '·', label}] : []
+        })}
       } catch (e) {
         setAsk((a) => (a?.id === id ? {...a, answering: null} : a))
         setError(`Your answer did not reach the bot: ${e instanceof Error ? e.message : String(e)}`)
@@ -404,6 +414,14 @@ export function useConversation(sessionId: string | null, transport: Transport =
     },
     [sessionId, transport, ask],
   )
+
+  // The asked card goes when the bot's computer has the answer; its answered form takes its place.
+  useEffect(() => {
+    const done = answered.current
+    if (!done || ask?.id === done.id) return
+    answered.current = null
+    if (done.cards.length) setBubbles((all) => [...all, ...done.cards.map((c, i): Bubble => ({key: `answered-${done.id}-${i}`, role: 'assistant', text: '', answered: c}))])
+  }, [ask])
 
   const picture = useCallback((id: string) => (sessionId && transport.picture ? transport.picture(sessionId, id) : null), [sessionId, transport])
 
