@@ -1,0 +1,923 @@
+{
+ "id": "2026-11-14-file-waiting",
+ "recipe": "file",
+ "oracle_version": "1.0.3",
+ "bot": "Oracle",
+ "captured": "2026-11-14T09:03:43.910Z",
+ "engine": "electron",
+ "durationS": 8.583,
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "note": "times in ms from the gesture; samples are [eventIndex, t, opacity, transform, y]; scroll is [t, scrollTop, scrollHeight]",
+ "events": [
+  {
+   "t": 16.3,
+   "type": "add",
+   "kind": "other",
+   "tag": "div",
+   "role": "presentation",
+   "data": "open startingStyle component baseUiInert",
+   "box": [
+    0,
+    0,
+    1040,
+    760
+   ]
+  },
+  {
+   "t": 16.3,
+   "type": "add",
+   "kind": "other",
+   "tag": "div",
+   "role": "presentation",
+   "data": "open side align instant component",
+   "box": [
+    0,
+    0,
+    200,
+    78
+   ],
+   "textLength": 25
+  },
+  {
+   "t": 543.3,
+   "type": "remove",
+   "kind": "main",
+   "tag": "span"
+  },
+  {
+   "t": 543.3,
+   "type": "remove",
+   "kind": "main",
+   "tag": "span"
+  },
+  {
+   "t": 543.3,
+   "type": "remove",
+   "kind": "main",
+   "tag": "span"
+  },
+  {
+   "t": 543.3,
+   "type": "remove",
+   "kind": "main",
+   "tag": "span"
+  },
+  {
+   "t": 543.3,
+   "type": "remove",
+   "kind": "main",
+   "tag": "span"
+  },
+  {
+   "t": 670.9,
+   "type": "remove",
+   "kind": "other",
+   "tag": "div"
+  },
+  {
+   "t": 670.9,
+   "type": "remove",
+   "kind": "other",
+   "tag": "div"
+  },
+  {
+   "t": 670.9,
+   "type": "remove",
+   "kind": "other",
+   "tag": "div"
+  }
+ ],
+ "samples": [
+  [
+   0,
+   21.3,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   21.3,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   31.4,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   31.4,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   48.3,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   48.3,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   65.5,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   65.5,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   81.1,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   81.1,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   98.5,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   98.5,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   114.3,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   114.3,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   131.8,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   131.8,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   148.5,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   148.5,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   165.3,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   165.3,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   180.9,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   180.9,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   198.9,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   198.9,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   215.4,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   215.4,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   231.8,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   231.8,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   248.5,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   248.5,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   265.3,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   265.3,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   282.4,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   282.4,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   297.7,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   297.7,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   314.4,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   314.4,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   332,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   332,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   348.4,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   348.4,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   365.1,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   365.1,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   381.1,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   381.1,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   398.6,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   398.6,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   415.4,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   415.4,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   432.5,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   432.5,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   449.2,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   449.2,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   465.7,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   465.7,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   482.5,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   482.5,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   497.9,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   497.9,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   515,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   515,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   547.5,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   547.5,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   552.5,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   552.5,
+   1,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   572.8,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   572.8,
+   0.446417,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   581.8,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   581.8,
+   0.202263,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   598.2,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   598.2,
+   0.0865675,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   615.5,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   615.5,
+   0.0294821,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   632.4,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   632.4,
+   0.00590837,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ],
+  [
+   0,
+   648.4,
+   1,
+   null,
+   0
+  ],
+  [
+   1,
+   648.4,
+   0.0000150751,
+   "matrix(1, 0, 0, 1, 103.5, 625.5)",
+   626
+  ]
+ ],
+ "scroll": [
+  [
+   21.3,
+   3439,
+   4199
+  ]
+ ],
+ "animations": [
+  {
+   "type": "CSSAnimation",
+   "name": "sand-12vywve-B",
+   "timing": {
+    "duration": 2400,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -4
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -3
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": -800,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -3
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": -1600,
+    "easing": "linear",
+    "iterations": "infinite",
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "ease-out",
+     "transform": "translateY(0px) scale(0.6)",
+     "opacity": "0"
+    },
+    {
+     "offset": 0.25,
+     "easing": "ease-out",
+     "opacity": "1"
+    },
+    {
+     "offset": 1,
+     "easing": "ease-out",
+     "transform": "translateY(-12px) scale(1)",
+     "opacity": "0"
+    }
+   ],
+   "look": {
+    "color": "rgba(245, 245, 245, 0.54)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgba(245, 245, 245, 0.54)",
+    "transform-origin": "2.71875px 5.5px"
+   },
+   "target": {
+    "kind": "panel",
+    "tag": "span",
+    "box": [
+     996,
+     366,
+     5,
+     10
+    ]
+   },
+   "t": -2
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "ui-1j3rbwo-B",
+   "timing": {
+    "duration": 0,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 21
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-top-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 29
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-bottom-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 29
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-left-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 29
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-right-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "linear",
+     "borderRightColor": "rgba(245, 245, 245, 0.22)"
+    },
+    {
+     "offset": 1,
+     "easing": "linear",
+     "borderRightColor": "rgba(245, 245, 245, 0.1)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 22px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "box": [
+     104,
+     700,
+     600,
+     44
+    ],
+    "text": "What does this file say?",
+    "textLength": 24
+   },
+   "t": 29
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 100,
+    "delay": 0,
+    "easing": "cubic-bezier(0.165, 0.84, 0.44, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 574
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 100,
+    "delay": 0,
+    "easing": "cubic-bezier(0.165, 0.84, 0.44, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 574
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-top-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 574
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-bottom-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 574
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-left-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 574
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-right-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "linear",
+     "borderRightColor": "rgba(245, 245, 245, 0.1)"
+    },
+    {
+     "offset": 1,
+     "easing": "linear",
+     "borderRightColor": "rgba(245, 245, 245, 0.22)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 22px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "box": [
+     104,
+     700,
+     600,
+     44
+    ],
+    "text": "What does this file say?",
+    "textLength": 24
+   },
+   "t": 574
+  }
+ ]
+}

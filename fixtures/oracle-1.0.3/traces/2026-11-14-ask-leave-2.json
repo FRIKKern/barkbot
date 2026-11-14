@@ -1,0 +1,1300 @@
+{
+ "id": "2026-11-14-ask-leave-2",
+ "recipe": "ask-leave-2",
+ "oracle_version": "1.0.3",
+ "bot": "Oracle",
+ "captured": "2026-11-14T09:02:05.499Z",
+ "engine": "electron",
+ "durationS": 14.887,
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "note": "times in ms from the gesture; samples are [eventIndex, t, opacity, transform, y]; scroll is [t, scrollTop, scrollHeight]",
+ "events": [
+  {
+   "t": 5.1,
+   "type": "remove",
+   "kind": "main",
+   "tag": "br"
+  },
+  {
+   "t": 6,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-label",
+   "value": "Send message",
+   "tag": "button"
+  },
+  {
+   "t": 288.5,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-label",
+   "value": "Start voice chat",
+   "tag": "button"
+  },
+  {
+   "t": 288.5,
+   "type": "remove",
+   "kind": "bubble:assistant",
+   "tag": "span"
+  },
+  {
+   "t": 288.5,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  },
+  {
+   "t": 288.5,
+   "type": "add",
+   "kind": "bubble:user",
+   "tag": "div",
+   "role": "article",
+   "data": "enter index pending role rowKey",
+   "box": [
+    104,
+    584,
+    600,
+    52
+   ],
+   "textLength": 69
+  },
+  {
+   "t": 513.3,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  },
+  {
+   "t": 513.3,
+   "type": "attr",
+   "kind": "bubble:user",
+   "name": "aria-busy",
+   "tag": "div"
+  },
+  {
+   "t": 579.5,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-label",
+   "value": "Oracle, Working",
+   "tag": "button"
+  },
+  {
+   "t": 579.5,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 579.5,
+   "type": "add",
+   "kind": "other",
+   "tag": "span",
+   "box": [
+    -1,
+    -1,
+    127,
+    20
+   ],
+   "text": "Oracle is working",
+   "textLength": 17
+  },
+  {
+   "t": 579.5,
+   "type": "add",
+   "kind": "main",
+   "tag": "div",
+   "data": "rowKey",
+   "box": [
+    104,
+    636,
+    600,
+    52
+   ]
+  },
+  {
+   "t": 2715.2,
+   "type": "add",
+   "kind": "main",
+   "tag": "span",
+   "box": [
+    149,
+    665,
+    103,
+    22
+   ],
+   "text": "Deleting the file",
+   "textLength": 17
+  },
+  {
+   "t": 2915.2,
+   "type": "add",
+   "kind": "bubble:assistant",
+   "tag": "div",
+   "role": "article",
+   "data": "enter index rowKey",
+   "box": [
+    104,
+    596,
+    600,
+    52
+   ],
+   "textLength": 34
+  },
+  {
+   "t": 2971.6,
+   "type": "add",
+   "kind": "rail",
+   "tag": "span",
+   "role": "status",
+   "label": "Unread activity",
+   "box": [
+    52,
+    164,
+    8,
+    8
+   ]
+  },
+  {
+   "t": 2971.6,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-label",
+   "value": "Oracle, Unread activity, Working",
+   "tag": "button"
+  },
+  {
+   "t": 5629,
+   "type": "attr",
+   "kind": "rail",
+   "name": "aria-label",
+   "value": "Oracle, Unread activity",
+   "tag": "button"
+  },
+  {
+   "t": 5629,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 5629,
+   "type": "add",
+   "kind": "other",
+   "tag": "span",
+   "box": [
+    -1,
+    -1,
+    104,
+    20
+   ],
+   "text": "Oracle replied",
+   "textLength": 14
+  },
+  {
+   "t": 5701.2,
+   "type": "add",
+   "kind": "bubble:assistant",
+   "tag": "div",
+   "role": "article",
+   "data": "enter index rowKey",
+   "box": [
+    104,
+    586,
+    600,
+    63
+   ],
+   "textLength": 102
+  },
+  {
+   "t": 6731.7,
+   "type": "remove",
+   "kind": "other",
+   "tag": "div"
+  },
+  {
+   "t": 6731.7,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  }
+ ],
+ "samples": [
+  [
+   5,
+   292.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   295.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   311.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   322.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   340.2,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   355.5,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   372.9,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   388.9,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   406.4,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   423,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   439.4,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   456.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   472.6,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   488.4,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   506.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   522.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   539.5,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   556,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   5,
+   580.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   580.7,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   580.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   591.8,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   591.8,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   591.8,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   606.4,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   606.4,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   606.4,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   623.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   623.1,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   623.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   639.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   639.7,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   639.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   656.8,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   656.8,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   656.8,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   673,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   673,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   673,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   689.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   689.7,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   689.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   706.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   706.1,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   706.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   723.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   723.1,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   723.1,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   738.9,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   738.9,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   738.9,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   762.6,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   762.6,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   762.6,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   773,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   773,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   773,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ],
+  [
+   5,
+   793.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3664)",
+   584
+  ],
+  [
+   10,
+   793.3,
+   1,
+   null,
+   -1
+  ],
+  [
+   11,
+   793.3,
+   1,
+   "matrix(1, 0, 0, 1, 0, 3716)",
+   636
+  ]
+ ],
+ "scroll": [
+  [
+   7.2,
+   3016,
+   3776
+  ],
+  [
+   292.7,
+   3080,
+   3840
+  ]
+ ],
+ "animations": [
+  {
+   "type": "CSSAnimation",
+   "name": "sand-12vywve-B",
+   "timing": {
+    "duration": 2400,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -5
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -4
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": -800,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -4
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": -1600,
+    "easing": "linear",
+    "iterations": "infinite",
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "ease-out",
+     "transform": "translateY(0px) scale(0.6)",
+     "opacity": "0"
+    },
+    {
+     "offset": 0.25,
+     "easing": "ease-out",
+     "opacity": "1"
+    },
+    {
+     "offset": 1,
+     "easing": "ease-out",
+     "transform": "translateY(-12px) scale(1)",
+     "opacity": "0"
+    }
+   ],
+   "look": {
+    "color": "rgba(245, 245, 245, 0.54)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgba(245, 245, 245, 0.54)",
+    "transform-origin": "2.71875px 5.5px"
+   },
+   "target": {
+    "kind": "panel",
+    "tag": "span",
+    "box": [
+     996,
+     362,
+     5,
+     11
+    ]
+   },
+   "t": -4
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 25
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 25
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 25
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "linear",
+     "opacity": "0"
+    },
+    {
+     "offset": 1,
+     "easing": "linear",
+     "opacity": "1"
+    }
+   ],
+   "look": {
+    "color": "rgb(18, 18, 18)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(18, 18, 18)",
+    "transform-origin": "8px 8px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "i",
+    "data": "iconName size",
+    "box": [
+     676,
+     716,
+     11,
+     11
+    ]
+   },
+   "t": 25
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 311
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 312
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 312
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 312
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1rqlz9z-B",
+   "timing": {
+    "duration": 240,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 312
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18re5ia-B",
+   "timing": {
+    "duration": 120,
+    "delay": 1977,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 313
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18i4fvi-B",
+   "timing": {
+    "duration": 1000,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": "infinite",
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "ease-in-out",
+     "transform": "translateX(-14px)"
+    },
+    {
+     "offset": 1,
+     "easing": "ease-in-out",
+     "transform": "translateX(14px)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "4px 2px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "box": [
+     668,
+     647,
+     8,
+     4
+    ]
+   },
+   "t": 313
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-gcq4cg-B",
+   "timing": {
+    "duration": 180,
+    "delay": 220,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 591
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-11nrck8-B",
+   "timing": {
+    "duration": 180,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 592
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-iekrje-B",
+   "timing": {
+    "duration": 340,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+     "transform": "scale(0.6)",
+     "opacity": "0"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+     "transform": "scale(1)",
+     "opacity": "1"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "14px 14px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "span",
+    "box": [
+     116,
+     659,
+     18,
+     18
+    ]
+   },
+   "t": 592
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-top-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 826
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-bottom-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 826
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-left-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 827
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-right-color",
+   "timing": {
+    "duration": 150,
+    "delay": 0,
+    "easing": "ease",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "linear",
+     "borderRightColor": "rgba(245, 245, 245, 0.22)"
+    },
+    {
+     "offset": 1,
+     "easing": "linear",
+     "borderRightColor": "rgba(245, 245, 245, 0.1)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 22px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "box": [
+     104,
+     700,
+     600,
+     44
+    ]
+   },
+   "t": 827
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-gcq4cg-B",
+   "timing": {
+    "duration": 180,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 2720
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1ofn8cw-B",
+   "timing": {
+    "duration": 2200,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": "infinite",
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "steps(60)",
+     "backgroundPositionX": "200%",
+     "backgroundPositionY": "0px"
+    },
+    {
+     "offset": 1,
+     "easing": "steps(60)",
+     "backgroundPositionX": "-200%",
+     "backgroundPositionY": "0px"
+    }
+   ],
+   "look": {
+    "color": "rgba(0, 0, 0, 0)",
+    "background-image": "linear-gradient(90deg, color(srgb 0.960784 0.960784 0.960784 / 0.4) 0%, color(srgb 0.960784 0.960784 0.960784 / 0.4) 25%, rgb(245, 245, 245) 60%, color(srgb 0.960784 0.960784 0.960784 / 0.4) 75%, colo",
+    "background-size": "200% 100%",
+    "background-clip": "text",
+    "-webkit-text-fill-color": "rgba(0, 0, 0, 0)",
+    "transform-origin": "51.5039px 11px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "span",
+    "box": [
+     149,
+     665,
+     103,
+     22
+    ],
+    "text": "Deleting the file",
+    "textLength": 17
+   },
+   "t": 2720
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1rqlz9z-B",
+   "timing": {
+    "duration": 240,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(12px)"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(0px)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 24px"
+   },
+   "target": {
+    "kind": "bubble:assistant",
+    "tag": "div",
+    "box": [
+     104,
+     610,
+     600,
+     48
+    ],
+    "textLength": 24
+   },
+   "t": 2916
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-18re5ia-B",
+   "timing": {
+    "duration": 130,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "0"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "opacity": "1"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "4px 4px"
+   },
+   "target": {
+    "kind": "rail",
+    "tag": "span",
+    "role": "status",
+    "label": "Unread activity",
+    "box": [
+     52,
+     164,
+     8,
+     8
+    ]
+   },
+   "t": 2985
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1uvc5f5-B",
+   "timing": {
+    "duration": 140,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "forwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "transform": "scale(1)",
+     "opacity": "1"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+     "transform": "scale(0.92)",
+     "opacity": "0"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "0px 18px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "data": "activity grokState role continuedPrev exiting",
+    "box": [
+     104,
+     650,
+     600,
+     36
+    ],
+    "text": "Deleting the file",
+    "textLength": 17
+   },
+   "t": 5630
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-1rqlz9z-B",
+   "timing": {
+    "duration": 240,
+    "delay": 0,
+    "easing": "linear",
+    "iterations": 1,
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(12px)"
+    },
+    {
+     "offset": 1,
+     "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+     "transform": "translateY(0px)"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 29.25px"
+   },
+   "target": {
+    "kind": "bubble:assistant",
+    "tag": "div",
+    "box": [
+     104,
+     600,
+     600,
+     59
+    ],
+    "textLength": 92
+   },
+   "t": 5701
+  }
+ ]
+}
