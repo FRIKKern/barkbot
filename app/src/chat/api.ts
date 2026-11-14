@@ -1,7 +1,7 @@
 // The conversation's server functions. Their bodies run on the server only (TanStack Start
 // strips them from the browser bundle), so they may use server/barkpark.
 import {createServerFn} from '@tanstack/react-start'
-import {bp, conf} from '../server/barkpark'
+import {bp, conf, BarkparkError} from '../server/barkpark'
 
 export type Host = {id: string; name: string; online: boolean}
 export type Chat = {bot: string; host: Host | null; sessionId: string | null; startedAt: string | null}
@@ -65,22 +65,39 @@ export const startChat = createServerFn({method: 'POST'})
     return {sessionId: s.id, startedAt: s.inserted_at}
   })
 
+/** What a message names: a picture by its id, a text file or PDF by its id and its name. */
+export type AttachmentRef = string | {id: string; name: string}
+
+/** Sends one message. A computer that cannot take what it names (Barkpark's 422
+ *  host_cannot_receive_attachments) is answered as `refused`, not thrown: the page says so in a
+ *  plain line and keeps the draft. */
 export const sendMessage = createServerFn({method: 'POST'})
-  .validator((d: {id: string; content: string; attachments?: string[]}) => d)
-  .handler(async ({data}) => {
-    // Pictures go by id: each was stored for this conversation first (uploadPicture below).
+  .validator((d: {id: string; content: string; attachments?: AttachmentRef[]}) => d)
+  .handler(async ({data}): Promise<{accepted: true} | {refused: string}> => {
+    // What it names was stored for this conversation first (uploadAttachment below).
     const json = data.attachments?.length ? {content: data.content, attachments: data.attachments} : {content: data.content}
-    await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`, {method: 'POST', json})
+    try {
+      await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`, {method: 'POST', json})
+    } catch (e) {
+      if (e instanceof BarkparkError && e.status === 422 && e.code === 'host_cannot_receive_attachments') return {refused: 'host_cannot_receive_attachments'}
+      throw e
+    }
     return {accepted: true}
   })
 
-/** Stores one picture for a conversation and answers its id. Barkpark takes png, jpeg, gif and
- *  webp up to 3 MB and reads the type from the bytes themselves, never from the file's name. */
-export const uploadPicture = createServerFn({method: 'POST'})
+/** Stores one picture, text file or PDF for a conversation and answers its id and type. Barkpark
+ *  reads the type from the bytes themselves, never from the file's name: png, jpeg, gif, webp,
+ *  PDF or UTF-8 text, up to 3 MB. Anything else is answered as `refused` (its 400), not thrown. */
+export const uploadAttachment = createServerFn({method: 'POST'})
   .validator((d: {id: string; data: string}) => d)
-  .handler(async ({data}) => {
-    const r = await bp<{attachment: {id: string; media_type: string; byte_size: number}}>(`/v1/chat/sessions/${encodeURIComponent(data.id)}/attachments`, {method: 'POST', json: {data: data.data}})
-    return {id: r.attachment.id}
+  .handler(async ({data}): Promise<{id: string; media_type: string; byte_size: number} | {refused: string}> => {
+    try {
+      const r = await bp<{attachment: {id: string; media_type: string; byte_size: number}}>(`/v1/chat/sessions/${encodeURIComponent(data.id)}/attachments`, {method: 'POST', json: {data: data.data}})
+      return {id: r.attachment.id, media_type: r.attachment.media_type, byte_size: r.attachment.byte_size}
+    } catch (e) {
+      if (e instanceof BarkparkError && e.status === 400) return {refused: e.message}
+      throw e
+    }
   })
 
 /** The person's answer to what the bot asked leave for. Barkpark passes it to the bot's computer;

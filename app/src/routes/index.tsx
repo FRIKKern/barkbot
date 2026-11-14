@@ -2,9 +2,9 @@ import {createFileRoute, useRouter} from '@tanstack/react-router'
 import {useEffect, useState} from 'react'
 import {Shell} from '../components/Shell'
 import {Transcript} from '../components/Transcript'
-import {Composer, placeholderFor, type Picture} from '../components/Composer'
+import {Composer, placeholderFor, type Picture, type WaitingFile} from '../components/Composer'
 import {computerOnline, loadChat, renameBot, startChat} from '../chat/api'
-import {useConversation} from '../chat/useConversation'
+import {useConversation, type Outgoing} from '../chat/useConversation'
 
 // The bot, live: its computer and conversation come from Barkpark (loadChat). No made-up data:
 // with no computer enrolled, the page says so (D11).
@@ -24,7 +24,7 @@ function Home() {
   const sessionId = started?.sessionId ?? chat.sessionId
   const convo = useConversation(sessionId)
   const [opening, setOpening] = useState(false)
-  const [waiting, setWaiting] = useState<{text: string; pictures: string[]} | null>(null)
+  const [waiting, setWaiting] = useState<{text: string; outgoing: Outgoing[]; done: (why: string | null) => void} | null>(null)
   // The bot's name as renamed in the details panel: the composer and the transcript follow it at
   // once, and it is saved to Barkpark, so a reload shows it too (loadChat reads it back).
   const [name, setName] = useState(chat.bot)
@@ -39,13 +39,14 @@ function Home() {
     }
   }
 
-  const send = async (text: string, pictures: Picture[] = []) => {
-    if (!chat.host) return
-    const data = pictures.map((p) => p.data)
-    if (sessionId && convo.ready) return convo.send(text, data)
+  // Answers why nothing was sent, if so (the composer then keeps the draft).
+  const send = async (text: string, pictures: Picture[] = [], files: WaitingFile[] = []): Promise<string | null> => {
+    if (!chat.host) return null
+    const outgoing: Outgoing[] = [...pictures.map((p) => ({data: p.data, name: p.name})), ...files.filter((f) => f.data).map((f) => ({data: f.data!, name: f.name, file: true}))]
+    if (sessionId && convo.ready) return convo.send(text, outgoing)
     // The first message opens the conversation on the bot's computer, then goes once the
     // live stream is open, so its run is seen from the start.
-    setWaiting({text, pictures: data})
+    const sent = new Promise<string | null>((done) => setWaiting({text, outgoing, done}))
     if (!sessionId && !opening) {
       setOpening(true)
       try {
@@ -54,11 +55,12 @@ function Home() {
         setOpening(false)
       }
     }
+    return sent
   }
   useEffect(() => {
     if (waiting && convo.ready) {
       setWaiting(null)
-      void convo.send(waiting.text, waiting.pictures)
+      void convo.send(waiting.text, waiting.outgoing).then(waiting.done)
     }
   }, [waiting, convo.ready, convo.send])
 

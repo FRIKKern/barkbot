@@ -129,9 +129,8 @@ export function FileName({name}: {name: string}) {
   )
 }
 
-/** A file sent with a message: a card with a page mark, the name and the size, above its bubble
- *  (oracle-file-sent, article 131: 300 x 72, radius 22, on rgb 37). Not openable yet: Barkpark
- *  stores no files but pictures (task-b47b4dcd04d7e4de). */
+/** A text file or PDF sent with a message: a card with a page mark, the name and the size, above its
+ *  bubble (oracle-file-sent, article 131: 300 x 72, radius 22, on rgb 37). Not openable yet. */
 export function FileCard({name, size}: {name: string; size: string}) {
   return (
     <div className="file-card" role="button" aria-label={`Open ${name}`} aria-disabled="true">

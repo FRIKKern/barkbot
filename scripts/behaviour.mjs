@@ -36,7 +36,7 @@ process.on('SIGINT', () => process.exit(130));
 
 // A stand-in Barkpark for the live page (/): it answers what loadChat asks (no computer enrolled;
 // the saved bot name) and keeps every write, so the rename-persists rules can count them.
-const stub = { name: null, reads: 0, writes: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map() };
+const stub = { name: null, reads: 0, writes: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 const PREF = '/w/default/p/default/v1/prefs/production/barkbot.bot';
@@ -58,10 +58,21 @@ await new Promise((ok) => httpServer((req, res) => {
       if (req.url !== '/v1/chat/events') { stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
       return;
     }
-    // Pictures, as Barkpark: an upload answers the sha256 of its bytes; a message names pictures by id.
-    if (/^\/v1\/chat\/sessions\/[^/]+\/attachments$/.test(req.url) && req.method === 'POST') { const { data } = JSON.parse(body); const bytes = Buffer.from(data, 'base64'); const id = createHash('sha256').update(bytes).digest('hex'); stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type: 'image/png', byte_size: bytes.length } }); }
+    // Pictures and files, as Barkpark: an upload's type is read from its bytes (png, PDF, UTF-8 text;
+    // anything else is a 400 and is not stored) and it answers the sha256 of its bytes; a message
+    // names a picture by id and a file by {id, name}. A computer that cannot take files: 422.
+    if (/^\/v1\/chat\/sessions\/[^/]+\/attachments$/.test(req.url) && req.method === 'POST') {
+      const { data } = JSON.parse(body); const bytes = Buffer.from(data, 'base64'); const id = createHash('sha256').update(bytes).digest('hex');
+      const media_type = bytes[0] === 0x89 && bytes.subarray(1, 4).toString() === 'PNG' ? 'image/png' : bytes.subarray(0, 5).toString() === '%PDF-' ? 'application/pdf' : bytes.length && !bytes.includes(0) && Buffer.from(bytes.toString('utf8'), 'utf8').equals(bytes) ? 'text/plain' : null;
+      if (!media_type) { stub.refused.push({ upload: id }); return json(400, { error: { code: 'invalid_request', message: 'attachment must be UTF-8 text, a PDF, or one of: image/png, image/jpeg, image/gif, image/webp' } }); }
+      stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
+    }
     if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const id = req.url.split('/').pop(); return stub.pictures.has(id) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(id) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
-    if (/^\/v1\/chat\/sessions\/[^/]+\/messages$/.test(req.url) && req.method === 'POST') { stub.sent.push(JSON.parse(body)); return json(202, { accepted: true }); }
+    if (/^\/v1\/chat\/sessions\/[^/]+\/messages$/.test(req.url) && req.method === 'POST') {
+      const m = JSON.parse(body);
+      if (stub.noFiles && (m.attachments ?? []).some((a) => typeof a === 'object')) { stub.refused.push({ message: m }); return json(422, { error: { code: 'host_cannot_receive_attachments', message: "this session's chat host cannot receive attachments of this type — update barkpark-chat-host, or send the text alone" } }); }
+      stub.sent.push(m); return json(202, { accepted: true });
+    }
     if (/^\/v1\/chat\/sessions\/[^/]+\/answer$/.test(req.url) && req.method === 'POST') { stub.choices.push(JSON.parse(body)); res.writeHead(204); return res.end(); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/approval$/.test(req.url) && req.method === 'POST') { stub.answers.push(JSON.parse(body)); res.writeHead(204); return res.end(); }
     stub.other.push(`${req.method} ${req.url}`);
@@ -376,6 +387,66 @@ else {
   await until(() => stub.sent.length > 1, 8000, 'the second message').catch(() => {});
   check('a message without a picture names none (control)', stub.sent.length === 2 && !('attachments' in stub.sent[1]) && stub.uploads.length === 1, { sent: stub.sent });
   rmSync(pngPath, { force: true });
+
+  // A text file goes with a message as a picture does, named by its id and its name; the sent
+  // message shows it as a file card (oracle 1.0.3, oracle-file-sent), also after a reload.
+  console.log('Behaviour · a text file with a message (the live page, against the stand-in Barkpark)');
+  const NOTE = Buffer.from('The code is K7-PLUM-42.\n'); const noteId = createHash('sha256').update(NOTE).digest('hex');
+  const notePath = path('.cache', `note-${CHROME_PORT}.txt`); writeFileSync(notePath, NOTE);
+  const zipPath = path('.cache', `bundle-${CHROME_PORT}.zip`); writeFileSync(zipPath, Buffer.from('504b0304140000000000', 'hex'));
+  const binPath = path('.cache', `blob-${CHROME_PORT}`); /* no extension: the browser gives it no type, so Barkpark judges it */ writeFileSync(binPath, Buffer.from([0, 1, 2, 3, 0xff, 0]));
+  const pick = async (file) => { const { root: r } = await page.send('DOM.getDocument'); const { nodeId: n } = await page.send('DOM.querySelector', { nodeId: r.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId: n, files: [file] }); };
+  const box = () => ev(() => ({ chips: [...document.querySelectorAll('.composer-attachments [role=listitem]')].map((x) => x.getAttribute('aria-label')), size: document.querySelector('.composer-attachments .file-size')?.textContent ?? null, words: document.querySelector('.prompt')?.innerText.trim() ?? '', line: document.querySelector('.composer-refused')?.textContent ?? null, cards: [...document.querySelectorAll('.turn-attached .file-card')].map((x) => [x.getAttribute('aria-label'), x.querySelector('.file-size')?.textContent]), bubbles: document.querySelectorAll('.bubble-user').length }));
+  const type = async (text) => { await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text }); };
+  const sent0 = stub.sent.length; const up0 = stub.uploads.length;
+  await pick(zipPath);
+  await until(async () => (await box()).line !== null, 5000, 'the refusal line').catch(() => {});
+  let f = await box();
+  check('a zip is refused in a plain line, and nothing is stored or sent', /bundle-\d+\.zip is not a picture, a text file or a PDF/.test(f.line ?? '') && f.chips.length === 0 && stub.uploads.length === up0 && stub.sent.length === sent0 && stub.refused.length === 0, { f, uploads: stub.uploads.length - up0, sent: stub.sent.length - sent0 });
+  await pick(notePath);
+  await until(async () => (await box()).chips.length === 1, 5000, 'the file chip').catch(() => {});
+  f = await box();
+  check('a picked text file waits in the box by name and size, and nothing is stored or sent yet', f.chips.length === 1 && /^note-\d+\.txt$/.test(f.chips[0]) && f.size === `${NOTE.length} B` && f.line === null && stub.uploads.length === up0 && stub.sent.length === sent0, { f });
+  await type('read it'); await key('Enter');
+  await until(() => stub.sent.length > sent0, 8000, 'the message to reach the stand-in').catch(() => {});
+  await until(async () => (await box()).cards.length > 0, 8000, 'the file card').catch(() => {});
+  f = await box();
+  const named = stub.sent[sent0]?.attachments;
+  check('Enter: the file is stored once, the message names it by id and name, and the sent message shows it as a file card above its words', stub.uploads.length === up0 + 1 && stub.uploads.at(-1) === noteId && stub.sent.length === sent0 + 1 && stub.sent[sent0].content === 'read it' && JSON.stringify(named) === JSON.stringify([{ id: noteId, name: notePath.split('/').pop() }]) && f.chips.length === 0 && f.cards.length === 1 && f.cards[0][0] === `Open ${notePath.split('/').pop()}` && f.cards[0][1] === `${NOTE.length} B`, { uploads: stub.uploads.slice(up0), named, f });
+  // Barkpark refuses what is not text, a PDF or a picture: the line says so and nothing is sent.
+  await pick(binPath);
+  await until(async () => (await box()).chips.length === 1, 5000, 'the unknown file chip').catch(() => {});
+  await type('and this'); await key('Enter');
+  await until(() => stub.refused.length > 0, 8000, 'the upload to be refused').catch(() => {});
+  await until(async () => (await box()).line !== null, 5000, 'the refusal line').catch(() => {});
+  f = await box();
+  check('a file Barkpark refuses: the line says it was not taken, nothing is sent, and the words and the file stay in the box', stub.refused.length === 1 && stub.refused[0].upload && stub.sent.length === sent0 + 1 && /blob-\d+ was not taken/.test(f.line ?? '') && f.words === 'and this' && f.chips.length === 1, { refused: stub.refused, sent: stub.sent.length - sent0, f });
+  await ev(() => document.querySelector('.attach-file-remove')?.click());
+  await ev(() => { const p = document.querySelector('.prompt'); p.replaceChildren(); p.dispatchEvent(new InputEvent('input', { bubbles: true })); });
+  // A computer that cannot take files (Barkpark's 422): a plain line, the draft kept; once it can, the same draft goes.
+  const b0 = (await box()).bubbles;
+  stub.noFiles = true;
+  await pick(notePath);
+  await until(async () => (await box()).chips.length === 1, 5000, 'the file chip').catch(() => {});
+  await type('try again'); await key('Enter');
+  await until(() => stub.refused.length > 1, 8000, 'the message to be refused').catch(() => {});
+  await until(async () => (await box()).line !== null, 5000, 'the refusal line').catch(() => {});
+  f = await box();
+  check("a computer that cannot take files: a plain line says so, nothing is sent, and the words and the file stay in the box", stub.refused.length === 2 && stub.refused[1].message?.content === 'try again' && stub.sent.length === sent0 + 1 && /cannot take this file/.test(f.line ?? '') && f.words === 'try again' && f.chips.length === 1 && f.bubbles === b0, { refused: stub.refused, b0, f });
+  stub.noFiles = false;
+  await ev(() => document.querySelector('.prompt').focus()); await key('Enter');
+  await until(() => stub.sent.length > sent0 + 1, 8000, 'the kept draft to go').catch(() => {});
+  await wait(300);
+  f = await box();
+  check('the kept draft is a real one: Enter sends those words and that file (control)', stub.sent.length === sent0 + 2 && stub.sent.at(-1).content === 'try again' && JSON.stringify(stub.sent.at(-1).attachments) === JSON.stringify([{ id: noteId, name: notePath.split('/').pop() }]) && f.line === null && f.chips.length === 0 && f.bubbles === b0 + 1, { sent: stub.sent.slice(sent0), f });
+  // After a reload the card comes from the stored row: Barkpark's attachments[] carries the file's name.
+  stub.rows = [{ seq: 1, role: 'user', source_markdown: 'read it', attachments: [{ id: noteId, media_type: 'text/plain', byte_size: NOTE.length, url: `/v1/chat/sessions/${SESSION}/attachments/${noteId}`, name: 'note.txt' }] }, { seq: 2, role: 'user', source_markdown: 'words only' }];
+  await open(`${base}/`);
+  await until(async () => (await box()).bubbles >= 2, 30000, 'the stored rows').catch(() => {});
+  f = await box();
+  check('a reload: the stored row shows its file card by name and size, once (control: the row with no attachments shows none)', f.bubbles === 2 && f.cards.length === 1 && f.cards[0][0] === 'Open note.txt' && f.cards[0][1] === `${NOTE.length} B`, { f });
+  stub.rows = [];
+  [notePath, zipPath, binPath].forEach((x) => rmSync(x, { force: true }));
 
   // A reload in the middle of a reply: the fresh page hears only the rest of the turn (Barkpark
   // replays stored rows, not a running turn's events; seen live 2026-11-13). The tail is not a
