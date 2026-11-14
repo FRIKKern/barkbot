@@ -97,7 +97,9 @@ const windowFocus = async (on) => { await page.send('Emulation.setFocusEmulation
 
 async function open(url) {
   await page.send('Page.navigate', { url });
-  await until(() => ev(() => document.readyState === 'complete' && !!document.querySelector('.app')), 30000, url);
+  // Loaded is not live: a cold dev server can take seconds more to hydrate (seen 2026-11-14: 3.4 s
+  // after load on a first page), and a page read before React owns it fails on what it never ran.
+  await until(() => ev(() => { const a = document.querySelector('.app'); return document.readyState === 'complete' && !!a && Object.keys(a).some((k) => k.startsWith('__reactFiber$')); }), 30000, url);
   await wait(500);
 }
 
@@ -358,10 +360,10 @@ else {
   const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' });
   precondition('the composer has a file chooser, and nothing has been stored or sent', !!nodeId && stub.uploads.length === 0 && stub.sent.length === 0, { nodeId, uploads: stub.uploads, sent: stub.sent });
   await page.send('DOM.setFileInputFiles', { nodeId, files: [pngPath] });
-  const waiting = () => ev(() => ({ chips: [...document.querySelectorAll('.picture-chip .picture-name')].map((x) => x.textContent), send: document.querySelector('.composer .round.voice')?.getAttribute('aria-label') }));
+  const waiting = () => ev(() => ({ chips: [...document.querySelectorAll('.composer-attachments [role=listitem]')].map((x) => x.getAttribute('aria-label')), send: document.querySelector('.composer .round.voice')?.getAttribute('aria-label') }));
   await until(async () => (await waiting()).chips.length === 1, 5000, 'the chip').catch(() => {});
   let w = await waiting();
-  check('a picked picture waits as a chip, the round button says Send, and nothing is stored or sent yet', w.chips.length === 1 && /behaviour-picture/.test(w.chips[0]) && w.send === 'Send' && stub.uploads.length === 0 && stub.sent.length === 0, { w, uploads: stub.uploads.length, sent: stub.sent.length });
+  check('a picked picture waits as a thumbnail in the box, the round button says Send message, and nothing is stored or sent yet', w.chips.length === 1 && /behaviour-picture/.test(w.chips[0]) && w.send === 'Send message' && stub.uploads.length === 0 && stub.sent.length === 0, { w, uploads: stub.uploads.length, sent: stub.sent.length });
   await ev(() => document.querySelector('.prompt').focus());
   await page.send('Input.insertText', { text: 'look' }); await key('Enter');
   await until(() => stub.sent.length > 0, 8000, 'the message to reach the stand-in').catch(() => {});

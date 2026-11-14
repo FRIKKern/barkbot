@@ -183,7 +183,7 @@ try {
     const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' });
     if (!nodeId) stopWith('the composer has no file chooser');
     await page.send('DOM.setFileInputFiles', { nodeId, files: [file] });
-    await until(() => page.evaluate(() => document.querySelectorAll('.picture-chip').length === 1), 5000, 'the picture to wait as a chip');
+    await until(() => page.evaluate(() => document.querySelectorAll('.composer-attachments [role=listitem]').length === 1), 5000, 'the picture to wait in the box');
     const r = await turn('What colour is this square? Reply with one word: red, green or blue.');
     rmSync(file, { force: true });
     const said = (await page.evaluate(() => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].at(-1)?.textContent ?? '')).toLowerCase();

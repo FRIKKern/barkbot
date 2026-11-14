@@ -10,6 +10,8 @@ export const EXCEPTIONS = [
   { id: 'oracle-choice-answered', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
   { id: 'oracle-file-sent', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
   { id: 'oracle-pictures-sent', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
+  { id: 'oracle-file-waiting', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
+  { id: 'oracle-pictures-waiting', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
 ];
 
 export const exception = (id) => EXCEPTIONS.find((x) => x.id === id) ?? null;

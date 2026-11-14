@@ -2,7 +2,7 @@
 
 Six looks the owner approved a send each for, read on the throwaway Oracle bot. Every gated state must come from one oracle version (`npm run check`, rule 6b), and the gated ones are 0.79.3. The card states move into `fixtures/states/` as named exceptions to that rule ([0008](../../docs/decisions/0008-card-states-from-a-newer-oracle.md), `scripts/lib/versions.mjs`); the rest wait here, outside `fixtures/states/` and `traces/`.
 
-Moved, and gated by Gate A: `oracle-ask-choice`, `oracle-choice-answered`, `oracle-file-sent`, `oracle-pictures-sent`.
+Moved, and gated by Gate A: `oracle-ask-choice`, `oracle-choice-answered`, `oracle-file-sent`, `oracle-pictures-sent`, `oracle-file-waiting`, `oracle-pictures-waiting` (its `pointer`, on the second picture, was added after the capture: only that picture's remove button shows).
 
 | Look | State | What it shows |
 |---|---|---|
