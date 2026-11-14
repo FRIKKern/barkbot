@@ -149,7 +149,7 @@ function compare(oracle, ours, focusAtEnd, skipped = []) {
     const k = oracle.filter((x) => x.kind === m.kind).indexOf(m);
     const o = nth(ours, m.kind, k);
     const key = `${m.kind}#${k + 1}`;
-    if (!o) { cases.push({ key, pass: false, oracle: m.t, why: m.kind === 'label:status' ? 'ours never shows it: the oracle\'s own summary of the turn, which no Barkpark event carries' : 'ours never shows it' }); return; }
+    if (!o) { cases.push({ key, pass: false, oracle: m.t, why: 'ours never shows it' }); return; }
     const lag = Math.round(o.t - m.t);
     const why = [];
     if (Math.abs(lag) > W) why.push(`${lag > 0 ? 'late' : 'early'} by ${Math.abs(lag)} ms`);
