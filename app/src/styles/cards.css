@@ -1,0 +1,35 @@
+/* Cards in the conversation, each a row of its own (no bubble). Read on the oracle 1.0.3:
+   fixtures/states/oracle-ask-choice.json (articles 134-157) and -choice-answered (134-148).
+   Gated: Gate A card cases (scripts/lib/cards.mjs). */
+
+/* The row: 2 above and below like a turn, the card 12 below the bubble before it (group 137 at
+   460, the row at 446); a reply under a card starts 13 below it (choice-answered: 575 -> 588).
+   A card still waiting sits 8 higher above the composer than a bubble would (spacer 120, not 112). */
+.turn-card { padding: 14px 0 2px; display: flex; }
+.turn-card + .turn { padding-top: 11px; }
+.turn-ask { margin-bottom: 8px; }
+
+/* The question card: 480 wide (80% of the column), rgb 31 on the pane, radius 24, a 0.5 ring. */
+.qcard { width: min(80%, 560px, calc(100% - 82px)); border-radius: 24px; }
+.qcard-box { border-radius: 24px; background-color: var(--bg-raised); box-shadow: rgba(245, 245, 245, 0.1) 0 0 0 0.5px, rgba(245, 245, 245, 0) 0 2px 8px 0; }
+.ask-question { margin: 0; padding: 0; border: 0; min-width: 0; }
+/* The question: 15/22 at 600, 14 from the top, 16 a side, 4 above the choices. Dimmed once answered. */
+.qcard-head { padding: 14px 16px 4px; }
+.qcard-q { margin: 0; font-size: 15px; font-weight: 600; line-height: 22px; letter-spacing: 0.15px; }
+/* The stand-in face at 600 runs 2.2 narrower over the 25 letters of the captured question (191): +0.09 a letter. */
+.qcard-q span { letter-spacing: 0.24px; }
+.qcard-q.answered span { color: var(--ink-54); }
+/* The choices: 8 around them, a row each, 40 tall and 1 apart (508, 549, 590), radius 16. */
+.qcard-rows { margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 1px; }
+.ask-choice, .qcard-row { display: flex; align-items: flex-start; gap: 4px; min-height: 40px; padding: 7px; border: 1px solid transparent; border-radius: 16px; text-align: left; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; color: var(--ink); }
+/* Not read on the oracle: a press shows where it lands. */
+.ask-choice:hover:not(:disabled) { background-color: var(--wash-04); }
+/* The letter: a 24 square, radius 8, 12/16 at 500 in 66% ink on a 4% wash; filled blue once chosen. */
+.ask-letter { flex: none; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; border-top: 0.5px solid var(--wash-06); background-color: var(--wash-04); color: var(--ink-66); font-size: 12px; font-weight: 500; line-height: 16px; letter-spacing: 0.12px; }
+.ask-letter.picked { background-color: rgb(17, 109, 210); background-image: linear-gradient(rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0)); color: var(--ink); }
+/* The label: 6 in from the letter's gap, 2 down, 14/20. */
+.ask-choice-text { display: block; flex: 1; min-width: 0; min-height: 22px; padding: 2px 6px 0; }
+.ask-label { display: inline-block; vertical-align: top; font-size: 14px; line-height: 20px; letter-spacing: 0.14px; }
+.ask-note { display: block; font-size: 13px; line-height: 18px; color: var(--ink-66); }
+.ask-question:disabled .ask-choice { opacity: 0.5; }
+.qcard .ask-buttons { margin: 0; padding: 0 16px 14px; }

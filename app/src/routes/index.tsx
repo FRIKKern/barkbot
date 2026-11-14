@@ -2,7 +2,7 @@ import {createFileRoute, useRouter} from '@tanstack/react-router'
 import {useEffect, useState} from 'react'
 import {Shell} from '../components/Shell'
 import {Transcript} from '../components/Transcript'
-import {Composer, type Picture} from '../components/Composer'
+import {Composer, placeholderFor, type Picture} from '../components/Composer'
 import {computerOnline, loadChat, renameBot, startChat} from '../chat/api'
 import {useConversation} from '../chat/useConversation'
 
@@ -90,7 +90,7 @@ function Home() {
           </div>
         )
       }
-      composer={<Composer placeholder={`Message ${name}`} onSend={send} disabled={!chat.host || opening || !!waiting} />}
+      composer={<Composer placeholder={placeholderFor(name, convo.ask)} onSend={send} disabled={!chat.host || opening || !!waiting} />}
     />
   )
 }

@@ -25,8 +25,11 @@ export function bubbles(state) {
   });
 }
 
-// A paragraph's length is its own text plus its bold runs and code spans.
-const paraLength = (els, p) => (p.textLength ?? 0) + els.filter((e) => e.parent === p.i && (e.tag === 'strong' || e.tag === 'code')).reduce((n, e) => n + (e.textLength ?? 0), 0);
+// A mark's length is its own text plus what it holds (1.0.3 wraps a path's code in a press:
+// oracle-ask-choice, the code holds a span with the text). A paragraph's length is its own text
+// plus its bold runs and code spans.
+const markLength = (els, m) => (m.textLength ?? 0) + els.filter((e) => e.parent === m.i).reduce((n, e) => n + (e.textLength ?? 0), 0);
+const paraLength = (els, p) => (p.textLength ?? 0) + els.filter((e) => e.parent === p.i && (e.tag === 'strong' || e.tag === 'code')).reduce((n, e) => n + markLength(els, e), 0);
 
 /** A transcript as lengths, for a gate scene: [{role, paras: [{len, height, marks: [{tag, len}]}]}]. */
 export function transcriptOf(state) {
@@ -37,7 +40,7 @@ export function transcriptOf(state) {
       const marks = els.filter((e) => e.parent === p.i && (e.tag === 'strong' || e.tag === 'code')).sort((m, n) => m.box[1] - n.box[1] || m.box[0] - n.box[0]);
       // Its height too: placeholder words wrap differently from the real ones, and a bubble's
       // height decides where every bubble above it sits (the transcript is pinned at its end).
-      return { len: paraLength(els, p), height: p.box[3], ...(marks.length ? { marks: marks.map((m) => ({ tag: m.tag, len: m.textLength ?? 0 })) } : {}) };
+      return { len: paraLength(els, p), height: p.box[3], ...(marks.length ? { marks: marks.map((m) => ({ tag: m.tag, len: markLength(els, m) })) } : {}) };
     }),
   }));
 }

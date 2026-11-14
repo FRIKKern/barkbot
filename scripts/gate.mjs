@@ -18,6 +18,8 @@ import { collect } from './oracle/collect.mjs';
 import { controls, namedElements, claims } from './lib/controls.mjs';
 import { transcriptCases, transcriptKeys } from './lib/transcript.mjs';
 import { path, ROOT, items as allItems } from './lib/data.mjs';
+import { judged } from './lib/versions.mjs';
+import { cardCases, cardKeys } from './lib/cards.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -41,7 +43,7 @@ async function until(fn, ms, what) {
 }
 
 const ONLY = opt('only');
-const states = readdirSync(path('fixtures', 'states')).filter((f) => f.endsWith('.json') && (!ONLY || f === `${ONLY}.json`)).map((f) => JSON.parse(readFileSync(path('fixtures', 'states', f), 'utf8')));
+const states = readdirSync(path('fixtures', 'states')).filter((f) => f.endsWith('.json') && (!ONLY || f === `${ONLY}.json`)).map((f) => judged(JSON.parse(readFileSync(path('fixtures', 'states', f), 'utf8'))));
 if (!states.length) { console.error('Gate A: no captured states in fixtures/states: nothing to compare is a failure'); process.exit(1); }
 
 const kids = [];
@@ -80,12 +82,12 @@ for (const state of states) {
   const [w, h, dpr] = state.viewport;
   // A hover state scores only what the hover changed (fixture `changed`), not the screen again.
   const theirs = namedElements(state).filter(({ key }) => !state.changed || state.changed.includes(key));
-  // The transcript's look (lib/transcript.mjs), words left out: in every state but a hover's,
+  // The transcript's look (lib/transcript.mjs), words left out, and its cards (lib/cards.mjs): in every state but a hover's,
   // which scores only what the hover changes.
   const talk = !state.changed;
   // A captured state the app has no scene for yet scores 0: every case is open work.
   if ((await fetch(`${base}/gate/${state.id}`)).status === 404) {
-    const keys = [...theirs.map(({ key }) => key), ...(talk ? transcriptKeys(state) : [])];
+    const keys = [...theirs.map(({ key }) => key), ...(talk ? [...transcriptKeys(state), ...cardKeys(state)] : [])];
     report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: keys.length, pass: 0, scene: false, results: keys.map((key) => ({ key, pass: false, why: 'no scene' })) });
     inventory.states.push(inventoryOf(state, null));
     console.log(`Gate A · ${state.id} · 0/${keys.length} pass (no scene yet)`);
@@ -181,7 +183,7 @@ for (const state of states) {
     }
     return { key, pass: !why.length, why: why.join('; ') || undefined };
   });
-  if (talk) cases.push(...transcriptCases(state, ours));
+  if (talk) cases.push(...transcriptCases(state, ours), ...cardCases(state, ours));
   const pass = cases.filter((c) => c.pass).length;
   report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: cases.length, pass, results: cases });
 
