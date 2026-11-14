@@ -8,7 +8,8 @@
   "Prompt",
   "Composer actions",
   "Start voice input",
-  "Start voice chat"
+  "Start voice chat",
+  "Send message"
  ],
  "evidence": "app/src/components/Composer.tsx: Enter sends and clears at once, Shift+Enter adds a line, focus stays in Prompt, the voice button turns into Send while there is a draft (200 ms, scale .5). Attach files opens the file chooser and a paste attaches a picture (A1)."
 }

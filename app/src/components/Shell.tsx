@@ -2,7 +2,7 @@
 // oracle state fixtures/states/oracle-turn-1040.json (see styles.css). The bots' faces are
 // plain stand-ins of the same size (O2): never the oracle's mascot art.
 import {useEffect, useMemo, useRef, useState, type ReactNode} from 'react'
-import {Composer, Icon, placeholderFor} from './Composer'
+import {Composer, Icon, placeholderFor, type ComposerStart} from './Composer'
 import {Rail} from './Rail'
 import {Details} from './Details'
 import {Face} from './parts'
@@ -23,6 +23,8 @@ export type Scene = {
   overlay?: string
   /** The conversation on screen, as lengths (gate/transcripts.ts); `time` shows its time row. */
   transcript?: {bubbles: SceneRow[]; time?: string}
+  /** The composer as captured: words typed, pictures or a file waiting (gate scenes). */
+  composer?: ComposerStart
 }
 
 // The scene is where the page starts; what the person does from there (panel, tab, the bot they
@@ -98,7 +100,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
           ) : (
             <div className="transcript" />
           ))}
-        {composer ?? <Composer placeholder={placeholderFor(shown, talk?.ask)} />}
+        {composer ?? <Composer placeholder={placeholderFor(shown, talk?.ask)} start={start.composer} />}
       </main>
 
       <Details scene={{...scene, overlay: opened ?? scene.overlay}} name={shown} onRename={(n) => {

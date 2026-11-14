@@ -198,7 +198,7 @@ async function play(trace, sent) {
   const run = await page.evaluate(() => document.querySelector('[data-gate-b]').dataset.run);
   // The draft: placeholder words of the sent message's length (O2), typed as an input event.
   await page.evaluate((text) => { const p = document.querySelector('[role=textbox][aria-label=Prompt]'); p.focus(); document.execCommand('insertText', false, text); }, filler(sent));
-  await until(() => page.evaluate(() => !!document.querySelector('button[aria-label=Send]')), 5000, 'the draft');
+  await until(() => page.evaluate(() => !!document.querySelector('button[aria-label="Send message"]')), 5000, 'the draft');
   await page.evaluate(armAndSend);
   await wait(Math.max(...milestones.map((m) => m.t)) + 1500);
   // After the turn the replay drops the stream; the browser reconnects and gets the stored rows.

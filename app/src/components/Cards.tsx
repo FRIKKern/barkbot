@@ -116,7 +116,7 @@ export function PageMark() {
 }
 
 /** The name, its kind kept apart so a long name loses its middle, not its ending (span 148 and 149). */
-function FileName({name}: {name: string}) {
+export function FileName({name}: {name: string}) {
   const dot = name.lastIndexOf('.')
   const [base, ext] = dot > 0 ? [name.slice(0, dot), name.slice(dot)] : [name, '']
   return (
