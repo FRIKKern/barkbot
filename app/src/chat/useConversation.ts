@@ -15,6 +15,9 @@ export type Bubble = {
   images?: string[]
   /** Gate scenes only: each paragraph's height on the oracle, kept whatever the placeholder words do. */
   heights?: number[]
+  /** Files sent with the message, by name and size: shown as a file card above its words. Barkpark takes pictures
+   *  only today (task-b47b4dcd04d7e4de), so only gate scenes carry one yet. */
+  files?: {name: string; size: string}[]
   /** A question the person answered, shown as its card in place of a bubble (gate scenes; the live page clears an ask once answered). */
   answered?: {question: string; letter: string; label: string}
 }

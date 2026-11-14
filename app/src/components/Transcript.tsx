@@ -3,22 +3,34 @@
 import {Fragment, useLayoutEffect, useRef, type ReactNode} from 'react'
 import type {Answers, Ask, Bubble, Working} from '../chat/useConversation'
 import {filler} from '../chat/turn'
-import {AnsweredCard, QuestionCard} from './Cards'
+import {AnsweredCard, FileCard, PictureTiles, QuestionCard} from './Cards'
 
 /** A message as lengths only (O2): what a gate scene holds (gate/transcripts.ts). */
 export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; height?: number; marks?: {tag: 'strong' | 'code'; len: number}[]}[]}
 /** A card in a gate scene (scripts/lib/cards.mjs sceneCard): a question waiting (choices) or answered. */
-export type SceneCard = {card: 'question'; question: string; choices?: string[]; answered?: {letter: string; label: string}}
+export type SceneCard =
+  | {card: 'question'; question: string; choices?: string[]; answered?: {letter: string; label: string}}
+  | {card: 'file'; name: string; size: number}
+  | {card: 'pictures'; count: number}
 export type SceneRow = SceneBubble | SceneCard
 
 /** A scene's conversation: its bubbles and answered cards, and the question still waiting (the last row), as the live page holds them. */
 export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null} {
   const last = rows.at(-1)
-  const waiting = last && 'card' in last && last.choices ? last : null
+  const waiting = last && 'card' in last && last.card === 'question' && last.choices ? last : null
   const ask: Ask | null = waiting ? {id: 'scene-ask', what: 'ask you something', detail: null, answering: null, questions: [{question: waiting.question, header: null, multi: false, options: (waiting.choices ?? []).map((label) => ({label, description: null}))}]} : null
-  const bubbles = (waiting ? rows.slice(0, -1) : rows).flatMap((r, i): Bubble[] =>
-    'card' in r ? (r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question, ...r.answered}}] : []) : fromLengths([r]).map((b) => ({...b, key: `scene-${i}`})),
-  )
+  // A file or picture card belongs to the message under it, as the live page holds it.
+  let carried: Pick<Bubble, 'files' | 'images'> = {}
+  const bubbles = (waiting ? rows.slice(0, -1) : rows).flatMap((r, i): Bubble[] => {
+    if (!('card' in r)) {
+      const b = {...fromLengths([r])[0], key: `scene-${i}`, ...carried}
+      carried = {}
+      return [b]
+    }
+    if (r.card === 'file') carried = {...carried, files: [{name: r.name, size: filler(r.size)}]}
+    if (r.card === 'pictures') carried = {...carried, images: Array.from({length: r.count}, (_, j) => `scene:${j}`)}
+    return r.card === 'question' && r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question, ...r.answered}}] : []
+  })
   return {bubbles, ask}
 }
 
@@ -68,8 +80,10 @@ function Rich({text, heights}: {text: string; heights?: number[]}) {
   )
 }
 
-// Two bubbles of one speaker in a row close their corners where they meet; a card between them parts them (oracle-choice-answered).
+// Two bubbles of one speaker in a row close their corners where they meet; a card between them
+// parts them (oracle-choice-answered), and so do a message's tiles or file (its bubble is round: -pictures-sent 152).
 const joins = (a: Bubble | undefined, b: Bubble) => !!a && !a.answered && a.role === b.role
+const hasAttachments = (b?: Bubble) => !!b && ((b.images?.length ?? 0) > 0 || (b.files?.length ?? 0) > 0)
 
 const timeOf = (iso: string) => {
   const d = new Date(iso)
@@ -108,32 +122,38 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
             <time dateTime={startedAt}>{timeOf(startedAt)}</time>
           </div>
         )}
-        {bubbles.map((b, i) => b.answered ? (
-          // An answered question: a card in a row of its own, no bubble (oracle-choice-answered, article 134).
-          <div role="article" key={b.key} className="turn turn-card">
-            <AnsweredCard {...b.answered} />
-          </div>
-        ) : (
-          <div role="article" key={b.key} className={`turn turn-${b.role}${i > 0 && bubbles[i - 1].role !== b.role ? ' turn-change' : ''}${joins(bubbles[i - 1], b) ? ' group-prev' : ''}${joins(bubbles[i + 1], b) ? ' group-next' : ''}`}>
-            <div role="article" className={`bubble bubble-${b.role}`} data-role={b.role}>
-              <span className="sr-only">{b.role === 'user' ? 'You' : bot}</span>
-              {/* Pictures sent with the message. The oracle's picture grid is not read yet (A2): plain. */}
-              {b.images && b.images.length > 0 && (
-                <div className="bubble-images">
-                  {b.images.map((id) => {
-                    const src = picture?.(id)
-                    return src ? <img key={id} src={src} alt="Attached picture" loading="lazy" /> : null
-                  })}
+        {bubbles.map((b, i) => {
+          if (b.answered)
+            return (
+              // An answered question: a card in a row of its own, no bubble (oracle-choice-answered, article 134).
+              <div role="article" key={b.key} className="turn turn-card">
+                <AnsweredCard {...b.answered} />
+              </div>
+            )
+          const change = i > 0 && bubbles[i - 1].role !== b.role ? ' turn-change' : ''
+          const attached = hasAttachments(b)
+          return (
+            <Fragment key={b.key}>
+              {/* What the message carries, in a row of its own above its bubble (oracle-file-sent 131, -pictures-sent 128). */}
+              {attached && (
+                <div role="article" className={`turn turn-${b.role} turn-attached${change}`} data-role={b.role}>
+                  {b.files?.map((f, j) => <FileCard key={j} {...f} />)}
+                  {b.images && b.images.length > 0 && <PictureTiles ids={b.images} picture={picture} />}
                 </div>
               )}
-              {(b.text || !b.images?.length) && (
-                <div className="bubble-text">
-                  {b.role === 'assistant' ? <Rich text={b.text} heights={b.heights} /> : <p style={heightStyle(b.heights?.[0])}>{b.text}</p>}
+              {(b.text || !attached) && (
+                <div role="article" className={`turn turn-${b.role}${attached ? '' : change}${joins(bubbles[i - 1], b) && !attached ? ' group-prev' : ''}${joins(bubbles[i + 1], b) && !hasAttachments(bubbles[i + 1]) ? ' group-next' : ''}`}>
+                  <div role="article" className={`bubble bubble-${b.role}`} data-role={b.role}>
+                    <span className="sr-only">{b.role === 'user' ? 'You' : bot}</span>
+                    <div className="bubble-text">
+                      {b.role === 'assistant' ? <Rich text={b.text} heights={b.heights} /> : <p style={heightStyle(b.heights?.[0])}>{b.text}</p>}
+                    </div>
+                  </div>
                 </div>
               )}
-            </div>
-          </div>
-        ))}
+            </Fragment>
+          )
+        })}
         {/* The row waits for the bot's Working state (held); the status line below does not. */}
         {working && !working.held && (
           <div className={`working${working.leaving ? ' leaving' : ''}`} aria-hidden="true">

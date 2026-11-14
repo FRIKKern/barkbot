@@ -8,6 +8,8 @@ const AUTO_UPDATE = 'Owner decision 2026-11-14 (docs/decisions/0008): the oracle
 export const EXCEPTIONS = [
   { id: 'oracle-ask-choice', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
   { id: 'oracle-choice-answered', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
+  { id: 'oracle-file-sent', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
+  { id: 'oracle-pictures-sent', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
 ];
 
 export const exception = (id) => EXCEPTIONS.find((x) => x.id === id) ?? null;

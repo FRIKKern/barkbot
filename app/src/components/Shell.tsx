@@ -8,6 +8,7 @@ import {Details} from './Details'
 import {Face} from './parts'
 import {Overlay} from './overlays'
 import {Transcript, fromScene, type SceneRow} from './Transcript'
+import {scenePicture} from './Cards'
 
 export type Scene = {
   bots: {name: string; main?: boolean}[]
@@ -93,7 +94,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
         </header>
         {transcript ??
           (talk ? (
-            <Transcript bot={active} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} />
+            <Transcript bot={active} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} picture={scenePicture} />
           ) : (
             <div className="transcript" />
           ))}
