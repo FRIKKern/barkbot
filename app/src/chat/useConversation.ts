@@ -116,8 +116,10 @@ export const barkpark: Transport = {
   choose: (id, requestId, answers) => answerQuestion({data: {id, requestId, answers}}),
 }
 
-/** One conversation. `transport` must be stable (module-level or memoized): a new one reconnects. */
-export function useConversation(sessionId: string | null, transport: Transport = barkpark) {
+/** One conversation. `transport` must be stable (module-level or memoized): a new one reconnects.
+ *  `fleetState`: the bot's state as the page's one fleet stream says it (useFleet). Given, the
+ *  conversation opens no fleet stream of its own; left out, it opens `transport.fleet` (Gate B). */
+export function useConversation(sessionId: string | null, transport: Transport = barkpark, fleetState?: BotState) {
   const [bubbles, setBubbles] = useState<Bubble[]>([])
   const [working, setWorking] = useState<Working>(null)
   const [error, setError] = useState<string | null>(null)
@@ -128,6 +130,14 @@ export function useConversation(sessionId: string | null, transport: Transport =
   const leave = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [botState, setBotState] = useState<BotState>(null)
   const bot = useRef<BotState>(null) // the same, for event handlers
+  const outside = fleetState !== undefined
+  const given = useRef(fleetState ?? null)
+  given.current = fleetState ?? null
+  const take = useCallback((s: BotState) => {
+    bot.current = s
+    setBotState(s)
+    if (busy(s)) setWorking((w) => (w?.held ? {...w, held: false} : w))
+  }, [])
   // A new line is held while the bot is not Working; once shown it stays until the turn ends.
   const fresh = (w: Working) => !w || w.leaving
   const held = (w: Working) => (fresh(w) ? !busy(bot.current) : w!.held)
@@ -344,12 +354,8 @@ export function useConversation(sessionId: string | null, transport: Transport =
     es.addEventListener('exit', () => end())
     // The bot's state: Barkpark flips it when a turn starts and ends (Recorder → FleetHub). The
     // working row shows when the bot is Working, which the rail shows too (workingBots).
-    const fleet = transport.fleet ? new EventSource(transport.fleet(sessionId)) : null
-    const take = (s: BotState) => {
-      bot.current = s
-      setBotState(s)
-      if (busy(s)) setWorking((w) => (w?.held ? {...w, held: false} : w))
-    }
+    const fleet = transport.fleet && !outside ? new EventSource(transport.fleet(sessionId)) : null
+    if (outside) take(given.current)
     fleet?.addEventListener('snapshot', (e) => {
       const f = JSON.parse((e as MessageEvent).data) as {sessions?: {session_id: string; agent_state: BotState}[]}
       take(f.sessions?.find((x) => x.session_id === sessionId)?.agent_state ?? 'idle')
@@ -366,7 +372,11 @@ export function useConversation(sessionId: string | null, transport: Transport =
       if (leave.current) clearTimeout(leave.current)
       if (typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
     }
-  }, [sessionId, transport, land, show, resume, typingSoon, end])
+  }, [sessionId, transport, land, show, resume, typingSoon, end, outside, take])
+  // The page's fleet stream says this bot's state changed.
+  useEffect(() => {
+    if (outside && sessionId) take(fleetState ?? null)
+  }, [outside, sessionId, fleetState, take])
 
   /** Sends a message with what goes with it. Answers null once it is sent, or the plain words for why it was not
    *  (a file Barkpark does not take, a computer that cannot take files): then nothing was sent and the draft stays. */

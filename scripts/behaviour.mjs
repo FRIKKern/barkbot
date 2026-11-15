@@ -38,9 +38,11 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500. stub.to is the session each message or answer went to.
-const stub = { prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, fail: new Map(), shown: [], made: [], to: [], readKeys: [] };
+const stub = { prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, fail: new Map(), shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
+// The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
+const flip = (sid, state) => { stub.stateBy.set(sid, state); stub.fleets.forEach((res) => res.write(`event: state\ndata: ${JSON.stringify({ session_id: sid, agent_state: state })}\n\n`)); };
 // Per-account prefs, as Barkpark's (docs/contracts/user-prefs.md): GET, PUT, and PATCH add/remove on a list.
 const PREFS = '/w/default/p/default/v1/prefs/production/';
 // The bot store's writes, from stub.writes: a bot key's PUTs, the list's adds, and the legacy key.
@@ -88,8 +90,11 @@ await new Promise((ok) => httpServer((req, res) => {
     if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
       res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' }); res.write(': open\n\n');
       // As Barkpark: the stored rows first (a fresh page asks from 0), and the fleet's snapshot.
-      if (req.url === '/v1/chat/events') { if (stub.fleet) res.write(`event: snapshot\ndata: ${JSON.stringify({ sessions: stub.sessions.map((x) => ({ session_id: x.id, agent_state: stub.fleet })) })}\n\n`); }
-      else if (req.headers['last-event-id'] !== undefined) stub.rows.forEach((r) => res.write(`id: ${r.seq}\nevent: message\ndata: ${JSON.stringify(r)}\n\n`));
+      if (req.url === '/v1/chat/events') {
+        stub.fleetOpens++; stub.fleets.push(res); res.on('close', () => stub.fleets.splice(stub.fleets.indexOf(res), 1));
+        if (stub.fleet) res.write(`event: snapshot\ndata: ${JSON.stringify({ sessions: stub.sessions.map((x) => ({ session_id: x.id, agent_state: stub.stateBy.get(x.id) ?? stub.fleet })) })}\n\n`);
+      }
+      else if (req.headers['last-event-id'] !== undefined) (stub.rowsBy.get(req.url.split('/')[4]) ?? stub.rows).forEach((r) => res.write(`id: ${r.seq}\nevent: message\ndata: ${JSON.stringify(r)}\n\n`));
       if (req.url !== '/v1/chat/events') { stub.opened.push(req.url.split('/')[4]); stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
       return;
     }
@@ -505,6 +510,48 @@ else {
   const moved2 = stub.writes.slice(w0);
   check('one other bot already listed and a computer enrolled: today\'s bot still moves in, with its name and its conversation; the legacy key is never written', s.tiles.includes('Other') && s.tiles.includes('Legacy Name') && stub.prefs.get(KEY)?.name === 'Legacy Name' && stub.prefs.get(KEY)?.session_id === S1 && ids().join() === [OTHER, main].join() && moved2.filter((w) => w.key === 'barkbot.bot').length === 0, { tiles: s.tiles, record: stub.prefs.get(KEY), ids: ids(), moved2 });
   stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = [];
+
+  // ── Picking a bot shows its own conversation (task-92087f34f4eeeb43) ──────────────────────
+  // Two bots on one computer, each with its own session and its own rows. One fleet stream tells
+  // the page every bot's state; a tile says Working and Unread activity for its own bot only.
+  console.log('Behaviour · picking a bot (the live page, against the stand-in Barkpark)');
+  const SA = '00000000-0000-4000-8000-0000000000a1', SB = '00000000-0000-4000-8000-0000000000b1';
+  const ADA = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d', BEA = 'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e';
+  stub.sessions = [session(SA), session(SB)]; stub.rows = []; freshStore(); stub.fleet = 'idle'; stub.stateBy.clear();
+  stub.prefs.set('barkbot.bots', { ids: [ADA, BEA] });
+  stub.prefs.set(`barkbot.bot.${ADA}`, rec('Ada', HOST_ID, SA));
+  stub.prefs.set(`barkbot.bot.${BEA}`, rec('Bea', HOST_ID, SB));
+  stub.rowsBy.set(SA, [{ seq: 1, role: 'user', source_markdown: 'apples please' }, { seq: 2, role: 'assistant', source_markdown: 'Here are the apples.' }]);
+  stub.rowsBy.set(SB, [{ seq: 1, role: 'user', source_markdown: 'bananas please' }, { seq: 2, role: 'assistant', source_markdown: 'Here are the bananas.' }]);
+  await windowFocus(true);
+  const fleets0 = stub.fleetOpens;
+  const words = () => ev(() => document.querySelector('.transcript')?.textContent ?? '');
+  const labels = () => ev(() => [...document.querySelectorAll('.rail-list .rail-tile')].map((t) => t.getAttribute('aria-label')));
+  const tileOf = (n) => ev((n) => { const t = [...document.querySelectorAll('.rail-list .rail-tile')].find((x) => x.getAttribute('aria-label').split(', ')[0] === n); const r = t?.getBoundingClientRect(); return r ? [r.x + r.width / 2, r.y + r.height / 2] : null; }, n);
+  const pickTile = async (n, want) => { const at = await tileOf(n); if (at) await click(...at); await until(async () => (await live()).header === n && want.test(await words()), 10000, `${n}'s conversation`).catch(() => {}); await wait(500); return { header: (await live()).header, t: await words(), url: await ev(() => location.search) }; };
+  await showing('Ada');
+  await until(async () => /apples/.test(await words()), 10000, "Ada's rows").catch(() => {});
+  precondition("the live page opens on Ada with Ada's rows, and Bea's tile is there", /apples please/.test(await words()) && (await labels()).includes('Bea'), { labels: await labels(), words: await words(), other: stub.other });
+  let p = await pickTile('Bea', /bananas/);
+  check("picking Bea shows Bea's conversation and none of Ada's (control: Ada's rows before)", p.header === 'Bea' && /bananas please/.test(p.t) && /Here are the bananas/.test(p.t) && !/apples/.test(p.t) && stub.opened.includes(SB), { p, opened: stub.opened });
+  p = await pickTile('Ada', /apples/);
+  check("picking Ada again shows Ada's conversation and none of Bea's", p.header === 'Ada' && /apples please/.test(p.t) && /Here are the apples/.test(p.t) && !/bananas/.test(p.t), p);
+  check('two bots and two picks, one fleet stream', stub.fleetOpens - fleets0 === 1 && stub.fleets.length === 1, { opens: stub.fleetOpens - fleets0, open: stub.fleets.length });
+  // Ada is open. Bea works, then replies while the window has no focus. A click gives the
+  // headless page real focus, which focus emulation off does not take away; a fresh load does not
+  // have it (the unread rules above), so Ada's page is loaded again first.
+  await open(`${base}/?bot=${ADA}`); await until(async () => (await live()).header === 'Ada', 15000, "Ada's page").catch(() => {});
+  await windowFocus(false);
+  precondition("Ada's page is open and the window has no focus", (await live()).header === 'Ada' && !(await ev(() => document.hasFocus())), { header: (await live()).header });
+  flip(SB, 'working'); await until(async () => (await labels()).includes('Bea, Working'), 5000, "Bea's Working").catch(() => {});
+  const during = await labels();
+  flip(SB, 'idle'); await until(async () => (await labels()).some((l) => l.startsWith('Bea, Unread')), 5000, "Bea's dot").catch(() => {});
+  await wait(300);
+  const after = await labels();
+  check("Bea works while Ada is open: only Bea's tile says Working, then, with no focus, only Bea's says Unread activity", JSON.stringify(during) === JSON.stringify(['Ada', 'Bea, Working']) && JSON.stringify(after) === JSON.stringify(['Ada', 'Bea, Unread activity']) && (await live()).header === 'Ada', { during, after });
+  await windowFocus(true);
+  check('control: the window getting focus clears the dot', JSON.stringify(await labels()) === JSON.stringify(['Ada', 'Bea']), await labels());
+  stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore();
 
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
   const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
