@@ -16,9 +16,6 @@ export const Route = createFileRoute('/')({
 // The Voice card's values until Barkpark has a voice setting: what the oracle's fresh bot shows
 // (fixtures/states: Helix, 1x, Auto-detect).
 const VOICE = {voice: 'Helix', speed: '1x', language: 'Auto-detect'}
-// The page's one bot, by id (the rail knows bots by id, the name is its label). Its own record
-// and a real id come with the bot store (task-735e6ba3d04f2b2c).
-const BOT_ID = 'bot'
 
 function Home() {
   const chat = Route.useLoaderData()
@@ -31,14 +28,15 @@ function Home() {
   // The bot's name as renamed in the details panel: the composer and the transcript follow it at
   // once, and it is saved to Barkpark, so a reload shows it too (loadChat reads it back).
   const [name, setName] = useState(chat.bot)
-  const [renameError, setRenameError] = useState<string | null>(null)
+  // A plain line when the name or the conversation was not saved (the page goes on).
+  const [note, setNote] = useState<string | null>(null)
   const rename = async (_id: string, next: string) => {
     setName(next)
     try {
-      await renameBot({data: next})
-      setRenameError(null)
+      await renameBot({data: {id: chat.botId, name: next}})
+      setNote(null)
     } catch (e) {
-      setRenameError(`The new name was not saved: ${(e as Error).message}`)
+      setNote(`The new name was not saved: ${(e as Error).message}`)
     }
   }
 
@@ -53,7 +51,9 @@ function Home() {
     if (!sessionId && !opening) {
       setOpening(true)
       try {
-        setStarted(await startChat({data: chat.host.id}))
+        const made = await startChat({data: {hostId: chat.host.id, botId: chat.botId}})
+        setStarted(made)
+        if (!made.kept) setNote('This conversation was not saved to the bot, so a reload may not open it again.')
       } finally {
         setOpening(false)
       }
@@ -80,12 +80,12 @@ function Home() {
   const computer = online ? 'Asleep' : 'Unreachable'
   return (
     <Shell
-      scene={{bots: [{id: BOT_ID, name: chat.bot}], active: BOT_ID, panelOpen: true, computer, voice: VOICE}}
+      scene={{bots: chat.bots, active: chat.botId, panelOpen: true, computer, voice: VOICE}}
       onRenameBot={rename}
-      workingBots={convo.botState === 'working' ? [BOT_ID] : []}
+      workingBots={convo.botState === 'working' ? [chat.botId] : []}
       transcript={
         chat.host ? (
-          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? renameError ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
+          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? note ?? chat.notice ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
         ) : (
           <div className="transcript">
             <p className="chat-note">

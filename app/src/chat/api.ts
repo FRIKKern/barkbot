@@ -2,9 +2,14 @@
 // strips them from the browser bundle), so they may use server/barkpark.
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError} from '../server/barkpark'
+import {addId, legacyName, listIds, mainBotId, putBot, readBot, readBots, sessionOf, trusted, validName, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
-export type Chat = {bot: string; host: Host | null; sessionId: string | null; startedAt: string | null}
+/** A bot as the page gets it: its id and its name only (the record's pointers stay on the server). */
+export type ChatBot = {id: string; name: string}
+/** The bots in rail order, the open one (`botId`, `bot` its name), its computer and its conversation,
+ *  and a plain line when a preference could not be read or saved (`notice`). */
+export type Chat = {bots: ChatBot[]; botId: string; bot: string; host: Host | null; sessionId: string | null; startedAt: string | null; notice: string | null}
 
 type RawHost = {id: string; name: string; online: boolean; enrolled: boolean; revoked: boolean}
 type RawSession = {id: string; execution_target: string; execution_host_id?: string | null; inserted_at: string; status: string}
@@ -13,43 +18,90 @@ type RawSession = {id: string; execution_target: string; execution_host_id?: str
 const HOST_NAME = () => process.env.BARKBOT_HOST_NAME || 'BarkBot Mac'
 const BOT_NAME = () => process.env.BARKBOT_NAME || 'BarkBot'
 
-// The bot's name as the person last renamed it (the details panel's Bot name field). Barkpark has
-// no bot record yet, so it is a per-account pref (/v1/prefs, docs/contracts/user-prefs.md in
-// Barkpark) under the owner's own login. Unset, the bot is BARKBOT_NAME.
-// phase 1: one bot; moves to a barkbot.bot document when there are many.
-const PREF_KEY = 'barkbot.bot'
-const prefPath = () => {
-  const c = conf()
-  return `/w/${c.workspace}/p/${c.project}/v1/prefs/${encodeURIComponent(c.dataset)}/${PREF_KEY}`
-}
-
-// Reads the pref. phase 1: one bot; moves to a barkbot.bot document when there are many.
-async function savedName(): Promise<string | null> {
-  try {
-    const {value} = await bp<{value: {name?: unknown} | null}>(prefPath())
-    return typeof value?.name === 'string' && value.name.trim() ? value.name : null
-  } catch (e) {
-    // The name is not worth a broken page: say why and show the default one.
-    console.warn(`barkbot: could not read the saved bot name (${(e as Error).message}); showing ${BOT_NAME()}`)
-    return null
-  }
-}
-
 async function findHost(): Promise<Host | null> {
   const {hosts} = await bp<{hosts: RawHost[]}>(`/w/${conf().workspace}/v1/chat-hosts`)
   const h = hosts.find((x) => x.name === HOST_NAME() && x.enrolled && !x.revoked)
   return h ? {id: h.id, name: h.name, online: h.online} : null
 }
 
-/** The bot, its computer, and its conversation (the newest session on that computer). */
-export const loadChat = createServerFn({method: 'GET'}).handler(async (): Promise<Chat> => {
-  const [host, saved] = await Promise.all([findHost(), savedName()])
-  const bot = saved ?? BOT_NAME()
-  if (!host) return {bot, host: null, sessionId: null, startedAt: null}
+// The caller's own computers and sessions, as Barkpark lists them to the caller: what a stored
+// bot record is checked against (server/bots.ts trusted).
+async function ownHosts(): Promise<Host[]> {
+  const {hosts} = await bp<{hosts: RawHost[]}>(`/w/${conf().workspace}/v1/chat-hosts`)
+  return hosts.filter((x) => x.enrolled && !x.revoked).map((h) => ({id: h.id, name: h.name, online: h.online}))
+}
+async function ownSessions(): Promise<OwnSession[]> {
   const {sessions} = await bp<{sessions: RawSession[]}>('/v1/chat/sessions')
-  const mine = sessions.filter((s) => s.execution_target === 'registered_host' && s.execution_host_id === host.id)
-  mine.sort((a, b) => b.inserted_at.localeCompare(a.inserted_at))
-  return {bot, host, sessionId: mine[0]?.id ?? null, startedAt: mine[0]?.inserted_at ?? null}
+  return sessions.filter((s) => s.execution_target === 'registered_host')
+}
+
+// A preference that could not be read or saved is said in one plain line; the page goes on.
+const NOT_READ = 'Some of your bots could not be read from Barkpark, so this may not be all of them. Reload to try again.'
+const NOT_SAVED = 'Your bot could not be saved to Barkpark, so a new name or conversation may not be kept. Reload to try again.'
+const got = <T,>(p: Promise<T>, what: string): Promise<{ok: true; v: T} | {ok: false}> =>
+  p.then(
+    (v) => ({ok: true as const, v}),
+    (e) => {
+      console.warn(`barkbot: could not ${what} (${(e as Error).message})`)
+      return {ok: false as const}
+    },
+  )
+
+/** The bots, in rail order, and the open one's computer and conversation.
+ *  The first load after the store exists makes the Main Bot from today's state, additively: its id
+ *  is a UUID v5 of the computer's id (two tabs write the same keys), its name the legacy pref (or
+ *  BARKBOT_NAME when it is unset), its session the newest one on that computer (today's rule, used
+ *  this once). Only the new keys are written; the legacy barkbot.bot is never written or deleted.
+ *  A preference read or write that fails never fails the page: it shows what it could read, writes
+ *  nothing more, and says so (`notice`). A Main Bot record already there is kept, never written
+ *  over: a load whose list add failed is repaired by the next. */
+export const loadChat = createServerFn({method: 'GET'}).handler(async (): Promise<Chat> => {
+  const [hosts, ids, legacy] = await Promise.all([ownHosts(), got(listIds(), 'read the bots'), got(legacyName(), 'read the saved bot name')])
+  const host = hosts.find((h) => h.name === HOST_NAME()) ?? null
+  // Today's name: the legacy pref, else BARKBOT_NAME. If the read failed it is not known, so it is shown, never saved.
+  const todays = legacy.ok ? (legacy.v ?? BOT_NAME()) : BOT_NAME()
+  if (!host) {
+    // No computer: no record can be made (a bot names its computer). Today's name, nothing written.
+    return {bots: [{id: 'no-computer', name: todays}], botId: 'no-computer', bot: todays, host: null, sessionId: null, startedAt: null, notice: null}
+  }
+  const sessions = await ownSessions()
+  const newest = sessions.filter((s) => s.execution_host_id === host.id).sort((a, b) => b.inserted_at.localeCompare(a.inserted_at))[0]
+  const main: Bot = {id: mainBotId(host.id), name: todays, host_id: host.id, session_id: newest?.id ?? null, created_at: newest?.inserted_at ?? new Date().toISOString()}
+  // The Main Bot from what the caller itself can see, written nowhere.
+  const inMemory = {bot: main, session: newest ? ({is: 'open', session: newest} as const) : ({is: 'none'} as const)}
+  let rail: {bot: Bot; session: SessionCheck}[] = [inMemory]
+  let notice: string | null = null
+  if (!ids.ok) {
+    notice = NOT_READ
+  } else if (ids.v?.length) {
+    const r = await readBots(ids.v, hosts, sessions)
+    if (r.unread) notice = NOT_READ
+    // Every stored record dropped: the in-memory Main Bot, nothing written.
+    if (r.bots.length) rail = r.bots
+  } else if (!legacy.ok) {
+    // The move-in waits for a read of today's name that worked: a failed read is not "unset".
+    notice = NOT_READ
+  } else {
+    const there = await got(readBot(main.id), 'read the Main Bot')
+    const kept = there.ok && there.v ? trusted(main.id, there.v, hosts) : null
+    if (!there.ok) notice = NOT_READ
+    else if (kept) {
+      // Made by a load whose list add failed: keep it as it is now (it may be renamed), add its id.
+      const session = await sessionOf(kept, sessions)
+      if (session.is !== 'foreign') {
+        rail = [{bot: kept, session}]
+        if (!(await got(addId(kept.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
+      }
+    } else if (!there.v) {
+      // Nothing half-made: the id joins the list only after its record is whole.
+      if (!(await got(putBot(main), 'save the Main Bot')).ok || !(await got(addId(main.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
+    }
+    // A Main Bot key that is there but not well formed is never written over: in memory only.
+  }
+  const open = rail[0]
+  const session = open.session.is === 'open' ? open.session.session : null
+  const home = hosts.find((h) => h.id === open.bot.host_id) ?? host
+  return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice}
 })
 
 /** Is the bot's computer reachable right now? The page asks every few seconds: Barkpark accepts a
@@ -57,12 +109,26 @@ export const loadChat = createServerFn({method: 'GET'}).handler(async (): Promis
  *  without this a send looked like it went nowhere (seen live 2026-11-11). */
 export const computerOnline = createServerFn({method: 'GET'}).handler(async (): Promise<boolean> => (await findHost())?.online ?? false)
 
-/** A new conversation on the bot's computer. Claude starts in plan mode (the host's default). */
+/** A new conversation on the bot's computer, kept in the bot's record so a reload opens it again.
+ *  Claude starts in plan mode (the host's default). Only a record that is the caller's own, on that
+ *  computer, whose session is none or gone, is written; a session Barkpark could not be asked about
+ *  is kept. Once the conversation exists this never throws: `kept: false` says it was not saved. */
 export const startChat = createServerFn({method: 'POST'})
-  .validator((hostId: string) => hostId)
-  .handler(async ({data: hostId}) => {
-    const s = await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: hostId}})
-    return {sessionId: s.id, startedAt: s.inserted_at}
+  .validator((d: {hostId: string; botId: string}) => d)
+  .handler(async ({data}) => {
+    const s = await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: data.hostId}})
+    let kept = true
+    try {
+      const raw = await readBot(data.botId)
+      const bot = raw && trusted(data.botId, raw, await ownHosts())
+      const now = bot && bot.host_id === data.hostId ? await sessionOf(bot) : null
+      if (bot && now?.is === 'none') await putBot({...bot, session_id: s.id})
+      else if (now?.is === 'unsure') kept = false
+    } catch (e) {
+      console.warn(`barkbot: could not save the new conversation in its bot (${(e as Error).message})`)
+      kept = false
+    }
+    return {sessionId: s.id, startedAt: s.inserted_at, kept}
   })
 
 /** What a message names: a picture by its id, a text file or PDF by its id and its name. */
@@ -124,12 +190,15 @@ export const answerQuestion = createServerFn({method: 'POST'})
 /** Saves the bot's new name. Details never sends an empty one (it puts the old name back); this
  *  refuses one anyway, so no path can save a blank bot. */
 export const renameBot = createServerFn({method: 'POST'})
-  .validator((name: unknown) => {
-    if (typeof name !== 'string' || !name.trim() || name.length > 200) throw new Error('A bot name is 1 to 200 characters')
-    return name
+  .validator((d: {id: string; name: unknown}) => {
+    if (!validName(d.name)) throw new Error('A bot name is 1 to 200 characters')
+    return {id: d.id, name: d.name}
   })
-  .handler(async ({data: name}) => {
-    // Writes the pref. phase 1: one bot; moves to a barkbot.bot document when there are many.
-    await bp(prefPath(), {method: 'PUT', json: {value: {name}}})
-    return {name}
+  .handler(async ({data}) => {
+    // The bot's own key, and only a record that is the caller's own: nothing else is written.
+    const raw = await readBot(data.id)
+    const bot = raw && trusted(data.id, raw, await ownHosts())
+    if (!bot || (await sessionOf(bot)).is === 'foreign') throw new Error('This bot is not saved yet, so its name is not kept')
+    await putBot({...bot, name: data.name})
+    return {name: data.name}
   })
