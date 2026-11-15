@@ -504,7 +504,7 @@ else {
   w0 = stub.writes.length; s = await showing('Other');
   const moved2 = stub.writes.slice(w0);
   check('one other bot already listed and a computer enrolled: today\'s bot still moves in, with its name and its conversation; the legacy key is never written', s.tiles.includes('Other') && s.tiles.includes('Legacy Name') && stub.prefs.get(KEY)?.name === 'Legacy Name' && stub.prefs.get(KEY)?.session_id === S1 && ids().join() === [OTHER, main].join() && moved2.filter((w) => w.key === 'barkbot.bot').length === 0, { tiles: s.tiles, record: stub.prefs.get(KEY), ids: ids(), moved2 });
-  stub.sessions = []; freshStore(); stub.fail.clear();
+  stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = [];
 
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
   const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
