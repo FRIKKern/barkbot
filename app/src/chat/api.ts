@@ -9,8 +9,9 @@ export type Host = {id: string; name: string; online: boolean}
 /** A bot as the page gets it: its id and its name only (the record's pointers stay on the server). */
 export type ChatBot = {id: string; name: string}
 /** The bots in rail order, the open one (`botId`, `bot` its name), its computer and its conversation,
- *  and a plain line when a preference could not be read or saved (`notice`). */
-export type Chat = {bots: ChatBot[]; botId: string; bot: string; host: Host | null; sessionId: string | null; startedAt: string | null; notice: string | null}
+ *  a plain line when a preference could not be read or saved (`notice`), and each bot's conversation
+ *  by bot id (`sessions`: only sessions checked as the caller's own, for Working and Unread per tile). */
+export type Chat = {bots: ChatBot[]; botId: string; bot: string; host: Host | null; sessionId: string | null; startedAt: string | null; notice: string | null; sessions: Record<string, string>}
 
 type RawHost = {id: string; name: string; online: boolean; enrolled: boolean; revoked: boolean}
 type RawSession = {id: string; execution_target: string; execution_host_id?: string | null; inserted_at: string; status: string}
@@ -68,7 +69,7 @@ export const loadChat = createServerFn({method: 'GET'})
   const todays = legacy.ok ? (legacy.v ?? BOT_NAME()) : BOT_NAME()
   if (!host) {
     // No computer: no record can be made (a bot names its computer). Today's name, nothing written.
-    return {bots: [{id: 'no-computer', name: todays}], botId: 'no-computer', bot: todays, host: null, sessionId: null, startedAt: null, notice: null}
+    return {bots: [{id: 'no-computer', name: todays}], botId: 'no-computer', bot: todays, host: null, sessionId: null, startedAt: null, notice: null, sessions: {}}
   }
   const sessions = await ownSessions()
   const onHost = sessions.filter((s) => s.execution_host_id === host.id).sort((a, b) => b.inserted_at.localeCompare(a.inserted_at))
@@ -77,13 +78,16 @@ export const loadChat = createServerFn({method: 'GET'})
   const r = listed?.length ? await readBots(listed, hosts, sessions) : {bots: [], unread: 0}
   let notice: string | null = !ids.ok || r.unread ? NOT_READ : null
   let rail: {bot: Bot; session: SessionCheck}[] = r.bots
-  // Today's conversation: the newest on the computer, if it is surely no other bot's. Once bots are
-  // listed, one that could not be read may name it, so then none.
+  // Today's conversation: the newest on the computer, if it is surely no other bot's (task-b910d6ee3d466fd1).
+  // Sure only when every listed bot was read and kept: a dropped record, one that could not be read,
+  // or one beyond what a load reads may name it, and the pick is saved. Otherwise none.
+  const whole = listed !== null && listed.length <= READ_CAP && !r.unread && r.bots.length === listed.length
   const taken = new Set(r.bots.map(({bot}) => bot.session_id))
-  const today = listed && !r.unread ? onHost.find((s) => !taken.has(s.id)) : undefined
+  const today = whole ? onHost.find((s) => !taken.has(s.id)) : undefined
   const main: Bot = {id: mainBotId(host.id), name: todays, host_id: host.id, session_id: today?.id ?? null, created_at: today?.inserted_at ?? new Date().toISOString()}
   const withToday = {bot: main, session: today ? ({is: 'open', session: today} as const) : ({is: 'none'} as const)}
-  if (listed && !listed.includes(main.id)) {
+  // The move-in never makes the list longer than a load reads: at READ_CAP it waits, nothing written.
+  if (listed && !listed.includes(main.id) && listed.length < READ_CAP) {
     if (!legacy.ok) {
       // The move-in waits for a read of today's name that worked: a failed read is not "unset".
       notice = NOT_READ
@@ -116,7 +120,9 @@ export const loadChat = createServerFn({method: 'GET'})
   const open = rail.find((x) => x.bot.id === want) ?? rail[0]
   const session = open.session.is === 'open' ? open.session.session : null
   const home = hosts.find((h) => h.id === open.bot.host_id) ?? host
-  return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice}
+  // Each bot's conversation, for the fleet stream's Working and Unread per tile: only a session sessionOf opened.
+  const byBot = Object.fromEntries(rail.flatMap((x) => (x.session.is === 'open' ? [[x.bot.id, x.session.session.id]] : [])))
+  return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice, sessions: byBot}
 })
 
 /** Create in the New Bot dialog: a new bot on the enrolled computer, with an empty conversation

@@ -121,8 +121,9 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
 // the window does not have focus marks its bot unread, even the bot that is open; the window
 // getting focus clears every dot at once, whatever is open (Settings was). A reply that lands
 // in a focused window marks nothing (traces/2026-11-09-long-answer.json: no rail change).
-// A reply landing is a bot leaving `workingBots`.
-function useUnread(working: string[]) {
+// A reply landing is a bot leaving `workingBots`. The live page keeps its own too (routes/index.tsx),
+// so a bot's dot outlives a pick, which opens a fresh Shell.
+export function useUnread(working: string[]) {
   const [unread, setUnread] = useState<string[]>([])
   const was = useRef<string[]>([])
   const key = working.join('\n')
