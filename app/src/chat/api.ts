@@ -78,13 +78,16 @@ export const loadChat = createServerFn({method: 'GET'})
   const r = listed?.length ? await readBots(listed, hosts, sessions) : {bots: [], unread: 0}
   let notice: string | null = !ids.ok || r.unread ? NOT_READ : null
   let rail: {bot: Bot; session: SessionCheck}[] = r.bots
-  // Today's conversation: the newest on the computer, if it is surely no other bot's. Once bots are
-  // listed, one that could not be read may name it, so then none.
+  // Today's conversation: the newest on the computer, if it is surely no other bot's (task-b910d6ee3d466fd1).
+  // Sure only when every listed bot was read and kept: a dropped record, one that could not be read,
+  // or one beyond what a load reads may name it, and the pick is saved. Otherwise none.
+  const whole = listed !== null && listed.length <= READ_CAP && !r.unread && r.bots.length === listed.length
   const taken = new Set(r.bots.map(({bot}) => bot.session_id))
-  const today = listed && !r.unread ? onHost.find((s) => !taken.has(s.id)) : undefined
+  const today = whole ? onHost.find((s) => !taken.has(s.id)) : undefined
   const main: Bot = {id: mainBotId(host.id), name: todays, host_id: host.id, session_id: today?.id ?? null, created_at: today?.inserted_at ?? new Date().toISOString()}
   const withToday = {bot: main, session: today ? ({is: 'open', session: today} as const) : ({is: 'none'} as const)}
-  if (listed && !listed.includes(main.id)) {
+  // The move-in never makes the list longer than a load reads: at READ_CAP it waits, nothing written.
+  if (listed && !listed.includes(main.id) && listed.length < READ_CAP) {
     if (!legacy.ok) {
       // The move-in waits for a read of today's name that worked: a failed read is not "unset".
       notice = NOT_READ

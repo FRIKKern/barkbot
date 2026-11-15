@@ -509,6 +509,19 @@ else {
   w0 = stub.writes.length; s = await showing('Other');
   const moved2 = stub.writes.slice(w0);
   check('one other bot already listed and a computer enrolled: today\'s bot still moves in, with its name and its conversation; the legacy key is never written', s.tiles.includes('Other') && s.tiles.includes('Legacy Name') && stub.prefs.get(KEY)?.name === 'Legacy Name' && stub.prefs.get(KEY)?.session_id === S1 && ids().join() === [OTHER, main].join() && moved2.filter((w) => w.key === 'barkbot.bot').length === 0, { tiles: s.tiles, record: stub.prefs.get(KEY), ids: ids(), moved2 });
+  // Today's bot moving in late takes today's conversation only when it is surely no other bot's
+  // (task-b910d6ee3d466fd1): a record that is dropped, or one beyond what a load reads, may name it.
+  const S_NEW = '00000000-0000-4000-8000-0000000000e1', S_OLD = '00000000-0000-4000-8000-0000000000e0';
+  const DROPPED = '6e1f2a3b-4c5d-4e6f-8a7b-9c0d1e2f3a4b';
+  freshStore({ name: 'Legacy Name' }); stub.sessions = [{ ...session(S_OLD), inserted_at: '2026-11-15T08:00:00Z' }, { ...session(S_NEW), inserted_at: '2026-11-15T10:00:00Z' }];
+  stub.prefs.set('barkbot.bots', { ids: [DROPPED] }); stub.prefs.set(`barkbot.bot.${DROPPED}`, { name: '', host_id: HOST_ID, session_id: S_NEW, created_at: '2026-11-15T10:00:00Z' });
+  w0 = stub.writes.length; s = await showing('Legacy Name');
+  check('a dropped record naming the newest conversation on the computer: today\'s bot moves in with no conversation, and opens none', stub.prefs.has(KEY) && stub.prefs.get(KEY)?.session_id === null && !stub.opened.includes(S_NEW) && stub.writes.slice(w0).filter((w) => w.key === 'barkbot.bot').length === 0, { record: stub.prefs.get(KEY), opened: stub.opened });
+  const BEYOND = '7f2a3b4c-5d6e-4f7a-8b9c-0d1e2f3a4b5c', fifty = Array.from({ length: 50 }, () => crypto.randomUUID());
+  freshStore({ name: 'Legacy Name' });
+  stub.prefs.set('barkbot.bots', { ids: [...fifty, BEYOND] }); stub.prefs.set(`barkbot.bot.${BEYOND}`, rec('Beyond', HOST_ID, S_NEW));
+  w0 = stub.writes.length; s = await showing('Legacy Name');
+  check('a bot beyond the 50 a load reads, naming the newest conversation: today\'s bot is not saved with it, the list does not grow past 50, nothing is opened', !(stub.prefs.get(KEY)?.session_id === S_NEW) && ids().length === 51 && !stub.opened.includes(S_NEW) && stub.writes.slice(w0).length === 0, { record: stub.prefs.get(KEY) ?? null, ids: ids().length, opened: stub.opened, writes: stub.writes.slice(w0) });
   stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = [];
 
   // ── Picking a bot shows its own conversation (task-92087f34f4eeeb43) ──────────────────────
