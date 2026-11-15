@@ -14,6 +14,8 @@
 //   npm run turn:live -- --file     a text file with the message (A1): a made-up code in a file made for the run;
 //                                   the bot must reply with the code, and the message shows the file card, also
 //                                   after a reload. Writes parity/live/file.json.
+//   npm run turn:live -- --file --pdf  the same with a one-page PDF made here, its text the code. Writes the
+//                                   pdf key of parity/live/file.json (the text run keeps the rest).
 //   npm run turn:live -- --tool     a turn with a tool (T5): a file with a made-up code is put in the bot's folder, the
 //                                   bot reads it and replies with the code; the working line must name the tool.
 //                                   Writes parity/live/tool.json.
@@ -27,7 +29,7 @@
 // Passing writes parity/live/turn.json. Exits 1 if any step fails; then nothing is written.
 import { spawn, execFileSync } from 'node:child_process';
 import { createServer } from 'node:net';
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { deflateSync } from 'node:zlib';
@@ -45,10 +47,24 @@ const RESUME = args.includes('--resume');
 const APPROVE = args.includes('--approve');
 const PICTURE = args.includes('--picture');
 const FILE = args.includes('--file');
+const PDF = args.includes('--pdf');
 const QUESTION = args.includes('--question');
 const TOOL = args.includes('--tool');
 const MIDRELOAD = args.includes('--midreload');
 const REPLY_MS = Number(opt('reply-ms')) || 90000;
+// A one-page PDF whose only text is `line`, made here (Helvetica, no fonts embedded): the xref
+// table holds each object's byte offset, so the file is valid as written.
+function onePagePdf(line) {
+  const text = line.replace(/[\\()]/g, (c) => `\\${c}`);
+  const stream = `BT /F1 18 Tf 72 720 Td (${text}) Tj ET`;
+  const objs = ['<< /Type /Catalog /Pages 2 0 R >>', '<< /Type /Pages /Kids [3 0 R] /Count 1 >>', '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>', '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>', `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`];
+  let out = '%PDF-1.4\n';
+  const at = objs.map((o, i) => { const off = out.length; out += `${i + 1} 0 obj\n${o}\nendobj\n`; return off; });
+  const xref = out.length;
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n${at.map((o) => `${String(o).padStart(10, '0')} 00000 n \n`).join('')}`;
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return Buffer.from(out, 'latin1');
+}
 // A square png of one colour, made here: no file from anywhere else is ever sent.
 function squarePng(n, [r, g, b]) {
   const crcTable = Array.from({ length: 256 }, (_, i) => { let c = i; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
@@ -99,6 +115,9 @@ const seen = () => page.evaluate(() => {
 const open = async () => {
   await page.send('Page.navigate', { url: `${base}/` });
   await until(async () => (await seen()).prompt, 30000, 'the conversation page');
+  // And React has taken the page over: a file set on the chooser before that has no onChange to
+  // reach (a cold dev server: --file timed out waiting for the chip, 2026-11-14).
+  await until(() => page.evaluate(() => { const i = document.querySelector('.composer-wrap input[type=file]'); return document.readyState === 'complete' && !!i && Object.keys(i).some((k) => k.startsWith('__reactProps$')); }), 30000, 'the page to hydrate');
 };
 // History lands a little after the page: wait until the count holds still for a second.
 const settled = async () => {
@@ -205,9 +224,11 @@ try {
     // exists only in .cache for the run, never in the bot's folder. So a reply holding the code can
     // only come from the bot having read the attachment Barkpark passed to its computer.
     const code = `${['kiwi', 'plum', 'fig', 'lime'][Math.floor(Math.random() * 4)]}-${1000 + Math.floor(Math.random() * 9000)}`;
-    const name = `barkbot-note-${1000 + Math.floor(Math.random() * 9000)}.txt`;
+    // --pdf: the same code as the only text of a one-page PDF, so the bot must read the PDF itself.
+    const name = `barkbot-note-${1000 + Math.floor(Math.random() * 9000)}.${PDF ? 'pdf' : 'txt'}`;
     const file = path('.cache', name);
-    writeFileSync(file, `The code is ${code}.\n`);
+    const bytes = PDF ? onePagePdf(`The code is ${code}.`) : Buffer.from(`The code is ${code}.\n`);
+    writeFileSync(file, bytes);
     const before = await settled();
     if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
     await page.send('DOM.enable');
@@ -228,8 +249,12 @@ try {
     if ((await card()) !== 1) stopWith('our own message does not show the file card for the file that was sent');
     await open();
     await until(async () => (await card()) === 1, 20000, 'the file card to show again after a reload (from the stored row)');
-    record('file.json', { file_bytes: `The code is ${code}.\n`.length, reply_has_the_code: true, card_in_message: true, card_after_reload: true, reply_ms: r.ms });
-    console.log(`Live file: ok · the bot replied with the code in the file · the file card shows in the message and after a reload · ${(r.ms / 1000).toFixed(1)} s`);
+    const run = { file_bytes: bytes.length, reply_has_the_code: true, card_in_message: true, card_after_reload: true, reply_ms: r.ms };
+    // One record for both: the text run at the top, the PDF run under pdf; each run keeps the other's.
+    const kept = (() => { try { return JSON.parse(readFileSync(path('parity', 'live', 'file.json'), 'utf8')); } catch { return {}; } })();
+    if (PDF) { mkdirSync(path('parity', 'live'), { recursive: true }); writeFileSync(path('parity', 'live', 'file.json'), JSON.stringify({ ...kept, pdf: { ran: new Date().toISOString(), barkbot: commit(), ...run } }, null, 1) + '\n'); }
+    else record('file.json', { ...run, ...(kept.pdf ? { pdf: kept.pdf } : {}) });
+    console.log(`Live file${PDF ? ' (PDF)' : ''}: ok · the bot replied with the code in the file · the file card shows in the message and after a reload · ${(r.ms / 1000).toFixed(1)} s`);
     process.exit(0);
   }
   if (TOOL) {
