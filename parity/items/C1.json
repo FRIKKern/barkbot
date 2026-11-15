@@ -3,6 +3,7 @@
  "slice": "S3",
  "journey": "J05",
  "title": "Cancel a reply: it stops at once and nothing is left running",
- "status": "unknown",
- "evidence": "Not read on the oracle: where its cancel is, is unknown. What is known: in all four 0.79.3 turn traces the composer's round button says 'Send message' and then 'Start voice chat' for the whole reply; it never becomes a Stop. So no Stop is built into our composer (it would be a guess). The plumbing works, checked live 2026-11-13: POST /v1/chat/sessions/:id/interrupt stops a streaming reply in under 1 s, the partial text is stored, and the host has no child process left. Barkpark #25811 makes the stopped turn end as turn_completed/interrupted instead of an error. Needs: a capture of the oracle cancelling a reply (a send, so the owner's OK). Oracle 1.0.3, 2026-11-14 (scripts/oracle/cancel.mjs, parity/oracle/cancel.json): through a 53 s reply the pane showed no stop or cancel label and the reply landed whole; Escape closes the details panel. The oracle has no cancel to copy."
+ "status": "open",
+ "evidence": "Finding: the oracle has no cancel. 0.79.3: in all four turn traces the composer's round button says Send message, then Start voice chat for the whole reply; it never becomes a Stop. 1.0.3, 2026-11-14 (scripts/oracle/cancel.mjs, parity/oracle/cancel.json): through a 53 s reply no stop or cancel label showed and the reply landed whole; Escape closes the details panel. So no Stop is built: there is nothing to copy. The plumbing works, checked live 2026-11-13: POST /v1/chat/sessions/:id/interrupt stops a streaming reply in under 1 s, the partial text is stored, the host has no child process left; Barkpark #25811 ends the stopped turn as turn_completed/interrupted. Needs the owner's decision: drop J05 from phase 1 (the oracle has no cancel), or allow a Stop of our own design, which breaks 1:1 (decision 0005).",
+ "gate": null
 }

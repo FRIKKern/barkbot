@@ -3,5 +3,7 @@
  "slice": "S7",
  "journey": "J12",
  "title": "First run: greeting, naming, a 'Renamed to' line",
- "status": "unknown"
+ "status": "partial",
+ "gate": "behaviour: 15 rename rules (scripts/behaviour.mjs: 11 on the name field, traced on the oracle in traces/2026-11-09-rename.json, and 4 against the stand-in Barkpark: writes once, a reload keeps it)",
+ "evidence": "Naming works: the details panel's Bot name renames the bot, saved to Barkpark as a pref (chat/api.ts renameBot), and the header, rail tile and placeholder follow. Missing: the first-run greeting and the \"Renamed to …\" line. Neither is built, and neither was ever captured on the oracle (needs a new bot's first run on the oracle, recorded as a Gate B trace: a new bot and sends, the owner's; none left)."
 }

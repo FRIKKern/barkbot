@@ -7,6 +7,6 @@
  "controls": [
   "Bot's computer"
  ],
- "gate": "Gate A: Bot's computer and Asleep pass in oracle-turn-1040",
- "evidence": "Details.tsx; only the asleep state is captured. Left: waking up, unreachable, working, the breathing zzz, and the host heartbeat"
+ "gate": "Gate A: Bot's computer passes in oracle-turn-1040, main-1280, -1600, -2000 and settings states, Asleep in oracle-turn-1040; behaviour 2 rules (Unreachable, and back)",
+ "evidence": "Details.tsx; the card's state comes from Barkpark's host record, asked every 5 s (chat/api.ts computerOnline; routes/index.tsx): online reads Asleep, offline reads Unreachable and the conversation says why (behaviour: \"the computer stops: within 10 s the card says Unreachable\", \"the computer comes back\"). Only Asleep is captured on the oracle, so Unreachable's look is ours. Missing: waking up and working (not built: ours stays Asleep while the bot works), the breathing zzz, and captures of the oracle's card waking, unreachable and working (its computer stopped and started, and a send for working: the owner's, and no sends are left)."
 }

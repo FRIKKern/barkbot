@@ -3,5 +3,6 @@
  "slice": "S6",
  "journey": null,
  "title": "The Claude token never reaches Barkpark: grep of DB and logs is empty",
- "status": "open"
+ "status": "open",
+ "evidence": "Not started. Needs the owner: read access to Barkpark's production database and logs, to grep them for the Claude token."
 }

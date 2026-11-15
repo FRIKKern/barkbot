@@ -8,5 +8,5 @@
   "Share"
  ],
  "gate": "Gate A: Share (control and label) passes in all five frame states; oracle-main-880: the compact Share (36 x 36 icon) passes",
- "evidence": "Shell.tsx + convo.css. Left: the sidebar toggle shows on hover, which no capture holds yet; Share compacts to its icon in a conversation column under 552 (convo.css container query)"
+ "evidence": "Shell.tsx + convo.css: Share, and its compact form (a 36 x 36 icon) in a conversation column under 552 (convo.css container query; oracle-main-880). Missing: the sidebar toggle that shows on hover. No capture holds it (needs a look-only hover capture of the top bar on the oracle), so it is not built."
 }
