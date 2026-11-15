@@ -10,14 +10,18 @@ import {Overlay} from './overlays'
 import {Transcript, fromScene, type SceneRow} from './Transcript'
 import {scenePicture} from './Cards'
 
+/** A bot as the page knows it: by its id; the name is only its label, so two bots may share one. */
+export type SceneBot = {id: string; name: string; main?: boolean}
+
 export type Scene = {
-  bots: {name: string; main?: boolean}[]
+  bots: SceneBot[]
+  /** The open bot's id. */
   active?: string
   panelOpen: boolean
   computer?: string
   voice?: {voice: string; speed: string; language: string}
   tab?: 'activity' | 'library'
-  /** Each bot's last message, shown in its chat preview on hover. Placeholder text in scenes (O2). */
+  /** Each bot's last message by bot id, shown in its chat preview on hover. Placeholder text in scenes (O2). */
   previews?: Record<string, string>
   /** An open menu, picker or dialog, by name (components/overlays). */
   overlay?: string
@@ -29,17 +33,18 @@ export type Scene = {
 
 // The scene is where the page starts; what the person does from there (panel, tab, the bot they
 // pick in the rail) is held here, so the live page and the gate share one behaviour.
-// `onPickBot` tells the page which bot is now active, so it can load that bot's conversation.
-// `onRenameBot` tells it a bot's new name (for a composer the page passes in, and for saving it).
+// Bots are known by id everywhere: picking, renames, Working and Unread. The name is the label.
+// `onPickBot` tells the page which bot (its id) is now active, so it can load that bot's conversation.
+// `onRenameBot` tells it a bot's id and new name (for a composer the page passes in, and for saving it).
 // A window under 800 closes the details panel by itself, and widening it again leaves it closed
 // (measured on the oracle: 790 closed, 800 open; oracle-main-790, -800).
 const NARROW = '(max-width: 799.98px)'
 
-// `workingBots`: the bots whose run is in progress, from the chat stream (the same signal as the
+// `workingBots`: the ids of the bots whose run is in progress, from the chat stream (the same signal as the
 // transcript's working row; both flip at the same ms in traces say-hi, say-hi-2, storage).
-// `unreadBots`: bots the page itself marks unread; Shell adds its own by the oracle's rule
+// `unreadBots`: ids of bots the page itself marks unread; Shell adds its own by the oracle's rule
 // (useUnread below).
-export function Shell({scene: start, transcript, composer, onPickBot, onRenameBot, workingBots = [], unreadBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (name: string) => void; onRenameBot?: (bot: string, name: string) => void; workingBots?: string[]; unreadBots?: string[]}) {
+export function Shell({scene: start, transcript, composer, onPickBot, onRenameBot, workingBots = [], unreadBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (id: string) => void; onRenameBot?: (id: string, name: string) => void; workingBots?: string[]; unreadBots?: string[]}) {
   const [panelOpen, setPanelOpen] = useState(start.panelOpen)
   const [picked, setPicked] = useState<string | undefined>(undefined)
   // The overlay that is up, whether the scene holds it or a click opened it (Overlay's
@@ -62,14 +67,14 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
   const talk = useMemo(() => (start.transcript ? fromScene(start.transcript.bubbles) : null), [start.transcript])
   const unread = useUnread(workingBots)
   const active = scene.active ?? ''
-  // A bot's name as the person renamed it in the details panel. On Enter the header pill, the
-  // rail tile's label and the composer's "Message <name>" all follow in the same frame
+  // A bot's name as the person renamed it in the details panel, by the bot's id. On Enter the header
+  // pill, the rail tile's label and the composer's "Message <name>" all follow in the same frame
   // (traces/2026-11-09-rename.json and the lead's re-run on oracle/focus-bot-name).
   const [names, setNames] = useState<Record<string, string>>({})
-  const shown = names[active] ?? active
-  const pick = (name: string) => {
-    setPicked(name)
-    onPickBot?.(name)
+  const shown = names[active] ?? scene.bots.find((b) => b.id === active)?.name ?? ''
+  const pick = (id: string) => {
+    setPicked(id)
+    onPickBot?.(id)
   }
   return (
     <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-instant={instant || undefined}>
@@ -96,7 +101,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
         </header>
         {transcript ??
           (talk ? (
-            <Transcript bot={active} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} picture={scenePicture} />
+            <Transcript bot={shown} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} picture={scenePicture} />
           ) : (
             <div className="transcript" />
           ))}

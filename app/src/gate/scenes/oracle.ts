@@ -3,7 +3,8 @@ import {transcripts} from '../transcripts'
 
 // The oracle bot's screen as captured (fixtures/states/oracle-turn-1040.json): the base most scenes start from.
 export const oracle: Scene = {
-  bots: [{name: 'Grookie', main: true}, {name: 'Oracle'}],
+  // Ids are the stand-in names: a scene's bots are labels only (O2); the live page's ids are its own.
+  bots: [{id: 'Grookie', name: 'Grookie', main: true}, {id: 'Oracle', name: 'Oracle'}],
   active: 'Oracle',
   panelOpen: true,
   computer: 'Asleep',
