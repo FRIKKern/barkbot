@@ -395,7 +395,7 @@ else {
   await until(() => stub.sent.length > shut0, 10000, 'the message to reach the stand-in').catch(() => {});
   const newSid = stub.made.at(-1), madeOn = stub.sessions.find((x) => x.id === newSid)?.execution_host_id;
   check('a bot whose conversation was archived keeps its name and opens none; the next message starts a fresh one on its computer and saves its id in the bot', shut.header === 'Renamed Later' && shut.opened.length === 0 && !!newSid && madeOn === HOST_ID && stub.to.at(-1) === newSid && stub.prefs.get(KEY)?.session_id === newSid && stub.prefs.get(KEY)?.name === 'Renamed Later', { shut, newSid, madeOn, to: stub.to.slice(-1), record: stub.prefs.get(KEY) });
-  check('the Main Bot\'s new conversation names no bot folder: it works in the computer\'s shared root, as today\'s bot always has', !!newSid && stub.bodies.find((x) => x.id === newSid) && !('bot_folder' in stub.bodies.find((x) => x.id === newSid).body), { body: stub.bodies.find((x) => x.id === newSid) });
+  check('the Main Bot\'s new conversation names no bot folder: it works in the computer\'s shared root, as today\'s bot always has', !!newSid && stub.bodies.findLast((x) => x.id === newSid) && !('bot_folder' in stub.bodies.findLast((x) => x.id === newSid).body), { body: stub.bodies.findLast((x) => x.id === newSid) });
   stub.prefs.set(KEY, rec('Renamed Later', HOST_ID, '00000000-0000-4000-8000-0000000000d9'));
   w0 = stub.writes.length; s = await showing('Renamed Later');
   check('a bot whose conversation Barkpark does not know (404) keeps its name, opens none and writes nothing', s.header === 'Renamed Later' && stub.opened.length === 0 && since(w0).length === 0, { header: s.header, opened: stub.opened, writes: since(w0) });
@@ -439,7 +439,7 @@ else {
   s = await showing('Kept Name');
   const recordReads = stub.readKeys.slice(r0).filter((k) => k.startsWith('barkbot.bot.')).length, tiles = s.tiles.filter((t) => t === 'Kept Name' || /^Bot \d+$/.test(t));
   check('one page load reads at most 50 bot records: the first 50 in the list are shown, the rest stay in the list untouched', recordReads === 50 && tiles.length === 50 && tiles.at(-1) === 'Bot 48' && ids().length === 61 && since(w0).length === 0, { recordReads, tiles: tiles.length, last: tiles.at(-1), ids: ids().length, writes: since(w0) });
-  stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = []; stub.shown = [];
+  stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = []; stub.shown = []; stub.bodies = [];
 
   // The bot's computer stops and comes back while the page is open (seen live 2026-11-11: a
   // message sent to a stopped computer showed no reply and no reason).
@@ -488,7 +488,7 @@ else {
   const pipSession = stub.made.at(-1);
   check('Pip\'s first message makes its one conversation on the computer, saves it in Pip\'s record, and goes there', stub.made.length === pipMade0 + 1 && stub.prefs.get(`barkbot.bot.${pipId}`)?.session_id === pipSession && stub.to.at(-1) === pipSession, { made: stub.made.slice(pipMade0), record: stub.prefs.get(`barkbot.bot.${pipId}`), to: stub.to.slice(-1) });
 
-  const pipBody = stub.bodies.find((x) => x.id === pipSession)?.body;
+  const pipBody = stub.bodies.findLast((x) => x.id === pipSession)?.body;
   check('a made bot\'s first conversation asks for its own folder: bot- and the first 8 hex of its id, one segment Barkpark takes', pipBody?.bot_folder === `bot-${pipId.slice(0, 8)}` && /^[a-z0-9][a-z0-9-]{0,39}$/.test(pipBody.bot_folder) && pipBody.provider === 'claude' && pipBody.execution_target === 'registered_host', { pipBody, pipId });
   // A computer whose chat host cannot run a bot in its folder: a plain line, the draft kept, never sent without the folder.
   await openDialog(); await typeName('Fern'); await press('Create');
