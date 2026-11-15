@@ -328,7 +328,13 @@ else {
   const session = (id, hostId = HOST_ID) => ({ id, execution_target: 'registered_host', execution_host_id: hostId, inserted_at: '2026-11-15T09:00:00Z', status: 'active' });
   const ids = () => stub.prefs.get('barkbot.bots')?.ids ?? [];
   const botKeys = () => [...stub.prefs.keys()].filter((k) => k.startsWith('barkbot.bot.'));
-  const showing = async (want) => { stub.opened = []; await open(`${base}/`); await until(async () => (await live()).header === want, 15000, `the page to show "${want}"`).catch(() => {}); await wait(500); return live(); };
+  // A page that fails to load (a 500) is a failed rule below, not a crash here.
+  const showing = async (want) => {
+    stub.opened = [];
+    try { await open(`${base}/`); } catch {}
+    await until(async () => (await live()).header === want, 15000, `the page to show "${want}"`).catch(() => {}); await wait(500);
+    return live().catch(() => ({ header: null, tiles: [], rect: null }));
+  };
   stub.sessions = [session(S1)]; stub.rows = [];
   freshStore({ name: 'Legacy Name' }); let w0 = stub.writes.length;
   s = await showing('Legacy Name');
