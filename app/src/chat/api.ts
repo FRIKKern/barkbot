@@ -3,7 +3,7 @@
 import {randomUUID} from 'node:crypto'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError} from '../server/barkpark'
-import {addId, botFolder, dropBot, legacyName, listIds, mainBotId, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
+import {addId, botFolder, dropBot, legacyName, listIds, mainBotId, NO_MESSAGES, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
 /** A bot as the page gets it: its id and its name only (the record's pointers stay on the server). */
@@ -171,6 +171,7 @@ export const startChat = createServerFn({method: 'POST'})
   .handler(async ({data}) => {
     // A bot made with Create works in its own folder on the computer; the Main Bot in the shared root.
     const folder = botFolder(data.botId, data.hostId)
+    if (folder !== null && typeof folder === 'object') throw new Error(folder.refused)
     const s = await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: data.hostId, ...(folder ? {bot_folder: folder} : {})}})
     let kept = true
     try {
@@ -194,6 +195,16 @@ export type AttachmentRef = string | {id: string; name: string}
  *  for a bot's own folder, a chat host too old to run a bot in its folder), is answered as
  *  `refused`, not thrown: the page says so in a plain line and keeps the draft. It is never sent
  *  again without the folder: that would run the bot in the computer's shared root. */
+/** Whether Barkpark shows this conversation as made with a bot folder. A failed read: no. */
+async function askedForFolder(id: string): Promise<boolean> {
+  try {
+    const s = await bp<{bot_folder?: unknown}>(`/v1/chat/sessions/${encodeURIComponent(id)}?since=${NO_MESSAGES}`)
+    return typeof s.bot_folder === 'string' && s.bot_folder !== ''
+  } catch {
+    return false
+  }
+}
+
 export const sendMessage = createServerFn({method: 'POST'})
   .validator((d: {id: string; content: string; attachments?: AttachmentRef[]}) => d)
   .handler(async ({data}): Promise<{accepted: true} | {refused: string}> => {
@@ -203,7 +214,9 @@ export const sendMessage = createServerFn({method: 'POST'})
       await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`, {method: 'POST', json})
     } catch (e) {
       if (e instanceof BarkparkError && e.status === 422 && e.code === 'host_cannot_receive_attachments') return {refused: 'host_cannot_receive_attachments'}
-      if (e instanceof BarkparkError && e.status === 422 && e.code === 'chat_unsupported') return {refused: 'chat_unsupported'}
+      // chat_unsupported is Barkpark's shared code (a revoked host, a provider not ready, …): it is
+      // the folder only when this conversation asked for one; otherwise it goes on as any failure.
+      if (e instanceof BarkparkError && e.status === 422 && e.code === 'chat_unsupported' && (await askedForFolder(data.id))) return {refused: 'chat_unsupported'}
       throw e
     }
     return {accepted: true}
