@@ -38,7 +38,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500. stub.to is the session each message or answer went to.
-const stub = { prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, fail: new Map(), shown: [], made: [], to: [], readKeys: [] };
+const stub = { prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, fail: new Map(), shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // Per-account prefs, as Barkpark's (docs/contracts/user-prefs.md): GET, PUT, and PATCH add/remove on a list.
@@ -61,7 +61,7 @@ await new Promise((ok) => httpServer((req, res) => {
       if (req.method === 'GET') { stub.reads++; stub.readKeys.push(key); return failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got(); }
       const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing });
       if (failing) return json(failing, { error: { code: 'internal', message: 'the stand-in fails this write' } });
-      if (req.method === 'PUT') { stub.prefs.set(key, b.value); return got(); }
+      if (req.method === 'PUT') { stub.prefs.set(key, b.value); return stub.createDelay ? setTimeout(got, stub.createDelay) : got(); }
       if (req.method === 'DELETE') { stub.prefs.delete(key); return got(); }
       if (req.method === 'PATCH') {
         const v = { ...(stub.prefs.get(key) ?? {}) }; const list = Array.isArray(v[b.field]) ? v[b.field] : [];
@@ -80,9 +80,10 @@ await new Promise((ok) => httpServer((req, res) => {
       const id = decodeURIComponent(req.url.split('?')[0].split('/')[4]); stub.shown.push(id); const x = stub.sessions.find((y) => y.id === id);
       return x ? json(200, { archived_at: null, ...x, messages: [] }) : json(404, { error: { code: 'not_found', message: 'chat session not found' } });
     }
+    // A new conversation on a computer, as Barkpark. `createDelay` holds the answer (Create's Creating…).
     if (req.url === '/v1/chat/sessions' && req.method === 'POST') {
       const b = JSON.parse(body); const x = { id: `00000000-0000-4000-8000-${String(900000000000 + stub.made.length)}`, execution_target: b.execution_target, execution_host_id: b.execution_host_id, inserted_at: new Date().toISOString(), status: 'active' };
-      stub.made.push(x.id); stub.sessions.push(x); return json(201, x);
+      stub.made.push(x.id); stub.sessions.push(x); return setTimeout(() => json(201, x), stub.createDelay);
     }
     if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
       res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' }); res.write(': open\n\n');
@@ -404,6 +405,7 @@ else {
   let status = (await fetch(`${base}/`)).status;
   s = await showing('Legacy Name');
   check('a failed read of the bot list: the page still opens, on today\'s bot from memory, says so in one plain line, and writes nothing', status === 200 && s.header === 'Legacy Name' && /could not be read/.test((await alertLine()) ?? '') && since(w0).length === 0, { status, header: s.header, alert: await alertLine(), writes: since(w0) });
+  check('… and, the store being there, it opens no conversation: the newest one on the computer may be another bot\'s', stub.opened.length === 0, { opened: stub.opened });
 
   stub.fail.clear(); freshStore({ name: 'Legacy Name' }); stub.fail.set(`PUT ${KEY}`, 500); w0 = stub.writes.length;
   status = (await fetch(`${base}/`)).status;
@@ -433,6 +435,77 @@ else {
 
   // The bot's computer stops and comes back while the page is open (seen live 2026-11-11: a
   // message sent to a stopped computer showed no reply and no reason).
+  // ── Create makes a bot (task-b7245cbd7634c631; traces/2026-11-08-create-oracle.json) ──────
+  console.log('Behaviour · Create makes a bot (the live page, against the stand-in Barkpark)');
+  stub.sessions = [session(S1)]; stub.rows = []; freshStore();
+  await showing('BarkBot');
+  const pinned = () => ev(() => [...document.querySelectorAll('.rail-list .rail-tile')].map((t) => t.getAttribute('aria-label')));
+  const dialog = () => ev(() => !!document.querySelector('.dialog.new-bot'));
+  const openDialog = async () => { const at = await ev(() => { const r = document.querySelector('button[aria-label="New Bot"]').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }); await click(...at); await until(dialog, 5000, 'the New Bot dialog').catch(() => {}); };
+  const press = async (label) => { const at = await ev((l) => { const b = [...document.querySelectorAll('.dialog.new-bot button')].find((x) => x.textContent.trim() === l || x.getAttribute('aria-label') === l); const r = b?.getBoundingClientRect(); return r ? [r.x + r.width / 2, r.y + r.height / 2] : null; }, label); if (at) await click(...at); };
+  const typeName = async (t) => { await ev(() => document.querySelector('.new-bot-name').focus()); await page.send('Input.insertText', { text: t }); await wait(30); };
+  const w1 = stub.writes.length, c1 = stub.made.length, railBefore = await pinned();
+  await openDialog(); await key('Escape'); await wait(200);
+  await openDialog(); await press('Close dialog'); await wait(200);
+  await openDialog(); await typeName('Pip'); await press('Cancel'); await wait(200);
+  await openDialog(); await typeName('   '); await press('Create'); await key('Enter'); await wait(300);
+  const quiet = stub.writes.slice(w1);
+  check('Cancel, Close dialog, Escape and Create with only spaces write nothing (control: the next rule\'s Create writes)', quiet.length === 0 && stub.made.length === c1 && JSON.stringify(await pinned()) === JSON.stringify(railBefore), { quiet, created: stub.made.slice(c1), railBefore });
+  await key('Escape'); await wait(200);
+  // The real Create. Barkpark's answer is held 400 ms, so the label in flight can be seen.
+  stub.createDelay = 400;
+  await openDialog(); await typeName('Pip');
+  await ev(() => { window.__tileAt = null; const t0 = performance.now(); window.__t0 = t0; new MutationObserver((_, o) => { if ([...document.querySelectorAll('.rail-tile')].some((t) => t.getAttribute('aria-label') === 'Pip')) { window.__tileAt = performance.now() - t0; o.disconnect(); } }).observe(document.body, { subtree: true, childList: true, attributes: true }); });
+  const w2 = stub.writes.length;
+  await press('Create'); await wait(150);
+  const label = await ev(() => [...document.querySelectorAll('.dialog.new-bot button')].map((b) => b.textContent.trim()).find((t) => /^Creat/.test(t)) ?? null);
+  await until(async () => (await live()).header === 'Pip', 10000, 'the new bot to open').catch(() => {});
+  await wait(500);
+  stub.createDelay = 0;
+  const pipId = await ev(() => new URLSearchParams(location.search).get('bot'));
+  const made2 = stub.writes.slice(w2);
+  const railAfter = await pinned(), tileAt = await ev(() => window.__tileAt);
+  const empty = await ev(() => document.querySelectorAll('.bubble').length === 0);
+  check('Create with a name adds one tile at the end of Pinned Bots and opens that bot\'s empty conversation', railAfter.length === railBefore.length + 1 && railAfter.at(-1) === 'Pip' && (await live()).header === 'Pip' && empty && !(await dialog()), { before: railBefore, after: railAfter, pipId });
+  check('control: that Create wrote one bot key and one add, and made no Barkpark conversation (its first message makes it)', made2.filter((w) => w.method === 'PUT' && w.key === `barkbot.bot.${pipId}`).length === 1 && made2.filter((w) => w.method === 'PATCH' && w.key === 'barkbot.bots').length === 1 && made2.length === 2 && stub.made.length === c1 && stub.prefs.get(`barkbot.bot.${pipId}`)?.session_id === null, { made2, made: stub.made.slice(c1) });
+  check('Create reads Creating… while the writes are in flight, and the tile lands no later than the oracle\'s 1151 ms', label === 'Creating…' && typeof tileAt === 'number' && tileAt <= 1151, { label, tileAt });
+  const here = await ev(() => location.href);
+  stub.opened = []; await open(here);
+  await until(async () => (await live()).header === 'Pip', 15000, 'the reloaded page').catch(() => {}); await wait(500);
+  const again = await pinned();
+  check('a reload shows the tile and the bot, still with no conversation made', again.at(-1) === 'Pip' && (await live()).header === 'Pip' && stub.opened.length === 0 && stub.made.length === c1, { again, opened: stub.opened, here });
+  const pipMade0 = stub.made.length, pipSent0 = stub.sent.length;
+  await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'hello pip' }); await key('Enter');
+  await until(() => stub.sent.length > pipSent0, 10000, 'Pip\'s first message').catch(() => {});
+  const pipSession = stub.made.at(-1);
+  check('Pip\'s first message makes its one conversation on the computer, saves it in Pip\'s record, and goes there', stub.made.length === pipMade0 + 1 && stub.prefs.get(`barkbot.bot.${pipId}`)?.session_id === pipSession && stub.to.at(-1) === pipSession, { made: stub.made.slice(pipMade0), record: stub.prefs.get(`barkbot.bot.${pipId}`), to: stub.to.slice(-1) });
+
+  // What Create refuses, and a Create that fails half-way: nothing is left behind.
+  const failLine = () => ev(() => document.querySelector('.new-bot-failed')?.textContent ?? null);
+  const tryCreate = async (name) => { const w = stub.writes.length, m = stub.made.length; await openDialog(); await typeName(name); await press('Create'); await until(async () => (await failLine()) !== null || !(await dialog()), 10000, `Create ${name} to answer`).catch(() => {}); await wait(300); const out = { line: await failLine(), open: await dialog(), writes: stub.writes.slice(w), made: stub.made.slice(m), keys: [...stub.prefs].filter(([k, v]) => k.startsWith('barkbot.bot.') && v?.name === name).length }; await key('Escape'); await wait(200); return out; };
+  stub.fail.set('PATCH barkbot.bots', 500);
+  let tc = await tryCreate('Ghost');
+  stub.fail.clear();
+  check('a Create whose list add fails says so in the dialog, makes no Barkpark conversation, and leaves no record behind', /not made/.test(tc.line ?? '') && tc.open && tc.made.length === 0 && tc.keys === 0 && tc.writes.some((w) => w.method === 'DELETE'), tc);
+  const odd = await ev(async (id) => { const m = await import('/src/chat/api.ts'); const out = []; for (const d of [{ name: 'Odd', shape: '<svg onload=x>' }, { name: 'Odd', colour: 'url(javascript:x)' }]) { try { await m.createBot({ data: d }); out.push('made'); } catch (e) { out.push(String(e?.message ?? e)); } } return out; });
+  check('Create refuses a shape or colour that is not one of the dialog\'s own, and writes nothing', odd.length === 2 && odd.every((x) => x !== 'made') && ![...stub.prefs].some(([k, v]) => k.startsWith('barkbot.bot.') && v?.name === 'Odd'), { odd });
+  const full = [...ids()]; for (let i = full.length; i < 50; i++) full.push(crypto.randomUUID());
+  stub.prefs.set('barkbot.bots', { ids: full });
+  tc = await tryCreate('Over');
+  check('with 50 bots listed (the most one load shows), Create refuses in one plain line and writes nothing, makes no conversation', /50 bots/.test(tc.line ?? '') && tc.open && tc.writes.length === 0 && tc.made.length === 0, tc);
+  stub.hosts = []; stub.opened = []; await open(`${base}/`); await until(async () => (await live()).header === 'BarkBot', 15000, 'the page with no computer').catch(() => {}); await wait(300);
+  tc = await tryCreate('Lonely');
+  stub.hosts = host(true);
+  check('with no computer enrolled, Create refuses in one plain line (a bot works on a computer) and writes nothing', /no(ne)? .*enrolled|npm run host:enroll/.test(tc.line ?? '') && tc.open && tc.writes.length === 0 && tc.made.length === 0, tc);
+  // A bot already listed when today's bot has not moved in yet: today's bot still moves in.
+  const OTHER = '9d2a3b4c-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
+  freshStore({ name: 'Legacy Name' }); stub.sessions = [session(S1)];
+  stub.prefs.set('barkbot.bots', { ids: [OTHER] }); stub.prefs.set(`barkbot.bot.${OTHER}`, rec('Other', HOST_ID, null));
+  w0 = stub.writes.length; s = await showing('Other');
+  const moved2 = stub.writes.slice(w0);
+  check('one other bot already listed and a computer enrolled: today\'s bot still moves in, with its name and its conversation; the legacy key is never written', s.tiles.includes('Other') && s.tiles.includes('Legacy Name') && stub.prefs.get(KEY)?.name === 'Legacy Name' && stub.prefs.get(KEY)?.session_id === S1 && ids().join() === [OTHER, main].join() && moved2.filter((w) => w.key === 'barkbot.bot').length === 0, { tiles: s.tiles, record: stub.prefs.get(KEY), ids: ids(), moved2 });
+  stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = [];
+
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
   const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
   stub.hosts = host(true);
