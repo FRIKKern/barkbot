@@ -410,13 +410,13 @@ else {
   await pick(notePath);
   await until(async () => (await box()).chips.length === 1, 5000, 'the file chip').catch(() => {});
   f = await box();
-  check('a picked text file waits in the box by name and size, and nothing is stored or sent yet', f.chips.length === 1 && /^note-\d+\.txt$/.test(f.chips[0]) && f.size === `${NOTE.length} B` && f.line === null && stub.uploads.length === up0 && stub.sent.length === sent0, { f });
+  check('a picked text file waits in the box by name and size, and nothing is stored or sent yet', f.chips.length === 1 && /^note-\d+\.txt$/.test(f.chips[0]) && f.size === `${NOTE.length}B` && f.line === null && stub.uploads.length === up0 && stub.sent.length === sent0, { f });
   await type('read it'); await key('Enter');
   await until(() => stub.sent.length > sent0, 8000, 'the message to reach the stand-in').catch(() => {});
   await until(async () => (await box()).cards.length > 0, 8000, 'the file card').catch(() => {});
   f = await box();
   const named = stub.sent[sent0]?.attachments;
-  check('Enter: the file is stored once, the message names it by id and name, and the sent message shows it as a file card above its words', stub.uploads.length === up0 + 1 && stub.uploads.at(-1) === noteId && stub.sent.length === sent0 + 1 && stub.sent[sent0].content === 'read it' && JSON.stringify(named) === JSON.stringify([{ id: noteId, name: notePath.split('/').pop() }]) && f.chips.length === 0 && f.cards.length === 1 && f.cards[0][0] === `Open ${notePath.split('/').pop()}` && f.cards[0][1] === `${NOTE.length} B`, { uploads: stub.uploads.slice(up0), named, f });
+  check('Enter: the file is stored once, the message names it by id and name, and the sent message shows it as a file card above its words', stub.uploads.length === up0 + 1 && stub.uploads.at(-1) === noteId && stub.sent.length === sent0 + 1 && stub.sent[sent0].content === 'read it' && JSON.stringify(named) === JSON.stringify([{ id: noteId, name: notePath.split('/').pop() }]) && f.chips.length === 0 && f.cards.length === 1 && f.cards[0][0] === `Open ${notePath.split('/').pop()}` && f.cards[0][1] === `${NOTE.length}B`, { uploads: stub.uploads.slice(up0), named, f });
   // Barkpark refuses what is not text, a PDF or a picture: the line says so and nothing is sent.
   await pick(binPath);
   await until(async () => (await box()).chips.length === 1, 5000, 'the unknown file chip').catch(() => {});
@@ -448,7 +448,7 @@ else {
   await open(`${base}/`);
   await until(async () => (await box()).bubbles >= 2, 30000, 'the stored rows').catch(() => {});
   f = await box();
-  check('a reload: the stored row shows its file card by name and size, once (control: the row with no attachments shows none)', f.bubbles === 2 && f.cards.length === 1 && f.cards[0][0] === 'Open note.txt' && f.cards[0][1] === `${NOTE.length} B`, { f });
+  check('a reload: the stored row shows its file card by name and size, once (control: the row with no attachments shows none)', f.bubbles === 2 && f.cards.length === 1 && f.cards[0][0] === 'Open note.txt' && f.cards[0][1] === `${NOTE.length}B`, { f });
   stub.rows = [];
   [notePath, zipPath, binPath].forEach((x) => rmSync(x, { force: true }));
 

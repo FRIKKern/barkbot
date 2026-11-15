@@ -94,8 +94,9 @@ export type Outgoing = {data: string; name: string; file?: boolean}
 /** One stored attachment, as Barkpark answers the upload. */
 type Stored = {id: string; media_type: string; byte_size: number}
 const isPicture = (mediaType?: string) => !mediaType || mediaType.startsWith('image/')
-/** A file's size as its card says it. */
-export const fileSize = (bytes: number) => (bytes < 1000 ? `${bytes} B` : bytes < 1_000_000 ? `${Math.round(bytes / 1000)} KB` : `${(bytes / 1_000_000).toFixed(1)} MB`)
+/** A file's size as its card says it: "25B" for 25 bytes, no space (the oracle's 1.0.3 card, oracle-file-sent, seen
+ *  on its screenshot 2026-11-14). KB and MB were not seen: written the same way, a guess. */
+export const fileSize = (bytes: number) => (bytes < 1000 ? `${bytes}B` : bytes < 1_000_000 ? `${Math.round(bytes / 1000)}KB` : `${(bytes / 1_000_000).toFixed(1)}MB`)
 /** Why a message did not go, said plainly; the draft stays in the box. */
 export const CANNOT_TAKE_FILES = "The bot's computer cannot take this file yet, so nothing was sent. Update its chat host, or send the words alone."
 
