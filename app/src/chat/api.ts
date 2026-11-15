@@ -131,7 +131,7 @@ export const loadChat = createServerFn({method: 'GET'})
  *  shows only once it is whole; if the add fails the record is removed again. It is refused, with
  *  nothing written, when no computer is enrolled (a bot works on a computer) or when the list
  *  already holds as many bots as one load shows (READ_CAP).
- *  Until a bot can have its own folder (task-88d21dd5955bfa64) it works in the Main Bot's folder. */
+ *  Its first conversation asks for its own folder on the computer (botFolder). */
 export const createBot = createServerFn({method: 'POST'})
   .validator((d: {name: unknown; shape?: unknown; colour?: unknown}) => {
     if (!validName(d.name)) throw new Error('a bot name is 1 to 200 characters')
