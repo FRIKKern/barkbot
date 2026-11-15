@@ -539,6 +539,7 @@ else {
   await windowFocus(true);
   const fleets0 = stub.fleetOpens;
   const words = () => ev(() => document.querySelector('.transcript')?.textContent ?? '');
+  // Every pinned tile: Ada, Bea, and today's bot, which moves in after them (#60).
   const labels = () => ev(() => [...document.querySelectorAll('.rail-list .rail-tile')].map((t) => t.getAttribute('aria-label')));
   const tileOf = (n) => ev((n) => { const t = [...document.querySelectorAll('.rail-list .rail-tile')].find((x) => x.getAttribute('aria-label').split(', ')[0] === n); const r = t?.getBoundingClientRect(); return r ? [r.x + r.width / 2, r.y + r.height / 2] : null; }, n);
   const pickTile = async (n, want) => { const at = await tileOf(n); if (at) await click(...at); await until(async () => (await live()).header === n && want.test(await words()), 10000, `${n}'s conversation`).catch(() => {}); await wait(500); return { header: (await live()).header, t: await words(), url: await ev(() => location.search) }; };
@@ -561,9 +562,9 @@ else {
   flip(SB, 'idle'); await until(async () => (await labels()).some((l) => l.startsWith('Bea, Unread')), 5000, "Bea's dot").catch(() => {});
   await wait(300);
   const after = await labels();
-  check("Bea works while Ada is open: only Bea's tile says Working, then, with no focus, only Bea's says Unread activity", JSON.stringify(during) === JSON.stringify(['Ada', 'Bea, Working']) && JSON.stringify(after) === JSON.stringify(['Ada', 'Bea, Unread activity']) && (await live()).header === 'Ada', { during, after });
+  check("Bea works while Ada is open: only Bea's tile says Working, then, with no focus, only Bea's says Unread activity", JSON.stringify(during) === JSON.stringify(['Ada', 'Bea, Working', 'BarkBot']) && JSON.stringify(after) === JSON.stringify(['Ada', 'Bea, Unread activity', 'BarkBot']) && (await live()).header === 'Ada', { during, after });
   await windowFocus(true);
-  check('control: the window getting focus clears the dot', JSON.stringify(await labels()) === JSON.stringify(['Ada', 'Bea']), await labels());
+  check('control: the window getting focus clears the dot', JSON.stringify(await labels()) === JSON.stringify(['Ada', 'Bea', 'BarkBot']), await labels());
   stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore();
 
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
