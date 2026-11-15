@@ -3,7 +3,7 @@
 import {randomUUID} from 'node:crypto'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError} from '../server/barkpark'
-import {addId, legacyName, listIds, mainBotId, putBot, readBot, readBots, sessionOf, trusted, validName, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
+import {addId, dropBot, legacyName, listIds, mainBotId, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
 /** A bot as the page gets it: its id and its name only (the record's pointers stay on the server). */
@@ -49,14 +49,16 @@ const got = <T,>(p: Promise<T>, what: string): Promise<{ok: true; v: T} | {ok: f
   )
 
 /** The bots, in rail order, and the open one's computer and conversation.
- *  The first load after the store exists makes the Main Bot from today's state, additively: its id
- *  is a UUID v5 of the computer's id (two tabs write the same keys), its name the legacy pref (or
- *  BARKBOT_NAME when it is unset), its session the newest one on that computer (today's rule, used
- *  this once). Only the new keys are written; the legacy barkbot.bot is never written or deleted.
+ *  The Main Bot is today's bot, made from today's state, additively, on the first load that finds
+ *  its id missing from the list, whatever else the list holds: its id is a UUID v5 of the
+ *  computer's id (two tabs write the same keys), its name the legacy pref (or BARKBOT_NAME when it
+ *  is unset). Its conversation is the newest one on that computer that no listed bot names (today's
+ *  rule, used this once); none when a record could not be read. Only the new keys are written; the
+ *  legacy barkbot.bot is never written or deleted.
  *  A preference read or write that fails never fails the page: it shows what it could read, writes
  *  nothing more, and says so (`notice`). A Main Bot record already there is kept, never written
- *  over: a load whose list add failed is repaired by the next. */
-// ?bot=<id>: the open bot, else the first in the rail.
+ *  over: a load whose list add failed is repaired by the next.
+ *  ?bot=<id>: the open bot, else the first in the rail. */
 export const loadChat = createServerFn({method: 'GET'})
   .validator((botId: string | null | undefined) => (typeof botId === 'string' ? botId : null))
   .handler(async ({data: want}): Promise<Chat> => {
@@ -65,70 +67,87 @@ export const loadChat = createServerFn({method: 'GET'})
   // Today's name: the legacy pref, else BARKBOT_NAME. If the read failed it is not known, so it is shown, never saved.
   const todays = legacy.ok ? (legacy.v ?? BOT_NAME()) : BOT_NAME()
   if (!host) {
-    // No computer: today's bot cannot be kept (a record names its computer), so it shows by its
-    // name with nothing written; bots made with no computer (Create) follow it.
-    const made = ids.ok && ids.v?.length ? await readBots(ids.v, hosts, []) : {bots: [], unread: 0}
-    const bots = [{id: 'no-computer', name: todays}, ...made.bots.filter(({bot}) => bot.host_id === null).map(({bot}) => ({id: bot.id, name: bot.name}))]
-    const open = bots.find((b) => b.id === want) ?? bots[0]
-    return {bots, botId: open.id, bot: open.name, host: null, sessionId: null, startedAt: null, notice: !ids.ok || made.unread ? NOT_READ : null}
+    // No computer: no record can be made (a bot names its computer). Today's name, nothing written.
+    return {bots: [{id: 'no-computer', name: todays}], botId: 'no-computer', bot: todays, host: null, sessionId: null, startedAt: null, notice: null}
   }
   const sessions = await ownSessions()
-  const newest = sessions.filter((s) => s.execution_host_id === host.id).sort((a, b) => b.inserted_at.localeCompare(a.inserted_at))[0]
-  const main: Bot = {id: mainBotId(host.id), name: todays, host_id: host.id, session_id: newest?.id ?? null, created_at: newest?.inserted_at ?? new Date().toISOString()}
-  // The Main Bot from what the caller itself can see, written nowhere.
-  const inMemory = {bot: main, session: newest ? ({is: 'open', session: newest} as const) : ({is: 'none'} as const)}
-  let rail: {bot: Bot; session: SessionCheck}[] = [inMemory]
-  let notice: string | null = null
-  if (!ids.ok) {
-    notice = NOT_READ
-  } else if (ids.v?.length) {
-    const r = await readBots(ids.v, hosts, sessions)
-    if (r.unread) notice = NOT_READ
-    // Every stored record dropped: the in-memory Main Bot, nothing written.
-    if (r.bots.length) rail = r.bots
-  } else if (!legacy.ok) {
-    // The move-in waits for a read of today's name that worked: a failed read is not "unset".
-    notice = NOT_READ
-  } else {
-    const there = await got(readBot(main.id), 'read the Main Bot')
-    const kept = there.ok && there.v ? trusted(main.id, there.v, hosts) : null
-    if (!there.ok) notice = NOT_READ
-    else if (kept) {
-      // Made by a load whose list add failed: keep it as it is now (it may be renamed), add its id.
-      const session = await sessionOf(kept, sessions)
-      if (session.is !== 'foreign') {
-        rail = [{bot: kept, session}]
-        if (!(await got(addId(kept.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
+  const onHost = sessions.filter((s) => s.execution_host_id === host.id).sort((a, b) => b.inserted_at.localeCompare(a.inserted_at))
+  // The list as read, or null when the read failed. Empty: the store was never made (today's state).
+  const listed = ids.ok ? (ids.v ?? []) : null
+  const r = listed?.length ? await readBots(listed, hosts, sessions) : {bots: [], unread: 0}
+  let notice: string | null = !ids.ok || r.unread ? NOT_READ : null
+  let rail: {bot: Bot; session: SessionCheck}[] = r.bots
+  // Today's conversation: the newest on the computer, if it is surely no other bot's. Once bots are
+  // listed, one that could not be read may name it, so then none.
+  const taken = new Set(r.bots.map(({bot}) => bot.session_id))
+  const today = listed && !r.unread ? onHost.find((s) => !taken.has(s.id)) : undefined
+  const main: Bot = {id: mainBotId(host.id), name: todays, host_id: host.id, session_id: today?.id ?? null, created_at: today?.inserted_at ?? new Date().toISOString()}
+  const withToday = {bot: main, session: today ? ({is: 'open', session: today} as const) : ({is: 'none'} as const)}
+  if (listed && !listed.includes(main.id)) {
+    if (!legacy.ok) {
+      // The move-in waits for a read of today's name that worked: a failed read is not "unset".
+      notice = NOT_READ
+    } else {
+      const there = await got(readBot(main.id), 'read the Main Bot')
+      const kept = there.ok && there.v ? trusted(main.id, there.v, hosts) : null
+      if (!there.ok) notice = NOT_READ
+      else if (kept) {
+        // Made by a load whose list add failed: keep it as it is now (it may be renamed), add its id.
+        const session = await sessionOf(kept, sessions)
+        if (session.is !== 'foreign') {
+          rail = [...rail, {bot: kept, session}]
+          if (!(await got(addId(kept.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
+        }
+      } else if (!there.v) {
+        // Nothing half-made: the id joins the list only after its record is whole.
+        if (!(await got(putBot(main), 'save the Main Bot')).ok) notice = NOT_SAVED
+        else {
+          rail = [...rail, withToday]
+          if (!(await got(addId(main.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
+        }
       }
-    } else if (!there.v) {
-      // Nothing half-made: the id joins the list only after its record is whole.
-      if (!(await got(putBot(main), 'save the Main Bot')).ok || !(await got(addId(main.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
+      // A Main Bot key that is there but not well formed is never written over: in memory only.
     }
-    // A Main Bot key that is there but not well formed is never written over: in memory only.
   }
+  // Nothing to show: the Main Bot from what the caller itself can see, written nowhere. Once the
+  // store exists (or could not be read) it opens no conversation: the newest one on the computer
+  // may be another bot's, and a message would go to the wrong bot.
+  if (!rail.length) rail = [listed?.length === 0 ? withToday : {bot: {...main, session_id: null}, session: {is: 'none'}}]
   const open = rail.find((x) => x.bot.id === want) ?? rail[0]
   const session = open.session.is === 'open' ? open.session.session : null
-  const home = open.bot.host_id === null ? null : (hosts.find((h) => h.id === open.bot.host_id) ?? host)
+  const home = hosts.find((h) => h.id === open.bot.host_id) ?? host
   return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice}
 })
 
-/** Create in the New Bot dialog: a new bot with its own empty conversation on the enrolled
- *  computer. Its record is written whole first, and its id is added to the list last, so a bot
- *  shows only once it is whole. With no computer enrolled the bot is made with none (no session).
- *  A failed write throws, and the dialog says so; a record whose list add failed is never shown.
+/** Create in the New Bot dialog: a new bot on the enrolled computer, with an empty conversation
+ *  that Barkpark makes on its first message (startChat saves it), so a failed Create leaves no
+ *  session behind. Its record is written whole first, its id added to the list last, so a bot
+ *  shows only once it is whole; if the add fails the record is removed again. It is refused, with
+ *  nothing written, when no computer is enrolled (a bot works on a computer) or when the list
+ *  already holds as many bots as one load shows (READ_CAP).
  *  Until a bot can have its own folder (task-88d21dd5955bfa64) it works in the Main Bot's folder. */
 export const createBot = createServerFn({method: 'POST'})
   .validator((d: {name: unknown; shape?: unknown; colour?: unknown}) => {
-    if (!validName(d.name)) throw new Error('A bot name is 1 to 200 characters')
-    const opt = (v: unknown) => (typeof v === 'string' && v.length <= 40 ? v : undefined)
-    return {name: d.name.trim(), shape: opt(d.shape), colour: opt(d.colour)}
+    if (!validName(d.name)) throw new Error('a bot name is 1 to 200 characters')
+    if (d.shape !== undefined && !validShape(d.shape)) throw new Error('that shape is not one of the shapes')
+    if (d.colour !== undefined && !validColour(d.colour)) throw new Error('that colour is not one of the colours')
+    return {name: d.name.trim(), shape: d.shape as string | undefined, colour: d.colour as string | undefined}
   })
   .handler(async ({data}) => {
     const host = await findHost()
-    const s = host ? await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: host.id}}) : null
-    const bot: Bot = {id: randomUUID(), ...data, host_id: host?.id ?? null, session_id: s?.id ?? null, created_at: s?.inserted_at ?? new Date().toISOString()}
+    if (!host) throw new Error('a bot works on a computer, and none is enrolled. Enroll one: npm run host:enroll, then npm run host.')
+    const ids = await listIds().catch(() => {
+      throw new Error('your bots could not be read from Barkpark. Try again.')
+    })
+    if ((ids?.length ?? 0) >= READ_CAP) throw new Error(`you have ${READ_CAP} bots, the most BarkBot shows.`)
+    const bot: Bot = {id: randomUUID(), ...data, host_id: host.id, session_id: null, created_at: new Date().toISOString()}
     await putBot(bot)
-    await addId(bot.id)
+    try {
+      await addId(bot.id)
+    } catch (e) {
+      await dropBot(bot.id).catch(() => console.warn('barkbot: a bot record whose list add failed could not be removed'))
+      throw e
+    }
     return {id: bot.id}
   })
 

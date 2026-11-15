@@ -15,9 +15,9 @@
 // No token, credential or enrollment value is ever written in a pref.
 import {createHash} from 'node:crypto'
 import {bp, conf, BarkparkError} from './barkpark'
+import {colours, shapeRows} from '../components/overlays/data'
 
-/** host_id null: a bot made while no computer was enrolled; it has no session and says it has no computer. */
-export type Bot = {id: string; name: string; shape?: string; colour?: string; host_id: string | null; session_id: string | null; created_at: string}
+export type Bot = {id: string; name: string; shape?: string; colour?: string; host_id: string; session_id: string | null; created_at: string}
 export type OwnHost = {id: string; name: string; online: boolean}
 export type OwnSession = {id: string; execution_target: string; execution_host_id?: string | null; inserted_at: string}
 
@@ -50,6 +50,12 @@ export const mainBotId = (hostId: string) => uuidV5(`main-bot:${hostId}`)
 
 export const validName = (n: unknown): n is string => typeof n === 'string' && n.trim().length > 0 && n.length <= 200
 
+// A bot's looks are one of the New Bot dialog's own shapes and colours, nothing else.
+const SHAPES = new Set(shapeRows.flat())
+const COLOURS = new Set(colours.map(([c]) => c))
+export const validShape = (v: unknown): v is string => typeof v === 'string' && SHAPES.has(v)
+export const validColour = (v: unknown): v is string => typeof v === 'string' && COLOURS.has(v)
+
 async function read<T>(key: string): Promise<T | null> {
   const {value} = await bp<{value: T | null}>(prefs(key))
   return value
@@ -77,15 +83,11 @@ export async function legacyName(): Promise<string | null> {
 export function trusted(id: string, raw: unknown, hosts: OwnHost[]): Bot | null {
   if (!UUID.test(id) || !raw || typeof raw !== 'object' || Array.isArray(raw)) return null
   const r = raw as Record<string, unknown>
-  if (!validName(r.name) || typeof r.created_at !== 'string') return null
-  const hostId = r.host_id ?? null
+  if (!validName(r.name) || typeof r.host_id !== 'string' || typeof r.created_at !== 'string') return null
+  if (!hosts.some((h) => h.id === r.host_id)) return null
   const sid = r.session_id ?? null
-  // No computer: it may name no session either. Pointing at nothing, it can reach nothing.
-  if (hostId === null && sid !== null) return null
-  if (hostId !== null && (typeof hostId !== 'string' || !hosts.some((h) => h.id === hostId))) return null
   if (sid !== null && (typeof sid !== 'string' || !UUID.test(sid))) return null
-  const opt = (v: unknown) => (typeof v === 'string' && v.length <= 40 ? v : undefined)
-  return {id, name: r.name, shape: opt(r.shape), colour: opt(r.colour), host_id: hostId, session_id: sid, created_at: r.created_at}
+  return {id, name: r.name, shape: validShape(r.shape) ? r.shape : undefined, colour: validColour(r.colour) ? r.colour : undefined, host_id: r.host_id, session_id: sid, created_at: r.created_at}
 }
 
 /** What a record's session is to its bot:
@@ -134,6 +136,11 @@ export async function readBots(ids: string[], hosts: OwnHost[], listed: OwnSessi
 export async function putBot(bot: Bot): Promise<void> {
   const {id, ...value} = bot
   await bp(prefs(botKey(id)), {method: 'PUT', json: {value}})
+}
+
+/** Removes a bot's own key: Create's clean-up when its list add failed, so nothing half-made stays. */
+export async function dropBot(id: string): Promise<void> {
+  if (UUID.test(id)) await bp(prefs(botKey(id)), {method: 'DELETE'})
 }
 
 /** Adds an id at the end of the list (idempotent: an id already there stays once). */
