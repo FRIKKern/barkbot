@@ -33,7 +33,7 @@ export function Details({scene, name, onRename, onClose}: {scene: Scene; name?: 
           <Tooltip box={avatar.box} side="bottom">
             Edit Avatar
           </Tooltip>
-          <BotName key={active} name={name ?? active} onRename={onRename} />
+          <BotName key={active} name={name ?? ''} onRename={onRename} />
         </div>
         <div className="tabs-row">
           <div role="tablist" aria-label="Conversation details" className="tabs">

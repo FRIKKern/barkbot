@@ -16,6 +16,9 @@ export const Route = createFileRoute('/')({
 // The Voice card's values until Barkpark has a voice setting: what the oracle's fresh bot shows
 // (fixtures/states: Helix, 1x, Auto-detect).
 const VOICE = {voice: 'Helix', speed: '1x', language: 'Auto-detect'}
+// The page's one bot, by id (the rail knows bots by id, the name is its label). Its own record
+// and a real id come with the bot store (task-735e6ba3d04f2b2c).
+const BOT_ID = 'bot'
 
 function Home() {
   const chat = Route.useLoaderData()
@@ -29,7 +32,7 @@ function Home() {
   // once, and it is saved to Barkpark, so a reload shows it too (loadChat reads it back).
   const [name, setName] = useState(chat.bot)
   const [renameError, setRenameError] = useState<string | null>(null)
-  const rename = async (_bot: string, next: string) => {
+  const rename = async (_id: string, next: string) => {
     setName(next)
     try {
       await renameBot({data: next})
@@ -77,9 +80,9 @@ function Home() {
   const computer = online ? 'Asleep' : 'Unreachable'
   return (
     <Shell
-      scene={{bots: [{name: chat.bot}], active: chat.bot, panelOpen: true, computer, voice: VOICE}}
+      scene={{bots: [{id: BOT_ID, name: chat.bot}], active: BOT_ID, panelOpen: true, computer, voice: VOICE}}
       onRenameBot={rename}
-      workingBots={convo.botState === 'working' ? [chat.bot] : []}
+      workingBots={convo.botState === 'working' ? [BOT_ID] : []}
       transcript={
         chat.host ? (
           <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? renameError ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />

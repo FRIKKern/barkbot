@@ -12,12 +12,13 @@ import {Preview, Tooltip, useHover} from './tips'
 // open: that label comes from the 0.79.2 traces of 2026-11-08 and waits for a re-record.
 // A bot with unread activity gets a dot on its face and ", Unread activity" in its name
 // (trace say-hi-2 at 5071.6 ms). Where "Main Bot" goes in that order is not captured; it stays first.
-// `names`: bots the person renamed (details panel), shown in place of their own name; the bot's
-// own name stays its id for picking (rename trace: the tile label follows on Enter).
-export function Rail({scene, onPick, working = [], unread = [], names = {}}: {scene: Scene; onPick?: (name: string) => void; working?: string[]; unread?: string[]; names?: Record<string, string>}) {
-  const shown = (name: string) => names[name] ?? name
+// Every bot is known by its id: picking, the current tile, Working and Unread. `names`: bots the
+// person renamed (details panel), by id, shown in place of their own name (rename trace: the tile
+// label follows on Enter). Two bots may share a name and stay two bots.
+export function Rail({scene, onPick, working = [], unread = [], names = {}}: {scene: Scene; onPick?: (id: string) => void; working?: string[]; unread?: string[]; names?: Record<string, string>}) {
+  const shown = (b: {id: string; name: string}) => names[b.id] ?? b.name
   const active = scene.active ?? ''
-  const busy = (name: string, label: string) => [label, unread.includes(name) && 'Unread activity', working.includes(name) && name !== active && 'Working'].filter(Boolean).join(', ')
+  const busy = (id: string, label: string) => [label, unread.includes(id) && 'Unread activity', working.includes(id) && id !== active && 'Working'].filter(Boolean).join(', ')
   const main = scene.bots.find((b) => b.main)
   const others = scene.bots.filter((b) => !b.main)
   const held = useCommandHeld()
@@ -27,7 +28,7 @@ export function Rail({scene, onPick, working = [], unread = [], names = {}}: {sc
     <aside className="rail" aria-label="Bots">
       <div className="rail-main">
         {main && (
-          <Tile name={main.name} shown={shown(main.name)} label={busy(main.name, `${shown(main.name)}, Main Bot`)} current={main.name === active} line={scene.previews?.[main.name]} onPick={onPick} unread={unread.includes(main.name)} hint={hint(0)}>
+          <Tile id={main.id} shown={shown(main)} label={busy(main.id, `${shown(main)}, Main Bot`)} current={main.id === active} line={scene.previews?.[main.id]} onPick={onPick} unread={unread.includes(main.id)} hint={hint(0)}>
             <span className="face face-main" />
             <span className="badge" role="img" aria-label="Main Bot" />
           </Tile>
@@ -36,8 +37,8 @@ export function Rail({scene, onPick, working = [], unread = [], names = {}}: {sc
       <div className="rail-rule" />
       <div className="rail-list" role="list" aria-label="Pinned Bots">
         {others.map((b, i) => (
-          <div role="listitem" key={b.name}>
-            <Tile name={b.name} shown={shown(b.name)} label={busy(b.name, shown(b.name))} current={b.name === active} line={scene.previews?.[b.name]} onPick={onPick} unread={unread.includes(b.name)} hint={hint(main ? i + 1 : i)}>
+          <div role="listitem" key={b.id}>
+            <Tile id={b.id} shown={shown(b)} label={busy(b.id, shown(b))} current={b.id === active} line={scene.previews?.[b.id]} onPick={onPick} unread={unread.includes(b.id)} hint={hint(main ? i + 1 : i)}>
               <Face size={34} />
             </Tile>
           </div>
@@ -65,16 +66,16 @@ export function Rail({scene, onPick, working = [], unread = [], names = {}}: {sc
 }
 
 // A bot's tile; the pointer on it brings up the bot's chat preview (oracle-hover-bot-tile-2).
-function Tile({name, shown, label, current, line, onPick, unread, hint, children}: {name: string; shown?: string; label: string; current?: boolean; line?: string; onPick?: (name: string) => void; unread?: boolean; hint?: string; children: ReactNode}) {
+function Tile({id, shown, label, current, line, onPick, unread, hint, children}: {id: string; shown: string; label: string; current?: boolean; line?: string; onPick?: (id: string) => void; unread?: boolean; hint?: string; children: ReactNode}) {
   const h = useHover()
   return (
     <>
-      <button className="rail-tile" aria-label={label} aria-current={current ? 'page' : undefined} onClick={() => onPick?.(name)} {...h.on}>
+      <button className="rail-tile" aria-label={label} aria-current={current ? 'page' : undefined} onClick={() => onPick?.(id)} {...h.on}>
         {children}
         {unread && <span className="unread" role="status" aria-label="Unread activity" />}
         {hint && <span className="rail-hint">{hint}</span>}
       </button>
-      <Preview box={h.box} name={shown ?? name} line={line ?? ''} />
+      <Preview box={h.box} name={shown} line={line ?? ''} />
     </>
   )
 }

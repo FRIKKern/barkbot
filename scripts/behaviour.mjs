@@ -227,6 +227,21 @@ await drive(['Oracle', 'Grookie']); s = await rail();
 check('Working: not on the open bot; still on a bot that is not open (control)', s.tiles[1] === 'Oracle' && s.tiles[0] === 'Grookie, Main Bot, Working', s);
 await drive([]);
 
+// ── Bots are known by id: two bots of one name stay two bots (task-e4dc0e4a8fca69b3) ───────
+console.log('Behaviour · two bots of one name');
+await open(`${base}/gate/oracle-turn-1040`);
+await ev(async () => { const m = await import('/src/gate/behaviour.tsx'); document.body.innerHTML = '<div id="t"></div>'; window.__drive = m.mount(document.getElementById('t'), undefined, { bots: [{ id: 'grookie', name: 'Grookie', main: true }, { id: 'twin-1', name: 'Twin' }, { id: 'twin-2', name: 'Twin' }], active: 'twin-1', previews: {} }); });
+await wait(300);
+const twins = () => ev(() => ({ tiles: [...document.querySelectorAll('.rail-list .rail-tile')].map((b) => { const r = b.getBoundingClientRect(); return { label: b.getAttribute('aria-label'), current: b.getAttribute('aria-current'), at: [r.x + r.width / 2, r.y + r.height / 2] }; }), header: document.querySelector('.bot-pill [role=heading]')?.textContent }));
+let tw = await twins();
+precondition('two pinned bots, both named Twin', tw.tiles.length === 2 && tw.tiles.every((x) => x.label === 'Twin'), tw);
+await click(...tw.tiles[1].at); await wait(100);
+tw = await twins();
+check('picking the second Twin marks only that tile current (control: the first was the open one before)', tw.tiles[0].current === null && tw.tiles[1].current === 'page' && tw.header === 'Twin', tw);
+await ev(() => document.querySelector('.who-name').focus()); await clear(); await typeIn('Twin Two'); await key('Enter'); await nextFrame();
+tw = await twins();
+check('renaming the second Twin leaves the first tile\'s label as it was', tw.tiles[0].label === 'Twin' && tw.tiles[1].label === 'Twin Two' && tw.header === 'Twin Two', tw);
+
 // ── Rename persists: the live page (/) saves the name to Barkpark (task-c3e0bc88ce28833d) ─────
 // Grok keeps a renamed bot's name across a restart. Ours saves it as a Barkpark pref on Enter or
 // a click away, and loadChat reads it back. Counted at the stand-in, so a write is a write.

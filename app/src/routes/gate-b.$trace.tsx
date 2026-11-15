@@ -56,7 +56,8 @@ export const Route = createFileRoute('/gate-b/$trace')({
 function Replay() {
   const {trace} = Route.useLoaderData()
   const scene = scenes['oracle-turn-1040']
-  const bot = scene.active ?? 'Oracle'
+  const id = scene.active ?? 'Oracle'
+  const bot = scene.bots.find((b) => b.id === id)?.name ?? id
   const [run] = useState(() => crypto.randomUUID())
   // ?shape=: the host the replay plays (turn.ts, Shape); the replay's default is `items`.
   const [shape] = useState(() => (typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('shape')))
@@ -78,7 +79,7 @@ function Replay() {
     <>
       <Shell
         scene={scene}
-        workingBots={convo.botState === 'working' ? [bot] : []}
+        workingBots={convo.botState === 'working' ? [id] : []}
         transcript={<Transcript bot={bot} startedAt={null} bubbles={convo.bubbles} working={convo.working} error={convo.error} />}
         composer={<Composer placeholder={`Message ${bot}`} onSend={(text) => void convo.send(text)} disabled={!convo.ready} />}
       />
