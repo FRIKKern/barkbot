@@ -3,5 +3,6 @@
  "slice": "S6",
  "journey": null,
  "title": "The bot's host moves to its own VM; J01, J05 and J06 pass there",
- "status": "open"
+ "status": "open",
+ "evidence": "Not started. Needs the owner: a VM to move the bot's host to, then J01, J05 and J06 run there."
 }

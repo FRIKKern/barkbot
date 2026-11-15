@@ -3,5 +3,7 @@
  "slice": "S5",
  "journey": "J13",
  "title": "Activity: open work such as a pull request and its state",
- "status": "unknown"
+ "status": "open",
+ "gate": null,
+ "evidence": "The Activity tab is built and gated (Details.tsx: Suggested, Computer and Voice chat cards, in every state with the panel open). Missing: open work such as a pull request and its state. The oracle's Activity was never captured with open work (needs a capture while its bot has a pull request open, which needs sends; none left), and nothing is built or read from Barkpark for it."
 }

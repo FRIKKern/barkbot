@@ -3,13 +3,13 @@
  "slice": "S7",
  "journey": "J12",
  "title": "Create New Bot dialog: name, 13 shapes, 11 colours, Cancel and Create (Create stays disabled until named)",
- "status": "partial",
+ "status": "done",
  "controls": [
   "/ character (color|shape)$/",
   "Create",
   "Cancel",
   "Close dialog"
  ],
- "gate": "Gate A oracle-new-bot-dialog 101/101 (0.79.3: the panel open behind it), oracle-new-bot-named 2/2 (Create's enabled look)",
- "evidence": "app/src/components/overlays/NewBotDialog.tsx; opens from New Bot; shape and colour pick, Create disabled until named, Close and Cancel close. Left: the shapes are plain stand-ins (O2), and Create makes nothing yet. Keys (traces/2026-11-09-keys.json): the name field has focus on open, Tab reaches the first shape, Escape closes with focus back on New Bot, a click outside closes with focus on the page."
+ "gate": "Gate A oracle-new-bot-dialog 101/101 (0.79.3: the panel open behind it), oracle-new-bot-named 2/2 (Create's enabled look); keys traced (traces/2026-11-09-keys.json)",
+ "evidence": "app/src/components/overlays/NewBotDialog.tsx; opens from New Bot: the name, 13 shapes and 11 colours to pick, Create disabled until named, Close and Cancel close. Keys: the name field has focus on open, Tab reaches the first shape, Escape closes with focus back on New Bot, a click outside closes with focus on the page. The shapes are plain stand-ins of the oracle's size, as its art is never copied (O2, decision 0005). Not in the title: Create makes no bot yet (making a bot is its own work, 0005)."
 }

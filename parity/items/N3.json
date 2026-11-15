@@ -10,5 +10,5 @@
   "Hide"
  ],
  "gate": "Gate A: oracle-hover-add-to-slack 1/1, oracle-hover-create-a-routine 1/1; Hide measured against oracle-hover-add-to-slack (button 979.5,236,38.5,24) to 0.2 pt",
- "evidence": "parts.tsx Section action + details.css: Hide shows while the pointer is over the window (:root:hover), hidden in every parked state. Left: Add to Slack and Create a routine opening 1:1 and stopping before acting outside the page, and what Hide does"
+ "evidence": "parts.tsx Section action + details.css: the Suggested card's two rows and Hide, which shows while the pointer is over the window (:root:hover) and is hidden in every parked state. Missing: what Add to Slack and Create a routine open, and what Hide does. None was captured (needs a look-only capture of each opened on the oracle, and of the card after Hide, which changes the oracle's state: the owner's), so none is built; both rows do nothing on a press."
 }
