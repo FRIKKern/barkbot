@@ -1,7 +1,9 @@
 // Create New Bot (fixtures/states/oracle-new-bot-dialog.json): 440 x 579, centred over a 70%
 // black scrim. A preview of the character, its name, 13 shapes, 11 colours; Create stays disabled
 // until the bot has a name. The shapes are plain geometric stand-ins drawn here, never the
-// oracle's character art (O2). Create does nothing yet: making a bot is its own item (0005).
+// oracle's character art (O2). Create makes the bot (onCreate): it reads Creating… while that is
+// in flight, as the oracle's does (traces/2026-11-08-create-oracle.json: at 349 ms), and the
+// dialog closes once the bot is made. In a gate scene there is no onCreate, and Create does nothing.
 import {useState} from 'react'
 import {Icon} from '../Composer'
 import {colours, shapeRows} from './data'
@@ -32,8 +34,22 @@ export function Shape({name, size}: {name: string; size: number}) {
   )
 }
 
-export function NewBotDialog({onClose}: {onClose?: () => void}) {
+export function NewBotDialog({onClose, onCreate}: {onClose?: () => void; onCreate?: (b: {name: string; shape: string; colour: string}) => Promise<void>}) {
   const [name, setName] = useState('')
+  const [creating, setCreating] = useState(false)
+  const [failed, setFailed] = useState<string | null>(null)
+  const create = async () => {
+    if (!onCreate || creating || !name.trim()) return
+    setCreating(true)
+    setFailed(null)
+    try {
+      await onCreate({name: name.trim(), shape, colour})
+      onClose?.()
+    } catch (e) {
+      setFailed(`The bot was not made: ${(e as Error).message}`)
+      setCreating(false)
+    }
+  }
   const [shape, setShape] = useState('hex')
   const [colour, setColour] = useState('Blue')
   const fill = colours.find(([c]) => c === colour)?.[1]
@@ -60,8 +76,9 @@ export function NewBotDialog({onClose}: {onClose?: () => void}) {
           <button className="pill" onClick={onClose}>
             <span style={fit('Cancel')}>Cancel</span>
           </button>
-          <button className="pill primary" disabled={!name.trim()}>
-            <span style={fit('Create')}>Create</span>
+          {failed && <span className="new-bot-failed" role="alert">{failed}</span>}
+          <button className="pill primary" disabled={!name.trim() || creating} onClick={() => void create()}>
+            <span style={fit(creating ? 'Creating…' : 'Create')}>{creating ? 'Creating…' : 'Create'}</span>
           </button>
         </div>
       </div>

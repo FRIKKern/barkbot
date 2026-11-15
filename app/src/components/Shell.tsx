@@ -6,7 +6,7 @@ import {Composer, Icon, placeholderFor, type ComposerStart} from './Composer'
 import {Rail} from './Rail'
 import {Details} from './Details'
 import {Face} from './parts'
-import {Overlay} from './overlays'
+import {Overlay, type CreateBot} from './overlays'
 import {Transcript, fromScene, type SceneRow} from './Transcript'
 import {scenePicture} from './Cards'
 
@@ -44,7 +44,7 @@ const NARROW = '(max-width: 799.98px)'
 // transcript's working row; both flip at the same ms in traces say-hi, say-hi-2, storage).
 // `unreadBots`: ids of bots the page itself marks unread; Shell adds its own by the oracle's rule
 // (useUnread below).
-export function Shell({scene: start, transcript, composer, onPickBot, onRenameBot, workingBots = [], unreadBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (id: string) => void; onRenameBot?: (id: string, name: string) => void; workingBots?: string[]; unreadBots?: string[]}) {
+export function Shell({scene: start, transcript, composer, onPickBot, onRenameBot, onCreateBot, workingBots = [], unreadBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (id: string) => void; onRenameBot?: (id: string, name: string) => void; onCreateBot?: CreateBot; workingBots?: string[]; unreadBots?: string[]}) {
   const [panelOpen, setPanelOpen] = useState(start.panelOpen)
   const [picked, setPicked] = useState<string | undefined>(undefined)
   // The overlay that is up, whether the scene holds it or a click opened it (Overlay's
@@ -112,7 +112,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
         setNames((m) => ({...m, [active]: n}))
         onRenameBot?.(active, n)
       }} onClose={() => setPanelOpen(false)} />
-      <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} />
+      <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} onCreateBot={onCreateBot} />
     </div>
   )
 }

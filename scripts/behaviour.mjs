@@ -38,7 +38,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500. stub.to is the session each message or answer went to.
-const stub = { prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, fail: new Map(), shown: [], made: [], to: [], readKeys: [] };
+const stub = { prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, fail: new Map(), shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // Per-account prefs, as Barkpark's (docs/contracts/user-prefs.md): GET, PUT, and PATCH add/remove on a list.
@@ -80,9 +80,10 @@ await new Promise((ok) => httpServer((req, res) => {
       const id = decodeURIComponent(req.url.split('?')[0].split('/')[4]); stub.shown.push(id); const x = stub.sessions.find((y) => y.id === id);
       return x ? json(200, { archived_at: null, ...x, messages: [] }) : json(404, { error: { code: 'not_found', message: 'chat session not found' } });
     }
+    // A new conversation on a computer, as Barkpark. `createDelay` holds the answer (Create's Creating…).
     if (req.url === '/v1/chat/sessions' && req.method === 'POST') {
       const b = JSON.parse(body); const x = { id: `00000000-0000-4000-8000-${String(900000000000 + stub.made.length)}`, execution_target: b.execution_target, execution_host_id: b.execution_host_id, inserted_at: new Date().toISOString(), status: 'active' };
-      stub.made.push(x.id); stub.sessions.push(x); return json(201, x);
+      stub.made.push(x.id); stub.sessions.push(x); return setTimeout(() => json(201, x), stub.createDelay);
     }
     if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
       res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' }); res.write(': open\n\n');
@@ -433,6 +434,47 @@ else {
 
   // The bot's computer stops and comes back while the page is open (seen live 2026-11-11: a
   // message sent to a stopped computer showed no reply and no reason).
+  // ── Create makes a bot (task-b7245cbd7634c631; traces/2026-11-08-create-oracle.json) ──────
+  console.log('Behaviour · Create makes a bot (the live page, against the stand-in Barkpark)');
+  stub.sessions = [session(S1)]; stub.rows = []; freshStore();
+  await showing('BarkBot');
+  const pinned = () => ev(() => [...document.querySelectorAll('.rail-list .rail-tile')].map((t) => t.getAttribute('aria-label')));
+  const dialog = () => ev(() => !!document.querySelector('.dialog.new-bot'));
+  const openDialog = async () => { const at = await ev(() => { const r = document.querySelector('button[aria-label="New Bot"]').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }); await click(...at); await until(dialog, 5000, 'the New Bot dialog').catch(() => {}); };
+  const press = async (label) => { const at = await ev((l) => { const b = [...document.querySelectorAll('.dialog.new-bot button')].find((x) => x.textContent.trim() === l || x.getAttribute('aria-label') === l); const r = b?.getBoundingClientRect(); return r ? [r.x + r.width / 2, r.y + r.height / 2] : null; }, label); if (at) await click(...at); };
+  const typeName = async (t) => { await ev(() => document.querySelector('.new-bot-name').focus()); await page.send('Input.insertText', { text: t }); await wait(30); };
+  const w1 = stub.writes.length, c1 = stub.made.length, railBefore = await pinned();
+  await openDialog(); await key('Escape'); await wait(200);
+  await openDialog(); await press('Close dialog'); await wait(200);
+  await openDialog(); await typeName('Pip'); await press('Cancel'); await wait(200);
+  await openDialog(); await typeName('   '); await press('Create'); await key('Enter'); await wait(300);
+  const quiet = stub.writes.slice(w1);
+  check('Cancel, Close dialog, Escape and Create with only spaces write nothing (control: the next rule\'s Create writes)', quiet.length === 0 && stub.made.length === c1 && JSON.stringify(await pinned()) === JSON.stringify(railBefore), { quiet, created: stub.made.slice(c1), railBefore });
+  await key('Escape'); await wait(200);
+  // The real Create. Barkpark's answer is held 400 ms, so the label in flight can be seen.
+  stub.createDelay = 400;
+  await openDialog(); await typeName('Pip');
+  await ev(() => { window.__tileAt = null; const t0 = performance.now(); window.__t0 = t0; new MutationObserver((_, o) => { if ([...document.querySelectorAll('.rail-tile')].some((t) => t.getAttribute('aria-label') === 'Pip')) { window.__tileAt = performance.now() - t0; o.disconnect(); } }).observe(document.body, { subtree: true, childList: true, attributes: true }); });
+  const w2 = stub.writes.length;
+  await press('Create'); await wait(150);
+  const label = await ev(() => [...document.querySelectorAll('.dialog.new-bot button')].map((b) => b.textContent.trim()).find((t) => /^Creat/.test(t)) ?? null);
+  await until(async () => (await live()).header === 'Pip', 10000, 'the new bot to open').catch(() => {});
+  await wait(500);
+  stub.createDelay = 0;
+  const pipSession = stub.made.at(-1);
+  const made2 = stub.writes.slice(w2);
+  const railAfter = await pinned(), tileAt = await ev(() => window.__tileAt);
+  const empty = await ev(() => document.querySelectorAll('.bubble').length === 0);
+  check('Create with a name adds one tile at the end of Pinned Bots and opens that bot\'s empty conversation', railAfter.length === railBefore.length + 1 && railAfter.at(-1) === 'Pip' && (await live()).header === 'Pip' && empty && stub.opened.includes(pipSession) && !(await dialog()), { before: railBefore, after: railAfter, opened: stub.opened, pipSession });
+  check('control: that Create wrote one bot key and one add, and made one conversation', made2.filter((w) => w.method === 'PUT' && w.key.startsWith('barkbot.bot.')).length === 1 && made2.filter((w) => w.method === 'PATCH' && w.key === 'barkbot.bots').length === 1 && stub.made.length === c1 + 1, { made2 });
+  check('Create reads Creating… while the writes are in flight, and the tile lands no later than the oracle\'s 1151 ms', label === 'Creating…' && typeof tileAt === 'number' && tileAt <= 1151, { label, tileAt });
+  const here = await ev(() => location.href);
+  stub.opened = []; await open(here);
+  await until(async () => (await live()).header === 'Pip', 15000, 'the reloaded page').catch(() => {}); await wait(500);
+  const again = await pinned();
+  check('a reload shows the tile and the same conversation', again.at(-1) === 'Pip' && (await live()).header === 'Pip' && stub.opened.includes(pipSession), { again, opened: stub.opened, pipSession, here });
+  stub.sessions = []; freshStore();
+
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
   const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
   stub.hosts = host(true);

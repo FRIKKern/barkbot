@@ -1,25 +1,37 @@
-import {createFileRoute, useRouter} from '@tanstack/react-router'
+import {createFileRoute, useNavigate, useRouter} from '@tanstack/react-router'
 import {useEffect, useState} from 'react'
 import {Shell} from '../components/Shell'
 import {Transcript} from '../components/Transcript'
 import {Composer, placeholderFor, type Picture, type WaitingFile} from '../components/Composer'
-import {computerOnline, loadChat, renameBot, startChat} from '../chat/api'
+import {computerOnline, createBot, loadChat, renameBot, startChat, type Chat} from '../chat/api'
 import {useConversation, type Outgoing} from '../chat/useConversation'
 
 // The bot, live: its computer and conversation come from Barkpark (loadChat). No made-up data:
 // with no computer enrolled, the page says so (D11).
+// ?bot=<id>: the open bot (a reload keeps it). Its id keys the page, so another bot's page starts fresh.
 export const Route = createFileRoute('/')({
-  loader: () => loadChat(),
-  component: Home,
+  validateSearch: (s: Record<string, unknown>): {bot?: string} => (typeof s.bot === 'string' ? {bot: s.bot} : {}),
+  loaderDeps: ({search}) => ({bot: search.bot ?? null}),
+  loader: ({deps}) => loadChat({data: deps.bot}),
+  component: function Page() {
+    const chat = Route.useLoaderData()
+    return <Home key={chat.botId} chat={chat} />
+  },
 })
 
 // The Voice card's values until Barkpark has a voice setting: what the oracle's fresh bot shows
 // (fixtures/states: Helix, 1x, Auto-detect).
 const VOICE = {voice: 'Helix', speed: '1x', language: 'Auto-detect'}
 
-function Home() {
-  const chat = Route.useLoaderData()
+function Home({chat}: {chat: Chat}) {
   const router = useRouter()
+  const navigate = useNavigate()
+  // Create in the New Bot dialog: the bot is made (its record, then its id in the list), and the
+  // page opens it, with its empty conversation; the rail shows it at the end of the pinned bots.
+  const create = async (b: {name: string; shape: string; colour: string}) => {
+    const {id} = await createBot({data: b})
+    await navigate({to: '/', search: {bot: id}})
+  }
   const [started, setStarted] = useState<{sessionId: string; startedAt: string} | null>(null)
   const sessionId = started?.sessionId ?? chat.sessionId
   const convo = useConversation(sessionId)
@@ -82,6 +94,7 @@ function Home() {
     <Shell
       scene={{bots: chat.bots, active: chat.botId, panelOpen: true, computer, voice: VOICE}}
       onRenameBot={rename}
+      onCreateBot={create}
       workingBots={convo.botState === 'working' ? [chat.botId] : []}
       transcript={
         chat.host ? (

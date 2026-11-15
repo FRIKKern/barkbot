@@ -27,7 +27,9 @@ import {NewBotDialog} from './NewBotDialog'
 import {AvatarEditor, ConnectApps, Settings} from './Views'
 
 type Open = {name: string; picked?: string; trigger?: HTMLElement; back?: HTMLElement | null}
-type Render = (o: {picked?: string; scene?: Scene; close: () => void; go: (name: string) => void}) => ReactNode
+/** Create in the New Bot dialog: makes the bot; the dialog closes once it is made. */
+export type CreateBot = (b: {name: string; shape: string; colour: string}) => Promise<void>
+type Render = (o: {picked?: string; scene?: Scene; close: () => void; go: (name: string) => void; create?: CreateBot}) => ReactNode
 
 const overlays: Record<string, Render> = {
   'composer-menu': ({close}) => <ComposerMenu onPick={close} />,
@@ -35,7 +37,7 @@ const overlays: Record<string, Render> = {
   'voice-picker': ({picked, scene, close}) => <VoicePicker picked={picked ?? scene?.voice?.voice} onPick={close} />,
   'speed-picker': ({picked, scene, close}) => <SpeedPicker picked={picked ?? scene?.voice?.speed} onPick={close} />,
   'language-picker': ({picked, scene, close}) => <LanguagePicker picked={picked ?? scene?.voice?.language} onPick={close} />,
-  'new-bot-dialog': ({close}) => <NewBotDialog onClose={close} />,
+  'new-bot-dialog': ({close, create}) => <NewBotDialog onClose={close} onCreate={create} />,
   'connect-apps': ({close}) => <ConnectApps onClose={close} />,
   'edit-avatar': () => <AvatarEditor />,
   settings: ({close}) => <Settings onClose={close} />,
@@ -77,7 +79,7 @@ function triggered(el: Element | null): Open | null {
 // voice settings; without it a picker opens on its row's value (or the oracle's captured pick).
 // `onOpenChange` hears which overlay is shown (its name, or null when none), whether a scene holds
 // it or a click opened it, so the frame can mark the trigger (aria-expanded, a pressed look).
-export function Overlay({name, scene, onOpenChange}: {name?: string; scene?: Scene; onOpenChange?: (name: string | null) => void}) {
+export function Overlay({name, scene, onOpenChange, onCreateBot}: {name?: string; scene?: Scene; onOpenChange?: (name: string | null) => void; onCreateBot?: CreateBot}) {
   const [open, setOpen] = useState<Open | null>(null)
   const layer = useRef<HTMLDivElement>(null)
   const held = !!name
@@ -187,6 +189,7 @@ export function Overlay({name, scene, onOpenChange}: {name?: string; scene?: Sce
         scene,
         close: () => !held && close(true),
         go: (n: string) => !held && setOpen({name: n}),
+        create: onCreateBot,
       })}
     </div>
   )

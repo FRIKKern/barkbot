@@ -16,7 +16,8 @@
 import {createHash} from 'node:crypto'
 import {bp, conf, BarkparkError} from './barkpark'
 
-export type Bot = {id: string; name: string; shape?: string; colour?: string; host_id: string; session_id: string | null; created_at: string}
+/** host_id null: a bot made while no computer was enrolled; it has no session and says it has no computer. */
+export type Bot = {id: string; name: string; shape?: string; colour?: string; host_id: string | null; session_id: string | null; created_at: string}
 export type OwnHost = {id: string; name: string; online: boolean}
 export type OwnSession = {id: string; execution_target: string; execution_host_id?: string | null; inserted_at: string}
 
@@ -76,12 +77,15 @@ export async function legacyName(): Promise<string | null> {
 export function trusted(id: string, raw: unknown, hosts: OwnHost[]): Bot | null {
   if (!UUID.test(id) || !raw || typeof raw !== 'object' || Array.isArray(raw)) return null
   const r = raw as Record<string, unknown>
-  if (!validName(r.name) || typeof r.host_id !== 'string' || typeof r.created_at !== 'string') return null
-  if (!hosts.some((h) => h.id === r.host_id)) return null
+  if (!validName(r.name) || typeof r.created_at !== 'string') return null
+  const hostId = r.host_id ?? null
   const sid = r.session_id ?? null
+  // No computer: it may name no session either. Pointing at nothing, it can reach nothing.
+  if (hostId === null && sid !== null) return null
+  if (hostId !== null && (typeof hostId !== 'string' || !hosts.some((h) => h.id === hostId))) return null
   if (sid !== null && (typeof sid !== 'string' || !UUID.test(sid))) return null
   const opt = (v: unknown) => (typeof v === 'string' && v.length <= 40 ? v : undefined)
-  return {id, name: r.name, shape: opt(r.shape), colour: opt(r.colour), host_id: r.host_id, session_id: sid, created_at: r.created_at}
+  return {id, name: r.name, shape: opt(r.shape), colour: opt(r.colour), host_id: hostId, session_id: sid, created_at: r.created_at}
 }
 
 /** What a record's session is to its bot:

@@ -1,5 +1,6 @@
 // The conversation's server functions. Their bodies run on the server only (TanStack Start
 // strips them from the browser bundle), so they may use server/barkpark.
+import {randomUUID} from 'node:crypto'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError} from '../server/barkpark'
 import {addId, legacyName, listIds, mainBotId, putBot, readBot, readBots, sessionOf, trusted, validName, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
@@ -55,14 +56,21 @@ const got = <T,>(p: Promise<T>, what: string): Promise<{ok: true; v: T} | {ok: f
  *  A preference read or write that fails never fails the page: it shows what it could read, writes
  *  nothing more, and says so (`notice`). A Main Bot record already there is kept, never written
  *  over: a load whose list add failed is repaired by the next. */
-export const loadChat = createServerFn({method: 'GET'}).handler(async (): Promise<Chat> => {
+// ?bot=<id>: the open bot, else the first in the rail.
+export const loadChat = createServerFn({method: 'GET'})
+  .validator((botId: string | null | undefined) => (typeof botId === 'string' ? botId : null))
+  .handler(async ({data: want}): Promise<Chat> => {
   const [hosts, ids, legacy] = await Promise.all([ownHosts(), got(listIds(), 'read the bots'), got(legacyName(), 'read the saved bot name')])
   const host = hosts.find((h) => h.name === HOST_NAME()) ?? null
   // Today's name: the legacy pref, else BARKBOT_NAME. If the read failed it is not known, so it is shown, never saved.
   const todays = legacy.ok ? (legacy.v ?? BOT_NAME()) : BOT_NAME()
   if (!host) {
-    // No computer: no record can be made (a bot names its computer). Today's name, nothing written.
-    return {bots: [{id: 'no-computer', name: todays}], botId: 'no-computer', bot: todays, host: null, sessionId: null, startedAt: null, notice: null}
+    // No computer: today's bot cannot be kept (a record names its computer), so it shows by its
+    // name with nothing written; bots made with no computer (Create) follow it.
+    const made = ids.ok && ids.v?.length ? await readBots(ids.v, hosts, []) : {bots: [], unread: 0}
+    const bots = [{id: 'no-computer', name: todays}, ...made.bots.filter(({bot}) => bot.host_id === null).map(({bot}) => ({id: bot.id, name: bot.name}))]
+    const open = bots.find((b) => b.id === want) ?? bots[0]
+    return {bots, botId: open.id, bot: open.name, host: null, sessionId: null, startedAt: null, notice: !ids.ok || made.unread ? NOT_READ : null}
   }
   const sessions = await ownSessions()
   const newest = sessions.filter((s) => s.execution_host_id === host.id).sort((a, b) => b.inserted_at.localeCompare(a.inserted_at))[0]
@@ -98,11 +106,31 @@ export const loadChat = createServerFn({method: 'GET'}).handler(async (): Promis
     }
     // A Main Bot key that is there but not well formed is never written over: in memory only.
   }
-  const open = rail[0]
+  const open = rail.find((x) => x.bot.id === want) ?? rail[0]
   const session = open.session.is === 'open' ? open.session.session : null
-  const home = hosts.find((h) => h.id === open.bot.host_id) ?? host
+  const home = open.bot.host_id === null ? null : (hosts.find((h) => h.id === open.bot.host_id) ?? host)
   return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice}
 })
+
+/** Create in the New Bot dialog: a new bot with its own empty conversation on the enrolled
+ *  computer. Its record is written whole first, and its id is added to the list last, so a bot
+ *  shows only once it is whole. With no computer enrolled the bot is made with none (no session).
+ *  A failed write throws, and the dialog says so; a record whose list add failed is never shown.
+ *  Until a bot can have its own folder (task-88d21dd5955bfa64) it works in the Main Bot's folder. */
+export const createBot = createServerFn({method: 'POST'})
+  .validator((d: {name: unknown; shape?: unknown; colour?: unknown}) => {
+    if (!validName(d.name)) throw new Error('A bot name is 1 to 200 characters')
+    const opt = (v: unknown) => (typeof v === 'string' && v.length <= 40 ? v : undefined)
+    return {name: d.name.trim(), shape: opt(d.shape), colour: opt(d.colour)}
+  })
+  .handler(async ({data}) => {
+    const host = await findHost()
+    const s = host ? await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: host.id}}) : null
+    const bot: Bot = {id: randomUUID(), ...data, host_id: host?.id ?? null, session_id: s?.id ?? null, created_at: s?.inserted_at ?? new Date().toISOString()}
+    await putBot(bot)
+    await addId(bot.id)
+    return {id: bot.id}
+  })
 
 /** Is the bot's computer reachable right now? The page asks every few seconds: Barkpark accepts a
  *  message for a computer that is off (202) and answers it only when the computer is back, so
