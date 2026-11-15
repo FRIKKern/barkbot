@@ -48,6 +48,11 @@ export function uuidV5(name: string): string {
 /** The Main Bot's id: the same for every tab and device, so two first loads write the same keys. */
 export const mainBotId = (hostId: string) => uuidV5(`main-bot:${hostId}`)
 
+/** The folder a bot works in on its computer (task-88d21dd5955bfa64): `bot-` and the first 8 hex of
+ *  its id, never its name, so it is always one segment Barkpark takes (^[a-z0-9][a-z0-9-]{0,39}$).
+ *  The Main Bot has none: it works in the computer's shared root, as today's bot always has. */
+export const botFolder = (id: string, hostId: string): string | null => (UUID.test(id) && id !== mainBotId(hostId) ? `bot-${id.slice(0, 8)}` : null)
+
 export const validName = (n: unknown): n is string => typeof n === 'string' && n.trim().length > 0 && n.length <= 200
 
 // A bot's looks are one of the New Bot dialog's own shapes and colours, nothing else.

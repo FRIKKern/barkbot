@@ -38,7 +38,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500. stub.to is the session each message or answer went to.
-const stub = { prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, fail: new Map(), shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, fail: new Map(), shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -85,7 +85,7 @@ await new Promise((ok) => httpServer((req, res) => {
     // A new conversation on a computer, as Barkpark. `createDelay` holds the answer (Create's Creating…).
     if (req.url === '/v1/chat/sessions' && req.method === 'POST') {
       const b = JSON.parse(body); const x = { id: `00000000-0000-4000-8000-${String(900000000000 + stub.made.length)}`, execution_target: b.execution_target, execution_host_id: b.execution_host_id, inserted_at: new Date().toISOString(), status: 'active' };
-      stub.made.push(x.id); stub.sessions.push(x); return setTimeout(() => json(201, x), stub.createDelay);
+      x.bot_folder = b.bot_folder ?? null; stub.bodies.push({ id: x.id, body: b }); stub.made.push(x.id); stub.sessions.push(x); return setTimeout(() => json(201, x), stub.createDelay);
     }
     if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
       res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' }); res.write(': open\n\n');
@@ -110,6 +110,8 @@ await new Promise((ok) => httpServer((req, res) => {
     if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const id = req.url.split('/').pop(); return stub.pictures.has(id) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(id) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/messages$/.test(req.url) && req.method === 'POST') {
       const m = JSON.parse(body);
+      // A host that does not advertise bot_folders: Barkpark's 422 chat_unsupported for a session with a folder.
+      if (stub.noFolders && stub.sessions.find((x) => x.id === req.url.split('/')[4])?.bot_folder) { stub.refused.push({ folder: m }); return json(422, { error: { code: 'chat_unsupported', message: "chat is not supported for this session's provider or operation" } }); }
       if (stub.noFiles && (m.attachments ?? []).some((a) => typeof a === 'object')) { stub.refused.push({ message: m }); return json(422, { error: { code: 'host_cannot_receive_attachments', message: "this session's chat host cannot receive attachments of this type — update barkpark-chat-host, or send the text alone" } }); }
       stub.sent.push(m); stub.to.push(req.url.split('/')[4]); return json(202, { accepted: true });
     }
@@ -393,6 +395,7 @@ else {
   await until(() => stub.sent.length > shut0, 10000, 'the message to reach the stand-in').catch(() => {});
   const newSid = stub.made.at(-1), madeOn = stub.sessions.find((x) => x.id === newSid)?.execution_host_id;
   check('a bot whose conversation was archived keeps its name and opens none; the next message starts a fresh one on its computer and saves its id in the bot', shut.header === 'Renamed Later' && shut.opened.length === 0 && !!newSid && madeOn === HOST_ID && stub.to.at(-1) === newSid && stub.prefs.get(KEY)?.session_id === newSid && stub.prefs.get(KEY)?.name === 'Renamed Later', { shut, newSid, madeOn, to: stub.to.slice(-1), record: stub.prefs.get(KEY) });
+  check('the Main Bot\'s new conversation names no bot folder: it works in the computer\'s shared root, as today\'s bot always has', !!newSid && stub.bodies.find((x) => x.id === newSid) && !('bot_folder' in stub.bodies.find((x) => x.id === newSid).body), { body: stub.bodies.find((x) => x.id === newSid) });
   stub.prefs.set(KEY, rec('Renamed Later', HOST_ID, '00000000-0000-4000-8000-0000000000d9'));
   w0 = stub.writes.length; s = await showing('Renamed Later');
   check('a bot whose conversation Barkpark does not know (404) keeps its name, opens none and writes nothing', s.header === 'Renamed Later' && stub.opened.length === 0 && since(w0).length === 0, { header: s.header, opened: stub.opened, writes: since(w0) });
@@ -485,6 +488,20 @@ else {
   const pipSession = stub.made.at(-1);
   check('Pip\'s first message makes its one conversation on the computer, saves it in Pip\'s record, and goes there', stub.made.length === pipMade0 + 1 && stub.prefs.get(`barkbot.bot.${pipId}`)?.session_id === pipSession && stub.to.at(-1) === pipSession, { made: stub.made.slice(pipMade0), record: stub.prefs.get(`barkbot.bot.${pipId}`), to: stub.to.slice(-1) });
 
+  const pipBody = stub.bodies.find((x) => x.id === pipSession)?.body;
+  check('a made bot\'s first conversation asks for its own folder: bot- and the first 8 hex of its id, one segment Barkpark takes', pipBody?.bot_folder === `bot-${pipId.slice(0, 8)}` && /^[a-z0-9][a-z0-9-]{0,39}$/.test(pipBody.bot_folder) && pipBody.provider === 'claude' && pipBody.execution_target === 'registered_host', { pipBody, pipId });
+  // A computer whose chat host cannot run a bot in its folder: a plain line, the draft kept, never sent without the folder.
+  await openDialog(); await typeName('Fern'); await press('Create');
+  await until(async () => (await live()).header === 'Fern', 10000, 'Fern to open').catch(() => {}); await wait(500);
+  stub.noFolders = true;
+  const fernMade0 = stub.made.length, fernSent0 = stub.sent.length, fernRef0 = stub.refused.length;
+  await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'hello fern' }); await key('Enter');
+  await until(async () => (await ev(() => document.querySelector('.composer-refused')?.textContent ?? null)) !== null || stub.sent.length > fernSent0, 10000, 'Fern\'s first message to answer').catch(() => {}); await wait(500);
+  const fern = { line: await ev(() => document.querySelector('.composer-refused')?.textContent ?? null), words: await ev(() => document.querySelector('.prompt')?.innerText.trim() ?? ''), made: stub.bodies.filter((x) => stub.made.slice(fernMade0).includes(x.id)).map((x) => x.body.bot_folder ?? null), sent: stub.sent.slice(fernSent0), refused: stub.refused.slice(fernRef0).length };
+  stub.noFolders = false;
+  check('a chat host that cannot run a bot in its own folder: one plain line says so, the words stay, nothing is sent, and it is never tried without the folder', /newer chat host/.test(fern.line ?? '') && fern.words === 'hello fern' && fern.sent.length === 0 && fern.refused === 1 && fern.made.length === 1 && /^bot-[0-9a-f]{8}$/.test(fern.made[0] ?? ''), fern);
+  await ev(() => { const p = document.querySelector('.prompt'); p.replaceChildren(); p.dispatchEvent(new InputEvent('input', { bubbles: true })); });
+
   // What Create refuses, and a Create that fails half-way: nothing is left behind.
   const failLine = () => ev(() => document.querySelector('.new-bot-failed')?.textContent ?? null);
   const tryCreate = async (name) => { const w = stub.writes.length, m = stub.made.length; await openDialog(); await typeName(name); await press('Create'); await until(async () => (await failLine()) !== null || !(await dialog()), 10000, `Create ${name} to answer`).catch(() => {}); await wait(300); const out = { line: await failLine(), open: await dialog(), writes: stub.writes.slice(w), made: stub.made.slice(m), keys: [...stub.prefs].filter(([k, v]) => k.startsWith('barkbot.bot.') && v?.name === name).length }; await key('Escape'); await wait(200); return out; };
@@ -522,7 +539,7 @@ else {
   stub.prefs.set('barkbot.bots', { ids: [...fifty, BEYOND] }); stub.prefs.set(`barkbot.bot.${BEYOND}`, rec('Beyond', HOST_ID, S_NEW));
   w0 = stub.writes.length; s = await showing('Legacy Name');
   check('a bot beyond the 50 a load reads, naming the newest conversation: today\'s bot is not saved with it, the list does not grow past 50, nothing is opened', !(stub.prefs.get(KEY)?.session_id === S_NEW) && ids().length === 51 && !stub.opened.includes(S_NEW) && stub.writes.slice(w0).length === 0, { record: stub.prefs.get(KEY) ?? null, ids: ids().length, opened: stub.opened, writes: stub.writes.slice(w0) });
-  stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = [];
+  stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = []; stub.bodies = [];
 
   // ── Picking a bot shows its own conversation (task-92087f34f4eeeb43) ──────────────────────
   // Two bots on one computer, each with its own session and its own rows. One fleet stream tells
