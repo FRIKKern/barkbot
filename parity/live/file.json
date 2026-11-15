@@ -1,0 +1,18 @@
+{
+ "ran": "2026-11-15T01:14:33.016Z",
+ "barkbot": "8dc03f5c7f",
+ "file_bytes": 23,
+ "reply_has_the_code": true,
+ "card_in_message": true,
+ "card_after_reload": true,
+ "reply_ms": 7508,
+ "pdf": {
+  "ran": "2026-11-14T23:23:50.261Z",
+  "barkbot": "9e05a2940d",
+  "file_bytes": 596,
+  "reply_has_the_code": true,
+  "card_in_message": true,
+  "card_after_reload": true,
+  "reply_ms": 9336
+ }
+}
