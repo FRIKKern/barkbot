@@ -34,20 +34,38 @@ const kids = [];
 process.on('exit', () => { kids.forEach((k) => { try { k.kill('SIGTERM'); } catch {} }); try { rmSync(PROFILE, { recursive: true, force: true }); } catch {} });
 process.on('SIGINT', () => process.exit(130));
 
-// A stand-in Barkpark for the live page (/): it answers what loadChat asks (no computer enrolled;
-// the saved bot name) and keeps every write, so the rename-persists rules can count them.
-const stub = { name: null, reads: 0, writes: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false };
+// A stand-in Barkpark for the live page (/): it answers what loadChat asks (the computers, the
+// sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
+const stub = { prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
-const PREF = '/w/default/p/default/v1/prefs/production/barkbot.bot';
+// Per-account prefs, as Barkpark's (docs/contracts/user-prefs.md): GET, PUT, and PATCH add/remove on a list.
+const PREFS = '/w/default/p/default/v1/prefs/production/';
+// The bot store's writes, from stub.writes: a bot key's PUTs, the list's adds, and the legacy key.
+const botPuts = () => stub.writes.filter((w) => w.method === 'PUT' && w.key.startsWith('barkbot.bot.'));
+const listAdds = () => stub.writes.filter((w) => w.method === 'PATCH' && w.key === 'barkbot.bots' && w.body.op === 'add');
+const legacyWrites = () => stub.writes.filter((w) => w.key === 'barkbot.bot');
+const freshStore = (legacy = null) => { stub.prefs.clear(); if (legacy) stub.prefs.set('barkbot.bot', legacy); };
 const STUB_PORT = await freePort();
 await new Promise((ok) => httpServer((req, res) => {
   let body = '';
   req.on('data', (c) => (body += c));
   req.on('end', () => {
     const json = (code, v) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(v)); };
-    if (req.url === PREF && req.method === 'GET') { stub.reads++; return json(200, { key: 'barkbot.bot', dataset: 'production', value: stub.name === null ? null : { name: stub.name } }); }
-    if (req.url === PREF && req.method === 'PUT') { const { value } = JSON.parse(body); stub.writes.push(value); stub.name = value?.name ?? null; return json(200, { key: 'barkbot.bot', dataset: 'production', value }); }
+    if (req.url.startsWith(PREFS)) {
+      const key = decodeURIComponent(req.url.slice(PREFS.length)); const got = () => json(200, { key, dataset: 'production', value: stub.prefs.get(key) ?? null });
+      if (req.method === 'GET') { stub.reads++; return got(); }
+      const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b });
+      if (req.method === 'PUT') { stub.prefs.set(key, b.value); return got(); }
+      if (req.method === 'DELETE') { stub.prefs.delete(key); return got(); }
+      if (req.method === 'PATCH') {
+        const v = { ...(stub.prefs.get(key) ?? {}) }; const list = Array.isArray(v[b.field]) ? v[b.field] : [];
+        if (b.op === 'add') v[b.field] = list.includes(b.item) ? list : [...list, b.item];
+        else if (b.op === 'remove') v[b.field] = list.filter((x) => x !== b.item);
+        else return json(422, { error: { code: 'bad_request', message: 'unknown op' } });
+        stub.prefs.set(key, v); return got();
+      }
+    }
     if (req.url.startsWith('/w/default/v1/chat-hosts')) return json(200, { hosts: stub.hosts });
     if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: stub.sessions });
     if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
@@ -55,7 +73,7 @@ await new Promise((ok) => httpServer((req, res) => {
       // As Barkpark: the stored rows first (a fresh page asks from 0), and the fleet's snapshot.
       if (req.url === '/v1/chat/events') { if (stub.fleet) res.write(`event: snapshot\ndata: ${JSON.stringify({ sessions: stub.sessions.map((x) => ({ session_id: x.id, agent_state: stub.fleet })) })}\n\n`); }
       else if (req.headers['last-event-id'] !== undefined) stub.rows.forEach((r) => res.write(`id: ${r.seq}\nevent: message\ndata: ${JSON.stringify(r)}\n\n`));
-      if (req.url !== '/v1/chat/events') { stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
+      if (req.url !== '/v1/chat/events') { stub.opened.push(req.url.split('/')[4]); stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
       return;
     }
     // Pictures and files, as Barkpark: an upload's type is read from its bytes (png, PDF, UTF-8 text;
@@ -257,33 +275,71 @@ else {
     await until(async () => (await live()).header === want, 10000, `the live page to show "${want}"`).catch(() => {});
     const l = await live(); field = l.rect; return l;
   };
+  // A bot is kept as its own record (task-735e6ba3d04f2b2c), and a record names its computer: so
+  // these rules run with one enrolled computer. The first load makes the Main Bot's record.
+  const host = (online) => [{ id: '00000000-0000-4000-8000-000000000001', name: 'BarkBot Mac', online, enrolled: true, revoked: false }];
+  stub.hosts = host(true); freshStore();
   const reads = stub.reads;
   s = await reload('BarkBot');
-  precondition('the live page read the saved name from the stand-in (unset), shows BarkBot, and wrote nothing',
-    stub.reads > reads && stub.writes.length === 0 && s.value === 'BarkBot' && s.placeholder === 'Message BarkBot' && s.tiles.includes('BarkBot'), { reads: stub.reads, writes: stub.writes, other: stub.other, s });
+  await until(() => botPuts().length > 0, 5000, 'the Main Bot record').catch(() => {});
+  const made = botPuts().length;
+  precondition('the live page read the store, shows BarkBot, made one Main Bot record and wrote the legacy key zero times',
+    stub.reads > reads && made === 1 && legacyWrites().length === 0 && s.value === 'BarkBot' && s.placeholder === 'Message BarkBot' && s.tiles.includes('BarkBot'), { reads: stub.reads, writes: stub.writes, other: stub.other, s });
+  const renames = () => botPuts().slice(made).map((w) => w.body.value);
 
   await into(); await key('End'); await typeIn(' Two'); await key('Escape'); await wait(300);
   await into(); await clear(); await key('Enter'); await wait(300);
   s = await live();
-  check('Escape and an empty name write nothing to Barkpark (control: the next rule\'s rename writes)', stub.writes.length === 0 && s.header === 'BarkBot', { writes: stub.writes, s });
+  check('Escape and an empty name write nothing to Barkpark (control: the next rule\'s rename writes)', renames().length === 0 && s.header === 'BarkBot', { writes: stub.writes, s });
 
   await into(); await key('End'); await typeIn(' Two'); await key('Enter');
-  await until(async () => stub.writes.length > 0, 5000, 'the rename to reach the stand-in').catch(() => {});
+  await until(async () => renames().length > 0, 5000, 'the rename to reach the stand-in').catch(() => {});
   s = await live();
-  check('Enter: writes the name once, and the live composer says "Message BarkBot Two" at once', stub.writes.length === 1 && stub.writes[0]?.name === 'BarkBot Two' && s.placeholder === 'Message BarkBot Two' && s.header === 'BarkBot Two', { writes: stub.writes, s });
+  check('Enter: writes the name once, to the bot\'s own key, and the live composer says "Message BarkBot Two" at once', renames().length === 1 && renames()[0]?.name === 'BarkBot Two' && legacyWrites().length === 0 && s.placeholder === 'Message BarkBot Two' && s.header === 'BarkBot Two', { writes: stub.writes, s });
 
   s = await reload('BarkBot Two');
-  check('reload: header, rail tile and placeholder show the saved name (control: "BarkBot" before the rename)', s.value === 'BarkBot Two' && s.tiles.includes('BarkBot Two') && s.placeholder === 'Message BarkBot Two' && stub.writes.length === 1, { writes: stub.writes, s });
+  check('reload: header, rail tile and placeholder show the saved name (control: "BarkBot" before the rename)', s.value === 'BarkBot Two' && s.tiles.includes('BarkBot Two') && s.placeholder === 'Message BarkBot Two' && renames().length === 1, { writes: stub.writes, s });
 
   await into(); await key('End'); await typeIn('X'); await click(400, 300);
-  await until(async () => stub.writes.length > 1, 5000, 'the click-away rename to reach the stand-in').catch(() => {});
+  await until(async () => renames().length > 1, 5000, 'the click-away rename to reach the stand-in').catch(() => {});
   s = await reload('BarkBot TwoX');
-  check('click away: writes too, and a reload keeps it', stub.writes.length === 2 && stub.writes[1]?.name === 'BarkBot TwoX' && s.tiles.includes('BarkBot TwoX'), { writes: stub.writes, s });
+  check('click away: writes too, and a reload keeps it', renames().length === 2 && renames()[1]?.name === 'BarkBot TwoX' && s.tiles.includes('BarkBot TwoX') && legacyWrites().length === 0, { writes: stub.writes, s });
+
+  // ── The bot store: today's bot moves in, additively; a record is checked, never trusted ─────
+  console.log('Behaviour · the bot store (the live page, against the stand-in Barkpark)');
+  const HOST_ID = host(true)[0].id;
+  const S1 = '00000000-0000-4000-8000-0000000000c1', S2 = '00000000-0000-4000-8000-0000000000c2', FOREIGN = '00000000-0000-4000-8000-0000000000ff';
+  const session = (id, hostId = HOST_ID) => ({ id, execution_target: 'registered_host', execution_host_id: hostId, inserted_at: '2026-11-15T09:00:00Z', status: 'active' });
+  const ids = () => stub.prefs.get('barkbot.bots')?.ids ?? [];
+  const botKeys = () => [...stub.prefs.keys()].filter((k) => k.startsWith('barkbot.bot.'));
+  const showing = async (want) => { stub.opened = []; await open(`${base}/`); await until(async () => (await live()).header === want, 15000, `the page to show "${want}"`).catch(() => {}); await wait(500); return live(); };
+  stub.sessions = [session(S1)]; stub.rows = [];
+  freshStore({ name: 'Legacy Name' }); let w0 = stub.writes.length;
+  s = await showing('Legacy Name');
+  const moved = stub.writes.slice(w0);
+  check('today\'s bot moves in: one bot with the legacy name and its conversation; one bot key and one add written, the legacy key never', s.tiles.filter((t) => !t.startsWith('Open account')).length === 1 && s.tiles.includes('Legacy Name') && stub.opened.includes(S1) && moved.filter((w) => w.method === 'PUT' && w.key.startsWith('barkbot.bot.')).length === 1 && moved.filter((w) => w.method === 'PATCH' && w.key === 'barkbot.bots').length === 1 && moved.filter((w) => w.key === 'barkbot.bot').length === 0 && stub.prefs.get('barkbot.bot')?.name === 'Legacy Name', { moved, opened: stub.opened, s });
+  // Two first loads at once (two tabs) against an empty store: the same id, so one bot.
+  freshStore({ name: 'Legacy Name' });
+  await Promise.all([fetch(`${base}/`).then((r) => r.text()), fetch(`${base}/`).then((r) => r.text())]);
+  check('two page loads at once against an empty store leave one bot, the same id, not two', ids().length === 1 && botKeys().length === 1 && botKeys()[0] === `barkbot.bot.${ids()[0]}`, { ids: ids(), keys: botKeys() });
+  // A record is a claim: one naming a session not on its own computer, or a computer not the caller's, is dropped.
+  const main = ids()[0]; const B = '7b0e1f2a-3c4d-4e5f-8a6b-7c8d9e0f1a2b', C = '8c1f2a3b-4d5e-4f6a-9b7c-8d9e0f1a2b3c';
+  const rec = (name, host_id, session_id) => ({ name, host_id, session_id, created_at: '2026-11-15T09:00:00Z' });
+  stub.prefs.set('barkbot.bots', { ids: [B, C, main] });
+  stub.prefs.set(`barkbot.bot.${B}`, rec('Stranger', HOST_ID, FOREIGN));
+  stub.prefs.set(`barkbot.bot.${C}`, rec('Elsewhere', '00000000-0000-4000-8000-00000000beef', null));
+  s = await showing('Legacy Name');
+  const sentTo = () => stub.other.filter((x) => x.includes(FOREIGN));
+  check('a bot key naming a session not on its own computer, or a computer not the caller\'s, is not shown and nothing is sent to that session', !s.tiles.some((t) => /Stranger|Elsewhere/.test(t)) && s.header === 'Legacy Name' && !stub.opened.includes(FOREIGN) && stub.opened.includes(S1) && sentTo().length === 0, { tiles: s.tiles, opened: stub.opened, other: stub.other });
+  stub.sessions = [session(S1), session(S2)];
+  stub.prefs.set(`barkbot.bot.${B}`, rec('Stranger', HOST_ID, S2));
+  s = await showing('Stranger');
+  check('control: the same bot with its own session is shown, first in the rail and open on that session', s.tiles.some((t) => t === 'Stranger') && s.header === 'Stranger' && stub.opened.includes(S2) && !s.tiles.some((t) => /Elsewhere/.test(t)), { tiles: s.tiles, opened: stub.opened });
+  stub.sessions = []; freshStore();
 
   // The bot's computer stops and comes back while the page is open (seen live 2026-11-11: a
   // message sent to a stopped computer showed no reply and no reason).
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
-  const host = (online) => [{ id: '00000000-0000-4000-8000-000000000001', name: 'BarkBot Mac', online, enrolled: true, revoked: false }];
   const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
   stub.hosts = host(true);
   await open(`${base}/`);
@@ -304,6 +360,7 @@ else {
   console.log('Behaviour · the bot asks leave (the live page, against the stand-in Barkpark)');
   const SESSION = '00000000-0000-4000-8000-0000000000aa';
   stub.sessions = [{ id: SESSION, execution_target: 'registered_host', execution_host_id: host(true)[0].id, inserted_at: '2026-11-13T10:00:00Z', status: 'active' }];
+  freshStore(); // the Main Bot is made again from this session, as today's bot moves in
   const card = () => ev(() => { const c = document.querySelector('.ask'); const r = (q) => { const b = c?.querySelector(q)?.getBoundingClientRect(); return b ? [b.x + b.width / 2, b.y + b.height / 2] : null; };
     return { shown: !!c, what: c?.querySelector('.ask-what')?.textContent ?? null, detail: c?.querySelector('.ask-detail')?.textContent ?? null, allow: r('.ask-allow'), deny: r('.ask-deny'), locked: !!c?.querySelector('.ask-allow')?.disabled }; });
   const asks = (id, tool, input) => say('approval_requested', { approval_id: id, native: { kind: 'approval_requested', approval_id: id, tool_name: tool, input } });
