@@ -36,7 +36,9 @@ process.on('SIGINT', () => process.exit(130));
 
 // A stand-in Barkpark for the live page (/): it answers what loadChat asks (the computers, the
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
-const stub = { prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false };
+// stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
+// pref call fail: 'GET barkbot.bots' → 500. stub.to is the session each message or answer went to.
+const stub = { prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], fleet: null, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, fail: new Map(), shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // Per-account prefs, as Barkpark's (docs/contracts/user-prefs.md): GET, PUT, and PATCH add/remove on a list.
@@ -45,6 +47,7 @@ const PREFS = '/w/default/p/default/v1/prefs/production/';
 const botPuts = () => stub.writes.filter((w) => w.method === 'PUT' && w.key.startsWith('barkbot.bot.'));
 const listAdds = () => stub.writes.filter((w) => w.method === 'PATCH' && w.key === 'barkbot.bots' && w.body.op === 'add');
 const legacyWrites = () => stub.writes.filter((w) => w.key === 'barkbot.bot');
+const listed = () => stub.sessions.filter((x) => !x.archived_at).sort((a, b) => (b.last_active_at ?? b.inserted_at).localeCompare(a.last_active_at ?? a.inserted_at)).slice(0, 50).map(({ archived_at, ...x }) => x);
 const freshStore = (legacy = null) => { stub.prefs.clear(); if (legacy) stub.prefs.set('barkbot.bot', legacy); };
 const STUB_PORT = await freePort();
 await new Promise((ok) => httpServer((req, res) => {
@@ -54,8 +57,10 @@ await new Promise((ok) => httpServer((req, res) => {
     const json = (code, v) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(v)); };
     if (req.url.startsWith(PREFS)) {
       const key = decodeURIComponent(req.url.slice(PREFS.length)); const got = () => json(200, { key, dataset: 'production', value: stub.prefs.get(key) ?? null });
-      if (req.method === 'GET') { stub.reads++; return got(); }
-      const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b });
+      const failing = stub.fail.get(`${req.method} ${key}`);
+      if (req.method === 'GET') { stub.reads++; stub.readKeys.push(key); return failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got(); }
+      const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing });
+      if (failing) return json(failing, { error: { code: 'internal', message: 'the stand-in fails this write' } });
       if (req.method === 'PUT') { stub.prefs.set(key, b.value); return got(); }
       if (req.method === 'DELETE') { stub.prefs.delete(key); return got(); }
       if (req.method === 'PATCH') {
@@ -67,7 +72,18 @@ await new Promise((ok) => httpServer((req, res) => {
       }
     }
     if (req.url.startsWith('/w/default/v1/chat-hosts')) return json(200, { hosts: stub.hosts });
-    if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: stub.sessions });
+    // As Barkpark (studio_chat.ex list_sessions): the list leaves out archived sessions and holds
+    // only the 50 most recently active. A session's own read answers any session the admin token
+    // can see, archived too, and 404 for an unknown id.
+    if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: listed() });
+    if (/^\/v1\/chat\/sessions\/[^/?]+(\?.*)?$/.test(req.url) && req.method === 'GET') {
+      const id = decodeURIComponent(req.url.split('?')[0].split('/')[4]); stub.shown.push(id); const x = stub.sessions.find((y) => y.id === id);
+      return x ? json(200, { archived_at: null, ...x, messages: [] }) : json(404, { error: { code: 'not_found', message: 'chat session not found' } });
+    }
+    if (req.url === '/v1/chat/sessions' && req.method === 'POST') {
+      const b = JSON.parse(body); const x = { id: `00000000-0000-4000-8000-${String(900000000000 + stub.made.length)}`, execution_target: b.execution_target, execution_host_id: b.execution_host_id, inserted_at: new Date().toISOString(), status: 'active' };
+      stub.made.push(x.id); stub.sessions.push(x); return json(201, x);
+    }
     if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
       res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' }); res.write(': open\n\n');
       // As Barkpark: the stored rows first (a fresh page asks from 0), and the fleet's snapshot.
@@ -89,10 +105,10 @@ await new Promise((ok) => httpServer((req, res) => {
     if (/^\/v1\/chat\/sessions\/[^/]+\/messages$/.test(req.url) && req.method === 'POST') {
       const m = JSON.parse(body);
       if (stub.noFiles && (m.attachments ?? []).some((a) => typeof a === 'object')) { stub.refused.push({ message: m }); return json(422, { error: { code: 'host_cannot_receive_attachments', message: "this session's chat host cannot receive attachments of this type — update barkpark-chat-host, or send the text alone" } }); }
-      stub.sent.push(m); return json(202, { accepted: true });
+      stub.sent.push(m); stub.to.push(req.url.split('/')[4]); return json(202, { accepted: true });
     }
-    if (/^\/v1\/chat\/sessions\/[^/]+\/answer$/.test(req.url) && req.method === 'POST') { stub.choices.push(JSON.parse(body)); res.writeHead(204); return res.end(); }
-    if (/^\/v1\/chat\/sessions\/[^/]+\/approval$/.test(req.url) && req.method === 'POST') { stub.answers.push(JSON.parse(body)); res.writeHead(204); return res.end(); }
+    if (/^\/v1\/chat\/sessions\/[^/]+\/answer$/.test(req.url) && req.method === 'POST') { stub.choices.push(JSON.parse(body)); stub.to.push(req.url.split('/')[4]); res.writeHead(204); return res.end(); }
+    if (/^\/v1\/chat\/sessions\/[^/]+\/approval$/.test(req.url) && req.method === 'POST') { stub.answers.push(JSON.parse(body)); stub.to.push(req.url.split('/')[4]); res.writeHead(204); return res.end(); }
     stub.other.push(`${req.method} ${req.url}`);
     json(404, { error: { code: 'not_found', message: 'not in the stand-in' } });
   });
@@ -325,17 +341,89 @@ else {
   // A record is a claim: one naming a session not on its own computer, or a computer not the caller's, is dropped.
   const main = ids()[0]; const B = '7b0e1f2a-3c4d-4e5f-8a6b-7c8d9e0f1a2b', C = '8c1f2a3b-4d5e-4f6a-9b7c-8d9e0f1a2b3c';
   const rec = (name, host_id, session_id) => ({ name, host_id, session_id, created_at: '2026-11-15T09:00:00Z' });
-  stub.prefs.set('barkbot.bots', { ids: [B, C, main] });
+  // Barkpark's list holds only the 50 most recently active sessions: 50 newer ones on another
+  // computer push S1 and FOREIGN out of it, so each is judged by its own read.
+  const OTHER_HOST = '00000000-0000-4000-8000-00000000beef';
+  const fillers = Array.from({ length: 50 }, (_, i) => ({ ...session(`00000000-0000-4000-8000-1000000000${String(i).padStart(2, '0')}`, OTHER_HOST), last_active_at: `2026-11-15T10:${String(i).padStart(2, '0')}:00Z` }));
+  const MANAGED = '00000000-0000-4000-8000-0000000000ee', D = '9d2a3b4c-5e6f-4a7b-8c8d-9e0f1a2b3c4d';
+  stub.sessions = [session(S1), session(FOREIGN, OTHER_HOST), { ...session(MANAGED, null), execution_target: 'managed' }, ...fillers];
+  stub.prefs.set('barkbot.bots', { ids: [B, D, C, main] });
+  stub.prefs.set(`barkbot.bot.${D}`, rec('Managed', HOST_ID, MANAGED));
   stub.prefs.set(`barkbot.bot.${B}`, rec('Stranger', HOST_ID, FOREIGN));
-  stub.prefs.set(`barkbot.bot.${C}`, rec('Elsewhere', '00000000-0000-4000-8000-00000000beef', null));
+  stub.prefs.set(`barkbot.bot.${C}`, rec('Elsewhere', OTHER_HOST, null));
   s = await showing('Legacy Name');
-  const sentTo = () => stub.other.filter((x) => x.includes(FOREIGN));
-  check('a bot key naming a session not on its own computer, or a computer not the caller\'s, is not shown and nothing is sent to that session', !s.tiles.some((t) => /Stranger|Elsewhere/.test(t)) && s.header === 'Legacy Name' && !stub.opened.includes(FOREIGN) && stub.opened.includes(S1) && sentTo().length === 0, { tiles: s.tiles, opened: stub.opened, other: stub.other });
-  stub.sessions = [session(S1), session(S2)];
+  const sentTo = () => [...stub.other, ...stub.to].filter((x) => x.includes(FOREIGN) || x.includes(MANAGED));
+  check('a bot key naming a session Barkpark shows on another computer or as managed, or a computer not the caller\'s, is not shown and nothing is sent to that session (control below: a gone session keeps the bot)', !s.tiles.some((t) => /Stranger|Elsewhere|Managed/.test(t)) && s.header === 'Legacy Name' && !stub.opened.includes(FOREIGN) && !stub.opened.includes(MANAGED) && stub.opened.includes(S1) && sentTo().length === 0 && !listed().some((x) => x.id === FOREIGN || x.id === S1 || x.id === MANAGED), { tiles: s.tiles, opened: stub.opened, other: stub.other, to: stub.to });
+  stub.sessions = [session(S1), session(S2), session(FOREIGN, OTHER_HOST), { ...session(MANAGED, null), execution_target: 'managed' }, ...fillers];
   stub.prefs.set(`barkbot.bot.${B}`, rec('Stranger', HOST_ID, S2));
   s = await showing('Stranger');
-  check('control: the same bot with its own session is shown, first in the rail and open on that session', s.tiles.some((t) => t === 'Stranger') && s.header === 'Stranger' && stub.opened.includes(S2) && !s.tiles.some((t) => /Elsewhere/.test(t)), { tiles: s.tiles, opened: stub.opened });
-  stub.sessions = []; freshStore();
+  check('control: the same bot with its own session is shown, first in the rail and open on that session', s.tiles.some((t) => t === 'Stranger') && s.header === 'Stranger' && stub.opened.includes(S2) && !s.tiles.some((t) => /Elsewhere|Managed/.test(t)), { tiles: s.tiles, opened: stub.opened });
+
+  // A good bot is kept whatever Barkpark's list leaves out, and a failed pref read or write never
+  // fails the page and never saves a guess (the review of #59: B1, B2, B3).
+  const KEY = `barkbot.bot.${main}`;
+  const alertLine = () => ev(() => document.querySelector('.chat-error')?.textContent ?? null);
+  const since = (n) => stub.writes.slice(n);
+  stub.sessions = [session(S1), ...fillers];
+  freshStore({ name: 'Legacy Name' }); stub.prefs.set('barkbot.bots', { ids: [main] }); stub.prefs.set(KEY, rec('Renamed Later', HOST_ID, S1));
+  w0 = stub.writes.length; stub.shown = [];
+  s = await showing('Renamed Later'); field = s.rect;
+  check('a bot whose conversation is past Barkpark\'s 50 most recent keeps its name and opens that conversation, read on its own (control: the list leaves it out)', s.header === 'Renamed Later' && stub.opened.includes(S1) && stub.shown.includes(S1) && !listed().some((x) => x.id === S1) && since(w0).length === 0, { header: s.header, opened: stub.opened, shown: stub.shown, writes: since(w0) });
+  await into(); await key('End'); await typeIn(' Again'); await key('Enter');
+  await until(() => since(w0).length > 0, 5000, 'the rename to reach the stand-in').catch(() => {});
+  check('… and a rename of it still saves, to its own key, keeping its conversation', since(w0).length === 1 && since(w0)[0].key === KEY && stub.prefs.get(KEY)?.name === 'Renamed Later Again' && stub.prefs.get(KEY)?.session_id === S1, { writes: since(w0), alert: await alertLine() });
+  stub.sessions = [{ ...session(S1), archived_at: '2026-11-15T11:00:00Z' }];
+  stub.prefs.set(KEY, rec('Renamed Later', HOST_ID, S1));
+  s = await showing('Renamed Later');
+  const shut = { header: s.header, opened: [...stub.opened] };
+  const shut0 = stub.sent.length;
+  await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'hello again' }); await key('Enter');
+  await until(() => stub.sent.length > shut0, 10000, 'the message to reach the stand-in').catch(() => {});
+  const newSid = stub.made.at(-1), madeOn = stub.sessions.find((x) => x.id === newSid)?.execution_host_id;
+  check('a bot whose conversation was archived keeps its name and opens none; the next message starts a fresh one on its computer and saves its id in the bot', shut.header === 'Renamed Later' && shut.opened.length === 0 && !!newSid && madeOn === HOST_ID && stub.to.at(-1) === newSid && stub.prefs.get(KEY)?.session_id === newSid && stub.prefs.get(KEY)?.name === 'Renamed Later', { shut, newSid, madeOn, to: stub.to.slice(-1), record: stub.prefs.get(KEY) });
+  stub.prefs.set(KEY, rec('Renamed Later', HOST_ID, '00000000-0000-4000-8000-0000000000d9'));
+  w0 = stub.writes.length; s = await showing('Renamed Later');
+  check('a bot whose conversation Barkpark does not know (404) keeps its name, opens none and writes nothing', s.header === 'Renamed Later' && stub.opened.length === 0 && since(w0).length === 0, { header: s.header, opened: stub.opened, writes: since(w0) });
+
+  stub.sessions = [session(S1)];
+  freshStore({ name: 'Legacy Name' }); stub.fail.set('GET barkbot.bot', 500);
+  w0 = stub.writes.length;
+  s = await showing('BarkBot');
+  const failedRead = { header: s.header, alert: await alertLine(), writes: since(w0) };
+  stub.fail.clear();
+  s = await showing('Legacy Name');
+  check('one failed read of today\'s name writes nothing and says so; the next load, whose read works, moves the bot in with that name (control: the first load showed BarkBot)', failedRead.header === 'BarkBot' && failedRead.writes.length === 0 && /could not be read/.test(failedRead.alert ?? '') && s.header === 'Legacy Name' && stub.prefs.get(KEY)?.name === 'Legacy Name' && ids().join() === main, { failedRead, header: s.header, record: stub.prefs.get(KEY), ids: ids() });
+
+  stub.fail.set('GET barkbot.bots', 500); w0 = stub.writes.length;
+  let status = (await fetch(`${base}/`)).status;
+  s = await showing('Legacy Name');
+  check('a failed read of the bot list: the page still opens, on today\'s bot from memory, says so in one plain line, and writes nothing', status === 200 && s.header === 'Legacy Name' && /could not be read/.test((await alertLine()) ?? '') && since(w0).length === 0, { status, header: s.header, alert: await alertLine(), writes: since(w0) });
+
+  stub.fail.clear(); freshStore({ name: 'Legacy Name' }); stub.fail.set(`PUT ${KEY}`, 500); w0 = stub.writes.length;
+  status = (await fetch(`${base}/`)).status;
+  s = await showing('Legacy Name');
+  check('a failed save of the Main Bot: the page still opens with it, says it was not saved, and adds no id for a record that is not there', status === 200 && s.header === 'Legacy Name' && /could not be saved/.test((await alertLine()) ?? '') && ids().length === 0 && !stub.prefs.has(KEY) && since(w0).every((w) => w.method === 'PUT'), { status, header: s.header, alert: await alertLine(), ids: ids(), writes: since(w0) });
+
+  stub.fail.clear(); freshStore({ name: 'Legacy Name' }); stub.fail.set('PATCH barkbot.bots', 500);
+  s = await showing('Legacy Name');
+  const left = { header: s.header, alert: await alertLine(), record: stub.prefs.get(KEY)?.name, ids: [...ids()] };
+  stub.fail.clear();
+  stub.prefs.set(KEY, { ...stub.prefs.get(KEY), name: 'Kept Name' }); // as a rename in between would save it
+  w0 = stub.writes.length;
+  s = await showing('Kept Name');
+  check('a save whose list add failed leaves a record with no list entry and says so; the next load adds its id and keeps the record as it is now, never written over', left.header === 'Legacy Name' && /could not be saved/.test(left.alert ?? '') && left.record === 'Legacy Name' && left.ids.length === 0 && ids().join() === main && s.header === 'Kept Name' && stub.prefs.get(KEY)?.name === 'Kept Name' && since(w0).filter((w) => w.method === 'PUT').length === 0, { left, header: s.header, ids: ids(), writes: since(w0) });
+
+  stub.prefs.set('barkbot.bots', { ids: [main, main] });
+  s = await showing('Kept Name');
+  check('an id twice in the list is one bot in the rail', s.tiles.filter((t) => t === 'Kept Name').length === 1, { tiles: s.tiles });
+  const many = Array.from({ length: 60 }, (_, i) => `a0000000-0000-4000-8000-0000000000${i.toString(16).padStart(2, '0')}`);
+  many.forEach((id, i) => stub.prefs.set(`barkbot.bot.${id}`, rec(`Bot ${i}`, HOST_ID, null)));
+  stub.prefs.set('barkbot.bots', { ids: [main, ...many] });
+  const r0 = stub.readKeys.length; w0 = stub.writes.length;
+  s = await showing('Kept Name');
+  const recordReads = stub.readKeys.slice(r0).filter((k) => k.startsWith('barkbot.bot.')).length, tiles = s.tiles.filter((t) => t === 'Kept Name' || /^Bot \d+$/.test(t));
+  check('one page load reads at most 50 bot records: the first 50 in the list are shown, the rest stay in the list untouched', recordReads === 50 && tiles.length === 50 && tiles.at(-1) === 'Bot 48' && ids().length === 61 && since(w0).length === 0, { recordReads, tiles: tiles.length, last: tiles.at(-1), ids: ids().length, writes: since(w0) });
+  stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = []; stub.shown = [];
 
   // The bot's computer stops and comes back while the page is open (seen live 2026-11-11: a
   // message sent to a stopped computer showed no reply and no reason).

@@ -6,13 +6,15 @@
 //   barkbot.bot         {name}             today's one bot, before the store: read, never written or deleted
 //
 // A pref is written by a client, so a record is a claim, not a fact. A record is shown only if its
-// key, id and fields are well formed, its host is one of the caller's own enrolled computers, and
-// its session (if it names one) is one of the caller's own registered-host sessions ON THAT HOST.
-// Anything else is dropped: not shown, and nothing is ever sent to the session it names (the
-// owner's bp token can be a global admin, which opens any session id).
+// key, id and fields are well formed and its host is one of the caller's own enrolled computers.
+// Its session is checked on its own (sessionOf): opened only if Barkpark shows it as a
+// registered-host session ON THAT HOST. A session Barkpark shows elsewhere (another host, managed)
+// drops the record: not shown, and nothing is ever sent to it (the owner's bp token can be a global
+// admin, which opens any session id). A session that is gone (404, archived) keeps the bot and
+// opens no conversation; the next message starts a fresh one and saves its id.
 // No token, credential or enrollment value is ever written in a pref.
 import {createHash} from 'node:crypto'
-import {bp, conf} from './barkpark'
+import {bp, conf, BarkparkError} from './barkpark'
 
 export type Bot = {id: string; name: string; shape?: string; colour?: string; host_id: string; session_id: string | null; created_at: string}
 export type OwnHost = {id: string; name: string; online: boolean}
@@ -52,44 +54,76 @@ async function read<T>(key: string): Promise<T | null> {
   return value
 }
 
-/** The ids in rail order, or null when the store was never made. */
+/** How many records one page load reads. The rest stay in the list, untouched, and are not shown. */
+export const READ_CAP = 50
+
+/** The ids in rail order, each once, or null when the store was never made. Throws if the read fails. */
 export async function listIds(): Promise<string[] | null> {
   const v = await read<{ids?: unknown}>(LIST_KEY)
   if (!v || !Array.isArray(v.ids)) return null
-  return v.ids.filter((x): x is string => typeof x === 'string' && UUID.test(x))
+  return [...new Set(v.ids.filter((x): x is string => typeof x === 'string' && UUID.test(x)))]
 }
 
-/** Today's one bot's name (the legacy pref), or null. Read only. */
+/** Today's one bot's name (the legacy pref), or null when it is unset. Read only. Throws if the
+ *  read fails: a failed read is not "unset", and the move-in must not save a default over it. */
 export async function legacyName(): Promise<string | null> {
-  try {
-    const v = await read<{name?: unknown}>(LEGACY_KEY)
-    return validName(v?.name) ? v!.name : null
-  } catch (e) {
-    console.warn(`barkbot: could not read the saved bot name (${(e as Error).message})`)
-    return null
-  }
+  const v = await read<{name?: unknown}>(LEGACY_KEY)
+  return validName(v?.name) ? v!.name : null
 }
 
-/** A record, checked against what the caller itself can see. Null: dropped. */
-export function trusted(id: string, raw: unknown, hosts: OwnHost[], sessions: OwnSession[]): Bot | null {
-  if (!UUID.test(id) || !raw || typeof raw !== 'object') return null
+/** A record, checked against the caller's own computers. Null: dropped. Its session is checked
+ *  apart (sessionOf), since Barkpark's list does not hold every session. */
+export function trusted(id: string, raw: unknown, hosts: OwnHost[]): Bot | null {
+  if (!UUID.test(id) || !raw || typeof raw !== 'object' || Array.isArray(raw)) return null
   const r = raw as Record<string, unknown>
   if (!validName(r.name) || typeof r.host_id !== 'string' || typeof r.created_at !== 'string') return null
   if (!hosts.some((h) => h.id === r.host_id)) return null
   const sid = r.session_id ?? null
-  if (sid !== null) {
-    if (typeof sid !== 'string') return null
-    const s = sessions.find((x) => x.id === sid)
-    if (!s || s.execution_target !== 'registered_host' || s.execution_host_id !== r.host_id) return null
-  }
+  if (sid !== null && (typeof sid !== 'string' || !UUID.test(sid))) return null
   const opt = (v: unknown) => (typeof v === 'string' && v.length <= 40 ? v : undefined)
   return {id, name: r.name, shape: opt(r.shape), colour: opt(r.colour), host_id: r.host_id, session_id: sid, created_at: r.created_at}
 }
 
-/** Every record in the list, in order, keeping only the trusted ones. */
-export async function readBots(ids: string[], hosts: OwnHost[], sessions: OwnSession[]): Promise<Bot[]> {
-  const raws = await Promise.all(ids.map((id) => read<unknown>(botKey(id)).catch(() => null)))
-  return ids.map((id, i) => trusted(id, raws[i], hosts, sessions)).filter((b): b is Bot => b !== null)
+/** What a record's session is to its bot:
+ *  open    the caller's own registered-host session on the bot's host: opened
+ *  none    the record names no session, or Barkpark has none by that id (404) or it is archived:
+ *          the bot stays, no conversation opens, the next message starts one and saves its id
+ *  unsure  Barkpark could not be asked (any other failure): the bot stays, nothing opens, and the
+ *          record keeps its pointer (a new conversation is not saved over it)
+ *  foreign Barkpark shows the session somewhere else (another host, managed, another id): the
+ *          record is dropped, never shown, opened or sent to */
+export type SessionCheck = {is: 'open'; session: OwnSession} | {is: 'none'} | {is: 'unsure'} | {is: 'foreign'}
+
+// The newest message seq Barkpark takes: a show read past it carries no messages, only the session.
+const NO_MESSAGES = '9223372036854775807'
+
+/** Checks `bot`'s session: first in the caller's list (`listed`), else by its own read, since the
+ *  list leaves out archived sessions and holds only the 50 most recently active. */
+export async function sessionOf(bot: Bot, listed: OwnSession[] = []): Promise<SessionCheck> {
+  const sid = bot.session_id
+  if (sid === null) return {is: 'none'}
+  const judge = (s: OwnSession & {archived_at?: string | null}): SessionCheck =>
+    s.id !== sid || s.execution_target !== 'registered_host' || s.execution_host_id !== bot.host_id ? {is: 'foreign'} : s.archived_at ? {is: 'none'} : {is: 'open', session: {id: s.id, execution_target: s.execution_target, execution_host_id: s.execution_host_id, inserted_at: s.inserted_at}}
+  const hit = listed.find((s) => s.id === sid)
+  if (hit) return judge(hit)
+  try {
+    return judge(await bp<OwnSession & {archived_at?: string | null}>(`/v1/chat/sessions/${encodeURIComponent(sid)}?since=${NO_MESSAGES}`))
+  } catch (e) {
+    if (e instanceof BarkparkError && e.status === 404) return {is: 'none'}
+    console.warn(`barkbot: could not check a bot's conversation (${(e as Error).message})`)
+    return {is: 'unsure'}
+  }
+}
+
+/** The first READ_CAP records in the list, in order: the trusted ones with their session checks,
+ *  and how many could not be read. An unread record is not shown this time and is not touched. */
+export async function readBots(ids: string[], hosts: OwnHost[], listed: OwnSession[]): Promise<{bots: {bot: Bot; session: SessionCheck}[]; unread: number}> {
+  const some = ids.slice(0, READ_CAP)
+  let unread = 0
+  const raws = await Promise.all(some.map((id) => read<unknown>(botKey(id)).catch(() => (unread++, null))))
+  const kept = some.map((id, i) => trusted(id, raws[i], hosts)).filter((b): b is Bot => b !== null)
+  const checks = await Promise.all(kept.map((b) => sessionOf(b, listed)))
+  return {bots: kept.map((bot, i) => ({bot, session: checks[i]})).filter((x) => x.session.is !== 'foreign'), unread}
 }
 
 /** Writes a bot's own key. The record is whole before its id is added to the list. */

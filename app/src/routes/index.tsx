@@ -28,14 +28,15 @@ function Home() {
   // The bot's name as renamed in the details panel: the composer and the transcript follow it at
   // once, and it is saved to Barkpark, so a reload shows it too (loadChat reads it back).
   const [name, setName] = useState(chat.bot)
-  const [renameError, setRenameError] = useState<string | null>(null)
+  // A plain line when the name or the conversation was not saved (the page goes on).
+  const [note, setNote] = useState<string | null>(null)
   const rename = async (_id: string, next: string) => {
     setName(next)
     try {
       await renameBot({data: {id: chat.botId, name: next}})
-      setRenameError(null)
+      setNote(null)
     } catch (e) {
-      setRenameError(`The new name was not saved: ${(e as Error).message}`)
+      setNote(`The new name was not saved: ${(e as Error).message}`)
     }
   }
 
@@ -50,7 +51,9 @@ function Home() {
     if (!sessionId && !opening) {
       setOpening(true)
       try {
-        setStarted(await startChat({data: {hostId: chat.host.id, botId: chat.botId}}))
+        const made = await startChat({data: {hostId: chat.host.id, botId: chat.botId}})
+        setStarted(made)
+        if (!made.kept) setNote('This conversation was not saved to the bot, so a reload may not open it again.')
       } finally {
         setOpening(false)
       }
@@ -82,7 +85,7 @@ function Home() {
       workingBots={convo.botState === 'working' ? [chat.botId] : []}
       transcript={
         chat.host ? (
-          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? renameError ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
+          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? note ?? chat.notice ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
         ) : (
           <div className="transcript">
             <p className="chat-note">
