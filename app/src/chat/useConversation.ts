@@ -100,6 +100,11 @@ export const fileSize = (bytes: number) => (bytes < 1000 ? `${bytes}B` : bytes <
 /** Why a message did not go, said plainly; the draft stays in the box. */
 /** Barkpark's chat_unsupported: for a bot in its own folder, the computer's chat host cannot run one there yet. */
 export const CANNOT_RUN_HERE = "The bot's computer cannot run this conversation, so nothing was sent. A bot in its own folder needs a newer chat host: update barkpark-chat-host, then send again."
+/** The one sentence for a message whose fate is not known: it ends every such line in the app. */
+export const MAY_HAVE_GONE = 'it may have been sent: look in the conversation before sending it again.'
+/** Barkpark may have taken it (it gave no answer): the words stay, and this says so, so one Enter
+ *  does not send it twice without a word. */
+export const NO_ANSWER = `This message had no answer from Barkpark, so ${MAY_HAVE_GONE}`
 export const CANNOT_TAKE_FILES = "The bot's computer cannot take this file yet, so nothing was sent. Update its chat host, or send the words alone."
 
 const flat = (s: string) => s.replace(/\s+/g, '')
@@ -382,13 +387,19 @@ export function useConversation(sessionId: string | null, transport: Transport =
 
   /** Sends a message with what goes with it. Answers null once it is sent, or the plain words for why it was not
    *  (a file Barkpark does not take, a computer that cannot take files): then nothing was sent and the draft stays.
-   *  A send that throws answers '': its reason is told as the conversation's line (or to `failed`), and the
-   *  draft stays too. */
+   *  A send Barkpark refused answers '': its reason is told as the conversation's line (or to `failed`), and
+   *  the draft stays too. A send with no answer may have gone: it answers NO_ANSWER, and the draft stays. */
   const send = useCallback(
     // `failed`: a send that fails is told there, not shown as the conversation's error.
     async (content: string, outgoing: Outgoing[] = [], failed?: (why: string) => void): Promise<string | null> => {
       if (!sessionId) return null
       setError(null)
+      const told = (why: string) => {
+        if (failed) failed(why)
+        else setError(why)
+        return ''
+      }
+      let asked = false // the message itself is on its way: from here a lost answer may mean it went
       try {
         // Each is stored for the conversation first; the message then names a picture by its id,
         // a text file or PDF by its id and its name.
@@ -402,15 +413,17 @@ export function useConversation(sessionId: string | null, transport: Transport =
           if (o.file && !isPicture(r.media_type)) refs.push({id: r.id, name: o.name}), files.push({name: o.name, size: fileSize(r.byte_size)})
           else refs.push(r.id), images.push(r.id)
         }
-        const sent = (await transport.send(sessionId, content, refs.length ? refs : undefined)) as {refused?: string} | undefined
+        asked = true
+        const sent = (await transport.send(sessionId, content, refs.length ? refs : undefined)) as {refused?: string; failed?: string; unsure?: string} | undefined
         if (sent?.refused === 'chat_unsupported') return CANNOT_RUN_HERE
         if (sent?.refused) return CANNOT_TAKE_FILES
+        if (typeof sent?.unsure === 'string') return NO_ANSWER
+        if (typeof sent?.failed === 'string') return told(sent.failed)
         land({role: 'user', text: content, ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
       } catch (e) {
-        const why = e instanceof Error ? e.message : String(e)
-        if (failed) failed(why)
-        else setError(why)
-        return ''
+        // The page's own call was lost on its way back: the message may have gone all the same.
+        if (asked) return NO_ANSWER
+        return told(e instanceof Error ? e.message : String(e))
       }
       return null
     },

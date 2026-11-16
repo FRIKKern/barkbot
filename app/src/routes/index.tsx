@@ -4,7 +4,7 @@ import {Shell, useUnread} from '../components/Shell'
 import {Transcript} from '../components/Transcript'
 import {Composer, placeholderFor, type ComposerStart, type Picture, type WaitingFile} from '../components/Composer'
 import {computerOnline, createBot, loadChat, renameBot, startChat, type Chat} from '../chat/api'
-import {barkpark, useConversation, type BotState, type Outgoing, type Transport} from '../chat/useConversation'
+import {barkpark, MAY_HAVE_GONE, useConversation, type BotState, type Outgoing, type Transport} from '../chat/useConversation'
 import {useFleet} from '../chat/useFleet'
 
 // The bot, live: its computer and conversation come from Barkpark (loadChat). No made-up data:
@@ -56,7 +56,7 @@ const VOICE = {voice: 'Helix', speed: '1x', language: 'Auto-detect'}
 const PICK_HOLD_MS = 6000
 // The line over the words of a first message given up on when a held pick went through.
 const NOT_SENT = 'This message was not sent: its conversation did not open in time. Send it again when you are back.'
-const MAYBE_SENT = 'This message was on its way when you left and had no answer yet, so it may have been sent: look in the conversation before sending it again.'
+const MAYBE_SENT = `This message was on its way when you left and had no answer yet, so ${MAY_HAVE_GONE}`
 
 type HomeProps = {chat: Chat; state: BotState; working: string[]; unread: string[]; onOpened: (sessionId: string) => void; onPick: (id: string) => Promise<void>; kept?: ComposerStart; onKeep: (botId: string, start: ComposerStart | null) => void}
 
