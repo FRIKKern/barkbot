@@ -90,6 +90,8 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   // before that page loads goes back to it, so the last click wins and the rail and the page agree
   // (task-4a719948e5ff5b80). After a give-up the words are already kept: that pick stays. Create's
   // own navigation needs none: its dialog is modal and stays open until the new bot's page is up.
+  // But Create can be pressed while a first message is still opening: it leaves at once, as a
+  // give-up does (task-37b324b9e0b5b768).
   const going = useRef(false)
   // The parked message is over: sent (why null), or not (why).
   const settle = (why: string | null) => {
@@ -126,16 +128,21 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
     pendingPick.current = id
     holdTimer.current ??= setTimeout(giveUp, PICK_HOLD_MS)
   }
+  // The page leaves while a first message is parked: its words wait in this bot's box, with a line
+  // that says whether it may have gone; it is never sent later on its own.
+  const keepParked = () => {
+    gaveUp.current = true
+    const words = parkedWords.current
+    if (words) onKeep(chat.botId, {...words, line: sending.current ? MAYBE_SENT : NOT_SENT})
+    parked.current = false
+  }
   // The hold is over and the message is not on its way: keep its words for this bot, then pick.
   const giveUp = () => {
     holdTimer.current = null
     if (!parked.current || !pendingPick.current) return
-    gaveUp.current = true
-    const words = parkedWords.current
-    if (words) onKeep(chat.botId, {...words, line: sending.current ? MAYBE_SENT : NOT_SENT})
+    keepParked()
     const id = pendingPick.current
     pendingPick.current = null
-    parked.current = false
     void onPick(id)
   }
   useEffect(() => () => unhold(), [])
@@ -147,6 +154,11 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   // page opens it, with its empty conversation; the rail shows it at the end of the pinned bots.
   const create = async (b: {name: string; shape: string; colour: string}) => {
     const {id} = await createBot({data: b})
+    if (parked.current) {
+      keepParked()
+      pendingPick.current = null
+      unhold()
+    }
     await navigate({to: '/', search: {bot: id}})
   }
   const [started, setStarted] = useState<{sessionId: string; startedAt: string} | null>(null)
