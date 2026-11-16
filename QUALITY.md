@@ -46,6 +46,7 @@ Gate B (`npm run gate:b`, item H5) checks these by replaying each recorded turn 
 | Generated pictures and `docs/PARITY.md` match their sources | `npm run check` |
 | A journey is signed by someone other than its builder, naming the sha | criterion on the slice task |
 | Doc caps are tightened, never raised | `npm run check` |
+| A production build carries no test hook (an env name starting `BARKBOT_TEST_`) | `npm run build-check` |
 
 ## Pace
 
