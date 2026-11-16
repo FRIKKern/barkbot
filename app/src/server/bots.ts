@@ -227,16 +227,30 @@ export async function addId(id: string): Promise<void> {
 }
 
 /** Removes an id from the list (row-locked; an id not there is no change). Only for an id whose
- *  record is proven gone (unsetIds): a record is whole before its id is listed. */
+ *  record is proven gone (readListed): a record is whole before its id is listed. */
 export async function removeId(id: string): Promise<void> {
   await bp(prefs(LIST_KEY), {method: 'PATCH', json: {op: 'remove', field: 'ids', item: id}})
 }
 
-/** The listed ids whose record read answered "unset" (proven gone), and how many reads failed or
- *  timed out: a read that did not answer proves nothing, so its id is never among the gone. */
-export async function unsetIds(ids: string[]): Promise<{gone: string[]; unread: number}> {
-  const reads = await Promise.all(ids.map((id) => (UUID.test(id) ? read<unknown>(botKey(id)).then((v) => v === null, () => undefined) : Promise.resolve(false))))
-  return {gone: ids.filter((_, i) => reads[i] === true), unread: reads.filter((r) => r === undefined).length}
+/** A listed record as one read of it answered:
+ *  gone    Barkpark answered for this very key and dataset that it is unset (200, value null)
+ *  there   its value, as read
+ *  unread  the read failed or timed out, or answered something that is not this key's prefs
+ *          answer (another key or dataset, no value field): it proves nothing, so it is never gone */
+export type Listed = {id: string; is: 'gone'} | {id: string; is: 'there'; raw: unknown} | {id: string; is: 'unread'}
+
+/** Each listed record, read once, all at once. */
+export function readListed(ids: string[]): Promise<Listed[]> {
+  const dataset = conf().dataset
+  return Promise.all(
+    ids.map(async (id): Promise<Listed> => {
+      if (!UUID.test(id)) return {id, is: 'unread'}
+      const key = botKey(id)
+      const a = await bp<{key?: unknown; dataset?: unknown; value?: unknown} | null>(prefs(key)).catch(() => null)
+      if (!a || typeof a !== 'object' || a.key !== key || a.dataset !== dataset || !('value' in a)) return {id, is: 'unread'}
+      return a.value === null ? {id, is: 'gone'} : {id, is: 'there', raw: a.value}
+    }),
+  )
 }
 
 /** The raw record behind a bot key, for an edit of one field. */

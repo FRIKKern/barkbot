@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError} from '../server/barkpark'
 import {CREATE_UNSURE} from './create-unsure'
-import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, removeId, unsetIds, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
+import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, readListed, removeId, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
 /** A bot as the page gets it: its id and its name only (the record's pointers stay on the server). */
@@ -205,19 +205,36 @@ async function minter(): Promise<(i: number) => string> {
 // and the refusal says how many show: a load reads only the first READ_CAP ids, so one more would
 // not show either.
 async function roomFor(ids: string[]): Promise<string[]> {
-  const {gone, unread} = await unsetIds(ids)
   let now = ids
+  let recs = await readListed(now)
+  const gone = recs.filter((r) => r.is === 'gone').map((r) => r.id)
   if (gone.length) {
     for (const id of gone) await removeId(id).catch(() => { throw new Error('your bot list could not be tidied in Barkpark. Try again.') })
     now = (await listIds().catch(() => { throw new Error('your bots could not be read from Barkpark. Try again.') })) ?? []
     if (now.length < READ_CAP) return now
+    recs = await readListed(now) // the list changed meanwhile: what it holds now
   }
+  // Why each of the ids a load reads shows or not, from the one read above.
   const [hosts, sessions] = await Promise.all([ownHosts(), ownSessions()])
-  const r = await readBots(now, hosts, sessions)
-  const shown = r.bots.length
-  if (unread || r.unread) throw new Error(`your list holds ${now.length} bots and ${shown} show; the others could not be read from Barkpark just now. Try again.`)
-  if (shown >= now.length) throw new Error(`you have ${READ_CAP} bots, the most BarkBot shows.`)
-  throw new Error(`your list holds ${now.length} bots, the most BarkBot reads, and only ${shown} show: the others are on a computer that is no longer enrolled, or in a conversation that is not yours. No bot was made.`)
+  const why = await Promise.all(
+    recs.slice(0, READ_CAP).map(async (r) => {
+      if (r.is !== 'there') return r.is
+      const bot = trusted(r.id, r.raw, hosts)
+      if (!bot) {
+        const h = (r.raw as {host_id?: unknown} | null)?.host_id
+        return typeof h === 'string' && trusted(r.id, r.raw, [{id: h, name: '', online: false}]) ? 'computer' : 'malformed'
+      }
+      return (await sessionOf(bot, sessions)).is === 'foreign' ? 'foreign' : 'shown'
+    }),
+  )
+  const n = (k: string) => why.filter((w) => w === k).length
+  const shown = n('shown')
+  if (n('unread')) throw new Error(`your list holds ${now.length} bots and ${shown} show; ${n('unread')} could not be read from Barkpark just now. Try again.`)
+  if (shown >= why.length) throw new Error(`you have ${READ_CAP} bots, the most BarkBot shows.`)
+  const parts = ([['computer', 'on a computer that is no longer enrolled'], ['foreign', 'in a conversation that is not yours'], ['malformed', 'not well formed'], ['gone', 'gone from Barkpark']] as const)
+    .filter(([k]) => n(k))
+    .map(([k, t]) => `${n(k)} ${t}`)
+  throw new Error(`your list holds ${now.length} bots, the most BarkBot reads, and only ${shown} show: ${parts.join(', ')}. No bot was made.`)
 }
 
 export const createBot = createServerFn({method: 'POST'})
