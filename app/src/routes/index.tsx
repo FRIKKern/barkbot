@@ -96,14 +96,27 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
     if (why === null) return void onPick(id)
     setTarget(null)
   }
+  // A pick with nothing held goes at once (`going`); the open bot picked again before that page
+  // loads goes back to it, so the last click wins and the rail and the page agree
+  // (task-4a719948e5ff5b80). After a give-up the words are already kept: that pick stays.
+  const going = useRef(false)
   const pick = (id: string) => {
     if (id === chat.botId) {
+      if (gaveUp.current) return
       pendingPick.current = null
       unhold()
-      return setTarget(null)
+      setTarget(null)
+      if (going.current) {
+        going.current = false
+        void onPick(id)
+      }
+      return
     }
     setTarget(id)
-    if (!parked.current) return void onPick(id)
+    if (!parked.current) {
+      going.current = true
+      return void onPick(id)
+    }
     pendingPick.current = id
     holdTimer.current ??= setTimeout(giveUp, PICK_HOLD_MS)
   }

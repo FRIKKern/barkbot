@@ -809,6 +809,31 @@ else {
   await clearPrompt();
   stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
 
+  console.log('Behaviour · picking the open bot again (the live page, against the stand-in Barkpark)');
+  // task-4a719948e5ff5b80: pick Bea with nothing held, then Ada (the open bot) again while Bea's page
+  // is still loading (its reads held): the last click wins, and the rail and the page agree.
+  stub.sessions = [session(SA), session(SB)]; stub.rows = []; freshStore(); stub.fleet = 'idle'; stub.stateBy.clear();
+  stub.prefs.set('barkbot.bots', { ids: [ADA, BEA] });
+  stub.prefs.set(`barkbot.bot.${ADA}`, rec('Ada', HOST_ID, SA));
+  stub.prefs.set(`barkbot.bot.${BEA}`, rec('Bea', HOST_ID, SB));
+  stub.rowsBy.set(SA, [{ seq: 1, role: 'user', source_markdown: 'apples please' }, { seq: 2, role: 'assistant', source_markdown: 'Here are the apples.' }]);
+  stub.rowsBy.set(SB, [{ seq: 1, role: 'user', source_markdown: 'bananas please' }, { seq: 2, role: 'assistant', source_markdown: 'Here are the bananas.' }]);
+  await open(`${base}/?bot=${ADA}`);
+  await until(async () => (await live()).header === 'Ada' && /apples/.test(await words()), 15000, "Ada's page").catch(() => {}); await wait(500);
+  const railOn = () => ev(() => document.querySelector('.rail-list .rail-tile[aria-current="page"]')?.getAttribute('aria-label').split(', ')[0] ?? null);
+  precondition("the page opens on Ada with Ada's rows, and the rail shows Ada open", /apples please/.test(await words()) && (await railOn()) === 'Ada', { words: await words(), rail: await railOn() });
+  const backKeys0 = stub.readKeys.length;
+  stub.readDelay = 3000;
+  await clickTile('Bea');
+  await until(() => stub.readKeys.length > backKeys0, 5000, "Bea's page to start loading").catch(() => {}); await wait(300);
+  const backMid = { rail: await railOn(), url: await onBot() };
+  await clickTile('Ada');
+  await wait(1000); stub.readDelay = 0;
+  await wait(6000);
+  const back = { mid: backMid, url: await onBot(), header: (await live()).header, rail: await railOn(), t: await words() };
+  check("picking the open bot again while another bot's page is still loading: the last click wins, the page shows the open bot's rows, and the rail agrees", back.mid.rail === 'Bea' && back.url === ADA && back.header === 'Ada' && back.rail === 'Ada' && /apples please/.test(back.t) && !/bananas/.test(back.t), back);
+  stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore();
+
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
   const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
   stub.hosts = host(true);
