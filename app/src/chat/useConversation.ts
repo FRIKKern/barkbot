@@ -383,7 +383,8 @@ export function useConversation(sessionId: string | null, transport: Transport =
   /** Sends a message with what goes with it. Answers null once it is sent, or the plain words for why it was not
    *  (a file Barkpark does not take, a computer that cannot take files): then nothing was sent and the draft stays. */
   const send = useCallback(
-    async (content: string, outgoing: Outgoing[] = []): Promise<string | null> => {
+    // `failed`: a send that fails is told there, not shown as the conversation's error.
+    async (content: string, outgoing: Outgoing[] = [], failed?: (why: string) => void): Promise<string | null> => {
       if (!sessionId) return null
       setError(null)
       try {
@@ -404,7 +405,9 @@ export function useConversation(sessionId: string | null, transport: Transport =
         if (sent?.refused) return CANNOT_TAKE_FILES
         land({role: 'user', text: content, ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
       } catch (e) {
-        setError(e instanceof Error ? e.message : String(e))
+        const why = e instanceof Error ? e.message : String(e)
+        if (failed) failed(why)
+        else setError(why)
       }
       return null
     },
