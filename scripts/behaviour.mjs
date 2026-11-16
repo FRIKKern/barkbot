@@ -40,7 +40,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], dropPatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -88,7 +88,10 @@ await new Promise((ok) => httpServer((req, res) => {
         if (b.op === 'add') v[b.field] = list.includes(b.item) ? list : [...list, b.item];
         else if (b.op === 'remove') v[b.field] = list.filter((x) => x !== b.item);
         else return json(422, { error: { code: 'bad_request', message: 'unknown op' } });
-        stub.prefs.set(key, v); return got();
+        stub.prefs.set(key, v);
+        // `dropPatch`: Barkpark applies the list op, then the answer is lost (the socket drops).
+        if (stub.dropPatch === key) return void req.socket.destroy();
+        return got();
       }
     }
     if (req.url.startsWith('/w/default/v1/chat-hosts')) return json(200, { hosts: stub.hosts });
@@ -1547,6 +1550,26 @@ else {
     await typeZed(); await until(() => zeds(w0).length > 0, 5000, 'the rename').catch(() => {}); await wait(300);
     const plain = { zeds: zeds(w0), ria: nameOf(RIA), sam: nameOf(SAM), header: (await live()).header };
     check('control: with nothing loading, a name typed into the panel is written once, to the open bot', JSON.stringify(plain.zeds) === JSON.stringify([`${SAM} Zed`]) && plain.ria === 'Ria' && plain.sam === 'Zed' && plain.header === 'Zed', plain);
+  }
+
+  // ── Create's two writes end in step whatever answer is lost (task-4338079c878d4cc7) ──
+  console.log("Behaviour · Create's list add with a lost answer (the live page, against the stand-in Barkpark)");
+  {
+    const create = (name) => ev(async (n) => { const m = await import('/src/chat/api.ts'); return m.createBot({ data: { name: n } }).then((v) => ({ v }), (e) => ({ e: String(e?.message ?? e) })); }, name);
+    const listed = () => stub.prefs.get('barkbot.bots')?.ids ?? [];
+    const dangling = () => listed().filter((id) => !stub.prefs.has(`barkbot.bot.${id}`));
+    const fresh = async () => { stub.hosts = host(true); stub.sessions = []; freshStore(); await open(`${base}/`); await until(async () => (await live()).header === 'BarkBot', 15000, 'the page').catch(() => {}); await wait(500); };
+    // Control: Barkpark refuses the add (500): the record is removed, the list is as it was, Create says no.
+    await fresh(); let ids0 = [...listed()];
+    stub.fail.set('PATCH barkbot.bots', 500); const refused = await create('Ula'); stub.fail.clear();
+    const no = { refused, listed: listed(), dangling: dangling(), botKeys: [...stub.prefs.keys()].filter((k) => k.startsWith('barkbot.bot.')).length, before: ids0 };
+    check('control: Barkpark refuses Create\'s list add: Create says it was not made, the list is as it was, and no id is left without a record', !!refused.e && JSON.stringify(no.listed) === JSON.stringify(ids0) && no.dangling.length === 0, no);
+    // Barkpark applies the add, then the answer is lost: the bot is made (its id is in the list), with its record.
+    await fresh(); ids0 = [...listed()];
+    stub.dropPatch = 'barkbot.bots'; const lost = await create('Vic'); stub.dropPatch = null;
+    const made = { lost, listed: listed(), dangling: dangling(), before: ids0 };
+    const id = lost.v?.id;
+    check("Create's list add is applied and its answer lost: no id is left without a record, and the bot is made with its record (Create answers its id)", made.dangling.length === 0 && !!id && made.listed.includes(id) && stub.prefs.get(`barkbot.bot.${id}`)?.name === 'Vic', made);
     stub.sessions = []; freshStore();
   }
 }
