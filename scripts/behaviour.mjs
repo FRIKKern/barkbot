@@ -40,7 +40,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -60,7 +60,8 @@ await new Promise((ok) => httpServer((req, res) => {
   let body = '';
   req.on('data', (c) => (body += c));
   req.on('end', () => {
-    const json = (code, v) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(v)); };
+    // `slowReads`: every JSON read (GET) answers, after that many ms (a slow but working Barkpark).
+    const json = (code, v) => { const go = () => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(v)); }; return stub.slowReads && req.method === 'GET' ? void setTimeout(go, stub.slowReads) : go(); };
     if (req.url.startsWith(PREFS)) {
       const key = decodeURIComponent(req.url.slice(PREFS.length)); const got = () => json(200, { key, dataset: 'production', value: stub.prefs.get(key) ?? null });
       const failing = stub.fail.get(`${req.method} ${key}`);
@@ -1600,6 +1601,26 @@ else {
     const late = await viaDialog('Xan'); await wait(2000); stub.latePatch = null;
     const landed = { late, listed: listed(), dangling: dangling(), before: ids0 };
     check("Create's list add answer is lost and the add lands after Create's re-read: no id is left without a record, and the dialog says Barkpark did not say whether the bot was made, with Create off", landed.dangling.length === 0 && landed.listed.length === ids0.length + 1 && late.line === UNSURE && late.createOff === true, landed);
+  }
+
+  // ── A slow but working Barkpark: a rename is saved (task-80e76dcfeebc7a1a) ──
+  console.log('Behaviour · a rename on a slow Barkpark (the live page, against the stand-in Barkpark)');
+  {
+    // A rename reads the record, the computers and the conversation, then writes. Each read is bounded
+    // on its own (8 s); only the write has the queue's 10 s bound (app/src/server/bots.ts WRITE_MS).
+    const PAX = '8c9d0e1f-2a3b-4c4d-9e5f-6a7b8c9d0e1f', KEYX = `barkbot.bot.${PAX}`, SPAX = '00000000-0000-4000-8000-0000000002c1';
+    const renameAt = async (ms, to) => {
+      stub.hosts = host(true); stub.sessions = [session(SPAX)]; freshStore(); stub.prefs.set('barkbot.bots', { ids: [PAX] }); stub.prefs.set(KEYX, rec('Pax', HOST_ID, SPAX));
+      await open(`${base}/?bot=${PAX}`); await until(async () => (await live()).header === 'Pax', 15000, "Pax's page").catch(() => {}); await wait(500);
+      stub.slowReads = ms;
+      const out = await Promise.race([ev(async ([id, name]) => { const t0 = performance.now(); const m = await import('/src/chat/api.ts'); return m.renameBot({ data: { id, name } }).then((v) => ({ v, ms: Math.round(performance.now() - t0) }), (e) => ({ e: String(e?.message ?? e), ms: Math.round(performance.now() - t0) })); }, [PAX, to]), wait(40000).then(() => 'still waiting after 40 s')]);
+      stub.slowReads = 0;
+      return { out, record: stub.prefs.get(KEYX) ?? null };
+    };
+    const quick = await renameAt(2000, 'Pax Two');
+    check('control: every Barkpark read answers in 2 s: a rename of a bot with a conversation is saved', quick.out?.v?.name === 'Pax Two' && quick.record?.name === 'Pax Two' && quick.record?.session_id === SPAX, quick);
+    const slow = await renameAt(3500, 'Pax Three');
+    check('every Barkpark read answers in 3.5 s: a rename of a bot with a conversation is still saved, with no "did not answer" line', slow.out?.v?.name === 'Pax Three' && slow.record?.name === 'Pax Three' && slow.record?.session_id === SPAX, slow);
     stub.sessions = []; freshStore();
   }
 }
