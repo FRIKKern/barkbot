@@ -168,6 +168,23 @@ export async function readBots(ids: string[], hosts: OwnHost[], listed: OwnSessi
 }
 
 /** Writes a bot's own key. The record is whole before its id is added to the list. */
+// One change at a time per bot record. A change reads the record, changes one field and writes
+// the whole record back (Barkpark prefs have no per-field write and no compare-and-set,
+// docs/contracts/user-prefs.md), so two at once (a rename while the first message opens a
+// conversation, or two tabs) would each write what they read and lose the other's field. Every
+// tab goes through this one BarkBot server, so a queue here keeps both; the next change starts
+// after the last one ended, whether it worked or not.
+const changing = new Map<string, Promise<unknown>>()
+export function oneAtATime<T>(id: string, change: () => Promise<T>): Promise<T> {
+  const run = (changing.get(id) ?? Promise.resolve()).then(change)
+  const after = run.catch(() => undefined)
+  changing.set(id, after)
+  void after.then(() => {
+    if (changing.get(id) === after) changing.delete(id)
+  })
+  return run
+}
+
 export async function putBot(bot: Bot): Promise<void> {
   const {id, ...value} = bot
   await bp(prefs(botKey(id)), {method: 'PUT', json: {value}})
