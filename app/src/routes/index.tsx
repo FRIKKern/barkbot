@@ -45,7 +45,7 @@ export const Route = createFileRoute('/')({
           setOpened((o) => ({...o, [botId]: made.sessionId}))
           if (!made.kept) setUnsaved((u) => ({...u, [botId]: {sessionId: made.sessionId, startedAt: made.startedAt}}))
         }}
-        unsaved={unsaved[botId]}
+        unsaved={Object.values(unsaved)[0]}
         kept={kept[botId]}
         onKeep={(id, start) => setKept(({[id]: _, ...k}) => (start ? {...k, [id]: start} : k))}
         onPick={(id) => navigate({to: '/', search: {bot: id}})}
