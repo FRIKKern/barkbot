@@ -1467,6 +1467,40 @@ else {
     check("Kai's first conversation cannot be saved while Lou's pick is held: the pick is taken back, Kai's page shows the not-saved line, and the message went once to the new conversation", lost.header === 'Kai' && lost.bot === KAI && NOT_KEPT.test(lost.line ?? '') && lost.made.length === 1 && JSON.stringify(lost.sent) === JSON.stringify(['hello again kai']) && JSON.stringify(lost.to) === JSON.stringify(lost.made) && lost.box === '', lost);
     stub.sessions = []; freshStore();
   }
+
+  // ── Create while a first message is opening (task-37b324b9e0b5b768) ──
+  console.log('Behaviour · Create while a first message is opening (the live page, against the stand-in Barkpark)');
+  {
+    const CLEO = '8c9d0e1f-2a3b-4c4d-8e5f-6a7b8c9d0e1f', DEX = '9d0e1f2a-3b4c-4d5e-9f6a-7b8c9d0e1f2a';
+    // A bot with no conversation yet; its first message is typed, then Create makes another bot.
+    const firstThenCreate = async (id, n, words, made) => {
+      stub.hosts = host(true); stub.sessions = []; freshStore(); stub.prefs.set('barkbot.bots', { ids: [id] }); stub.prefs.set(`barkbot.bot.${id}`, rec(n, HOST_ID, null));
+      await open(`${base}/?bot=${id}`); await until(async () => (await live()).header === n, 15000, `${n}'s page`).catch(() => {}); await wait(500);
+      const s0 = stub.sent.length, h0 = stub.heldSends.length;
+      await typeSend(words);
+      await until(() => stub.slow.size > 0 || stub.heldSends.length > h0, 8000, `${n}'s message to park`).catch(() => {}); await wait(300);
+      await openDialog(); await typeName(made); await press('Create');
+      await until(async () => (await live()).header === made, 15000, `${made}'s page`).catch(() => {}); await wait(500);
+      // Whatever was holding the first message lets go now, while the page is on the new bot.
+      stub.slow.clear(); stub.slowNew = false; stub.holdSend = false; stub.heldSends.splice(0).forEach((answer) => answer());
+      await wait(3000);
+      const away = { header: (await live()).header, sent: stub.sent.slice(s0).map((m) => m.content) };
+      await clickTile(n);
+      await until(async () => (await onBot()) === id && (await promptText()) !== '', 15000, `${n}'s page with its words`).catch(() => {}); await wait(1000);
+      const back = { away, bot: await onBot(), prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(s0).map((m) => m.content) };
+      await clearPrompt();
+      return back;
+    };
+    // Its conversation is made but its stream never opens before Create: the message was never sent.
+    stub.slowNew = true;
+    const opening = await firstThenCreate(CLEO, 'Cleo', 'hello cleo', 'Newt');
+    check("Create while a first message's conversation is still opening: the new bot opens, the message is never sent, and back on its bot the words wait with the not-sent line", opening.away.header === 'Newt' && opening.sent.length === 0 && opening.bot === CLEO && opening.prompt === 'hello cleo' && /was not sent/.test(opening.line ?? ''), opening);
+    // Its stream is open and the message is on its way with no answer yet: it may have gone.
+    stub.holdSend = true;
+    const onItsWay = await firstThenCreate(DEX, 'Dex', 'hello dex', 'Nell');
+    check("Create while a first message is on its way with no answer: the new bot opens, and back on its bot the words wait with the line that it may have been sent", onItsWay.away.header === 'Nell' && onItsWay.bot === DEX && onItsWay.prompt === 'hello dex' && /may have been sent/.test(onItsWay.line ?? ''), onItsWay);
+    stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
+  }
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
