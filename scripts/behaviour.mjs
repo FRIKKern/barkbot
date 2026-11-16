@@ -761,17 +761,18 @@ else {
   stub.slowNew = true;
   await typeSend('hello kim');
   await until(() => stub.slow.size > 0, 8000, "Kim's conversation").catch(() => {}); await wait(300);
-  const kimKeys0 = stub.readKeys.length;
-  await clickTile('Bea'); stub.readDelay = 2500;
-  await until(() => stub.readKeys.slice(kimKeys0).includes('barkbot.bots'), 15000, 'the page to start leaving Kim').catch(() => {});
+  // The give-up comes 6 s after the pick; the stream opens at 7.5 s; reads held 4 s keep Kim's page up past it.
+  const kimAt = Date.now(); await clickTile('Bea'); stub.readDelay = 4000;
+  await wait(7500 - (Date.now() - kimAt));
+  const kimEarly = { bot: await onBot(), sent: stub.sent.slice(kimSent0).length };
   stub.slow.clear(); stub.slowNew = false; // Kim's stream opens now, while Kim's page is still up
   await until(async () => (await onBot()) === BEA, 15000, "Bea's page after the give-up").catch(() => {});
   stub.readDelay = 0; await wait(1500);
   const kimLeft = stub.sent.slice(kimSent0).map((m) => m.content);
   await clickTile('Kim');
   await until(async () => (await onBot()) === KIM && (await promptText()) !== '', 15000, "Kim's page with its words").catch(() => {}); await wait(1000);
-  const kim = { left: kimLeft, bot: await onBot(), prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(kimSent0).map((m) => m.content) };
-  check("a given-up message whose stream opens late, while the page is leaving: it is never sent then or after; back on the bot, the words wait with the not-sent line", kim.left.length === 0 && kim.sent.length === 0 && kim.bot === KIM && kim.prompt === 'hello kim' && /not sent/.test(kim.line ?? ''), kim);
+  const kim = { early: kimEarly, left: kimLeft, bot: await onBot(), prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(kimSent0).map((m) => m.content) };
+  check("a given-up message whose stream opens late, while the page is leaving: it is never sent then or after; back on the bot, the words wait with the not-sent line", kim.early.bot === KIM && kim.early.sent === 0 && kim.left.length === 0 && kim.sent.length === 0 && kim.bot === KIM && kim.prompt === 'hello kim' && /not sent/.test(kim.line ?? ''), kim);
   await clearPrompt();
   stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
 
