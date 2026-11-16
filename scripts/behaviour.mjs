@@ -766,15 +766,16 @@ else {
   const kimAt = Date.now(); await clickTile('Bea'); stub.readDelay = 4000;
   const kimTrace = [];
   while (Date.now() - kimAt < 7500) { kimTrace.push([Date.now() - kimAt, (await onBot()) === KIM ? 'kim' : 'other', (await words()).trim() === '' ? 'blank' : 'rows', stub.sent.length - kimSent0, stub.readKeys.length]); await wait(500); }
-  const kimEarly = { bot: await onBot(), sent: stub.sent.slice(kimSent0).length, held: kimTrace.some(([, , t]) => t === 'blank') };
+  // Still leaving: Kim's page is up with its rows hidden, Bea's rows not yet shown (the URL moves at once).
+  const kimEarly = { leaving: (await words()).trim() === '', sent: stub.sent.slice(kimSent0).length, held: kimTrace.some(([, , t]) => t === 'blank') };
   stub.slow.clear(); stub.slowNew = false; // Kim's stream opens now, while Kim's page is still up
-  await until(async () => (await onBot()) === BEA, 15000, "Bea's page after the give-up").catch(() => {});
-  stub.readDelay = 0; await wait(1500);
+  await wait(1000); stub.readDelay = 0;
+  await until(async () => (await onBot()) === BEA && /bananas/.test(await words()), 20000, "Bea's page after the give-up").catch(() => {}); await wait(1000);
   const kimLeft = stub.sent.slice(kimSent0).map((m) => m.content);
   await clickTile('Kim');
   await until(async () => (await onBot()) === KIM && (await promptText()) !== '', 15000, "Kim's page with its words").catch(() => {}); await wait(1000);
   const kim = { trace: kimTrace, early: kimEarly, left: kimLeft, bot: await onBot(), prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(kimSent0).map((m) => m.content) };
-  check("a given-up message whose stream opens late, while the page is leaving: it is never sent then or after; back on the bot, the words wait with the not-sent line", kim.early.bot === KIM && kim.early.sent === 0 && kim.early.held && kim.left.length === 0 && kim.sent.length === 0 && kim.bot === KIM && kim.prompt === 'hello kim' && /not sent/.test(kim.line ?? ''), kim);
+  check("a given-up message whose stream opens late, while the page is leaving: it is never sent then or after; back on the bot, the words wait with the not-sent line", kim.early.leaving && kim.early.sent === 0 && kim.early.held && kim.left.length === 0 && kim.sent.length === 0 && kim.bot === KIM && kim.prompt === 'hello kim' && /not sent/.test(kim.line ?? ''), kim);
   await clearPrompt();
   stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
 
