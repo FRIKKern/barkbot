@@ -1255,6 +1255,27 @@ else {
     stub.hosts = two(true, true);
     const asked = await ev(async ([ids]) => { const m = await import('/src/chat/api.ts'); const out = []; for (const hostId of ids) { try { out.push(await m.computerOnline({ data: { hostId } })); } catch (e) { out.push('threw: ' + e.message); } } return out; }, [[OTHER, GONE, '00000000-0000-4000-8000-0000000000ff']]);
     check('asked about a revoked computer that is on, or one not the caller\'s, the answer is "not reachable" (control: the open bot\'s own computer is reachable)', JSON.stringify(asked) === JSON.stringify([true, false, false]), { asked });
+    // A pick across computers: while the picked bot loads, the panel already shows its name, so it must
+    // not show the state of the computer it is leaving. The page records every name and state pair it
+    // shows, from before the click until the picked bot's own state is up.
+    stub.hosts = two(false, true);
+    await open(`${base}/?bot=${OLA}`); await until(async () => (await live()).header === 'Ola' && (await machine()).state === 'Asleep', 20000, "Ola's page").catch(() => {});
+    const watch = () => ev(() => {
+      const seen = window.__pairs = [];
+      const note = () => { const n = document.querySelector('.who-name'); const p = { name: n ? n.value : null, state: document.querySelector('.computer-state')?.textContent ?? null }; const last = seen.at(-1); if (!last || last.name !== p.name || last.state !== p.state) seen.push(p); };
+      note(); window.__pairsStop?.(); const o = new MutationObserver(note); o.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true }); window.__pairsStop = () => o.disconnect();
+    });
+    const across = async (bot, own) => {
+      await watch(); stub.readDelay = 3000; await clickTile(bot);
+      await until(async () => (await live()).header === bot && (await machine()).state === own, 15000, `${bot}'s own state`).catch(() => {});
+      stub.readDelay = 0;
+      return ev(() => { window.__pairsStop(); return window.__pairs; });
+    };
+    const toMain = await across('BarkBot', 'Unreachable');
+    await wait(1000);
+    const toOla = await across('Ola', 'Asleep');
+    const mixed = [...toMain.filter((p) => p.name === 'BarkBot' && p.state === 'Asleep'), ...toOla.filter((p) => p.name === 'Ola' && p.state === 'Unreachable')];
+    check("a slow pick across computers never shows one bot's name with the other computer's state, and each shows its own after the load (Ola's on, the Main Bot's off)", mixed.length === 0 && toMain.at(-1)?.name === 'BarkBot' && toMain.at(-1)?.state === 'Unreachable' && toOla.at(-1)?.name === 'Ola' && toOla.at(-1)?.state === 'Asleep', { mixed, toMain, toOla });
     stub.hosts = host(true); freshStore();
   }
 }

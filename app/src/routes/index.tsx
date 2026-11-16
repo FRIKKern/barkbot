@@ -230,7 +230,9 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
     return () => clearInterval(t)
   }, [chat.host])
   const offline = chat.host && !online ? `${name}'s computer is unreachable. Messages wait until it is back. Start it with: npm run host` : null
-  const computer = online ? 'Asleep' : 'Unreachable'
+  // While a pick loads, this page still holds the bot it is leaving, but the panel already names the
+  // picked one: say nothing about a computer until the picked bot's own page knows its own.
+  const computer = leaving ? '' : online ? 'Asleep' : 'Unreachable'
   return (
     <Shell
       scene={{bots: chat.bots, active: chat.botId, panelOpen: true, computer, voice: VOICE}}
