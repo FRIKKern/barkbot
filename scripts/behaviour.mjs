@@ -39,7 +39,7 @@ process.on('SIGINT', () => process.exit(130));
 // A stand-in Barkpark for the live page (/): it answers what loadChat asks (the computers, the
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
-// pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id → status) makes a session's own read fail. stub.to is the session each message or answer went to.
+// pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
 const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
@@ -84,7 +84,7 @@ await new Promise((ok) => httpServer((req, res) => {
     if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: listed() });
     if (/^\/v1\/chat\/sessions\/[^/?]+(\?.*)?$/.test(req.url) && req.method === 'GET') {
       const id = decodeURIComponent(req.url.split('?')[0].split('/')[4]); stub.shown.push(id); const x = stub.sessions.find((y) => y.id === id);
-      if (stub.failShow.has(id)) return json(stub.failShow.get(id), { error: { code: 'internal', message: 'the stand-in fails this read' } });
+      if (stub.failShow.has(id) || stub.failShow.has('*')) return json(stub.failShow.get(id) ?? stub.failShow.get('*'), { error: { code: 'internal', message: 'the stand-in fails this read' } });
       return x ? json(200, { archived_at: null, bot_folder: null, ...x, messages: [] }) : json(404, { error: { code: 'not_found', message: 'chat session not found' } });
     }
     // A new conversation on a computer, as Barkpark. `createDelay` holds the answer (Create's Creating…).
@@ -1081,6 +1081,51 @@ else {
   const late = await line();
   check('once its text streams the line says Typing…, and a status after that is ignored', late === 'Typing…', { late });
   say('item_completed', textItem); say('turn_completed');
+
+  // ── A send that fails keeps its words; the Main Bot is the Main Bot whatever the host id's case
+  // (task-2f356974eb9722b6) ──────────────────────────────────────────────────────────────────────
+  console.log('Behaviour · a failed send keeps its words; the host id\'s case (the live page, against the stand-in Barkpark)');
+  {
+    const errLine = () => ev(() => document.querySelector('.chat-error')?.textContent ?? null);
+    const SF = '00000000-0000-4000-8000-0000000000d7';
+    stub.fleet = null; stub.rows = []; freshStore(); stub.sessions = [session(SF)]; stub.failShow.clear();
+    stub.opened = []; await open(`${base}/`);
+    await until(() => stub.opened.includes(SF), 15000, "the Main Bot's conversation to open").catch(() => {}); await wait(800);
+    // A conversation that is open: Barkpark fails the send (a 500, thrown).
+    let f0 = stub.failedSends.length, s0 = stub.sent.length;
+    stub.failSend = true; await typeSend('keep these words');
+    await until(() => stub.failedSends.length > f0, 8000, 'the send to fail').catch(() => {}); await wait(800);
+    const kept1 = { prompt: await promptText(), line: await errLine(), refused: await refusedLine(), sent: stub.sent.slice(s0).length };
+    stub.failSend = false;
+    check('a send that Barkpark fails, in an open conversation: the words stay in the box and one plain line says why; nothing is sent', kept1.prompt === 'keep these words' && /could not take it/.test(kept1.line ?? '') && kept1.refused === null && kept1.sent === 0, kept1);
+    await clearPrompt(); s0 = stub.sent.length; await typeSend('now it goes');
+    await until(() => stub.sent.length > s0, 8000, 'the next send').catch(() => {}); await wait(500);
+    const went = { prompt: await promptText(), sent: stub.sent.slice(s0).map((m) => m.content) };
+    check('control: the next send goes, and the box is empty after it', went.prompt === '' && JSON.stringify(went.sent) === JSON.stringify(['now it goes']), went);
+    // A made bot's first message: refused 422 chat_unsupported, and the read that asks whether it
+    // has a folder fails too (review F5), so the send throws.
+    const FAY = 'f6a7b8c9-d0e1-4f2a-8b3c-4d5e6f708192';
+    await newBot('Fay', FAY);
+    const r0 = stub.refused.length; s0 = stub.sent.length;
+    stub.noFolders = true; stub.failShow.set('*', 503); await typeSend('hello fay');
+    await until(() => stub.refused.length > r0, 8000, "Fay's message to be refused").catch(() => {}); await wait(1000);
+    const kept2 = { prompt: await promptText(), line: await errLine(), refused: await refusedLine(), sent: stub.sent.slice(s0).length, shown: stub.refused.slice(r0).length };
+    stub.noFolders = false; stub.failShow.clear();
+    check("a made bot's first message refused as chat_unsupported, whose folder read fails too: the words stay in the box and one plain line says what Barkpark said; nothing is sent", kept2.prompt === 'hello fay' && /not supported/.test(kept2.line ?? '') && kept2.refused === null && kept2.sent === 0 && kept2.shown === 1, kept2);
+    await clearPrompt();
+    // The Main Bot's id comes from its computer's id, whatever its case: a host id in upper case
+    // still names the Main Bot, so its conversation asks for no folder, and no second Main Bot appears.
+    const LETTERS = 'abcdef00-0000-4000-8000-0000000000ab';
+    stub.hosts = [{ ...host(true)[0], id: LETTERS }]; stub.sessions = []; freshStore({ name: 'Legacy Name' });
+    s = await showing('Legacy Name');
+    const mainL = ids()[0], m0 = stub.made.length;
+    const upper = await ev(async ([hostId, botId]) => { const m = await import('/src/chat/api.ts'); try { await m.startChat({ data: { hostId, botId } }); return 'made'; } catch (e) { return String(e?.message ?? e); } }, [LETTERS.toUpperCase(), mainL]);
+    const upBody = stub.made.length > m0 ? stub.bodies.findLast((x) => x.id === stub.made.at(-1))?.body : null;
+    check("a host id that differs only in case still names the Main Bot: its conversation asks for no folder", upper === 'made' && !!upBody && !('bot_folder' in upBody), { upper, upBody, mainL });
+    s = await showing('Legacy Name');
+    check('control: the Main Bot made from the lower-case host id is still the one Main Bot after a reload (no second one)', ids().join() === mainL && s.tiles.filter((t) => !t.startsWith('Open account')).length === 1 && botKeys().length === 1, { ids: ids(), tiles: s.tiles, keys: botKeys() });
+    stub.hosts = host(true); freshStore();
+  }
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
