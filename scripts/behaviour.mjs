@@ -630,10 +630,12 @@ else {
   // A read that fails is not "no folder": the newest conversation's own read answers 500, then 503,
   // and today's bot moves in with no conversation, never that one (it may be a made bot's).
   for (const code of [500, 503]) {
-    freshStore({ name: 'Legacy Name' }); stub.sessions = [{ ...session(S_OLD), inserted_at: '2026-11-15T08:00:00Z' }, foldered]; stub.failShow.set(S_FOLD, code);
+    // A session never read before: a read that worked is kept (app/src/chat/api.ts folderKnown).
+    const unread = { ...foldered, id: code === 500 ? '00000000-0000-4000-8000-0000000000f5' : '00000000-0000-4000-8000-0000000000f6' };
+    freshStore({ name: 'Legacy Name' }); stub.sessions = [{ ...session(S_OLD), inserted_at: '2026-11-15T08:00:00Z' }, unread]; stub.failShow.set(unread.id, code);
     stub.prefs.set('barkbot.bots', { ids: [PIP] }); stub.prefs.set(`barkbot.bot.${PIP}`, rec('Pip', HOST_ID, null));
     stub.shown = []; s = await showing('Pip');
-    check(`the newest conversation has a folder and its own read answers ${code}: today's bot moves in with no conversation, not that one and not an older one`, stub.prefs.has(KEY) && stub.prefs.get(KEY)?.session_id === null && stub.shown.includes(S_FOLD) && !stub.opened.includes(S_FOLD), { record: stub.prefs.get(KEY) ?? null, shown: stub.shown, opened: stub.opened });
+    check(`the newest conversation has a folder and its own read answers ${code}: today's bot moves in with no conversation, not that one and not an older one`, stub.prefs.has(KEY) && stub.prefs.get(KEY)?.session_id === null && stub.shown.includes(unread.id) && !stub.opened.includes(unread.id), { record: stub.prefs.get(KEY) ?? null, shown: stub.shown, opened: stub.opened });
   }
   stub.failShow.clear();
   stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = []; stub.bodies = [];
@@ -1174,20 +1176,22 @@ else {
   console.log('Behaviour · bounded reads (the live page, against the stand-in Barkpark)');
   {
     const at = (iso, x) => ({ ...x, inserted_at: iso });
-    // A read held open costs the page one bound (3 s, app/src/server/barkpark.ts READ_MS), then it is
+    // A read held open costs the page one bound (8 s, app/src/server/barkpark.ts READ_MS), then it is
     // a failed read: the move-in takes no conversation, not that one and not an older one.
+    // Each load has its own sessions: a read that worked is kept (app/src/chat/api.ts folderKnown).
     const HOLD = '00000000-0000-4000-8000-0000000001b1', OLDER = '00000000-0000-4000-8000-0000000001b0';
-    const twoOnHost = () => [at('2026-11-15T08:00:00Z', session(OLDER)), at('2026-11-15T10:00:00Z', session(HOLD))];
-    freshStore({ name: 'Legacy Name' }); stub.sessions = twoOnHost();
+    const CTL_NEW = '00000000-0000-4000-8000-0000000001b3', CTL_OLD = '00000000-0000-4000-8000-0000000001b2';
+    const twoOnHost = (newer, older) => [at('2026-11-15T08:00:00Z', session(older)), at('2026-11-15T10:00:00Z', session(newer))];
+    freshStore({ name: 'Legacy Name' }); stub.sessions = twoOnHost(CTL_NEW, CTL_OLD);
     let t0 = Date.now(); s = await showing('Legacy Name'); const baseMs = Date.now() - t0;
     const ctl = { header: s.header, session: stub.prefs.get(KEY)?.session_id ?? null, ms: baseMs };
-    check('control: with every read answered, the move-in takes the newest conversation', ctl.header === 'Legacy Name' && ctl.session === HOLD, ctl);
-    freshStore({ name: 'Legacy Name' }); stub.sessions = twoOnHost(); stub.holdShow.add(HOLD);
+    check('control: with every read answered, the move-in takes the newest conversation', ctl.header === 'Legacy Name' && ctl.session === CTL_NEW, ctl);
+    freshStore({ name: 'Legacy Name' }); stub.sessions = twoOnHost(HOLD, OLDER); stub.holdShow.add(HOLD);
     // At most 20 s here: a page with no bound waits out Node's own 300 s, so this rule fails in 20 s.
     t0 = Date.now(); const shown = await Promise.race([showing('Legacy Name'), wait(20000).then(() => null)]); const heldMs = Date.now() - t0;
     const held = { header: shown?.header ?? null, record: stub.prefs.get(KEY) ?? null, ms: heldMs, baseMs };
     stub.holdShow.clear(); stub.heldShows.splice(0).forEach((r) => r.destroy()); await wait(1000);
-    check('a session read Barkpark never answers holds the page about 3 s, not forever; then the move-in takes no conversation, not that one and not an older one', held.header === 'Legacy Name' && held.ms >= 2500 && held.ms - baseMs < 6000 && !!held.record && held.record.session_id === null, held);
+    check('a session read Barkpark never answers holds the page about 8 s, not forever; then the move-in takes no conversation, not that one and not an older one', held.header === 'Legacy Name' && held.ms >= 7500 && held.ms - baseMs < 12000 && !!held.record && held.record.session_id === null, held);
     // With no bot list and the saved name unreadable, each load shows the Main Bot from memory and
     // picks its conversation again. What a read showed (a folder or none) is known: not asked again.
     const F = (n) => `00000000-0000-4000-8000-0000000001c${n}`;
