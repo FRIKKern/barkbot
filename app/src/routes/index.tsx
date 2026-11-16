@@ -54,6 +54,9 @@ const VOICE = {voice: 'Helix', speed: '1x', language: 'Auto-detect'}
 
 // How long a pick waits for a first message still opening its conversation (Home's pick).
 const PICK_HOLD_MS = 6000
+// The line over the words of a first message given up on when a held pick went through.
+const NOT_SENT = 'This message was not sent: its conversation did not open in time. Send it again when you are back.'
+const MAYBE_SENT = 'This message was on its way when you left and had no answer yet, so it may have been sent: look in the conversation before sending it again.'
 
 type HomeProps = {chat: Chat; state: BotState; working: string[]; unread: string[]; onOpened: (sessionId: string) => void; onPick: (id: string) => Promise<void>; kept?: ComposerStart; onKeep: (botId: string, start: ComposerStart | null) => void}
 
@@ -66,14 +69,16 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   // - the message goes once, to this bot; then the pick goes through
   // - it is refused or fails: the pick is taken back; this bot's page shows why, with the words
   // - picking this bot again takes the pick back; the last pick wins
-  // - after PICK_HOLD_MS with the message not yet going, the pick goes through, and the words wait,
-  //   unsent, in this bot's box with a line saying so; they are never sent later on their own
+  // - after PICK_HOLD_MS the pick goes through, and the words wait in this bot's box with a line:
+  //   not sent (the conversation never opened; they are never sent later on their own), or
+  //   perhaps sent (the send was on its way and had no answer yet: look before sending again)
   const [target, setTarget] = useState<string | null>(null)
   const leaving = target !== null
   const pendingPick = useRef<string | null>(null)
   const parked = useRef(false)
   const sending = useRef(false)
   const gaveUp = useRef(false)
+  const parkedWords = useRef<ComposerStart | null>(null)
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const unhold = () => {
     if (holdTimer.current) clearTimeout(holdTimer.current)
@@ -83,6 +88,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   const settle = (why: string | null) => {
     parked.current = false
     sending.current = false
+    parkedWords.current = null
     unhold()
     const id = pendingPick.current
     pendingPick.current = null
@@ -104,10 +110,10 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   // The hold is over and the message is not on its way: keep its words for this bot, then pick.
   const giveUp = () => {
     holdTimer.current = null
-    if (sending.current || !parked.current || !pendingPick.current) return
-    const w = waitingRef.current
+    if (!parked.current || !pendingPick.current) return
     gaveUp.current = true
-    if (w) onKeep(chat.botId, {...w.start, line: 'This message was not sent: its conversation did not open in time. Send it again when you are back.'})
+    const words = parkedWords.current
+    if (words) onKeep(chat.botId, {...words, line: sending.current ? MAYBE_SENT : NOT_SENT})
     const id = pendingPick.current
     pendingPick.current = null
     parked.current = false
@@ -128,10 +134,9 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   const sessionId = started?.sessionId ?? chat.sessionId
   const convo = useConversation(sessionId, live, state)
   const [opening, setOpening] = useState(false)
-  type Waiting = {text: string; outgoing: Outgoing[]; start: ComposerStart; done: (why: string | null) => void}
-  const [waiting, setWaiting] = useState<Waiting | null>(null)
-  const waitingRef = useRef<Waiting | null>(null)
-  waitingRef.current = waiting
+  const [waiting, setWaiting] = useState<{text: string; outgoing: Outgoing[]; done: (why: string | null) => void} | null>(null)
+  // A first message that failed to send, with no pick held: said until the next send, as convo.error is.
+  const [failedLine, setFailedLine] = useState<string | null>(null)
   // The bot's name as renamed in the details panel: the composer and the transcript follow it at
   // once, and it is saved to Barkpark, so a reload shows it too (loadChat reads it back).
   const [name, setName] = useState(chat.bot)
@@ -150,15 +155,17 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   // Answers why nothing was sent, if so (the composer then keeps the draft).
   const send = async (text: string, pictures: Picture[] = [], files: WaitingFile[] = []): Promise<string | null> => {
     if (!chat.host) return null
+    setFailedLine(null)
     const outgoing: Outgoing[] = [...pictures.map((p) => ({data: p.data, name: p.name})), ...files.filter((f) => f.data).map((f) => ({data: f.data!, name: f.name, file: true}))]
     if (sessionId && convo.ready) return convo.send(text, outgoing)
     // The first message opens the conversation on the bot's computer, then goes once the
     // live stream is open, so its run is seen from the start.
     parked.current = true
+    parkedWords.current = {draft: text, pictures, files}
     let done!: (why: string | null) => void
     const sent = new Promise<string | null>((d) => {
       done = d
-      setWaiting({text, outgoing, start: {draft: text, pictures, files}, done: d})
+      setWaiting({text, outgoing, done: d})
     })
     if (!sessionId && !opening) {
       setOpening(true)
@@ -188,7 +195,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
         const held = pendingPick.current !== null
         // A failed send while a pick is held: the words come back with the reason, as a refusal.
         if (failed && held) why = failed
-        else if (failed) setNote(failed)
+        else if (failed) setFailedLine(failed)
         waiting.done(why)
         settle(why ?? failed)
       })
@@ -219,7 +226,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
         leaving ? (
           <div className="transcript" />
         ) : chat.host ? (
-          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? note ?? chat.notice ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
+          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? failedLine ?? note ?? chat.notice ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
         ) : (
           <div className="transcript">
             <p className="chat-note">
