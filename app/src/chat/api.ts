@@ -4,6 +4,7 @@ import {randomUUID} from 'node:crypto'
 import {readFileSync} from 'node:fs'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError} from '../server/barkpark'
+import {CREATE_UNSURE} from './create-unsure'
 import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
@@ -217,6 +218,16 @@ export const createBot = createServerFn({method: 'POST'})
     try {
       await addId(bot.id)
     } catch (e) {
+      // A failed add may still land. Read the list again: the id there means the bot is made. The
+      // record is dropped only when Barkpark itself answered the add (its transaction is over) and
+      // the list, read after, holds no id. A lost answer (no answer at all), or a gateway that gave
+      // up (502, 503, 504) while Barkpark may still be applying it, proves nothing: the record is
+      // kept and Create says so. A record dropped while its id may yet be listed would leave an id
+      // with no record: never shown, never removed, a cap slot (task-4338079c878d4cc7).
+      const answered = e instanceof BarkparkError && ![502, 503, 504].includes(e.status)
+      const now = await listIds().catch(() => undefined)
+      if (now?.includes(bot.id)) return {id: bot.id}
+      if (now === undefined || !answered) throw new Error(CREATE_UNSURE)
       await dropBot(bot.id).catch(() => console.warn('barkbot: a bot record whose list add failed could not be removed'))
       throw e
     }
