@@ -1278,6 +1278,31 @@ else {
     check("a slow pick across computers never shows one bot's name with the other computer's state, and each shows its own after the load (Ola's on, the Main Bot's off)", mixed.length === 0 && toMain.at(-1)?.name === 'BarkBot' && toMain.at(-1)?.state === 'Unreachable' && toOla.at(-1)?.name === 'Ola' && toOla.at(-1)?.state === 'Asleep', { mixed, toMain, toOla });
     stub.hosts = host(true); freshStore();
   }
+
+  // ── A new chat that is not saved to its bot says so (task-2f10df6041bfdf8e) ──
+  console.log('Behaviour · a new chat not saved to its bot (the live page, against the stand-in Barkpark)');
+  {
+    const PIA = '1b2c3d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e', OTHER_TAB = '00000000-0000-4000-8000-0000000002a1';
+    const KEYP = `barkbot.bot.${PIA}`, NOT_KEPT = /not saved to the bot/;
+    const line = () => ev(() => document.querySelector('.chat-error')?.textContent ?? null);
+    // Pia's page opens with no conversation; then `meanwhile` changes her record; then her first message.
+    const firstMessage = async (words, meanwhile) => {
+      stub.sessions = [session(OTHER_TAB)]; freshStore(); stub.prefs.set('barkbot.bots', { ids: [PIA] }); stub.prefs.set(KEYP, rec('Pia', HOST_ID, null));
+      await open(`${base}/?bot=${PIA}`); await until(async () => (await live()).header === 'Pia', 15000, "Pia's page").catch(() => {}); await wait(500);
+      const before = await line();
+      meanwhile(); const m0 = stub.made.length;
+      await typeSend(words);
+      await until(() => stub.made.length > m0, 8000, 'the new conversation').catch(() => {}); await wait(1500);
+      return { before, line: await line(), made: stub.made.slice(m0), record: stub.prefs.get(KEYP) ?? null };
+    };
+    const ok = await firstMessage('hello pia', () => {});
+    check("control: Pia's first message makes a conversation that is saved to her record, and no line", ok.before === null && ok.made.length === 1 && ok.record?.session_id === ok.made[0] && ok.line === null, ok);
+    const taken = await firstMessage('hello again', () => stub.prefs.set(KEYP, rec('Pia', HOST_ID, OTHER_TAB)));
+    check("another tab saved a conversation to Pia meanwhile: hers stays, and the page says in one line that this one was not saved to the bot", taken.before === null && taken.made.length === 1 && taken.record?.session_id === OTHER_TAB && NOT_KEPT.test(taken.line ?? ''), taken);
+    const gone = await firstMessage('hello there', () => stub.prefs.delete(KEYP));
+    check("Pia's record is gone meanwhile: nothing is written for her, and the page says in one line that this conversation was not saved to the bot", gone.before === null && gone.made.length === 1 && gone.record === null && NOT_KEPT.test(gone.line ?? ''), gone);
+    await clearPrompt(); stub.sessions = []; freshStore();
+  }
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
