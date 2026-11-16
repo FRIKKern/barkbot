@@ -42,15 +42,17 @@ export class BarkparkError extends Error {
   }
 }
 
-/** How long a read (a GET) waits for Barkpark, answer and body: 3 s. A read answers in well under
- *  0.3 s, and a page load waits on a few reads in a row (computers, sessions, bot records, the
- *  Main Bot's move-in), so a read that hangs costs the page 3 s once, not the whole load, and is then
- *  a failed read on the caller's own failed-read path (the move-in takes nothing).
+/** How long a read (a GET) waits for Barkpark, answer and body: 8 s. A read answers in well under
+ *  0.3 s; a slow one under load can take a few seconds and is still an answer (behaviour's slow
+ *  page loads hold reads 3 to 4 s), so the bound is twice the slowest answer taken as normal. A page
+ *  load waits on a few reads in a row (computers, sessions, bot records, the Main Bot's move-in): a
+ *  read that hangs costs it 8 s once, not the whole load, and is then a failed read on the caller's
+ *  own failed-read path (the move-in takes nothing).
  *  Not bounded: anything that is not a GET (a message send, an upload, an answer, a pref write),
  *  since one with no answer may have been done and is judged so (a long turn is normal); the event
  *  streams (bpStream); and a picture's bytes (`unbounded`): up to 3 MB on a slow link is not a hang,
  *  and it holds only that picture. */
-export const READ_MS = 3000
+export const READ_MS = 8000
 
 /** One JSON call. A refusal throws with Barkpark's own code and message; a read past READ_MS throws a
  *  plain Error (not a BarkparkError: Barkpark did not answer). */
