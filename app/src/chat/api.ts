@@ -1,9 +1,10 @@
 // The conversation's server functions. Their bodies run on the server only (TanStack Start
 // strips them from the browser bundle), so they may use server/barkpark.
 import {randomUUID} from 'node:crypto'
+import {readFileSync} from 'node:fs'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError} from '../server/barkpark'
-import {addId, botFolder, dropBot, legacyName, listIds, mainBotId, NO_MESSAGES, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
+import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
 /** A bot as the page gets it: its id and its name only (the record's pointers stay on the server). */
@@ -153,13 +154,31 @@ export const loadChat = createServerFn({method: 'GET'})
   return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice, sessions: byBot}
 })
 
+// Each Create try's id: random. In dev only (vite build leaves it out), BARKBOT_TEST_MINT_FILE, set
+// by scripts/behaviour.mjs against its stand-in Barkpark, names a file whose lines are the ids the
+// tries take first. A line whose record is there, or could not be read, is dropped: the test hook
+// never writes over a record, listed or not.
+async function minter(): Promise<(i: number) => string> {
+  const file = import.meta.env.DEV ? process.env.BARKBOT_TEST_MINT_FILE : undefined
+  const given: string[] = []
+  if (file) {
+    let lines: string[] = []
+    try {
+      lines = readFileSync(file, 'utf8').split('\n').map((x) => x.trim()).filter(Boolean)
+    } catch {}
+    for (const id of lines) if ((await readBot(id).catch(() => 'unread')) === null) given.push(id)
+  }
+  return (i) => given[i] ?? randomUUID()
+}
+
 /** Create in the New Bot dialog: a new bot on the enrolled computer, with an empty conversation
  *  that Barkpark makes on its first message (startChat saves it), so a failed Create leaves no
  *  session behind. Its record is written whole first, its id added to the list last, so a bot
  *  shows only once it is whole; if the add fails the record is removed again. It is refused, with
  *  nothing written, when no computer is enrolled (a bot works on a computer) or when the list
  *  already holds as many bots as one load shows (READ_CAP).
- *  Its first conversation asks for its own folder on the computer (botFolder). */
+ *  Its first conversation asks for its own folder on the computer (botFolder), one no listed bot
+ *  works in (freshId). */
 export const createBot = createServerFn({method: 'POST'})
   .validator((d: {name: unknown; shape?: unknown; colour?: unknown}) => {
     if (!validName(d.name)) throw new Error('a bot name is 1 to 200 characters')
@@ -174,7 +193,10 @@ export const createBot = createServerFn({method: 'POST'})
       throw new Error('your bots could not be read from Barkpark. Try again.')
     })
     if ((ids?.length ?? 0) >= READ_CAP) throw new Error(`you have ${READ_CAP} bots, the most BarkBot shows.`)
-    const bot: Bot = {id: randomUUID(), ...data, host_id: host.id, session_id: null, created_at: new Date().toISOString()}
+    // A new id whose folder no listed bot works in; a few tries, then a plain refusal, nothing written.
+    const id = freshId(ids ?? [], host.id, await minter())
+    if (!id) throw new Error('every id tried gave a folder one of your bots already works in. Try again.')
+    const bot: Bot = {id, ...data, host_id: host.id, session_id: null, created_at: new Date().toISOString()}
     await putBot(bot)
     try {
       await addId(bot.id)
