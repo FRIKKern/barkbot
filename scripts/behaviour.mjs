@@ -1223,6 +1223,37 @@ else {
     check('a 503 storage_unavailable after Barkpark took the message: the words stay and one line says it may have been sent', st.prompt === 'stored or not' && /may have been sent/.test(st.refused ?? '') && st.line === null && JSON.stringify(st.sent) === JSON.stringify(['stored or not']), st);
     await clearPrompt(); stub.sessions = []; freshStore();
   }
+
+  // ── The online dot is the open bot's own computer (task-658f2a8b5536d7ec) ──
+  console.log("Behaviour · the open bot's own computer (the live page, against the stand-in Barkpark)");
+  {
+    // Two of the owner's computers. The open bot lives on the one NOT named BARKBOT_HOST_NAME.
+    const NAMED = '00000000-0000-4000-8000-000000000001', OTHER = '00000000-0000-4000-8000-0000000000a2', GONE = '00000000-0000-4000-8000-0000000000a3';
+    const OLA = '0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
+    const two = (named, other) => [
+      { id: NAMED, name: 'BarkBot Mac', online: named, enrolled: true, revoked: false },
+      { id: OTHER, name: 'Other Mac', online: other, enrolled: true, revoked: false },
+      { id: GONE, name: 'Old Mac', online: true, enrolled: true, revoked: true },
+    ];
+    const machine = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
+    stub.sessions = []; freshStore(); stub.prefs.set('barkbot.bots', { ids: [OLA] }); stub.prefs.set(`barkbot.bot.${OLA}`, rec('Ola', OTHER, null));
+    stub.hosts = two(true, true);
+    await open(`${base}/?bot=${OLA}`); await until(async () => (await live()).header === 'Ola' && (await machine()).state === 'Asleep', 20000, "Ola's page").catch(() => {});
+    const on = { header: (await live()).header, ...(await machine()) };
+    precondition("Ola's page is open, its computer reachable, no alert", on.header === 'Ola' && on.state === 'Asleep' && on.alert === null, on);
+    stub.hosts = two(false, true); await wait(11000);
+    const namedOff = await machine();
+    check("control: the computer named BARKBOT_HOST_NAME stops, Ola's does not: after 11 s the card still says Asleep and no alert", namedOff.state === 'Asleep' && namedOff.alert === null, namedOff);
+    stub.hosts = two(true, false);
+    await until(async () => (await machine()).state === 'Unreachable', 10000, 'the page to notice').catch(() => {});
+    const otherOff = await machine();
+    check("Ola's own computer stops (the named one is on): within 10 s the card says Unreachable and the conversation says why", otherOff.state === 'Unreachable' && /unreachable/.test(otherOff.alert ?? ''), otherOff);
+    // The answer is only ever about one of the caller's own enrolled, unrevoked computers.
+    stub.hosts = two(true, true);
+    const asked = await ev(async ([ids]) => { const m = await import('/src/chat/api.ts'); const out = []; for (const hostId of ids) { try { out.push(await m.computerOnline({ data: { hostId } })); } catch (e) { out.push('threw: ' + e.message); } } return out; }, [[OTHER, GONE, '00000000-0000-4000-8000-0000000000ff']]);
+    check('asked about a revoked computer that is on, or one not the caller\'s, the answer is "not reachable" (control: the open bot\'s own computer is reachable)', JSON.stringify(asked) === JSON.stringify([true, false, false]), { asked });
+    stub.hosts = host(true); freshStore();
+  }
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
