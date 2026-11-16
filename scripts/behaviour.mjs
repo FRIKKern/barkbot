@@ -809,6 +809,44 @@ else {
   await clearPrompt();
   stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
 
+  console.log('Behaviour · picking the open bot again (the live page, against the stand-in Barkpark)');
+  // task-4a719948e5ff5b80: pick Bea with nothing held, then Ada (the open bot) again while Bea's page
+  // is still loading (its reads held): the last click wins, and the rail and the page agree.
+  stub.sessions = [session(SA), session(SB)]; stub.rows = []; freshStore(); stub.fleet = 'idle'; stub.stateBy.clear();
+  stub.prefs.set('barkbot.bots', { ids: [ADA, BEA] });
+  stub.prefs.set(`barkbot.bot.${ADA}`, rec('Ada', HOST_ID, SA));
+  stub.prefs.set(`barkbot.bot.${BEA}`, rec('Bea', HOST_ID, SB));
+  stub.rowsBy.set(SA, [{ seq: 1, role: 'user', source_markdown: 'apples please' }, { seq: 2, role: 'assistant', source_markdown: 'Here are the apples.' }]);
+  stub.rowsBy.set(SB, [{ seq: 1, role: 'user', source_markdown: 'bananas please' }, { seq: 2, role: 'assistant', source_markdown: 'Here are the bananas.' }]);
+  await open(`${base}/?bot=${ADA}`);
+  await until(async () => (await live()).header === 'Ada' && /apples/.test(await words()), 15000, "Ada's page").catch(() => {}); await wait(500);
+  const railOn = () => ev(() => document.querySelector('.rail-list .rail-tile[aria-current="page"]')?.getAttribute('aria-label').split(', ')[0] ?? null);
+  precondition("the page opens on Ada with Ada's rows, and the rail shows Ada open", /apples please/.test(await words()) && (await railOn()) === 'Ada', { words: await words(), rail: await railOn() });
+  const backKeys0 = stub.readKeys.length;
+  stub.readDelay = 3000;
+  await clickTile('Bea');
+  await until(() => stub.readKeys.length > backKeys0, 5000, "Bea's page to start loading").catch(() => {}); await wait(300);
+  const backMid = { rail: await railOn(), url: await onBot() };
+  await clickTile('Ada');
+  await wait(1000); stub.readDelay = 0;
+  await wait(6000);
+  const back = { mid: backMid, url: await onBot(), header: (await live()).header, rail: await railOn(), t: await words() };
+  check("picking the open bot again while another bot's page is still loading: the last click wins, the page shows the open bot's rows, and the rail agrees", back.mid.rail === 'Bea' && back.url === ADA && back.header === 'Ada' && back.rail === 'Ada' && /apples please/.test(back.t) && !/bananas/.test(back.t), back);
+  // The same when the pick was held for a new bot's first message and goes once that message went.
+  const LYN = 'f2a3b4c5-d6e7-4f80-8192-a3b4c5d6e7f8';
+  await newBot('Lyn', LYN);
+  const lynSent0 = stub.sent.length, lynTo0 = stub.to.length, lynMade0 = stub.made.length;
+  stub.createDelay = 700;
+  await typeSend('hello lyn'); await wait(150); await clickTile('Bea'); stub.readDelay = 3000;
+  await until(() => stub.sent.length > lynSent0, 15000, "Lyn's message").catch(() => {}); await wait(300);
+  const lynMid = { rail: await railOn(), sent: stub.sent.length - lynSent0 };
+  await clickTile('Lyn');
+  await wait(1000); stub.readDelay = 0; stub.createDelay = 0;
+  await wait(6000);
+  const lyn = { mid: lynMid, url: await onBot(), header: (await live()).header, rail: await railOn(), shown: /hello lyn/.test(await words()), bea: /bananas/.test(await words()), sent: stub.sent.slice(lynSent0).map((m) => m.content), to: stub.to.slice(lynTo0), made: stub.made.slice(lynMade0) };
+  check("a held pick that goes once the first message went, then the open bot picked again while that page loads: the page and the rail end on the open bot, and the message went once, to it", lyn.mid.rail === 'Bea' && lyn.mid.sent === 1 && lyn.url === LYN && lyn.header === 'Lyn' && lyn.rail === 'Lyn' && lyn.shown && !lyn.bea && JSON.stringify(lyn.sent) === JSON.stringify(['hello lyn']) && JSON.stringify(lyn.to) === JSON.stringify(lyn.made) && lyn.made.length === 1, lyn);
+  stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
+
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
   const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
   stub.hosts = host(true);

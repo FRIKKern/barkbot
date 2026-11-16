@@ -84,6 +84,11 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
     if (holdTimer.current) clearTimeout(holdTimer.current)
     holdTimer.current = null
   }
+  // A pick that goes (at once, or once its held message went) is `going`; the open bot picked again
+  // before that page loads goes back to it, so the last click wins and the rail and the page agree
+  // (task-4a719948e5ff5b80). After a give-up the words are already kept: that pick stays. Create's
+  // own navigation needs none: its dialog is modal and stays open until the new bot's page is up.
+  const going = useRef(false)
   // The parked message is over: sent (why null), or not (why).
   const settle = (why: string | null) => {
     parked.current = false
@@ -93,17 +98,29 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
     const id = pendingPick.current
     pendingPick.current = null
     if (!id) return
-    if (why === null) return void onPick(id)
+    if (why === null) {
+      going.current = true
+      return void onPick(id)
+    }
     setTarget(null)
   }
   const pick = (id: string) => {
     if (id === chat.botId) {
+      if (gaveUp.current) return
       pendingPick.current = null
       unhold()
-      return setTarget(null)
+      setTarget(null)
+      if (going.current) {
+        going.current = false
+        void onPick(id)
+      }
+      return
     }
     setTarget(id)
-    if (!parked.current) return void onPick(id)
+    if (!parked.current) {
+      going.current = true
+      return void onPick(id)
+    }
     pendingPick.current = id
     holdTimer.current ??= setTimeout(giveUp, PICK_HOLD_MS)
   }
