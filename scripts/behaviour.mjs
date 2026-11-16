@@ -1440,6 +1440,33 @@ else {
       && JSON.stringify(two.puts) === JSON.stringify(['Ria', 'Ria Two']) && two.record?.name === 'Ria', two);
     stub.sessions = []; freshStore();
   }
+
+  // ── A first conversation not saved while a pick is held keeps its line (task-97a57c9b49a06691) ──
+  console.log('Behaviour · a held pick and a first conversation not saved (the live page, against the stand-in Barkpark)');
+  {
+    const KAI = '4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b', LOU = '5f6a7b8c-9d0e-4f1a-8b2c-3d4e5f6a7b8c';
+    const KEYK = `barkbot.bot.${KAI}`;
+    const errLine = () => ev(() => document.querySelector('.chat-error')?.textContent ?? null);
+    // Kai's first message; while its conversation opens (Barkpark holds the answer 700 ms), Lou is picked.
+    const heldPick = async (words, saveFails) => {
+      stub.hosts = host(true); stub.sessions = []; freshStore(); stub.prefs.set('barkbot.bots', { ids: [KAI, LOU] });
+      stub.prefs.set(KEYK, rec('Kai', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${LOU}`, rec('Lou', HOST_ID, null));
+      await open(`${base}/?bot=${KAI}`); await until(async () => (await live()).header === 'Kai', 15000, "Kai's page").catch(() => {}); await wait(500);
+      if (saveFails) stub.fail.set(`PUT ${KEYK}`, 500);
+      const s0 = stub.sent.length, t0 = stub.to.length, m0 = stub.made.length;
+      stub.createDelay = 700;
+      await typeSend(words); await wait(150); await clickTile('Lou');
+      await until(() => stub.sent.length > s0, 8000, "Kai's message").catch(() => {}); await wait(2500);
+      stub.createDelay = 0; stub.fail.clear();
+      return { header: (await live()).header, bot: await onBot(), line: await errLine(), sent: stub.sent.slice(s0).map((m) => m.content), to: stub.to.slice(t0), made: stub.made.slice(m0), box: await promptText() };
+    };
+    const NOT_KEPT = /not saved to the bot/;
+    const ok = await heldPick('hello kai', false);
+    check("control: Kai's first conversation is saved while Lou's pick is held: the message goes once to it, then the pick goes to Lou", ok.header === 'Lou' && ok.bot === LOU && ok.made.length === 1 && JSON.stringify(ok.sent) === JSON.stringify(['hello kai']) && JSON.stringify(ok.to) === JSON.stringify(ok.made), ok);
+    const lost = await heldPick('hello again kai', true);
+    check("Kai's first conversation cannot be saved while Lou's pick is held: the pick is taken back, Kai's page shows the not-saved line, and the message went once to the new conversation", lost.header === 'Kai' && lost.bot === KAI && NOT_KEPT.test(lost.line ?? '') && lost.made.length === 1 && JSON.stringify(lost.sent) === JSON.stringify(['hello again kai']) && JSON.stringify(lost.to) === JSON.stringify(lost.made) && lost.box === '', lost);
+    stub.sessions = []; freshStore();
+  }
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);

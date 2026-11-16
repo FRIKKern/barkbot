@@ -68,6 +68,8 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   // is held (task-f954370021fb60fb: the pick remounts Home, which dropped the parked message):
   // - the message goes once, to this bot; then the pick goes through
   // - it is refused or fails: the pick is taken back; this bot's page shows why, with the words
+  // - its conversation is made but cannot be saved to this bot (startChat's kept: false): the pick
+  //   is taken back, so this page shows that line; the message still goes once, to that conversation
   // - picking this bot again takes the pick back; the last pick wins
   // - after PICK_HOLD_MS the pick goes through, and the words wait in this bot's box with a line:
   //   not sent (the conversation never opened; they are never sent later on their own), or
@@ -190,7 +192,15 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
         const made = await startChat({data: {hostId: chat.host.id, botId: chat.botId}})
         setStarted(made)
         onOpened(made.sessionId)
-        if (!made.kept) setNote('This conversation was not saved to the bot, so a reload may not open it again.')
+        if (!made.kept) {
+          setNote('This conversation was not saved to the bot, so a reload may not open it again.')
+          // The line is said here, on this bot's page, so a held pick is taken back (task-97a57c9b49a06691).
+          if (pendingPick.current) {
+            pendingPick.current = null
+            unhold()
+            setTarget(null)
+          }
+        }
       } catch (e) {
         // No conversation was made (botFolder refused, or Barkpark did): say why; the draft stays.
         setWaiting(null)
