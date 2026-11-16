@@ -225,7 +225,6 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
           // The line is said here, on this bot's page, so a held pick is taken back (task-97a57c9b49a06691).
           if (pendingPick.current) {
             pendingPick.current = null
-            unhold()
             setTarget(null)
           }
         }
