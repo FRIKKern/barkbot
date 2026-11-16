@@ -65,6 +65,10 @@ const VOICE = {voice: 'Helix', speed: '1x', language: 'Auto-detect'}
 const PICK_HOLD_MS = 6000
 // The line over the words of a first message given up on when a held pick went through.
 const NOT_SENT = 'This message was not sent: its conversation did not open in time. Send it again when you are back.'
+// How long a first message waits, with no pick held, for its conversation to open (task-252c44a41576121a).
+const OPEN_MS = 10000
+// The line over its words when that wait is over: it was never sent, and never will be on its own.
+const NOT_OPENED = 'This message was not sent: its conversation did not open in time. Send it again.'
 const MAYBE_SENT = `This message was on its way when you left and had no answer yet, so ${MAY_HAVE_GONE}`
 
 type Started = {sessionId: string; startedAt: string}
@@ -96,6 +100,8 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
     if (holdTimer.current) clearTimeout(holdTimer.current)
     holdTimer.current = null
   }
+  // The bound on a parked first message with no pick held (send's OPEN_MS).
+  const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   // A pick that goes (at once, or once its held message went) is `going`; the open bot picked again
   // before that page loads goes back to it, so the last click wins and the rail and the page agree
   // (task-4a719948e5ff5b80). After a give-up the words are already kept: that pick stays. Create's
@@ -109,6 +115,8 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
     sending.current = false
     parkedWords.current = null
     unhold()
+    if (openTimer.current) clearTimeout(openTimer.current)
+    openTimer.current = null
     const id = pendingPick.current
     pendingPick.current = null
     if (!id) return
@@ -155,7 +163,13 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
     pendingPick.current = null
     void onPick(id)
   }
-  useEffect(() => () => unhold(), [])
+  useEffect(
+    () => () => {
+      unhold()
+      if (openTimer.current) clearTimeout(openTimer.current)
+    },
+    [],
+  )
   // Words kept from a given-up message are in the box now (Composer's start): the page forgets them.
   useEffect(() => {
     if (kept) onKeep(chat.botId, null)
@@ -214,30 +228,46 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
       done = d
       setWaiting({text, outgoing, done: d})
     })
+    // Its conversation has OPEN_MS to open. Then, if it is not on its way, the words come back to the
+    // box with a line, and it is never sent on its own. A held pick has its own bound (giveUp): wait for it.
+    const bound = () => {
+      openTimer.current = null
+      if (!parked.current || sending.current || gaveUp.current) return
+      if (pendingPick.current) return void (openTimer.current = setTimeout(bound, 1000))
+      setWaiting(null)
+      done(NOT_OPENED)
+      settle(NOT_OPENED)
+    }
+    openTimer.current = setTimeout(bound, OPEN_MS)
+    // Opened beside the wait, not before it: `sent` answers when OPEN_MS is over, even while
+    // Barkpark has not answered this yet.
     if (!sessionId && !opening) {
+      const hostId = chat.host.id
       setOpening(true)
-      try {
-        const made = await startChat({data: {hostId: chat.host.id, botId: chat.botId}})
-        setStarted(made)
-        onOpened(made)
-        if (!made.kept) {
-          setNote('This conversation was not saved to the bot, so a reload may not open it again.')
-          // The line is said here, on this bot's page, so a held pick is taken back (task-97a57c9b49a06691).
-          if (pendingPick.current) {
-            pendingPick.current = null
-            unhold()
-            setTarget(null)
+      void (async () => {
+        try {
+          const made = await startChat({data: {hostId, botId: chat.botId}})
+          setStarted(made)
+          onOpened(made)
+          if (!made.kept) {
+            setNote('This conversation was not saved to the bot, so a reload may not open it again.')
+            // The line is said here, on this bot's page, so a held pick is taken back (task-97a57c9b49a06691).
+            if (pendingPick.current) {
+              pendingPick.current = null
+              unhold()
+              setTarget(null)
+            }
           }
+        } catch (e) {
+          // No conversation was made (botFolder refused, or Barkpark did): say why; the draft stays.
+          setWaiting(null)
+          const why = (e as Error).message
+          done(why)
+          settle(why)
+        } finally {
+          setOpening(false)
         }
-      } catch (e) {
-        // No conversation was made (botFolder refused, or Barkpark did): say why; the draft stays.
-        setWaiting(null)
-        const why = (e as Error).message
-        done(why)
-        settle(why)
-      } finally {
-        setOpening(false)
-      }
+      })()
     }
     return sent
   }
