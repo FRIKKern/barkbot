@@ -245,9 +245,16 @@ export type AttachmentRef = string | {id: string; name: string}
  *  for a bot's own folder, a chat host too old to run a bot in its folder), is answered as
  *  `refused`, not thrown: the page says so in a plain line and keeps the draft. It is never sent
  *  again without the folder: that would run the bot in the computer's shared root.
- *  Any other answer from Barkpark means it did not take the message: `failed`, with its words. No
- *  answer (the connection dropped, a gateway gave up: 502, 504) means it may have: `unsure`. Neither
- *  is thrown, so the page can tell "Barkpark said no" from "no answer". */
+ *  Barkpark sends the turn on before it stores the user's message (chat_controller.ex
+ *  create_message), so only an answer from before that is a sure no: a 4xx, or a 503 that the
+ *  runtime could not take it (runtime_capacity, runtime_unavailable). That is `failed`, with
+ *  Barkpark's words. Anything else may come after the turn went: a 500 or another 503 (storing it
+ *  failed), a gateway's 502 or 504, no answer at all. That is `unsure`. Neither is thrown, so the
+ *  page can tell "Barkpark said no" from "it may have gone". */
+/** A refusal Barkpark gives before the turn goes: the message was surely not sent. */
+const refusedBeforeSending = (e: BarkparkError) =>
+  (e.status >= 400 && e.status < 500) || (e.status === 503 && (e.code === 'runtime_capacity' || e.code === 'runtime_unavailable'))
+
 /** Whether Barkpark shows this conversation as made with a bot folder. A failed read: no. */
 async function askedForFolder(id: string): Promise<boolean> {
   try {
@@ -266,8 +273,7 @@ export const sendMessage = createServerFn({method: 'POST'})
     try {
       await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`, {method: 'POST', json})
     } catch (e) {
-      // A gateway's 502 or 504 is not Barkpark's answer: Barkpark may have taken the message.
-      if (!(e instanceof BarkparkError) || e.status === 502 || e.status === 504) return {unsure: (e as Error).message}
+      if (!(e instanceof BarkparkError) || !refusedBeforeSending(e)) return {unsure: (e as Error).message}
       if (e.status === 422 && e.code === 'host_cannot_receive_attachments') return {refused: 'host_cannot_receive_attachments'}
       // chat_unsupported is Barkpark's shared code (a revoked host, a provider not ready, …): it is
       // the folder only when this conversation asked for one; otherwise it goes on as any failure.
