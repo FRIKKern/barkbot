@@ -42,15 +42,36 @@ export class BarkparkError extends Error {
   }
 }
 
-/** One JSON call. A refusal throws with Barkpark's own code and message. */
-export async function bp<T>(path: string, init: {method?: string; json?: unknown} = {}): Promise<T> {
+/** How long a read (a GET) waits for Barkpark, answer and body: 3 s. A read answers in well under
+ *  0.3 s, and a page load waits on a few reads in a row (computers, sessions, bot records, the
+ *  Main Bot's move-in), so a read that hangs costs the page 3 s once, not the whole load, and is then
+ *  a failed read on the caller's own failed-read path (the move-in takes nothing).
+ *  Not bounded: anything that is not a GET (a message send, an upload, an answer, a pref write),
+ *  since one with no answer may have been done and is judged so (a long turn is normal); the event
+ *  streams (bpStream); and a picture's bytes (`unbounded`): up to 3 MB on a slow link is not a hang,
+ *  and it holds only that picture. */
+export const READ_MS = 3000
+
+/** One JSON call. A refusal throws with Barkpark's own code and message; a read past READ_MS throws a
+ *  plain Error (not a BarkparkError: Barkpark did not answer). */
+export async function bp<T>(path: string, init: {method?: string; json?: unknown; unbounded?: boolean} = {}): Promise<T> {
   const c = conf()
-  const res = await fetch(c.url + path, {
-    method: init.method ?? 'GET',
-    headers: {authorization: `Bearer ${c.token}`, accept: 'application/json', ...(init.json === undefined ? {} : {'content-type': 'application/json'})},
-    body: init.json === undefined ? undefined : JSON.stringify(init.json),
-  })
-  const text = await res.text()
+  const method = init.method ?? 'GET'
+  const bounded = method === 'GET' && !init.unbounded
+  let text: string
+  let res: Response
+  try {
+    res = await fetch(c.url + path, {
+      method,
+      headers: {authorization: `Bearer ${c.token}`, accept: 'application/json', ...(init.json === undefined ? {} : {'content-type': 'application/json'})},
+      body: init.json === undefined ? undefined : JSON.stringify(init.json),
+      signal: bounded ? AbortSignal.timeout(READ_MS) : undefined,
+    })
+    text = await res.text()
+  } catch (e) {
+    if (bounded && (e as Error)?.name === 'TimeoutError') throw new Error(`Barkpark did not answer a read within ${READ_MS / 1000} s`)
+    throw e
+  }
   const body = text ? JSON.parse(text) : null
   if (!res.ok) throw new BarkparkError(res.status, body?.error?.code ?? 'http_' + res.status, body?.error?.message ?? res.statusText)
   return body as T

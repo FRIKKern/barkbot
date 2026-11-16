@@ -14,7 +14,8 @@ export const Route = createFileRoute('/api/chat/$id/attachments/$aid')({
       GET: async ({params}) => {
         if (!UUID.test(params.id) || !SHA.test(params.aid)) return new Response('bad id', {status: 400})
         try {
-          const {attachment} = await bp<{attachment: {media_type: string; data: string}}>(`/v1/chat/sessions/${params.id}/attachments/${params.aid}`)
+          // A picture's bytes are not bounded (barkpark.ts READ_MS): a slow link is not a hang.
+          const {attachment} = await bp<{attachment: {media_type: string; data: string}}>(`/v1/chat/sessions/${params.id}/attachments/${params.aid}`, {unbounded: true})
           if (!TYPES.has(attachment.media_type)) return new Response('not a picture', {status: 415})
           return new Response(Buffer.from(attachment.data, 'base64'), {headers: {'content-type': attachment.media_type, 'x-content-type-options': 'nosniff', 'cache-control': 'private, max-age=31536000, immutable'}})
         } catch {
