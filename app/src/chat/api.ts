@@ -244,7 +244,17 @@ export type AttachmentRef = string | {id: string; name: string}
  *  host_cannot_receive_attachments), or cannot run the conversation as asked (422 chat_unsupported:
  *  for a bot's own folder, a chat host too old to run a bot in its folder), is answered as
  *  `refused`, not thrown: the page says so in a plain line and keeps the draft. It is never sent
- *  again without the folder: that would run the bot in the computer's shared root. */
+ *  again without the folder: that would run the bot in the computer's shared root.
+ *  Barkpark sends the turn on before it stores the user's message (chat_controller.ex
+ *  create_message), so only an answer from before that is a sure no: a 4xx, or a 503 that the
+ *  runtime could not take it (runtime_capacity, runtime_unavailable). That is `failed`, with
+ *  Barkpark's words. Anything else may come after the turn went: a 500 or another 503 (storing it
+ *  failed), a gateway's 502 or 504, no answer at all. That is `unsure`. Neither is thrown, so the
+ *  page can tell "Barkpark said no" from "it may have gone". */
+/** A refusal Barkpark gives before the turn goes: the message was surely not sent. */
+const refusedBeforeSending = (e: BarkparkError) =>
+  (e.status >= 400 && e.status < 500) || (e.status === 503 && (e.code === 'runtime_capacity' || e.code === 'runtime_unavailable'))
+
 /** Whether Barkpark shows this conversation as made with a bot folder. A failed read: no. */
 async function askedForFolder(id: string): Promise<boolean> {
   try {
@@ -257,17 +267,18 @@ async function askedForFolder(id: string): Promise<boolean> {
 
 export const sendMessage = createServerFn({method: 'POST'})
   .validator((d: {id: string; content: string; attachments?: AttachmentRef[]}) => d)
-  .handler(async ({data}): Promise<{accepted: true} | {refused: string}> => {
+  .handler(async ({data}): Promise<{accepted: true} | {refused: string} | {failed: string} | {unsure: string}> => {
     // What it names was stored for this conversation first (uploadAttachment below).
     const json = data.attachments?.length ? {content: data.content, attachments: data.attachments} : {content: data.content}
     try {
       await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`, {method: 'POST', json})
     } catch (e) {
-      if (e instanceof BarkparkError && e.status === 422 && e.code === 'host_cannot_receive_attachments') return {refused: 'host_cannot_receive_attachments'}
+      if (!(e instanceof BarkparkError) || !refusedBeforeSending(e)) return {unsure: (e as Error).message}
+      if (e.status === 422 && e.code === 'host_cannot_receive_attachments') return {refused: 'host_cannot_receive_attachments'}
       // chat_unsupported is Barkpark's shared code (a revoked host, a provider not ready, …): it is
       // the folder only when this conversation asked for one; otherwise it goes on as any failure.
-      if (e instanceof BarkparkError && e.status === 422 && e.code === 'chat_unsupported' && (await askedForFolder(data.id))) return {refused: 'chat_unsupported'}
-      throw e
+      if (e.status === 422 && e.code === 'chat_unsupported' && (await askedForFolder(data.id))) return {refused: 'chat_unsupported'}
+      return {failed: e.message}
     }
     return {accepted: true}
   })
