@@ -40,7 +40,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -55,6 +55,7 @@ const legacyWrites = () => stub.writes.filter((w) => w.key === 'barkbot.bot');
 const listed = () => stub.sessions.filter((x) => !x.archived_at).sort((a, b) => (b.last_active_at ?? b.inserted_at).localeCompare(a.last_active_at ?? a.inserted_at)).slice(0, 50).map(({ archived_at, bot_folder, ...x }) => x);
 const freshStore = (legacy = null) => { stub.prefs.clear(); if (legacy) stub.prefs.set('barkbot.bot', legacy); };
 const STUB_PORT = await freePort();
+let madeN = 0; // every conversation the stand-in makes gets its own id for the whole run, as in Barkpark
 await new Promise((ok) => httpServer((req, res) => {
   let body = '';
   req.on('data', (c) => (body += c));
@@ -84,6 +85,8 @@ await new Promise((ok) => httpServer((req, res) => {
     if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: listed() });
     if (/^\/v1\/chat\/sessions\/[^/?]+(\?.*)?$/.test(req.url) && req.method === 'GET') {
       const id = decodeURIComponent(req.url.split('?')[0].split('/')[4]); stub.shown.push(id); const x = stub.sessions.find((y) => y.id === id);
+      // `holdShow`: a read of that session that Barkpark never answers (released by destroying it).
+      if (stub.holdShow.has(id)) return void stub.heldShows.push(res);
       if (stub.failShow.has(id) || stub.failShow.has('*')) return json(stub.failShow.get(id) ?? stub.failShow.get('*'), { error: { code: 'internal', message: 'the stand-in fails this read' } });
       return x ? json(200, { archived_at: null, bot_folder: null, ...x, messages: [] }) : json(404, { error: { code: 'not_found', message: 'chat session not found' } });
     }
@@ -91,7 +94,7 @@ await new Promise((ok) => httpServer((req, res) => {
     if (req.url === '/v1/chat/sessions' && req.method === 'POST') {
       // `failCreate`: Barkpark cannot make the conversation (after the same hold).
       if (stub.failCreate) return setTimeout(() => json(500, { error: { code: 'internal_error', message: 'the stand-in could not make it' } }), stub.createDelay);
-      const b = JSON.parse(body); const x = { id: `00000000-0000-4000-8000-${String(900000000000 + stub.made.length)}`, execution_target: b.execution_target, execution_host_id: b.execution_host_id, inserted_at: new Date().toISOString(), status: 'active' };
+      const b = JSON.parse(body); const x = { id: `00000000-0000-4000-8000-${String(900000000000 + madeN++)}`, execution_target: b.execution_target, execution_host_id: b.execution_host_id, inserted_at: new Date().toISOString(), status: 'active' };
       x.bot_folder = b.bot_folder ?? null; stub.bodies.push({ id: x.id, body: b }); stub.made.push(x.id); stub.sessions.push(x); if (stub.deafNew) stub.deaf.add(x.id); if (stub.slowNew) stub.slow.add(x.id); return setTimeout(() => json(201, x), stub.createDelay);
     }
     if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
@@ -619,10 +622,11 @@ else {
   stub.prefs.set('barkbot.bots', { ids: [PIP] }); stub.prefs.set(`barkbot.bot.${PIP}`, rec('Pip', HOST_ID, null));
   s = await showing('Pip');
   check('the same, with an older conversation with no folder: today\'s bot moves in with the older one, never the folder\'s', stub.prefs.get(KEY)?.session_id === S_OLD && !stub.opened.includes(S_FOLD), { record: stub.prefs.get(KEY) ?? null, opened: stub.opened });
-  freshStore({ name: 'Legacy Name' }); stub.sessions = [{ ...foldered, bot_folder: null }];
+  const S_PLAIN = '00000000-0000-4000-8000-0000000000f2';
+  freshStore({ name: 'Legacy Name' }); stub.sessions = [{ ...foldered, id: S_PLAIN, bot_folder: null }];
   stub.prefs.set('barkbot.bots', { ids: [PIP] }); stub.prefs.set(`barkbot.bot.${PIP}`, rec('Pip', HOST_ID, null));
   s = await showing('Pip');
-  check('control: the same newest conversation with no folder is today\'s bot\'s, as before', stub.prefs.get(KEY)?.session_id === S_FOLD, { record: stub.prefs.get(KEY) ?? null });
+  check('control: the same newest conversation with no folder is today\'s bot\'s, as before', stub.prefs.get(KEY)?.session_id === S_PLAIN, { record: stub.prefs.get(KEY) ?? null });
   // A read that fails is not "no folder": the newest conversation's own read answers 500, then 503,
   // and today's bot moves in with no conversation, never that one (it may be a made bot's).
   for (const code of [500, 503]) {
@@ -1164,6 +1168,55 @@ else {
     s = await showing('Legacy Name');
     check('control: the Main Bot made from the lower-case host id is still the one Main Bot after a reload (no second one)', ids().join() === mainL && s.tiles.filter((t) => !t.startsWith('Open account')).length === 1 && botKeys().length === 1, { ids: ids(), tiles: s.tiles, keys: botKeys() });
     stub.hosts = host(true); freshStore();
+  }
+
+  // ── A Barkpark read is bounded; the move-in does not ask again what it knows (task-b7cd665a7b162544) ──
+  console.log('Behaviour · bounded reads (the live page, against the stand-in Barkpark)');
+  {
+    const at = (iso, x) => ({ ...x, inserted_at: iso });
+    // A read held open costs the page one bound (3 s, app/src/server/barkpark.ts READ_MS), then it is
+    // a failed read: the move-in takes no conversation, not that one and not an older one.
+    const HOLD = '00000000-0000-4000-8000-0000000001b1', OLDER = '00000000-0000-4000-8000-0000000001b0';
+    const twoOnHost = () => [at('2026-11-15T08:00:00Z', session(OLDER)), at('2026-11-15T10:00:00Z', session(HOLD))];
+    freshStore({ name: 'Legacy Name' }); stub.sessions = twoOnHost();
+    let t0 = Date.now(); s = await showing('Legacy Name'); const baseMs = Date.now() - t0;
+    const ctl = { header: s.header, session: stub.prefs.get(KEY)?.session_id ?? null, ms: baseMs };
+    check('control: with every read answered, the move-in takes the newest conversation', ctl.header === 'Legacy Name' && ctl.session === HOLD, ctl);
+    freshStore({ name: 'Legacy Name' }); stub.sessions = twoOnHost(); stub.holdShow.add(HOLD);
+    t0 = Date.now(); s = await showing('Legacy Name'); const heldMs = Date.now() - t0;
+    const held = { header: s.header, record: stub.prefs.get(KEY) ?? null, ms: heldMs, baseMs };
+    stub.holdShow.clear(); stub.heldShows.splice(0).forEach((r) => r.destroy()); await wait(1000);
+    check('a session read Barkpark never answers holds the page about 3 s, not forever; then the move-in takes no conversation, not that one and not an older one', held.header === 'Legacy Name' && held.ms >= 2500 && held.ms - baseMs < 6000 && !!held.record && held.record.session_id === null, held);
+    // With no bot list and the saved name unreadable, each load shows the Main Bot from memory and
+    // picks its conversation again. What a read showed (a folder or none) is known: not asked again.
+    const F = (n) => `00000000-0000-4000-8000-0000000001c${n}`;
+    const folderOf = (n) => ({ ...at(`2026-11-15T1${n}:00:00Z`, session(F(n))), bot_folder: `bot-0000000${n}` });
+    stub.sessions = [at('2026-11-15T08:00:00Z', session(F(1))), folderOf(2), folderOf(3), folderOf(4)];
+    freshStore(); stub.fail.set('GET barkbot.bot', 500);
+    const reads = () => stub.shown.filter((id) => /-0000000001c\d$/.test(id)).length;
+    stub.shown = []; s = await showing('BarkBot'); const first = { reads: reads(), opened: [...stub.opened] };
+    stub.shown = []; s = await showing('BarkBot'); const second = { reads: reads(), opened: [...stub.opened] };
+    check('the second load with no bot list and the saved name unreadable asks Barkpark nothing it already knows, and opens the same conversation (control: the first load read all four)', first.reads === 4 && second.reads === 0 && first.opened.includes(F(1)) && second.opened.includes(F(1)), { first, second });
+    // A read that failed is never remembered: the next load asks again, and never takes that one.
+    stub.sessions = [at('2026-11-15T08:00:00Z', session(F(5))), folderOf(6)]; stub.failShow.set(F(6), 500);
+    stub.shown = []; s = await showing('BarkBot'); const failedLoad = { opened: [...stub.opened] };
+    stub.failShow.clear();
+    stub.shown = []; s = await showing('BarkBot'); const nextLoad = { opened: [...stub.opened], asked: stub.shown.includes(F(6)) };
+    check('control: a read that failed is not remembered: that load opens nothing, the next asks again and takes the conversation with no folder, never the one with a folder', !failedLoad.opened.includes(F(5)) && !failedLoad.opened.includes(F(6)) && nextLoad.asked && nextLoad.opened.includes(F(5)) && !nextLoad.opened.includes(F(6)), { failedLoad, nextLoad });
+    stub.fail.clear(); freshStore();
+    // A 503 storage_unavailable after Barkpark took the message (its turn went before it was stored):
+    // the words stay, and one line says it may have been sent (the 500 case is #69's rule).
+    const SX = '00000000-0000-4000-8000-0000000001d1';
+    stub.sessions = [session(SX)]; stub.opened = []; await open(`${base}/`);
+    await until(() => stub.opened.includes(SX), 15000, "the Main Bot's conversation to open").catch(() => {}); await wait(800);
+    const s0 = stub.sent.length;
+    stub.afterTake = { status: 503, body: { error: { code: 'storage_unavailable', message: 'storage is unavailable' } } };
+    await typeSend('stored or not');
+    await until(() => stub.sent.length > s0, 8000, 'the message to reach the stand-in').catch(() => {}); await wait(1500);
+    stub.afterTake = null;
+    const st = { prompt: await promptText(), refused: await refusedLine(), line: await ev(() => document.querySelector('.chat-error')?.textContent ?? null), sent: stub.sent.slice(s0).map((m) => m.content) };
+    check('a 503 storage_unavailable after Barkpark took the message: the words stay and one line says it may have been sent', st.prompt === 'stored or not' && /may have been sent/.test(st.refused ?? '') && st.line === null && JSON.stringify(st.sent) === JSON.stringify(['stored or not']), st);
+    await clearPrompt(); stub.sessions = []; freshStore();
   }
 }
 
