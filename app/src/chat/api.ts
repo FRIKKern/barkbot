@@ -235,7 +235,10 @@ export const computerOnline = createServerFn({method: 'GET'})
 /** A new conversation on the bot's computer, kept in the bot's record so a reload opens it again.
  *  Claude starts in plan mode (the host's default). Only a record that is the caller's own, on that
  *  computer, whose session is none or gone, is written; a session Barkpark could not be asked about
- *  is kept. Once the conversation exists this never throws: `kept: false` says it was not saved. */
+ *  is kept. Once the conversation exists this never throws: `kept` is true only when the record was
+ *  written. It is false when there is no such record (none, not the caller's, another computer),
+ *  when the record already names a conversation (another tab saved one), or when a read or the
+ *  write failed: the page says so in one line. */
 export const startChat = createServerFn({method: 'POST'})
   .validator((d: {hostId: string; botId: string}) => d)
   .handler(async ({data}) => {
@@ -243,13 +246,15 @@ export const startChat = createServerFn({method: 'POST'})
     const folder = botFolder(data.botId, data.hostId)
     if (folder !== null && typeof folder === 'object') throw new Error(folder.refused)
     const s = await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: data.hostId, ...(folder ? {bot_folder: folder} : {})}})
-    let kept = true
+    let kept = false
     try {
       const raw = await readBot(data.botId)
       const bot = raw && trusted(data.botId, raw, await ownHosts())
       const now = bot && bot.host_id === data.hostId ? await sessionOf(bot) : null
-      if (bot && now?.is === 'none') await putBot({...bot, session_id: s.id})
-      else if (now?.is === 'unsure') kept = false
+      if (bot && now?.is === 'none') {
+        await putBot({...bot, session_id: s.id})
+        kept = true
+      }
     } catch (e) {
       console.warn(`barkbot: could not save the new conversation in its bot (${(e as Error).message})`)
       kept = false
