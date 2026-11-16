@@ -1779,6 +1779,32 @@ else {
     check("a held pick taken back because the first conversation could not be saved, then Omi picked again: the new pick waits a fresh hold of about 6 s (control: the pick was taken back, with the line)", kept2.back2.bot === NIA && /not saved to the bot/.test(kept2.back2.line ?? '') && kept2.bot === OMI && kept2.ms >= 5500 && kept2.ms < 9000, kept2);
     await clearPrompt(); stub.sessions = []; freshStore();
   }
+
+  // ── A send with no answer keeps its words, even when more was typed meanwhile (task-9fd77d2bc8f276e9) ──
+  console.log('Behaviour · words typed while a send is on its way (the live page, against the stand-in Barkpark)');
+  {
+    const SQ = '00000000-0000-4000-8000-0000000002d1';
+    // The Main Bot's open conversation; Barkpark takes the message and gives no answer until let go (503).
+    const heldThenUnsure = async (words, typedMeanwhile) => {
+      stub.hosts = host(true); stub.sessions = [session(SQ)]; freshStore(); stub.opened = [];
+      await open(`${base}/`); await until(() => stub.opened.includes(SQ), 15000, "the Main Bot's conversation to open").catch(() => {}); await wait(800);
+      await clearPrompt();
+      const h0 = stub.heldSends.length; stub.holdSend = true;
+      await typeSend(words);
+      await until(() => stub.heldSends.length > h0, 8000, 'the message on its way').catch(() => {}); await wait(200);
+      if (typedMeanwhile) { await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: typedMeanwhile }); await wait(200); }
+      stub.holdSend = false; stub.heldSends.splice(0).forEach((answer) => answer());
+      await until(async () => !!(await refusedLine()), 8000, 'the line').catch(() => {}); await wait(500);
+      const out = { prompt: await ev(() => document.querySelector('.prompt')?.innerText ?? ''), line: await refusedLine() };
+      await clearPrompt(); return out;
+    };
+    const lines = (t) => t.split('\n').map((x) => x.trim()).filter(Boolean);
+    const alone = await heldThenUnsure('first words', null);
+    check('control: a send with no answer and nothing typed meanwhile: the box holds its words and the line says it may have been sent', JSON.stringify(lines(alone.prompt)) === JSON.stringify(['first words']) && /may have been sent/.test(alone.line ?? ''), alone);
+    const both = await heldThenUnsure('first words', 'second');
+    check('a send with no answer while more was typed: the box holds its words first, then what was typed meanwhile, and the line says it may have been sent', JSON.stringify(lines(both.prompt)) === JSON.stringify(['first words', 'second']) && /may have been sent/.test(both.line ?? ''), both);
+    stub.sessions = []; freshStore();
+  }
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
