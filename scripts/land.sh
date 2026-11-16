@@ -52,6 +52,7 @@ node scripts/behaviour.mjs   # what the frame does, rule by rule with controls; 
 npm run -s docs
 git checkout -q -- README.md   # the timeline is main's to refresh
 if [ -n "$(git status --porcelain)" ]; then git add -A docs parity && git commit -q -m "Re-record the gates and regenerate docs after rebase"; fi
+node scripts/build-check.mjs   # a production build carries no test hook (BARKBOT_TEST_*); exits 1 if one does
 npm run -s check
 [ "${DRY:-}" = 1 ] && { echo "land: dry run, rebased and checked; not pushed"; exit 0; }
 git push -q --force-with-lease -u origin "$branch"
