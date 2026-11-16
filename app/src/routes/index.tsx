@@ -173,7 +173,7 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
   }
   // `started`: the conversation this page's own first message opened. Then the record's (the loader
   // reads it again after a cached page shows), and only when it names none, this bot's unsaved one.
-  const [started, setStarted] = useState<Started | null>(null)
+  const [started, setStarted] = useState<Started | null>(unsaved ?? null)
   const sessionId = started?.sessionId ?? chat.sessionId ?? unsaved?.sessionId ?? null
   const startedAt = started?.startedAt ?? (chat.sessionId ? chat.startedAt : (unsaved?.startedAt ?? chat.startedAt))
   const convo = useConversation(sessionId, live, state)
