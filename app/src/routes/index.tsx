@@ -225,7 +225,8 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   useEffect(() => {
     if (!chat.host) return
     setOnline(chat.host.online)
-    const t = setInterval(() => void computerOnline().then(setOnline, () => {}), 5000)
+    const hostId = chat.host.id
+    const t = setInterval(() => void computerOnline({data: {hostId}}).then(setOnline, () => {}), 5000)
     return () => clearInterval(t)
   }, [chat.host])
   const offline = chat.host && !online ? `${name}'s computer is unreachable. Messages wait until it is back. Start it with: npm run host` : null
