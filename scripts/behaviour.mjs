@@ -1301,6 +1301,32 @@ else {
     check("another tab saved a conversation to Pia meanwhile: hers stays, and the page says in one line that this one was not saved to the bot", taken.before === null && taken.made.length === 1 && taken.record?.session_id === OTHER_TAB && NOT_KEPT.test(taken.line ?? ''), taken);
     const gone = await firstMessage('hello there', () => stub.prefs.delete(KEYP));
     check("Pia's record is gone meanwhile: nothing is written for her, and the page says in one line that this conversation was not saved to the bot", gone.before === null && gone.made.length === 1 && gone.record === null && NOT_KEPT.test(gone.line ?? ''), gone);
+    // Every other way the new chat is not saved (from the review of #73): the line shows, the first
+    // message goes once to the new conversation and the box empties, the next send goes there too with
+    // no second create, and the record is not written.
+    const H2 = '00000000-0000-4000-8000-0000000000b2', S_UNS = '00000000-0000-4000-8000-0000000002b9';
+    const cases = [
+      ['unsure', () => { stub.prefs.set(KEYP, rec('Pia', HOST_ID, S_UNS)); stub.failShow.set(S_UNS, 503); }, (r) => r?.session_id === S_UNS],
+      ['read fails', () => { stub.fail.set(`GET ${KEYP}`, 500); }, (r) => r?.session_id === null],
+      ['write fails', () => { stub.fail.set(`PUT ${KEYP}`, 500); }, (r) => r?.session_id === null],
+      ['other computer', () => { stub.hosts = [...host(true), { id: H2, name: 'Other Mac', online: true, enrolled: true, revoked: false }]; stub.prefs.set(KEYP, rec('Pia', H2, null)); }, (r) => r?.host_id === H2 && r?.session_id === null],
+      ['not own (bad record)', () => { stub.prefs.set(KEYP, { name: '', host_id: HOST_ID }); }, (r) => r?.name === ''],
+      ['timed-out read', () => { stub.readDelay = 9000; }, (r) => r?.session_id === null],
+    ];
+    for (const [what, meanwhile, recOk] of cases) {
+      const t0 = stub.to.length;
+      const r = await firstMessage(`first ${what}`, meanwhile);
+      stub.readDelay = 0; stub.fail.clear(); stub.failShow.clear();
+      await until(() => stub.to.length > t0, 12000, 'the first message').catch(() => {}); await wait(800);
+      const lineNow = await line();
+      const firstTo = stub.to.slice(t0); const sentFirst = stub.sent.slice(-1)[0]?.content ?? null; const box1 = await promptText();
+      const m1 = stub.made.length, t1 = stub.to.length; await typeSend(`next ${what}`);
+      await until(() => stub.to.length > t1, 8000, 'the next send').catch(() => {}); await wait(800);
+      const nextTo = stub.to.slice(t1), newMade = stub.made.length - m1;
+      const d = { ...r, lineNow, firstTo, sentFirst, box1, nextTo, newMade, recNow: stub.prefs.get(KEYP) ?? null };
+      check(`not saved (${what}): one line says so; the first message goes once to the new conversation; the next send goes there too, no second create; the record is not written`, NOT_KEPT.test(lineNow ?? '') && r.made.length === 1 && JSON.stringify(firstTo) === JSON.stringify([r.made[0]]) && sentFirst === `first ${what}` && box1 === '' && JSON.stringify(nextTo) === JSON.stringify([r.made[0]]) && newMade === 0 && recOk(stub.prefs.get(KEYP)), d);
+      await clearPrompt(); stub.hosts = host(true);
+    }
     await clearPrompt(); stub.sessions = []; freshStore();
   }
 }
