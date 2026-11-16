@@ -672,7 +672,8 @@ else {
   const refusedLine = () => ev(() => document.querySelector('.composer-refused')?.textContent ?? null);
   const clearPrompt = () => ev(() => { const p = document.querySelector('.prompt'); p.replaceChildren(); p.dispatchEvent(new InputEvent('input', { bubbles: true })); });
   const typeSend = async (t) => { await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: t }); await key('Enter'); };
-  const clickTile = async (n) => { const at = await tileOf(n); if (at) await click(...at); };
+  // With many bots the rail scrolls to the open one: the tile is scrolled into view first.
+  const clickTile = async (n) => { await ev((n) => [...document.querySelectorAll('.rail-list .rail-tile')].find((x) => x.getAttribute('aria-label').split(', ')[0] === n)?.scrollIntoView({ block: 'nearest' }), n); await wait(100); const at = await tileOf(n); if (at) await click(...at); };
   // … and back on Dot: the words given up on wait in its box, with a line that they were not sent.
   await clickTile('Dot');
   await until(async () => (await onBot()) === DOT && (await promptText()) !== '', 15000, "Dot's page with its words").catch(() => {}); await wait(1000);
@@ -763,16 +764,17 @@ else {
   await until(() => stub.slow.size > 0, 8000, "Kim's conversation").catch(() => {}); await wait(300);
   // The give-up comes 6 s after the pick; the stream opens at 7.5 s; reads held 4 s keep Kim's page up past it.
   const kimAt = Date.now(); await clickTile('Bea'); stub.readDelay = 4000;
-  await wait(7500 - (Date.now() - kimAt));
-  const kimEarly = { bot: await onBot(), sent: stub.sent.slice(kimSent0).length };
+  const kimTrace = [];
+  while (Date.now() - kimAt < 7500) { kimTrace.push([Date.now() - kimAt, (await onBot()) === KIM ? 'kim' : 'other', (await words()).trim() === '' ? 'blank' : 'rows', stub.sent.length - kimSent0, stub.readKeys.length]); await wait(500); }
+  const kimEarly = { bot: await onBot(), sent: stub.sent.slice(kimSent0).length, held: kimTrace.some(([, , t]) => t === 'blank') };
   stub.slow.clear(); stub.slowNew = false; // Kim's stream opens now, while Kim's page is still up
   await until(async () => (await onBot()) === BEA, 15000, "Bea's page after the give-up").catch(() => {});
   stub.readDelay = 0; await wait(1500);
   const kimLeft = stub.sent.slice(kimSent0).map((m) => m.content);
   await clickTile('Kim');
   await until(async () => (await onBot()) === KIM && (await promptText()) !== '', 15000, "Kim's page with its words").catch(() => {}); await wait(1000);
-  const kim = { early: kimEarly, left: kimLeft, bot: await onBot(), prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(kimSent0).map((m) => m.content) };
-  check("a given-up message whose stream opens late, while the page is leaving: it is never sent then or after; back on the bot, the words wait with the not-sent line", kim.early.bot === KIM && kim.early.sent === 0 && kim.left.length === 0 && kim.sent.length === 0 && kim.bot === KIM && kim.prompt === 'hello kim' && /not sent/.test(kim.line ?? ''), kim);
+  const kim = { trace: kimTrace, early: kimEarly, left: kimLeft, bot: await onBot(), prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(kimSent0).map((m) => m.content) };
+  check("a given-up message whose stream opens late, while the page is leaving: it is never sent then or after; back on the bot, the words wait with the not-sent line", kim.early.bot === KIM && kim.early.sent === 0 && kim.early.held && kim.left.length === 0 && kim.sent.length === 0 && kim.bot === KIM && kim.prompt === 'hello kim' && /not sent/.test(kim.line ?? ''), kim);
   await clearPrompt();
   stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
 
