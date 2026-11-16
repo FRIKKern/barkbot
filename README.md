@@ -20,19 +20,17 @@ read · one gesture · read ─────► fixtures/ and traces/
 
 [![Journeys: one tile per journey, one dot per parity item](docs/images/journeys.svg)](JOURNEYS.md)
 
-## What happened
+## News
 
-<!-- timeline:start -->
-- **Today** · 2 changes
-  - The unread dot's colour is the oracle's own, read on its dot ([#34](https://github.com/FRIKKern/barkbot/pull/34))
-  - Gate B judges the turns re-recorded on Grok 0.79.3, and the rail's Unread dot ([#33](https://github.com/FRIKKern/barkbot/pull/33))
-- **Yesterday** · 5 changes
-  - Name the rename pref as phase 1: one bot ([#32](https://github.com/FRIKKern/barkbot/pull/32))
-  - A bot rename is saved to Barkpark (a per-account pref) and survives a reload ([#31](https://github.com/FRIKKern/barkbot/pull/31))
-- **This week** · 60 changes
-  - Bot name: rename as the oracle does, and the name follows everywhere ([#27](https://github.com/FRIKKern/barkbot/pull/27))
-  - Oracle: the rename field has no focus look; the name reaches the tile and the placeholder ([#26](https://github.com/FRIKKern/barkbot/pull/26))
-<!-- timeline:end -->
+<!-- news:start -->
+**Monday 16 November.** So far: each bot you make now works in its own folder on its computer, named `bot-` plus the first 8 characters of its id, so two bots no longer share one workspace. The Main Bot keeps the computer's shared folder. It uses bot folders that Barkpark added the day before; it was tested against a stand-in Barkpark, not yet in a live turn. [The full day](docs/news/2026-11-16.md)
+- **Bot folders:** a made bot asks for its own folder; if the computer's chat host is too old to make one, a plain line says so and nothing is sent ([#62](https://github.com/FRIKKern/barkbot/pull/62))
+
+**Sunday 15 November.** BarkBot went from one bot to many. Press Create, type a name, and a new bot appears in the rail (the list of bots down the left) with its own empty conversation; it is still there after a reload. Each bot is its own record in Barkpark, keyed by an id, so two bots called the same stay two bots. A fresh review passed the last step with 81 of 81 behaviour rules and found two snags, now filed: picking another bot while a new bot's first message is opening loses that message, and making a bot took up to 1.13 s against a 1.15 s limit. [The full day](docs/news/2026-11-15.md)
+- **Many bots:** Create makes a named bot with its own conversation; bots are known by id and stored per account; picking a bot shows its own conversation, and the Working and Unread marks land on the right bot ([#58](https://github.com/FRIKKern/barkbot/pull/58), [#59](https://github.com/FRIKKern/barkbot/pull/59), [#60](https://github.com/FRIKKern/barkbot/pull/60), [#61](https://github.com/FRIKKern/barkbot/pull/61))
+- **Files:** in a live run the bot read a text file and a PDF; a file card shows "25B" for 25 bytes, as Grok Bot does ([#56](https://github.com/FRIKKern/barkbot/pull/56))
+- **What is left:** the parity list (every part of Grok Bot, the app BarkBot recreates, and whether ours matches) now says only what is truly missing; four more items are done ([#57](https://github.com/FRIKKern/barkbot/pull/57))
+<!-- news:end -->
 
 ## Where things live (one fact, one home)
 
@@ -53,7 +51,7 @@ read · one gesture · read ─────► fixtures/ and traces/
 ```sh
 npm run check    # doc caps, links, items, fresh pictures, no secrets
 npm run board    # snapshot the Barkpark board (needs bp)
-npm run docs     # redraw the pictures, PARITY.md and the timeline
+npm run docs     # redraw the pictures and PARITY.md
 npm run gate     # Gate A and the inventory: the app against every captured oracle state
 npm run host:enroll  # once: make this Mac the bot's computer (token from Studio > Chat hosts)
 npm run host         # keep running while the bot works
