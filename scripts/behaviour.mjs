@@ -1183,8 +1183,9 @@ else {
     const ctl = { header: s.header, session: stub.prefs.get(KEY)?.session_id ?? null, ms: baseMs };
     check('control: with every read answered, the move-in takes the newest conversation', ctl.header === 'Legacy Name' && ctl.session === HOLD, ctl);
     freshStore({ name: 'Legacy Name' }); stub.sessions = twoOnHost(); stub.holdShow.add(HOLD);
-    t0 = Date.now(); s = await showing('Legacy Name'); const heldMs = Date.now() - t0;
-    const held = { header: s.header, record: stub.prefs.get(KEY) ?? null, ms: heldMs, baseMs };
+    // At most 20 s here: a page with no bound waits out Node's own 300 s, so this rule fails in 20 s.
+    t0 = Date.now(); const shown = await Promise.race([showing('Legacy Name'), wait(20000).then(() => null)]); const heldMs = Date.now() - t0;
+    const held = { header: shown?.header ?? null, record: stub.prefs.get(KEY) ?? null, ms: heldMs, baseMs };
     stub.holdShow.clear(); stub.heldShows.splice(0).forEach((r) => r.destroy()); await wait(1000);
     check('a session read Barkpark never answers holds the page about 3 s, not forever; then the move-in takes no conversation, not that one and not an older one', held.header === 'Legacy Name' && held.ms >= 2500 && held.ms - baseMs < 6000 && !!held.record && held.record.session_id === null, held);
     // With no bot list and the saved name unreadable, each load shows the Main Bot from memory and
