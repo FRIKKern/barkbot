@@ -40,7 +40,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -128,7 +128,11 @@ await new Promise((ok) => httpServer((req, res) => {
       if (stub.holdSend) { stub.heldSends.push(() => json(503, { error: { code: 'unavailable', message: 'the stand-in gave up' } })); return; }
       // `dropAnswer`: Barkpark takes the message, then the answer is lost (the socket drops).
       if (stub.dropAnswer) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); return void req.socket.destroy(); }
-      if (stub.failSend) { stub.failedSends.push(m); return json(500, { error: { code: 'internal_error', message: 'the stand-in could not take it' } }); }
+      // `afterTake` {status, body}: Barkpark takes the message, then answers that (a 500 from storing the
+      // user's turn after it went, chat_controller.ex create_message; a gateway's empty 502).
+      if (stub.afterTake) { const { status, body: b } = stub.afterTake; stub.sent.push(m); stub.to.push(req.url.split('/')[4]); res.writeHead(status, b ? { 'content-type': 'application/json' } : {}); return res.end(b ? JSON.stringify(b) : ''); }
+      // `failSend`: Barkpark refuses before the turn goes (503 runtime_unavailable): nothing is sent.
+      if (stub.failSend) { stub.failedSends.push(m); return json(503, { error: { code: 'runtime_unavailable', message: 'the stand-in could not take it' } }); }
       // Barkpark's shared 422 chat_unsupported for any session (a revoked host, a provider not ready, …).
       if (stub.unsupported) { stub.refused.push({ unsupported: m }); return json(422, { error: { code: 'chat_unsupported', message: "chat is not supported for this session's provider or operation" } }); }
       // A host that does not advertise bot_folders: Barkpark's 422 chat_unsupported for a session with a folder.
@@ -1093,13 +1097,13 @@ else {
     stub.fleet = null; stub.rows = []; freshStore(); stub.sessions = [session(SF)]; stub.failShow.clear();
     stub.opened = []; await open(`${base}/`);
     await until(() => stub.opened.includes(SF), 15000, "the Main Bot's conversation to open").catch(() => {}); await wait(800);
-    // A conversation that is open: Barkpark fails the send (a 500, thrown).
+    // A conversation that is open: Barkpark refuses the send before it goes (503 runtime_unavailable).
     let f0 = stub.failedSends.length, s0 = stub.sent.length;
     stub.failSend = true; await typeSend('keep these words');
     await until(() => stub.failedSends.length > f0, 8000, 'the send to fail').catch(() => {}); await wait(800);
     const kept1 = { prompt: await promptText(), line: await errLine(), refused: await refusedLine(), sent: stub.sent.slice(s0).length };
     stub.failSend = false;
-    check('a send that Barkpark fails, in an open conversation: the words stay in the box and one plain line says why, never that it may have been sent; nothing is sent', kept1.prompt === 'keep these words' && /could not take it/.test(kept1.line ?? '') && kept1.refused === null && kept1.sent === 0 && !/may have been sent/.test(`${kept1.line} ${kept1.refused}`), kept1);
+    check('a send that Barkpark refuses, in an open conversation: the words stay in the box and one plain line says why, never that it may have been sent; nothing is sent', kept1.prompt === 'keep these words' && /could not take it/.test(kept1.line ?? '') && kept1.refused === null && kept1.sent === 0 && !/may have been sent/.test(`${kept1.line} ${kept1.refused}`), kept1);
     await clearPrompt(); s0 = stub.sent.length; await typeSend('now it goes');
     await until(() => stub.sent.length > s0, 8000, 'the next send').catch(() => {}); await wait(500);
     const went = { prompt: await promptText(), sent: stub.sent.slice(s0).map((m) => m.content) };
@@ -1117,16 +1121,31 @@ else {
     await clearPrompt();
     // Barkpark takes a message and its answer is lost (the socket drops): it may have gone. The words
     // stay, and the one line says so, so one Enter does not send it twice without a word.
-    const lost = async (words) => {
-      const at = stub.sent.length; stub.dropAnswer = true; await typeSend(words);
+    const lost = async (words, how = () => (stub.dropAnswer = true)) => {
+      const at = stub.sent.length; await how(); await typeSend(words);
       await until(() => stub.sent.length > at, 8000, 'the message to reach the stand-in').catch(() => {}); await wait(1500);
-      stub.dropAnswer = false;
+      stub.dropAnswer = false; stub.afterTake = null; await ev(() => (window.__lose = null));
       return { prompt: await promptText(), refused: await refusedLine(), line: await errLine(), sent: stub.sent.slice(at).map((m) => m.content) };
     };
     stub.opened = []; await open(`${base}/`);
     await until(() => stub.opened.includes(SF), 15000, "the Main Bot's conversation to open again").catch(() => {}); await wait(800);
     const lost1 = await lost('did this go');
     check('in an open conversation, a message Barkpark took whose answer was lost: the words stay and one line says it may have been sent, to look before sending again', lost1.prompt === 'did this go' && /may have been sent/.test(lost1.refused ?? '') && /look in the conversation/.test(lost1.refused ?? '') && lost1.line === null && JSON.stringify(lost1.sent) === JSON.stringify(['did this go']), lost1);
+    await clearPrompt();
+    // The same "may have gone" for every answer that can come after the turn went: Barkpark's 500
+    // (it stores the user's turn after it sends it on), a gateway's empty 502, and the page's own
+    // call lost on its way back after the stand-in took the message.
+    const mayHaveGone = (x, words) => x.prompt === words && /may have been sent/.test(x.refused ?? '') && x.line === null && JSON.stringify(x.sent) === JSON.stringify([words]);
+    const crash = await lost('crash after take', () => (stub.afterTake = { status: 500, body: { error: { code: 'internal_error', message: 'Internal server error (DBConnection.ConnectionError)' } } }));
+    check('a 500 from Barkpark after it took the message: the words stay and one line says it may have been sent', mayHaveGone(crash, 'crash after take'), crash);
+    await clearPrompt();
+    const gate = await lost('gateway gave up', () => (stub.afterTake = { status: 502, body: null }));
+    check("a gateway's empty 502 after the message was taken: the words stay and one line says it may have been sent", mayHaveGone(gate, 'gateway gave up'), gate);
+    await clearPrompt();
+    // The page's own call to its server is lost after the stand-in took the message (fetch rejects).
+    await ev(() => { if (window.__loseOn) return; window.__loseOn = true; const real = window.fetch; window.fetch = async (u, init) => { const r = await real(u, init); if (window.__lose && typeof init?.body === 'string' && init.body.includes(window.__lose)) { window.__lose = null; throw new TypeError('Failed to fetch'); } return r; }; });
+    const own = await lost('lost on the way back', () => ev(() => (window.__lose = 'lost on the way back')));
+    check("the page's own call is lost after the message was taken: the words stay and one line says it may have been sent", mayHaveGone(own, 'lost on the way back'), own);
     await clearPrompt();
     const GIL = 'a7b8c9d0-e1f2-4a3b-8c4d-5e6f70819203';
     await newBot('Gil', GIL);
