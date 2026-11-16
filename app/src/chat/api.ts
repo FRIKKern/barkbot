@@ -27,18 +27,34 @@ async function findHost(): Promise<Host | null> {
   return h ? {id: h.id, name: h.name, online: h.online} : null
 }
 
+// Whether a conversation has a bot folder, as a read that worked showed it. Barkpark sets the folder
+// only when it makes the conversation, so the answer never changes: it is kept for the life of this
+// server and not asked again (with no bot list and the saved name unreadable, every load picks the
+// Main Bot's conversation anew). A read that failed is never kept. The oldest goes first past 500.
+const folderKnown = new Map<string, boolean>()
+const remember = (id: string, has: boolean) => {
+  folderKnown.delete(id)
+  folderKnown.set(id, has)
+  if (folderKnown.size > 500) folderKnown.delete(folderKnown.keys().next().value as string)
+}
+
 /** Today's conversation for the Main Bot: the newest of `onHost` that no listed bot names (`taken`)
  *  and that Barkpark shows with no bot folder. A conversation with a folder is a made bot's, whose
  *  record may never have saved it, and the Main Bot works in the computer's shared root, never in a
  *  bot's folder. Barkpark's list carries no bot_folder, so each one is read on its own, newest
- *  first. One that is gone (404) is passed over; a read that fails is not "no folder", so none is
- *  picked. */
+ *  first, unless an earlier read already showed it (folderKnown). One that is gone (404) is passed
+ *  over; a read that fails, or does not answer within READ_MS, is not "no folder", so none is picked. */
 async function folderless<S extends {id: string}>(onHost: S[], taken: Set<string | null>): Promise<S | undefined> {
   for (const s of onHost) {
     if (taken.has(s.id)) continue
+    const known = folderKnown.get(s.id)
+    if (known === false) return s
+    if (known === true) continue
     try {
       const shown = await bp<{bot_folder?: unknown}>(`/v1/chat/sessions/${encodeURIComponent(s.id)}?since=${NO_MESSAGES}`)
-      if (shown.bot_folder === null || shown.bot_folder === undefined) return s
+      const has = !(shown.bot_folder === null || shown.bot_folder === undefined)
+      remember(s.id, has)
+      if (!has) return s
     } catch (e) {
       if (e instanceof BarkparkError && e.status === 404) continue
       console.warn(`barkbot: could not read a conversation for the Main Bot (${(e as Error).message})`)
