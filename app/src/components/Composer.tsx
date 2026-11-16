@@ -35,7 +35,8 @@ export const placeholderFor = (bot: string, ask?: {questions?: unknown[]} | null
 export type ComposerStart = {draft?: string; pictures?: Picture[]; files?: WaitingFile[]; line?: string}
 
 /** Sends what the box holds. It may answer why nothing was sent (a file refused, a computer that cannot take
- *  files): the box then shows that in a plain line and gets its draft back. */
+ *  files): the box then shows that in a plain line and gets its draft back. An empty answer ('') says nothing
+ *  was sent and the reason is already said elsewhere (the conversation's line): the draft comes back alone. */
 export type OnSend = (text: string, pictures: Picture[], files: WaitingFile[]) => Promise<string | null | void> | void
 
 export function Composer({placeholder, onSend, disabled, start}: {placeholder: string; onSend?: OnSend; disabled?: boolean; start?: ComposerStart}) {
@@ -94,9 +95,9 @@ export function Composer({placeholder, onSend, disabled, start}: {placeholder: s
     setRefused(null)
     el.focus()
     const why = await onSend(text, sent.pictures, sent.files)
-    if (!why) return
-    // Nothing went: the words and what waited with them come back, and the line says why.
-    setRefused(why)
+    if (why === null || why === undefined) return
+    // Nothing went: the words and what waited with them come back, and the line says why (if it is not said elsewhere).
+    setRefused(why || null)
     setPictures((now) => [...sent.pictures, ...now])
     setFiles((now) => [...sent.files, ...now])
     if (text && !el.innerText.trim()) {

@@ -45,8 +45,10 @@ export function uuidV5(name: string): string {
   return `${x.slice(0, 8)}-${x.slice(8, 12)}-${x.slice(12, 16)}-${x.slice(16, 20)}-${x.slice(20)}`
 }
 
-/** The Main Bot's id: the same for every tab and device, so two first loads write the same keys. */
-export const mainBotId = (hostId: string) => uuidV5(`main-bot:${hostId}`)
+/** The Main Bot's id: the same for every tab and device, so two first loads write the same keys. The host
+ *  id is read in lower case (Barkpark's own ids are), so one that differs only in case names the same
+ *  Main Bot, and a record made from Barkpark's lower-case id still matches. */
+export const mainBotId = (hostId: string) => uuidV5(`main-bot:${hostId.toLowerCase()}`)
 
 /** The folder a bot works in on its computer (task-88d21dd5955bfa64): `bot-` and the first 8 hex of
  *  its id, never its name, so it is always one segment Barkpark takes (^[a-z0-9][a-z0-9-]{0,39}$).

@@ -381,7 +381,9 @@ export function useConversation(sessionId: string | null, transport: Transport =
   }, [outside, sessionId, fleetState, take])
 
   /** Sends a message with what goes with it. Answers null once it is sent, or the plain words for why it was not
-   *  (a file Barkpark does not take, a computer that cannot take files): then nothing was sent and the draft stays. */
+   *  (a file Barkpark does not take, a computer that cannot take files): then nothing was sent and the draft stays.
+   *  A send that throws answers '': its reason is told as the conversation's line (or to `failed`), and the
+   *  draft stays too. */
   const send = useCallback(
     // `failed`: a send that fails is told there, not shown as the conversation's error.
     async (content: string, outgoing: Outgoing[] = [], failed?: (why: string) => void): Promise<string | null> => {
@@ -408,6 +410,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
         const why = e instanceof Error ? e.message : String(e)
         if (failed) failed(why)
         else setError(why)
+        return ''
       }
       return null
     },
