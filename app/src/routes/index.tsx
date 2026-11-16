@@ -24,6 +24,10 @@ export const Route = createFileRoute('/')({
     const [opened, setOpened] = useState<Record<string, string>>({})
     // A first message given up on when a held pick went through: its words wait in that bot's box.
     const [kept, setKept] = useState<Record<string, ComposerStart>>({})
+    // A conversation opened on this page that could not be saved to its bot (startChat's kept:
+    // false): picking away and back opens it again, for this page's life. Only a reload, which
+    // reads the bot's record, may not (the line said so).
+    const [unsaved, setUnsaved] = useState<Record<string, Started>>({})
     const sessions = {...chat.sessions, ...opened}
     const of = (id: string) => fleet(sessions[id] ?? null)
     const working = chat.bots.filter((b) => sessions[b.id] && of(b.id) === 'working').map((b) => b.id)
@@ -36,7 +40,11 @@ export const Route = createFileRoute('/')({
         state={of(botId)}
         working={working}
         unread={unread}
-        onOpened={(sessionId) => setOpened((o) => ({...o, [botId]: sessionId}))}
+        onOpened={(made) => {
+          setOpened((o) => ({...o, [botId]: made.sessionId}))
+          if (!made.kept) setUnsaved((u) => ({...u, [botId]: {sessionId: made.sessionId, startedAt: made.startedAt}}))
+        }}
+        unsaved={chat.sessionId ? undefined : unsaved[botId]}
         kept={kept[botId]}
         onKeep={(id, start) => setKept(({[id]: _, ...k}) => (start ? {...k, [id]: start} : k))}
         onPick={(id) => navigate({to: '/', search: {bot: id}})}
@@ -58,9 +66,10 @@ const PICK_HOLD_MS = 6000
 const NOT_SENT = 'This message was not sent: its conversation did not open in time. Send it again when you are back.'
 const MAYBE_SENT = `This message was on its way when you left and had no answer yet, so ${MAY_HAVE_GONE}`
 
-type HomeProps = {chat: Chat; state: BotState; working: string[]; unread: string[]; onOpened: (sessionId: string) => void; onPick: (id: string) => Promise<void>; kept?: ComposerStart; onKeep: (botId: string, start: ComposerStart | null) => void}
+type Started = {sessionId: string; startedAt: string}
+type HomeProps = {chat: Chat; state: BotState; working: string[]; unread: string[]; onOpened: (made: Started & {kept: boolean}) => void; unsaved?: Started; onPick: (id: string) => Promise<void>; kept?: ComposerStart; onKeep: (botId: string, start: ComposerStart | null) => void}
 
-function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: HomeProps) {
+function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, onKeep}: HomeProps) {
   const router = useRouter()
   const navigate = useNavigate()
   // Picked another bot (`target`): its page is loading, and this one's rows are not shown under the
@@ -161,7 +170,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
     }
     await navigate({to: '/', search: {bot: id}})
   }
-  const [started, setStarted] = useState<{sessionId: string; startedAt: string} | null>(null)
+  const [started, setStarted] = useState<Started | null>(unsaved ?? null)
   const sessionId = started?.sessionId ?? chat.sessionId
   const convo = useConversation(sessionId, live, state)
   const [opening, setOpening] = useState(false)
@@ -206,7 +215,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
       try {
         const made = await startChat({data: {hostId: chat.host.id, botId: chat.botId}})
         setStarted(made)
-        onOpened(made.sessionId)
+        onOpened(made)
         if (!made.kept) {
           setNote('This conversation was not saved to the bot, so a reload may not open it again.')
           // The line is said here, on this bot's page, so a held pick is taken back (task-97a57c9b49a06691).
