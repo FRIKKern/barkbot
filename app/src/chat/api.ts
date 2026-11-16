@@ -4,7 +4,7 @@ import {randomUUID} from 'node:crypto'
 import {readFileSync} from 'node:fs'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError} from '../server/barkpark'
-import {addId, botFolder, dropBot, legacyName, listIds, mainBotId, NO_MESSAGES, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
+import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
 /** A bot as the page gets it: its id and its name only (the record's pointers stay on the server). */
@@ -173,7 +173,8 @@ function minter(): (i: number) => string {
  *  shows only once it is whole; if the add fails the record is removed again. It is refused, with
  *  nothing written, when no computer is enrolled (a bot works on a computer) or when the list
  *  already holds as many bots as one load shows (READ_CAP).
- *  Its first conversation asks for its own folder on the computer (botFolder). */
+ *  Its first conversation asks for its own folder on the computer (botFolder), one no listed bot
+ *  works in (freshId). */
 export const createBot = createServerFn({method: 'POST'})
   .validator((d: {name: unknown; shape?: unknown; colour?: unknown}) => {
     if (!validName(d.name)) throw new Error('a bot name is 1 to 200 characters')
@@ -188,7 +189,10 @@ export const createBot = createServerFn({method: 'POST'})
       throw new Error('your bots could not be read from Barkpark. Try again.')
     })
     if ((ids?.length ?? 0) >= READ_CAP) throw new Error(`you have ${READ_CAP} bots, the most BarkBot shows.`)
-    const bot: Bot = {id: minter()(0), ...data, host_id: host.id, session_id: null, created_at: new Date().toISOString()}
+    // A new id whose folder no listed bot works in; a few tries, then a plain refusal, nothing written.
+    const id = freshId(ids ?? [], host.id, minter())
+    if (!id) throw new Error('every id tried for this bot gave a folder one of your bots already works in, so it was not made. Try again.')
+    const bot: Bot = {id, ...data, host_id: host.id, session_id: null, created_at: new Date().toISOString()}
     await putBot(bot)
     try {
       await addId(bot.id)

@@ -60,6 +60,24 @@ export function botFolder(id: string, hostId: string): string | null | {refused:
   return `bot-${low.slice(0, 8)}`
 }
 
+/** How many ids Create tries for a folder no listed bot works in. */
+export const MINT_TRIES = 8
+
+/** A new bot's id: the first of `next(0)`, `next(1)`, … (MINT_TRIES of them) whose folder is no
+ *  listed bot's folder, or null when every one clashes. A folder is only the first 8 hex of an id,
+ *  so two ids can share one (task-c7929f26e51c447a), and two bots in one folder would work in each
+ *  other's files. Every listed id counts, on any computer: a stricter check, never a looser one.
+ *  An id that gives no folder (not a UUID, or the Main Bot's) is never taken. */
+export function freshId(listed: string[], hostId: string, next: (i: number) => string): string | null {
+  const used = new Set(listed.map((id) => botFolder(id, hostId)).filter((f) => typeof f === 'string'))
+  for (let i = 0; i < MINT_TRIES; i++) {
+    const id = next(i)
+    const f = botFolder(id, hostId)
+    if (typeof f === 'string' && !used.has(f)) return id.toLowerCase()
+  }
+  return null
+}
+
 export const validName = (n: unknown): n is string => typeof n === 'string' && n.trim().length > 0 && n.length <= 200
 
 // A bot's looks are one of the New Bot dialog's own shapes and colours, nothing else.
