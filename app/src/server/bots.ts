@@ -226,5 +226,18 @@ export async function addId(id: string): Promise<void> {
   await bp(prefs(LIST_KEY), {method: 'PATCH', json: {op: 'add', field: 'ids', item: id}})
 }
 
+/** Removes an id from the list (row-locked; an id not there is no change). Only for an id whose
+ *  record is proven gone (unsetIds): a record is whole before its id is listed. */
+export async function removeId(id: string): Promise<void> {
+  await bp(prefs(LIST_KEY), {method: 'PATCH', json: {op: 'remove', field: 'ids', item: id}})
+}
+
+/** The listed ids whose record read answered "unset" (proven gone), and how many reads failed or
+ *  timed out: a read that did not answer proves nothing, so its id is never among the gone. */
+export async function unsetIds(ids: string[]): Promise<{gone: string[]; unread: number}> {
+  const reads = await Promise.all(ids.map((id) => (UUID.test(id) ? read<unknown>(botKey(id)).then((v) => v === null, () => undefined) : Promise.resolve(false))))
+  return {gone: ids.filter((_, i) => reads[i] === true), unread: reads.filter((r) => r === undefined).length}
+}
+
 /** The raw record behind a bot key, for an edit of one field. */
 export const readBot = (id: string) => (UUID.test(id) ? read<Record<string, unknown>>(botKey(id)) : Promise.resolve(null))
