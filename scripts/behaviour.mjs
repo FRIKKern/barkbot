@@ -717,7 +717,7 @@ else {
   const hal = { bot: await onBot(), header: (await live()).header, prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(halSent0).length, refused: stub.refused.slice(halRef0).length };
   check("a held pick when the made bot's computer cannot run it in its own folder: the pick is taken back, the page stays, shows the folder line, and keeps the words", hal.bot === HAL && hal.header === 'Hal' && hal.prompt === 'hello hal' && /newer chat host/.test(hal.line ?? '') && hal.sent === 0 && hal.refused === 1, hal);
   await clearPrompt();
-  stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = [];
+  stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
 
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
   const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
