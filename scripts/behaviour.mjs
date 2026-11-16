@@ -37,8 +37,8 @@ process.on('SIGINT', () => process.exit(130));
 // A stand-in Barkpark for the live page (/): it answers what loadChat asks (the computers, the
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
-// pref call fail: 'GET barkbot.bots' → 500. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, fail: new Map(), shown: [], made: [], to: [], readKeys: [] };
+// pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id → status) makes a session's own read fail. stub.to is the session each message or answer went to.
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, fail: new Map(), failShow: new Map(), shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -82,6 +82,7 @@ await new Promise((ok) => httpServer((req, res) => {
     if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: listed() });
     if (/^\/v1\/chat\/sessions\/[^/?]+(\?.*)?$/.test(req.url) && req.method === 'GET') {
       const id = decodeURIComponent(req.url.split('?')[0].split('/')[4]); stub.shown.push(id); const x = stub.sessions.find((y) => y.id === id);
+      if (stub.failShow.has(id)) return json(stub.failShow.get(id), { error: { code: 'internal', message: 'the stand-in fails this read' } });
       return x ? json(200, { archived_at: null, bot_folder: null, ...x, messages: [] }) : json(404, { error: { code: 'not_found', message: 'chat session not found' } });
     }
     // A new conversation on a computer, as Barkpark. `createDelay` holds the answer (Create's Creating…).
@@ -574,6 +575,15 @@ else {
   stub.prefs.set('barkbot.bots', { ids: [PIP] }); stub.prefs.set(`barkbot.bot.${PIP}`, rec('Pip', HOST_ID, null));
   s = await showing('Pip');
   check('control: the same newest conversation with no folder is today\'s bot\'s, as before', stub.prefs.get(KEY)?.session_id === S_FOLD, { record: stub.prefs.get(KEY) ?? null });
+  // A read that fails is not "no folder": the newest conversation's own read answers 500, then 503,
+  // and today's bot moves in with no conversation, never that one (it may be a made bot's).
+  for (const code of [500, 503]) {
+    freshStore({ name: 'Legacy Name' }); stub.sessions = [{ ...session(S_OLD), inserted_at: '2026-11-15T08:00:00Z' }, foldered]; stub.failShow.set(S_FOLD, code);
+    stub.prefs.set('barkbot.bots', { ids: [PIP] }); stub.prefs.set(`barkbot.bot.${PIP}`, rec('Pip', HOST_ID, null));
+    stub.shown = []; s = await showing('Pip');
+    check(`the newest conversation has a folder and its own read answers ${code}: today's bot moves in with no conversation, not that one and not an older one`, stub.prefs.has(KEY) && stub.prefs.get(KEY)?.session_id === null && stub.shown.includes(S_FOLD) && !stub.opened.includes(S_FOLD), { record: stub.prefs.get(KEY) ?? null, shown: stub.shown, opened: stub.opened });
+  }
+  stub.failShow.clear();
   stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = []; stub.bodies = [];
 
   // ── Picking a bot shows its own conversation (task-92087f34f4eeeb43) ──────────────────────
