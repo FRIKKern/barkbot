@@ -98,6 +98,8 @@ const isPicture = (mediaType?: string) => !mediaType || mediaType.startsWith('im
  *  on its screenshot 2026-11-14). KB and MB were not seen: written the same way, a guess. */
 export const fileSize = (bytes: number) => (bytes < 1000 ? `${bytes}B` : bytes < 1_000_000 ? `${Math.round(bytes / 1000)}KB` : `${(bytes / 1_000_000).toFixed(1)}MB`)
 /** Why a message did not go, said plainly; the draft stays in the box. */
+/** Barkpark's chat_unsupported: for a bot in its own folder, the computer's chat host cannot run one there yet. */
+export const CANNOT_RUN_HERE = "The bot's computer cannot run this conversation, so nothing was sent. A bot in its own folder needs a newer chat host: update barkpark-chat-host, then send again."
 export const CANNOT_TAKE_FILES = "The bot's computer cannot take this file yet, so nothing was sent. Update its chat host, or send the words alone."
 
 const flat = (s: string) => s.replace(/\s+/g, '')
@@ -398,6 +400,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
           else refs.push(r.id), images.push(r.id)
         }
         const sent = (await transport.send(sessionId, content, refs.length ? refs : undefined)) as {refused?: string} | undefined
+        if (sent?.refused === 'chat_unsupported') return CANNOT_RUN_HERE
         if (sent?.refused) return CANNOT_TAKE_FILES
         land({role: 'user', text: content, ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
       } catch (e) {

@@ -93,7 +93,11 @@ function Home({chat, state, working, unread, onOpened, onPick}: HomeProps) {
     if (sessionId && convo.ready) return convo.send(text, outgoing)
     // The first message opens the conversation on the bot's computer, then goes once the
     // live stream is open, so its run is seen from the start.
-    const sent = new Promise<string | null>((done) => setWaiting({text, outgoing, done}))
+    let done!: (why: string | null) => void
+    const sent = new Promise<string | null>((d) => {
+      done = d
+      setWaiting({text, outgoing, done: d})
+    })
     if (!sessionId && !opening) {
       setOpening(true)
       try {
@@ -101,6 +105,10 @@ function Home({chat, state, working, unread, onOpened, onPick}: HomeProps) {
         setStarted(made)
         onOpened(made.sessionId)
         if (!made.kept) setNote('This conversation was not saved to the bot, so a reload may not open it again.')
+      } catch (e) {
+        // No conversation was made (botFolder refused, or Barkpark did): say why; the draft stays.
+        setWaiting(null)
+        done((e as Error).message)
       } finally {
         setOpening(false)
       }
