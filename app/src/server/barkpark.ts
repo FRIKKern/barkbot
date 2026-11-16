@@ -56,7 +56,7 @@ export const READ_MS = 8000
 
 /** One JSON call. A refusal throws with Barkpark's own code and message; a read past READ_MS throws a
  *  plain Error (not a BarkparkError: Barkpark did not answer). */
-export async function bp<T>(path: string, init: {method?: string; json?: unknown; unbounded?: boolean} = {}): Promise<T> {
+export async function bp<T>(path: string, init: {method?: string; json?: unknown; unbounded?: boolean; signal?: AbortSignal} = {}): Promise<T> {
   const c = conf()
   const method = init.method ?? 'GET'
   const bounded = method === 'GET' && !init.unbounded
@@ -67,7 +67,7 @@ export async function bp<T>(path: string, init: {method?: string; json?: unknown
       method,
       headers: {authorization: `Bearer ${c.token}`, accept: 'application/json', ...(init.json === undefined ? {} : {'content-type': 'application/json'})},
       body: init.json === undefined ? undefined : JSON.stringify(init.json),
-      signal: bounded ? AbortSignal.timeout(READ_MS) : undefined,
+      signal: bounded ? AbortSignal.timeout(READ_MS) : init.signal,
     })
     text = await res.text()
   } catch (e) {
