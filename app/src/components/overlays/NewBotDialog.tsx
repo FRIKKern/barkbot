@@ -8,6 +8,7 @@ import {useState} from 'react'
 import {Icon} from '../Composer'
 import {colours, shapeRows} from './data'
 import {fit} from '../parts'
+import {CREATE_UNSURE} from '../../chat/create-unsure'
 
 // Plain shapes in a 36 x 36 box, one per captured shape name.
 const shapes: Record<string, string> = {
@@ -38,15 +39,20 @@ export function NewBotDialog({onClose, onCreate}: {onClose?: () => void; onCreat
   const [name, setName] = useState('')
   const [creating, setCreating] = useState(false)
   const [failed, setFailed] = useState<string | null>(null)
+  // Barkpark did not say whether the bot was made: the line says so as it is, and Create stays off
+  // while this dialog is open, so no second bot is made blind.
+  const [unsure, setUnsure] = useState(false)
   const create = async () => {
-    if (!onCreate || creating || !name.trim()) return
+    if (!onCreate || creating || unsure || !name.trim()) return
     setCreating(true)
     setFailed(null)
     try {
       await onCreate({name: name.trim(), shape, colour})
       onClose?.()
     } catch (e) {
-      setFailed(`The bot was not made: ${(e as Error).message}`)
+      const why = (e as Error).message
+      if (why.includes(CREATE_UNSURE)) setUnsure(true)
+      setFailed(why.includes(CREATE_UNSURE) ? CREATE_UNSURE : `The bot was not made: ${why}`)
       setCreating(false)
     }
   }
@@ -77,7 +83,7 @@ export function NewBotDialog({onClose, onCreate}: {onClose?: () => void; onCreat
             <span style={fit('Cancel')}>Cancel</span>
           </button>
           {failed && <span className="new-bot-failed" role="alert">{failed}</span>}
-          <button className="pill primary" disabled={!name.trim() || creating} onClick={() => void create()}>
+          <button className="pill primary" disabled={!name.trim() || creating || unsure} onClick={() => void create()}>
             <span style={fit(creating ? 'Creating…' : 'Create')}>{creating ? 'Creating…' : 'Create'}</span>
           </button>
         </div>
