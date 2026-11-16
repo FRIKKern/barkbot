@@ -611,7 +611,8 @@ else {
   const folderTry = await ev(async ([hostId, upper]) => { const m = await import('/src/chat/api.ts'); const out = []; for (const botId of ['not-a-bot-id', upper]) { try { await m.startChat({ data: { hostId, botId } }); out.push('made'); } catch (e) { out.push(String(e?.message ?? e)); } } return out; }, [stub.hosts[0].id, pipId.toUpperCase()]);
   const folderBodies = stub.made.slice(folderMade0).map((id) => stub.bodies.findLast((x) => x.id === id)?.body.bot_folder ?? null);
   check("a made bot whose id gives no folder makes no conversation and says so plainly; an upper-case id is read as lower and gets the bot's own folder", /no folder/.test(folderTry[0]) && folderTry[1] === 'made' && JSON.stringify(folderBodies) === JSON.stringify([`bot-${pipId.slice(0, 8)}`]), { folderTry, folderBodies });
-  const full = [...ids()]; for (let i = full.length; i < 50; i++) full.push(crypto.randomUUID());
+  // 50 bots that each show: a listed id with no record is no bot (task-c95974b430641fe6).
+  const full = [...ids()]; for (let i = full.length; i < 50; i++) { const id = crypto.randomUUID(); full.push(id); stub.prefs.set(`barkbot.bot.${id}`, rec(`Full ${i}`, HOST_ID, null)); }
   stub.prefs.set('barkbot.bots', { ids: full });
   tc = await tryCreate('Over');
   check('with 50 bots listed (the most one load shows), Create refuses in one plain line and writes nothing, makes no conversation', /50 bots/.test(tc.line ?? '') && tc.open && tc.writes.length === 0 && tc.made.length === 0, tc);
@@ -1600,6 +1601,37 @@ else {
     const late = await viaDialog('Xan'); await wait(2000); stub.latePatch = null;
     const landed = { late, listed: listed(), dangling: dangling(), before: ids0 };
     check("Create's list add answer is lost and the add lands after Create's re-read: no id is left without a record, and the dialog says Barkpark did not say whether the bot was made, with Create off", landed.dangling.length === 0 && landed.listed.length === ids0.length + 1 && late.line === UNSURE && late.createOff === true, landed);
+    stub.sessions = []; freshStore();
+  }
+
+  // ── The 50-bot cap counts bots that show (task-c95974b430641fe6) ──
+  console.log('Behaviour · the 50-bot cap and ids that show no bot (the live page, against the stand-in Barkpark)');
+  {
+    const create = (name) => ev(async (n) => { const m = await import('/src/chat/api.ts'); return m.createBot({ data: { name: n } }).then((v) => ({ v }), (e) => ({ e: String(e?.message ?? e) })); }, name);
+    const listed = () => stub.prefs.get('barkbot.bots')?.ids ?? [];
+    const dangling = () => listed().filter((id) => !stub.prefs.has(`barkbot.bot.${id}`));
+    const GONE_HOST = '00000000-0000-4000-8000-0000000000ff';
+    stub.hosts = host(true); stub.sessions = []; freshStore(); await open(`${base}/`); await until(async () => (await live()).header === 'BarkBot', 15000, 'the page').catch(() => {}); await wait(500);
+    // 45 bots that show, then 5 listed ids of `kind`: 'none' (no record), 'gone' (a record on a computer no longer enrolled).
+    const fill = (kind) => {
+      freshStore(); const all = [], extra = [];
+      for (let i = 0; i < 45; i++) { const id = crypto.randomUUID(); all.push(id); stub.prefs.set(`barkbot.bot.${id}`, rec(`Shown ${i}`, HOST_ID, null)); }
+      for (let i = 0; i < 5; i++) { const id = crypto.randomUUID(); all.push(id); extra.push(id); if (kind === 'gone') stub.prefs.set(`barkbot.bot.${id}`, rec(`Old ${i}`, GONE_HOST, null)); }
+      stub.prefs.set('barkbot.bots', { ids: all }); return { all, extra };
+    };
+    // 45 that show and 5 ids with no record: the 5 are proven gone (their read answered "unset"), so they leave the list and the bot is made.
+    let f = fill('none'); let w0 = stub.writes.length; let out = await create('Ada');
+    const none = { out, listed: listed().length, dangling: dangling().length, kept45: f.all.slice(0, 45).every((id) => listed().includes(id)), removed: stub.writes.slice(w0).filter((w) => w.method === 'PATCH' && w.body.op === 'remove').map((w) => w.body.item) };
+    check('45 bots that show and 5 listed ids with no record: Create makes the bot, the 5 ids leave the list (their reads answered "unset"), and the 45 stay', !!none.out.v?.id && listed().includes(none.out.v.id) && none.dangling === 0 && none.kept45 && none.listed === 46, none);
+    // 45 that show and 5 records on a computer no longer enrolled: not proven gone, so nothing is removed; Create says plainly why it is not made, never "you have 50 bots".
+    f = fill('gone'); w0 = stub.writes.length; out = await create('Bea');
+    const gone = { out, writes: stub.writes.slice(w0).map((w) => `${w.method} ${w.key}`), same: JSON.stringify(listed()) === JSON.stringify(f.all) };
+    check('45 bots that show and 5 listed bots on a computer no longer enrolled: nothing is written or removed, and Create says 45 show, never "you have 50 bots"', !!gone.out.e && !/you have 50 bots/.test(gone.out.e) && /\b45\b/.test(gone.out.e) && gone.writes.length === 0 && gone.same, gone);
+    // 45 that show and 5 ids with no record whose reads fail: a failed read proves nothing, so nothing is removed, and Create says the bots could not all be read.
+    f = fill('none'); for (const id of f.extra) stub.fail.set(`GET barkbot.bot.${id}`, 500);
+    w0 = stub.writes.length; out = await create('Cy'); stub.fail.clear();
+    const blind = { out, writes: stub.writes.slice(w0).map((w) => `${w.method} ${w.key}`), same: JSON.stringify(listed()) === JSON.stringify(f.all) };
+    check('45 bots that show and 5 listed ids whose reads fail: nothing is removed or written, and Create says they could not be read, never "you have 50 bots"', !!blind.out.e && !/you have 50 bots/.test(blind.out.e) && /could not be read/.test(blind.out.e) && blind.writes.length === 0 && blind.same, blind);
     stub.sessions = []; freshStore();
   }
 }
