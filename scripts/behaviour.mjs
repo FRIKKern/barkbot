@@ -217,9 +217,29 @@ let s;
 
 s = await fresh();
 check('rest: transparent, border-color and background-color transitions of 0.12 s', s.bg === 'rgba(0, 0, 0, 0)' && /border-color 0\.12s.*background-color 0\.12s/.test(s.transition), s);
+// The hover is a real mouse move (a page cannot hover itself), so the page is armed first: the
+// background-color transition the hover starts is caught by its own transitionrun, its timing is
+// read from it, and its fill at 60 ms is read by seeking it there, not by Node waiting 60 ms.
+await ev(() => {
+  const el = document.querySelector('.who-name'); window.__hover = null;
+  const seen = (e) => {
+    if (e.propertyName !== 'background-color') return;
+    el.removeEventListener('transitionrun', seen);
+    const a = el.getAnimations().find((x) => x.transitionProperty === 'background-color');
+    if (!a) return void (window.__hover = { found: false });
+    const { duration, easing } = a.effect.getComputedTiming(); const keyEasing = a.effect.getKeyframes()[0]?.easing;
+    a.pause(); a.currentTime = 60; const at60 = getComputedStyle(el).backgroundColor; a.play();
+    window.__hover = { found: true, duration, easing, keyEasing, at60 };
+  };
+  el.addEventListener('transitionrun', seen);
+});
 { const [x, y, w, h] = field; await mouse('mouseMoved', x + w / 2, y + h / 2); }
-await wait(60); const early = (await name()).bg; await wait(250); s = await name();
-check('hover: fills to rgba(245,245,245,0.08), through the transition (control: not there at 60 ms)', s.bg === 'rgba(245, 245, 245, 0.08)' && early !== s.bg, { at60ms: early, settled: s.bg });
+await until(() => ev(() => window.__hover !== null), 5000, 'the hover transition').catch(() => {});
+await wait(250); s = await name();
+const hover = { ...(await ev(() => window.__hover)), settled: s.bg };
+// 'ease' at half its time is 0.8024 of the way: alpha 0.08 × 0.8024 = 0.0642.
+const alpha60 = Number(/rgba\(245, 245, 245, ([\d.]+)\)/.exec(hover.at60 ?? '')?.[1] ?? NaN);
+check('hover: fills to rgba(245,245,245,0.08) through a 120 ms ease transition (control: at 60 ms it is part way, alpha 0.0642)', s.bg === 'rgba(245, 245, 245, 0.08)' && hover.found && hover.duration === 120 && (hover.easing === 'ease' || hover.keyEasing === 'ease') && Math.abs(alpha60 - 0.0642) <= 0.004, hover);
 
 await fresh();
 await into('middle'); const middle = (await name()).sel;
@@ -499,10 +519,25 @@ else {
   // The real Create. Barkpark's answer is held 400 ms, so the label in flight can be seen.
   stub.createDelay = 400;
   await openDialog(); await typeName('Pip');
-  await ev(() => { window.__tileAt = null; const t0 = performance.now(); window.__t0 = t0; new MutationObserver((_, o) => { if ([...document.querySelectorAll('.rail-tile')].some((t) => t.getAttribute('aria-label') === 'Pip')) { window.__tileAt = performance.now() - t0; o.disconnect(); } }).observe(document.body, { subtree: true, childList: true, attributes: true }); });
+  // The span is the click on Create to the tile's node in the rail, as the oracle trace measured it
+  // (traces/2026-11-08-create-oracle.json: add rail listitem at 1150.9 ms). It is armed inside the
+  // page in the same evaluate that clicks, so no CDP round trip from Node sits inside it; the label
+  // in flight is seen by the same observer, not read by Node after a wait.
   const w2 = stub.writes.length;
-  await press('Create'); await wait(150);
-  const label = await ev(() => [...document.querySelectorAll('.dialog.new-bot button')].map((b) => b.textContent.trim()).find((t) => /^Creat/.test(t)) ?? null);
+  await ev(() => {
+    window.__tileAt = null; window.__creating = false;
+    const button = [...document.querySelectorAll('.dialog.new-bot button')].find((b) => b.textContent.trim() === 'Create');
+    const t0 = performance.now(); window.__t0 = t0;
+    new MutationObserver((_, o) => {
+      if ([...document.querySelectorAll('.dialog.new-bot button')].some((b) => b.textContent.trim() === 'Creating…')) window.__creating = true;
+      if ([...document.querySelectorAll('.rail-tile')].some((t) => t.getAttribute('aria-label') === 'Pip')) { window.__tileAt = performance.now() - t0; o.disconnect(); }
+    }).observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true });
+    button.click();
+  });
+  await until(() => ev(() => window.__tileAt !== null), 10000, 'the new tile').catch(() => {});
+  const label = (await ev(() => window.__creating)) ? 'Creating…' : null;
+  // Where the span went: each request in it, from the click (ms in, ms long).
+  const tileNet = await ev(() => performance.getEntriesByType('resource').filter((e) => e.startTime >= window.__t0 && e.startTime <= window.__t0 + (window.__tileAt ?? 0)).map((e) => [e.name.replace(location.origin, '').slice(0, 60), Math.round(e.startTime - window.__t0), Math.round(e.duration)]));
   await until(async () => (await live()).header === 'Pip', 10000, 'the new bot to open').catch(() => {});
   await wait(500);
   stub.createDelay = 0;
@@ -512,7 +547,7 @@ else {
   const empty = await ev(() => document.querySelectorAll('.bubble').length === 0);
   check('Create with a name adds one tile at the end of Pinned Bots and opens that bot\'s empty conversation', railAfter.length === railBefore.length + 1 && railAfter.at(-1) === 'Pip' && (await live()).header === 'Pip' && empty && !(await dialog()), { before: railBefore, after: railAfter, pipId });
   check('control: that Create wrote one bot key and one add, and made no Barkpark conversation (its first message makes it)', made2.filter((w) => w.method === 'PUT' && w.key === `barkbot.bot.${pipId}`).length === 1 && made2.filter((w) => w.method === 'PATCH' && w.key === 'barkbot.bots').length === 1 && made2.length === 2 && stub.made.length === c1 && stub.prefs.get(`barkbot.bot.${pipId}`)?.session_id === null, { made2, made: stub.made.slice(c1) });
-  check('Create reads Creating… while the writes are in flight, and the tile lands no later than the oracle\'s 1151 ms', label === 'Creating…' && typeof tileAt === 'number' && tileAt <= 1151, { label, tileAt });
+  check('Create reads Creating… while the writes are in flight, and the tile lands no later than the oracle\'s 1151 ms', label === 'Creating…' && typeof tileAt === 'number' && tileAt <= 1151, { label, tileAt, tileNet });
   const here = await ev(() => location.href);
   stub.opened = []; await open(here);
   await until(async () => (await live()).header === 'Pip', 15000, 'the reloaded page').catch(() => {}); await wait(500);
