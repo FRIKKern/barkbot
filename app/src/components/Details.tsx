@@ -61,7 +61,7 @@ export function Details({scene, name, onRename, onClose}: {scene: Scene; name?: 
               <Row icon={<Icon d="M3 3h4v4H3zM9 3h4v4H9zM3 9h4v4H3zM9 9h4v4H9z" />} label="Add to Slack" />
               <Row icon={<Icon d="M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 5v3l2 1.25" />} label="Create a routine" />
             </Section>
-            {scene.computer && (
+            {scene.computer !== undefined && (
               <Section title="Computer">
                 <li>
                   <button className="computer">
