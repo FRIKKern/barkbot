@@ -8,7 +8,7 @@ import {Tooltip, useHover} from './tips'
 
 // Always mounted: closing runs its width 320 -> 0 (styles/details.css), and a closed panel is
 // inert. The tab starts on the scene's and follows clicks.
-export function Details({scene, name, onRename, onClose}: {scene: Scene; name?: string; onRename?: (name: string) => void; onClose?: () => void}) {
+export function Details({scene, name, between, onRename, onClose}: {scene: Scene; name?: string; between?: boolean; onRename?: (name: string) => void; onClose?: () => void}) {
   const active = scene.active ?? ''
   const [tab, setTab] = useState(scene.tab ?? 'activity')
   const library = tab === 'library'
@@ -33,7 +33,7 @@ export function Details({scene, name, onRename, onClose}: {scene: Scene; name?: 
           <Tooltip box={avatar.box} side="bottom">
             Edit Avatar
           </Tooltip>
-          <BotName key={active} name={name ?? ''} onRename={onRename} />
+          <BotName key={active} name={name ?? ''} readOnly={between} onRename={onRename} />
         </div>
         <div className="tabs-row">
           <div role="tablist" aria-label="Conversation details" className="tabs">
@@ -98,7 +98,7 @@ export function Details({scene, name, onRename, onClose}: {scene: Scene; name?: 
 // lands (no select-all). Enter saves and leaves the field (focus on body); Escape puts the old
 // name back and leaves it; a click elsewhere saves (focus goes where the click went). An empty
 // name is never saved: the old one comes back.
-function BotName({name, onRename}: {name: string; onRename?: (name: string) => void}) {
+function BotName({name, readOnly, onRename}: {name: string; readOnly?: boolean; onRename?: (name: string) => void}) {
   const [draft, setDraft] = useState(name)
   const cancelled = useRef(false)
   // Saves what the field holds, not `draft`: the same native change event can update draft
@@ -114,6 +114,7 @@ function BotName({name, onRename}: {name: string; onRename?: (name: string) => v
     <input
       className="who-name"
       aria-label="Bot name"
+      readOnly={readOnly}
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onKeyDown={(e) => {

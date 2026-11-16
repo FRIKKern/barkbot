@@ -1501,6 +1501,54 @@ else {
     check("Create while a first message is on its way with no answer: the new bot opens, and back on its bot the words wait with the line that it may have been sent", onItsWay.away.header === 'Nell' && onItsWay.bot === DEX && onItsWay.prompt === 'hello dex' && /may have been sent/.test(onItsWay.line ?? ''), onItsWay);
     stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
+
+  // ── A name typed while a pick loads is written to no bot ──
+  console.log('Behaviour · renaming while a pick loads (the live page, against the stand-in Barkpark)');
+  {
+    const RIA = '6a7b8c9d-0e1f-4a2b-8c3d-4e5f6a7b8c9d', SAM = '7b8c9d0e-1f2a-4b3c-9d4e-5f6a7b8c9d0e';
+    const nameOf = (id) => stub.prefs.get(`barkbot.bot.${id}`)?.name;
+    // Every write of the typed name, to any bot's record: "<id> <name>".
+    const zeds = (w0) => stub.writes.slice(w0).filter((w) => w.method === 'PUT' && /^barkbot\.bot\./.test(w.key) && w.body?.value?.name === 'Zed').map((w) => `${w.key.slice('barkbot.bot.'.length)} Zed`);
+    const field = () => ev(() => document.querySelector('.who-name')?.value ?? null);
+    const typeZed = async () => {
+      const at = await ev(() => { const r = document.querySelector('.who-name').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; });
+      await click(...at); await ev(() => document.querySelector('.who-name').select()); await key('Backspace'); await page.send('Input.insertText', { text: 'Zed' }); await wait(100); await key('Enter');
+    };
+    const openOn = async (id, want) => {
+      stub.hosts = host(true); stub.sessions = []; freshStore(); stub.prefs.set('barkbot.bots', { ids: [RIA, SAM] });
+      stub.prefs.set(`barkbot.bot.${RIA}`, rec('Ria', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${SAM}`, rec('Sam', HOST_ID, null));
+      await open(`${base}/?bot=${id}`); await windowFocus(true); await until(async () => (await live()).header === want, 15000, `${want}'s page`).catch(() => {}); await wait(500);
+    };
+    // Ria open, Sam picked with every read held 3 s: the panel already shows Sam's name.
+    await openOn(RIA, 'Ria');
+    let w0 = stub.writes.length;
+    stub.readDelay = 3000; await clickTile('Sam'); await wait(400);
+    const mid = { header: (await live()).header, field: await field() };
+    await typeZed(); await wait(300);
+    const typed = await field();
+    await wait(5000); stub.readDelay = 0; await wait(1500);
+    const during = { mid, typed, zeds: zeds(w0), ria: nameOf(RIA), sam: nameOf(SAM), header: (await live()).header, field: await field() };
+    check("a name typed into the panel while a pick loads is written to no bot: both records keep their names, and after the load the picked bot shows its own (control: the field showed the picked bot's name)", mid.field === 'Sam' && during.zeds.length === 0 && during.ria === 'Ria' && during.sam === 'Sam' && during.header === 'Sam' && during.field === 'Sam', during);
+    // The same window, the change made by a script rather than typed (as an extension or a tool would:
+    // focus, React's value setter and an input event, blur). The field being read-only does not stop
+    // that, so the save path itself must write to no bot (review of #77, P2b).
+    await openOn(RIA, 'Ria');
+    w0 = stub.writes.length;
+    const progs = () => stub.writes.slice(w0).filter((w) => w.method === 'PUT' && /^barkbot\.bot\./.test(w.key) && w.body?.value?.name === 'Prog').map((w) => w.key.slice('barkbot.bot.'.length));
+    stub.readDelay = 4000; await clickTile('Sam'); await wait(300);
+    const progMid = { header: (await live()).header, field: await field(), readOnly: await ev(() => document.querySelector('.who-name')?.readOnly ?? null) };
+    await ev(() => { const f = document.querySelector('.who-name'); f.focus(); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(f, 'Prog'); f.dispatchEvent(new Event('input', { bubbles: true })); f.blur(); });
+    await wait(5000); stub.readDelay = 0; await wait(1500);
+    const prog = { mid: progMid, progs: progs(), ria: nameOf(RIA), sam: nameOf(SAM), header: (await live()).header };
+    check("a change made by a script on the panel's name field while a pick loads is written to no bot either: both records keep their names (control: the field showed the picked bot, read-only)", progMid.field === 'Sam' && progMid.readOnly === true && prog.progs.length === 0 && prog.ria === 'Ria' && prog.sam === 'Sam' && prog.header === 'Sam', prog);
+    // Control: with nothing loading, the same typing renames the open bot, once.
+    await openOn(SAM, 'Sam');
+    w0 = stub.writes.length;
+    await typeZed(); await until(() => zeds(w0).length > 0, 5000, 'the rename').catch(() => {}); await wait(300);
+    const plain = { zeds: zeds(w0), ria: nameOf(RIA), sam: nameOf(SAM), header: (await live()).header };
+    check('control: with nothing loading, a name typed into the panel is written once, to the open bot', JSON.stringify(plain.zeds) === JSON.stringify([`${SAM} Zed`]) && plain.ria === 'Ria' && plain.sam === 'Zed' && plain.header === 'Zed', plain);
+    stub.sessions = []; freshStore();
+  }
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
