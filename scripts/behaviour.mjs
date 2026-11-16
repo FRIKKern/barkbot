@@ -67,6 +67,17 @@ await new Promise((ok) => httpServer((req, res) => {
       if (req.method === 'GET') { stub.reads++; stub.readKeys.push(key); const answer = () => (failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got()); return stub.readDelay ? setTimeout(answer, stub.readDelay) : answer(); }
       const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing });
       if (failing) return json(failing, { error: { code: 'internal', message: 'the stand-in fails this write' } });
+      // `holdPut` {key, field, max}: the first whole-record write to `key` that changes `field` waits
+      // until another write to `key` has landed (or `max` ms), then lands after it: two writers that
+      // each read the record before either wrote.
+      const h = stub.holdPut;
+      if (req.method === 'PUT' && h?.key === key) {
+        if (!h.pending && !h.done && JSON.stringify(b.value?.[h.field]) !== JSON.stringify(stub.prefs.get(key)?.[h.field])) {
+          h.pending = () => { h.pending = null; h.done = true; clearTimeout(h.timer); stub.prefs.set(key, b.value); got(); };
+          h.timer = setTimeout(() => h.pending?.(), h.max); return;
+        }
+        stub.prefs.set(key, b.value); got(); h.pending?.(); return;
+      }
       if (req.method === 'PUT') { stub.prefs.set(key, b.value); return stub.createDelay ? setTimeout(got, stub.createDelay) : got(); }
       if (req.method === 'DELETE') { stub.prefs.delete(key); return got(); }
       if (req.method === 'PATCH') {
@@ -1363,6 +1374,32 @@ else {
       await clearPrompt(); stub.hosts = host(true);
     }
     await clearPrompt(); stub.sessions = []; freshStore();
+  }
+
+  // ── A rename and a new conversation at the same moment both stay (task-815065d27591f624) ──
+  console.log('Behaviour · a rename and a new chat at once (the live page, against the stand-in Barkpark)');
+  {
+    const RIA = '2c3d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f', KEYR = `barkbot.bot.${RIA}`;
+    const atOnce = async (first, held) => {
+      stub.hosts = host(true); stub.sessions = []; freshStore(); stub.prefs.set('barkbot.bots', { ids: [RIA] }); stub.prefs.set(KEYR, rec('Ria', HOST_ID, null));
+      await open(`${base}/?bot=${RIA}`); await until(async () => (await live()).header === 'Ria', 15000, "Ria's page").catch(() => {}); await wait(500);
+      const m0 = stub.made.length;
+      stub.holdPut = { key: KEYR, field: held, max: 4000 };
+      await ev(() => { window.__call = (which, botId, hostId) => import('/src/chat/api.ts').then((m) => (which === 'start' ? m.startChat({ data: { hostId, botId } }) : m.renameBot({ data: { id: botId, name: 'Ria Two' } }))).then((v) => ({ v }), (e) => ({ e: String(e?.message ?? e) })); });
+      // The first call reads the record and its write is held; then the second runs to its end.
+      await ev(([w, id, h]) => { window.__first = window.__call(w, id, h); }, [first, RIA, HOST_ID]);
+      await until(() => !!stub.holdPut.pending, 8000, 'the first write to be held').catch(() => {});
+      const heldSeen = !!stub.holdPut.pending;
+      const second = await ev(([w, id, h]) => window.__call(w, id, h), [first === 'start' ? 'rename' : 'start', RIA, HOST_ID]);
+      const firstOut = await ev(() => window.__first);
+      const out = { heldSeen, first: firstOut, second, made: stub.made.slice(m0), record: stub.prefs.get(KEYR) ?? null };
+      stub.holdPut = null; return out;
+    };
+    const a = await atOnce('start', 'session_id');
+    check("a new chat's record write is held until a rename of the same bot has been written: the record ends with the new name and the new conversation", a.heldSeen && a.made.length === 1 && a.record?.name === 'Ria Two' && a.record?.session_id === a.made[0], a);
+    const b = await atOnce('rename', 'name');
+    check("a rename's record write is held until a new chat of the same bot has been written: the record ends with the new name and the new conversation", b.heldSeen && b.made.length === 1 && b.record?.name === 'Ria Two' && b.record?.session_id === b.made[0], b);
+    stub.sessions = []; freshStore();
   }
 }
 
