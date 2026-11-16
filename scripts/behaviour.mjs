@@ -38,7 +38,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, fail: new Map(), failShow: new Map(), shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -61,7 +61,7 @@ await new Promise((ok) => httpServer((req, res) => {
     if (req.url.startsWith(PREFS)) {
       const key = decodeURIComponent(req.url.slice(PREFS.length)); const got = () => json(200, { key, dataset: 'production', value: stub.prefs.get(key) ?? null });
       const failing = stub.fail.get(`${req.method} ${key}`);
-      if (req.method === 'GET') { stub.reads++; stub.readKeys.push(key); return failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got(); }
+      if (req.method === 'GET') { stub.reads++; stub.readKeys.push(key); const answer = () => (failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got()); return stub.readDelay ? setTimeout(answer, stub.readDelay) : answer(); }
       const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing });
       if (failing) return json(failing, { error: { code: 'internal', message: 'the stand-in fails this write' } });
       if (req.method === 'PUT') { stub.prefs.set(key, b.value); return stub.createDelay ? setTimeout(got, stub.createDelay) : got(); }
@@ -87,19 +87,28 @@ await new Promise((ok) => httpServer((req, res) => {
     }
     // A new conversation on a computer, as Barkpark. `createDelay` holds the answer (Create's Creating…).
     if (req.url === '/v1/chat/sessions' && req.method === 'POST') {
+      // `failCreate`: Barkpark cannot make the conversation (after the same hold).
+      if (stub.failCreate) return setTimeout(() => json(500, { error: { code: 'internal_error', message: 'the stand-in could not make it' } }), stub.createDelay);
       const b = JSON.parse(body); const x = { id: `00000000-0000-4000-8000-${String(900000000000 + stub.made.length)}`, execution_target: b.execution_target, execution_host_id: b.execution_host_id, inserted_at: new Date().toISOString(), status: 'active' };
-      x.bot_folder = b.bot_folder ?? null; stub.bodies.push({ id: x.id, body: b }); stub.made.push(x.id); stub.sessions.push(x); return setTimeout(() => json(201, x), stub.createDelay);
+      x.bot_folder = b.bot_folder ?? null; stub.bodies.push({ id: x.id, body: b }); stub.made.push(x.id); stub.sessions.push(x); if (stub.deafNew) stub.deaf.add(x.id); if (stub.slowNew) stub.slow.add(x.id); return setTimeout(() => json(201, x), stub.createDelay);
     }
     if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
-      res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' }); res.write(': open\n\n');
-      // As Barkpark: the stored rows first (a fresh page asks from 0), and the fleet's snapshot.
-      if (req.url === '/v1/chat/events') {
-        stub.fleetOpens++; stub.fleets.push(res); res.on('close', () => stub.fleets.splice(stub.fleets.indexOf(res), 1));
-        if (stub.fleet) res.write(`event: snapshot\ndata: ${JSON.stringify({ sessions: stub.sessions.map((x) => ({ session_id: x.id, agent_state: stub.stateBy.get(x.id) ?? stub.fleet })) })}\n\n`);
-      }
-      else if (req.headers['last-event-id'] !== undefined) (stub.rowsBy.get(req.url.split('/')[4]) ?? stub.rows).forEach((r) => res.write(`id: ${r.seq}\nevent: message\ndata: ${JSON.stringify(r)}\n\n`));
-      if (req.url !== '/v1/chat/events') { stub.opened.push(req.url.split('/')[4]); stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
-      return;
+      // `deafNew`: a conversation made meanwhile never opens its stream (Barkpark refuses it).
+      if (stub.deaf.has(req.url.split('/')[4])) { res.writeHead(503, { 'content-type': 'text/plain' }); return res.end('unavailable'); }
+      // `slowNew`: a conversation made meanwhile opens its stream only when the rule takes its id out of stub.slow.
+      const go = () => {
+        res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' }); res.write(': open\n\n');
+        // As Barkpark: the stored rows first (a fresh page asks from 0), and the fleet's snapshot.
+        if (req.url === '/v1/chat/events') {
+          stub.fleetOpens++; stub.fleets.push(res); res.on('close', () => stub.fleets.splice(stub.fleets.indexOf(res), 1));
+          if (stub.fleet) res.write(`event: snapshot\ndata: ${JSON.stringify({ sessions: stub.sessions.map((x) => ({ session_id: x.id, agent_state: stub.stateBy.get(x.id) ?? stub.fleet })) })}\n\n`);
+        }
+        else if (req.headers['last-event-id'] !== undefined) (stub.rowsBy.get(req.url.split('/')[4]) ?? stub.rows).forEach((r) => res.write(`id: ${r.seq}\nevent: message\ndata: ${JSON.stringify(r)}\n\n`));
+        if (req.url !== '/v1/chat/events') { stub.opened.push(req.url.split('/')[4]); stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
+      };
+      const sid = req.url.split('/')[4];
+      if (stub.slow.has(sid)) { const t = setInterval(() => { if (!stub.slow.has(sid)) { clearInterval(t); go(); } }, 50); res.on('close', () => clearInterval(t)); return; }
+      return go();
     }
     // Pictures and files, as Barkpark: an upload's type is read from its bytes (png, PDF, UTF-8 text;
     // anything else is a 400 and is not stored) and it answers the sha256 of its bytes; a message
@@ -113,6 +122,9 @@ await new Promise((ok) => httpServer((req, res) => {
     if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const id = req.url.split('/').pop(); return stub.pictures.has(id) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(id) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/messages$/.test(req.url) && req.method === 'POST') {
       const m = JSON.parse(body);
+      // `holdSend`: Barkpark takes the message and does not answer until the rule lets it (503 then).
+      if (stub.holdSend) { stub.heldSends.push(() => json(503, { error: { code: 'unavailable', message: 'the stand-in gave up' } })); return; }
+      if (stub.failSend) { stub.failedSends.push(m); return json(500, { error: { code: 'internal_error', message: 'the stand-in could not take it' } }); }
       // Barkpark's shared 422 chat_unsupported for any session (a revoked host, a provider not ready, …).
       if (stub.unsupported) { stub.refused.push({ unsupported: m }); return json(422, { error: { code: 'chat_unsupported', message: "chat is not supported for this session's provider or operation" } }); }
       // A host that does not advertise bot_folders: Barkpark's 422 chat_unsupported for a session with a folder.
@@ -627,7 +639,145 @@ else {
   check("Bea works while Ada is open: only Bea's tile says Working, then, with no focus, only Bea's says Unread activity", JSON.stringify(during) === JSON.stringify(['Ada', 'Bea, Working', 'BarkBot']) && JSON.stringify(after) === JSON.stringify(['Ada', 'Bea, Unread activity', 'BarkBot']) && (await live()).header === 'Ada', { during, after });
   await windowFocus(true);
   check('control: the window getting focus clears the dot', JSON.stringify(await labels()) === JSON.stringify(['Ada', 'Bea', 'BarkBot']), await labels());
-  stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore();
+  // A first message still opening its conversation, then a pick (task-f954370021fb60fb): the
+  // message goes once, to the bot it was written to, and never to the bot picked.
+  const CLEO = 'c3d4e5f6-a7b8-4c9d-8e0f-1a2b3c4d5e6f';
+  stub.prefs.set(`barkbot.bot.${CLEO}`, rec('Cleo', HOST_ID, null)); stub.prefs.set('barkbot.bots', { ids: [...ids(), CLEO] });
+  await open(`${base}/?bot=${CLEO}`); await until(async () => (await live()).header === 'Cleo', 15000, "Cleo's page").catch(() => {}); await wait(500);
+  const cleoSent0 = stub.sent.length, cleoTo0 = stub.to.length, cleoMade0 = stub.made.length;
+  stub.createDelay = 700; // Barkpark holds the new conversation's answer: the pick lands while it opens
+  await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'hello cleo' }); await key('Enter');
+  await wait(150);
+  const beaAt = await tileOf('Bea'); if (beaAt) await click(...beaAt);
+  await until(async () => (await live()).header === 'Bea' && /bananas/.test(await words()), 15000, "Bea's page after the pick").catch(() => {});
+  await until(() => stub.sent.length > cleoSent0, 5000, "Cleo's message").catch(() => {}); await wait(800);
+  stub.createDelay = 0;
+  const cleoSession = stub.made.slice(cleoMade0)[0];
+  const cleo = { header: (await live()).header, sent: stub.sent.slice(cleoSent0).map((m) => m.content), to: stub.to.slice(cleoTo0), made: stub.made.slice(cleoMade0), saved: stub.prefs.get(`barkbot.bot.${CLEO}`)?.session_id ?? null };
+  check('a pick while a new bot\'s first message is still opening: the message is sent once, to that bot\'s new conversation, never to the bot picked, and the pick still lands', cleo.header === 'Bea' && cleo.made.length === 1 && JSON.stringify(cleo.sent) === JSON.stringify(['hello cleo']) && JSON.stringify(cleo.to) === JSON.stringify([cleoSession]) && cleo.saved === cleoSession && !cleo.to.includes(SB), cleo);
+  // The same, when the new conversation's stream never opens: the pick still lands, after its hold.
+  const DOT = 'd4e5f6a7-b8c9-4d0e-8f1a-2b3c4d5e6f70';
+  stub.prefs.set(`barkbot.bot.${DOT}`, rec('Dot', HOST_ID, null)); stub.prefs.set('barkbot.bots', { ids: [...ids(), DOT] });
+  await open(`${base}/?bot=${DOT}`); await until(async () => (await live()).header === 'Dot', 15000, "Dot's page").catch(() => {}); await wait(500);
+  const dotSent0 = stub.sent.length;
+  stub.deafNew = true;
+  await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'hello dot' }); await key('Enter');
+  await until(() => stub.deaf.size > 0, 5000, "Dot's conversation").catch(() => {}); await wait(300);
+  const beaAgain = await tileOf('Bea'); const pickedAt = Date.now(); if (beaAgain) await click(...beaAgain);
+  await until(async () => (await live()).header === 'Bea' && /bananas/.test(await words()), 20000, "Bea's page after the held pick").catch(() => {});
+  const dot = { header: (await live()).header, ms: Date.now() - pickedAt, beasRows: /bananas/.test(await words()), sent: stub.sent.slice(dotSent0).map((m) => m.content) };
+  check("a pick while a new bot's first message waits on a stream that never opens: the pick still lands, after its hold, and nothing is sent", dot.header === 'Bea' && dot.beasRows && dot.ms >= 5000 && dot.ms < 20000 && dot.sent.length === 0, dot);
+  const onBot = () => ev(() => new URLSearchParams(location.search).get('bot'));
+  const promptText = () => ev(() => document.querySelector('.prompt')?.innerText.trim() ?? '');
+  const refusedLine = () => ev(() => document.querySelector('.composer-refused')?.textContent ?? null);
+  const clearPrompt = () => ev(() => { const p = document.querySelector('.prompt'); p.replaceChildren(); p.dispatchEvent(new InputEvent('input', { bubbles: true })); });
+  const typeSend = async (t) => { await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: t }); await key('Enter'); };
+  // With many bots the rail scrolls to the open one: the tile is scrolled into view first.
+  const clickTile = async (n) => { await ev((n) => [...document.querySelectorAll('.rail-list .rail-tile')].find((x) => x.getAttribute('aria-label').split(', ')[0] === n)?.scrollIntoView({ block: 'nearest' }), n); await wait(100); const at = await tileOf(n); if (at) await click(...at); };
+  // … and back on Dot: the words given up on wait in its box, with a line that they were not sent.
+  await clickTile('Dot');
+  await until(async () => (await onBot()) === DOT && (await promptText()) !== '', 15000, "Dot's page with its words").catch(() => {}); await wait(1000);
+  const dotBack = { bot: await onBot(), prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(dotSent0).map((m) => m.content) };
+  stub.deafNew = false; stub.deaf.clear();
+  check("… back on that bot, its unsent words wait in the box with one plain line that they were not sent, and they are not sent on their own", dotBack.bot === DOT && dotBack.prompt === 'hello dot' && /not sent/.test(dotBack.line ?? '') && dotBack.sent.length === 0, dotBack);
+  await clearPrompt();
+  const newBot = async (n, id) => { stub.prefs.set(`barkbot.bot.${id}`, rec(n, HOST_ID, null)); stub.prefs.set('barkbot.bots', { ids: [...ids(), id] }); await open(`${base}/?bot=${id}`); await until(async () => (await live()).header === n, 15000, `${n}'s page`).catch(() => {}); await wait(500); };
+  // Pick Bea while Eve's first message is held, then Eve again: the pick is taken back, the last pick wins.
+  const EVE = 'e5f6a7b8-c9d0-4e1f-8a2b-3c4d5e6f7081';
+  await newBot('Eve', EVE);
+  const eveSent0 = stub.sent.length, eveMade0 = stub.made.length;
+  stub.createDelay = 700;
+  await typeSend('hello eve'); await wait(150); await clickTile('Bea'); await wait(150); await clickTile('Eve');
+  await until(() => stub.sent.length > eveSent0, 8000, "Eve's message").catch(() => {}); await wait(1500);
+  stub.createDelay = 0;
+  const eve = { bot: await onBot(), header: (await live()).header, sent: stub.sent.slice(eveSent0).map((m) => m.content), to: stub.to.slice(eveSent0), made: stub.made.slice(eveMade0), shown: /hello eve/.test(await words()) };
+  check("a held pick taken back by picking the first bot again: the page stays on it, its message goes once, to it, and shows", eve.bot === EVE && eve.header === 'Eve' && JSON.stringify(eve.sent) === JSON.stringify(['hello eve']) && JSON.stringify(eve.to) === JSON.stringify(eve.made) && eve.made.length === 1 && eve.shown, eve);
+  // A held pick when the conversation cannot be made: the pick is taken back; the page says why, with the words.
+  const FAY = 'f6a7b8c9-d0e1-4f2a-8b3c-4d5e6f708192';
+  await newBot('Fay', FAY);
+  const fayMade0 = stub.made.length;
+  stub.createDelay = 700; stub.failCreate = true;
+  await typeSend('hello fay'); await wait(150); await clickTile('Bea');
+  await until(async () => (await refusedLine()) !== null, 8000, "Fay's line").catch(() => {}); await wait(1500);
+  stub.createDelay = 0; stub.failCreate = false;
+  const fay = { bot: await onBot(), header: (await live()).header, prompt: await promptText(), line: await refusedLine(), made: stub.made.slice(fayMade0) };
+  check("a held pick when the first message's conversation cannot be made: the pick is taken back, the page stays, says why, and keeps the words", fay.bot === FAY && fay.header === 'Fay' && fay.prompt === 'hello fay' && /could not make it/.test(fay.line ?? '') && fay.made.length === 0, fay);
+  await clearPrompt();
+  // A held pick when the first message itself fails: the same.
+  const GUS = 'a7b8c9d0-e1f2-4a3b-8c4d-5e6f708192a3';
+  await newBot('Gus', GUS);
+  const gusSent0 = stub.sent.length, gusRef0 = stub.failedSends.length;
+  stub.createDelay = 700; stub.failSend = true;
+  await typeSend('hello gus'); await wait(150); await clickTile('Bea');
+  await until(() => stub.failedSends.length > gusRef0, 8000, "Gus's message to fail").catch(() => {}); await wait(1500);
+  stub.createDelay = 0; stub.failSend = false;
+  const gus = { bot: await onBot(), header: (await live()).header, prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(gusSent0).length, failed: stub.failedSends.slice(gusRef0).length };
+  check("a held pick when the first message fails to send: the pick is taken back, the page stays, says why, and keeps the words", gus.bot === GUS && gus.header === 'Gus' && gus.prompt === 'hello gus' && !!gus.line && gus.sent === 0 && gus.failed === 1, gus);
+  await clearPrompt();
+  // A held pick when the made bot's computer refuses its folder (Barkpark's 422 chat_unsupported): the same, with the folder line.
+  const HAL = 'b8c9d0e1-f2a3-4b4c-8d5e-6f708192a3b4';
+  await newBot('Hal', HAL);
+  const halSent0 = stub.sent.length, halRef0 = stub.refused.length;
+  stub.createDelay = 700; stub.noFolders = true;
+  await typeSend('hello hal'); await wait(150); await clickTile('Bea');
+  await until(async () => (await refusedLine()) !== null, 8000, "Hal's line").catch(() => {}); await wait(1500);
+  stub.createDelay = 0; stub.noFolders = false;
+  const hal = { bot: await onBot(), header: (await live()).header, prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(halSent0).length, refused: stub.refused.slice(halRef0).length };
+  check("a held pick when the made bot's computer cannot run it in its own folder: the pick is taken back, the page stays, shows the folder line, and keeps the words", hal.bot === HAL && hal.header === 'Hal' && hal.prompt === 'hello hal' && /newer chat host/.test(hal.line ?? '') && hal.sent === 0 && hal.refused === 1, hal);
+  await clearPrompt();
+  // A held pick whose first message is on its way and gets no answer: the 6 s cap holds; back on the bot,
+  // its words wait in the box with a line that they may have been sent.
+  const IAN = 'c9d0e1f2-a3b4-4c5d-8e6f-708192a3b4c5';
+  await newBot('Ian', IAN);
+  const ianHeld0 = stub.heldSends.length;
+  stub.holdSend = true;
+  await typeSend('hello ian');
+  await until(() => stub.heldSends.length > ianHeld0, 8000, "Ian's message on its way").catch(() => {}); await wait(200);
+  const ianAt = Date.now(); await clickTile('Bea');
+  await until(async () => (await onBot()) === BEA && /bananas/.test(await words()), 20000, "Bea's page after the hung send").catch(() => {});
+  const ianMs = Date.now() - ianAt;
+  await clickTile('Ian');
+  await until(async () => (await onBot()) === IAN && (await promptText()) !== '', 15000, "Ian's page with its words").catch(() => {}); await wait(500);
+  const ian = { ms: ianMs, bot: await onBot(), prompt: await promptText(), line: await refusedLine() };
+  stub.holdSend = false; stub.heldSends.splice(0).forEach((answer) => answer());
+  check("a held pick whose first message is on its way with no answer: the pick still lands after its hold; back on the bot, the words wait with a line that they may have been sent", ian.ms >= 5000 && ian.ms < 20000 && ian.bot === IAN && ian.prompt === 'hello ian' && /may have been sent/.test(ian.line ?? ''), ian);
+  await clearPrompt();
+  // A first message that fails with no pick held: the line says so until the next send, which clears it.
+  const JO = 'd0e1f2a3-b4c5-4d6e-8f70-8192a3b4c5d6';
+  await newBot('Jo', JO);
+  const joF0 = stub.failedSends.length, joSent0 = stub.sent.length;
+  stub.failSend = true;
+  await typeSend('hello jo');
+  await until(() => stub.failedSends.length > joF0, 8000, "Jo's message to fail").catch(() => {}); await wait(800);
+  const joLine1 = await ev(() => document.querySelector('.chat-error')?.textContent ?? null);
+  stub.failSend = false;
+  await clearPrompt(); await typeSend('again jo');
+  await until(() => stub.sent.length > joSent0, 8000, "Jo's second message").catch(() => {}); await wait(800);
+  const jo = { line1: joLine1, line2: await ev(() => document.querySelector('.chat-error')?.textContent ?? null), sent: stub.sent.slice(joSent0).map((m) => m.content) };
+  check('a failed first message (no pick held) says why, and the next send that goes clears the line', /could not take it/.test(jo.line1 ?? '') && !/could not take it/.test(jo.line2 ?? '') && JSON.stringify(jo.sent) === JSON.stringify(['again jo']), jo);
+  // A held pick given up on whose stream opens late, while the page is still leaving: the message must not go then.
+  const KIM = 'e1f2a3b4-c5d6-4e7f-8081-92a3b4c5d6e7';
+  await newBot('Kim', KIM);
+  const kimSent0 = stub.sent.length;
+  stub.slowNew = true;
+  await typeSend('hello kim');
+  await until(() => stub.slow.size > 0, 8000, "Kim's conversation").catch(() => {}); await wait(300);
+  // The give-up comes 6 s after the pick; the stream opens at 7.5 s; reads held 4 s keep Kim's page up past it.
+  const kimAt = Date.now(); await clickTile('Bea'); stub.readDelay = 4000;
+  const kimTrace = [];
+  while (Date.now() - kimAt < 7500) { kimTrace.push([Date.now() - kimAt, (await onBot()) === KIM ? 'kim' : 'other', (await words()).trim() === '' ? 'blank' : 'rows', stub.sent.length - kimSent0, stub.readKeys.length]); await wait(500); }
+  // Still leaving: Kim's page is up with its rows hidden, Bea's rows not yet shown (the URL moves at once).
+  const kimEarly = { leaving: (await words()).trim() === '', sent: stub.sent.slice(kimSent0).length, held: kimTrace.some(([, , t]) => t === 'blank') };
+  stub.slow.clear(); stub.slowNew = false; // Kim's stream opens now, while Kim's page is still up
+  await wait(1000); stub.readDelay = 0;
+  await until(async () => (await onBot()) === BEA && /bananas/.test(await words()), 20000, "Bea's page after the give-up").catch(() => {}); await wait(1000);
+  const kimLeft = stub.sent.slice(kimSent0).map((m) => m.content);
+  await clickTile('Kim');
+  await until(async () => (await onBot()) === KIM && (await promptText()) !== '', 15000, "Kim's page with its words").catch(() => {}); await wait(1000);
+  const kim = { trace: kimTrace, early: kimEarly, left: kimLeft, bot: await onBot(), prompt: await promptText(), line: await refusedLine(), sent: stub.sent.slice(kimSent0).map((m) => m.content) };
+  check("a given-up message whose stream opens late, while the page is leaving: it is never sent then or after; back on the bot, the words wait with the not-sent line", kim.early.leaving && kim.early.sent === 0 && kim.early.held && kim.left.length === 0 && kim.sent.length === 0 && kim.bot === KIM && kim.prompt === 'hello kim' && /not sent/.test(kim.line ?? ''), kim);
+  await clearPrompt();
+  stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
 
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
   const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));

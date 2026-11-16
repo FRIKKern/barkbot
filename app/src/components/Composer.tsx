@@ -32,7 +32,7 @@ const base64 = (f: File) =>
 export const placeholderFor = (bot: string, ask?: {questions?: unknown[]} | null) => (ask?.questions?.length ? 'Type your answer, or talk about something else' : bot ? `Message ${bot}` : 'Message')
 
 /** Where a gate scene's composer starts: words typed, and what waits to go with them. */
-export type ComposerStart = {draft?: string; pictures?: Picture[]; files?: WaitingFile[]}
+export type ComposerStart = {draft?: string; pictures?: Picture[]; files?: WaitingFile[]; line?: string}
 
 /** Sends what the box holds. It may answer why nothing was sent (a file refused, a computer that cannot take
  *  files): the box then shows that in a plain line and gets its draft back. */
@@ -44,7 +44,7 @@ export function Composer({placeholder, onSend, disabled, start}: {placeholder: s
   const [draft, setDraft] = useState(!!start?.draft)
   const [pictures, setPictures] = useState<Picture[]>(start?.pictures ?? [])
   const [files, setFiles] = useState<WaitingFile[]>(start?.files ?? [])
-  const [refused, setRefused] = useState<string | null>(null)
+  const [refused, setRefused] = useState<string | null>(start?.line ?? null)
   const ready = draft || pictures.length > 0 || files.length > 0
   // A scene's words, as the oracle's editor holds them: a paragraph in the box.
   useLayoutEffect(() => {

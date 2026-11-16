@@ -44,7 +44,7 @@ const NARROW = '(max-width: 799.98px)'
 // transcript's working row; both flip at the same ms in traces say-hi, say-hi-2, storage).
 // `unreadBots`: ids of bots the page itself marks unread; Shell adds its own by the oracle's rule
 // (useUnread below).
-export function Shell({scene: start, transcript, composer, onPickBot, onRenameBot, onCreateBot, workingBots = [], unreadBots = []}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (id: string) => void; onRenameBot?: (id: string, name: string) => void; onCreateBot?: CreateBot; workingBots?: string[]; unreadBots?: string[]}) {
+export function Shell({scene: start, transcript, composer, onPickBot, onRenameBot, onCreateBot, workingBots = [], unreadBots = [], picked: pageActive}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (id: string) => void; picked?: string; onRenameBot?: (id: string, name: string) => void; onCreateBot?: CreateBot; workingBots?: string[]; unreadBots?: string[]}) {
   const [panelOpen, setPanelOpen] = useState(start.panelOpen)
   const [picked, setPicked] = useState<string | undefined>(undefined)
   // The overlay that is up, whether the scene holds it or a click opened it (Overlay's
@@ -63,7 +63,8 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
     narrow.addEventListener('change', onChange)
     return () => narrow.removeEventListener('change', onChange)
   }, [])
-  const scene: Scene = {...start, panelOpen, active: picked ?? start.active}
+  // `picked` from the page, when it gives one, is the tile the rail shows as open (a pick it holds or takes back).
+  const scene: Scene = {...start, panelOpen, active: pageActive ?? picked ?? start.active}
   const talk = useMemo(() => (start.transcript ? fromScene(start.transcript.bubbles) : null), [start.transcript])
   const unread = useUnread(workingBots)
   const active = scene.active ?? ''
