@@ -845,7 +845,7 @@ else {
   await wait(6000);
   const lyn = { mid: lynMid, url: await onBot(), header: (await live()).header, rail: await railOn(), shown: /hello lyn/.test(await words()), bea: /bananas/.test(await words()), sent: stub.sent.slice(lynSent0).map((m) => m.content), to: stub.to.slice(lynTo0), made: stub.made.slice(lynMade0) };
   check("a held pick that goes once the first message went, then the open bot picked again while that page loads: the page and the rail end on the open bot, and the message went once, to it", lyn.mid.rail === 'Bea' && lyn.mid.sent === 1 && lyn.url === LYN && lyn.header === 'Lyn' && lyn.rail === 'Lyn' && lyn.shown && !lyn.bea && JSON.stringify(lyn.sent) === JSON.stringify(['hello lyn']) && JSON.stringify(lyn.to) === JSON.stringify(lyn.made) && lyn.made.length === 1, lyn);
-  stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore();
+  stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
 
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
   const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
