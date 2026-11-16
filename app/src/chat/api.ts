@@ -3,7 +3,7 @@
 import {randomUUID} from 'node:crypto'
 import {readFileSync} from 'node:fs'
 import {createServerFn} from '@tanstack/react-start'
-import {bp, conf, BarkparkError} from '../server/barkpark'
+import {bp, conf, BarkparkError, READ_MS} from '../server/barkpark'
 import {CREATE_UNSURE} from './create-unsure'
 import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
@@ -256,7 +256,14 @@ export const startChat = createServerFn({method: 'POST'})
     // A bot made with Create works in its own folder on the computer; the Main Bot in the shared root.
     const folder = botFolder(data.botId, data.hostId)
     if (folder !== null && typeof folder === 'object') throw new Error(folder.refused)
-    const s = await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: data.hostId, ...(folder ? {bot_folder: folder} : {})}})
+    // Bounded as a read is: a conversation that does not open in time is said, not waited on forever.
+    let s: RawSession
+    try {
+      s = await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: data.hostId, ...(folder ? {bot_folder: folder} : {})}, signal: AbortSignal.timeout(READ_MS)})
+    } catch (e) {
+      if ((e as Error)?.name === 'TimeoutError') throw new Error(`This message was not sent: Barkpark did not open its conversation within ${READ_MS / 1000} s. Send it again.`)
+      throw e
+    }
     let kept = false
     try {
       kept = await oneAtATime(data.botId, async (write) => {
