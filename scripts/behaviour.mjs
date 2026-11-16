@@ -559,9 +559,9 @@ else {
   {
     const A = 'abcdef12-1111-4111-8111-111111111111', clash = (n) => `abcdef12-${String(n).padStart(4, '0')}-4222-8222-222222222222`, C = '0badc0de-3333-4333-8333-333333333333';
     const folder = (id) => `bot-${id.slice(0, 8)}`;
-    const make = async (lines) => {
+    const make = async (lines, seed = () => {}) => {
       writeFileSync(MINT, lines.join('\n'));
-      freshStore(); stub.prefs.set('barkbot.bots', { ids: [A] }); stub.prefs.set(`barkbot.bot.${A}`, rec('Ada', HOST_ID, null)); const w = stub.writes.length;
+      freshStore(); stub.prefs.set('barkbot.bots', { ids: [A] }); stub.prefs.set(`barkbot.bot.${A}`, rec('Ada', HOST_ID, null)); seed(); const w = stub.writes.length;
       const out = await ev(async () => { const m = await import('/src/chat/api.ts'); try { return { id: (await m.createBot({ data: { name: 'Twin' } })).id }; } catch (e) { return { refused: String(e?.message ?? e) }; } });
       return { ...out, ids: ids(), writes: stub.writes.slice(w).map((x) => `${x.method} ${x.key}`) };
     };
@@ -571,6 +571,13 @@ else {
     check("Create's first id shares its folder with a listed bot's: Create takes the next id, and the two bots work in two folders", t.id === C && folder(t.id) !== folder(A) && t.ids.join() === [A, C].join() && !stub.prefs.has(`barkbot.bot.${clash(1)}`), t);
     t = await make(Array.from({ length: 8 }, (_, i) => clash(i + 1)));
     check('every id Create tries shares a listed bot\'s folder: Create refuses in one plain line and writes nothing', /folder/.test(t.refused ?? '') && t.ids.join() === A && t.writes.length === 0, t);
+    // A new id is a lower-case v4 UUID, whatever gives it: a v5, a v1 or an upper-case one is passed over.
+    t = await make(['12345678-aaaa-5aaa-8aaa-aaaaaaaaaaaa', '23456789-bbbb-1bbb-8bbb-bbbbbbbbbbbb', 'ABCDEF99-CCCC-4CCC-8CCC-CCCCCCCCCCCC', C]);
+    check('Create passes over an id that is not a lower-case v4 UUID (v5, v1, upper case) and takes the next', t.id === C && t.ids.join() === [A, C].join(), t);
+    // The seeded ids never overwrite a record, even one off the list.
+    const O = 'fedcba98-7777-4777-8777-777777777777', orphan = rec('Orphan', HOST_ID, '00000000-0000-4000-8000-0000000000aa');
+    t = await make([O, C], () => stub.prefs.set(`barkbot.bot.${O}`, orphan));
+    check('a seeded id whose record is there, off the list, is passed over: Create takes the next, and that record is untouched', t.id === C && JSON.stringify(stub.prefs.get(`barkbot.bot.${O}`)) === JSON.stringify(orphan) && !t.writes.includes(`PUT barkbot.bot.${O}`), { ...t, orphan: stub.prefs.get(`barkbot.bot.${O}`) });
     rmSync(MINT, { force: true }); freshStore();
   }
   // A bot already listed when today's bot has not moved in yet: today's bot still moves in.
