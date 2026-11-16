@@ -25,8 +25,9 @@ export const Route = createFileRoute('/')({
     // A first message given up on when a held pick went through: its words wait in that bot's box.
     const [kept, setKept] = useState<Record<string, ComposerStart>>({})
     // A conversation opened on this page that could not be saved to its bot (startChat's kept:
-    // false): picking away and back opens it again, for this page's life. Only a reload, which
-    // reads the bot's record, may not (the line said so).
+    // false): picking away and back opens it again, for this page's life, unless the bot's record
+    // names a conversation of its own (another tab saved one): the record wins. Only a reload,
+    // which reads the record, may not open it (the line said so).
     const [unsaved, setUnsaved] = useState<Record<string, Started>>({})
     const sessions = {...chat.sessions, ...opened}
     const of = (id: string) => fleet(sessions[id] ?? null)
@@ -44,7 +45,7 @@ export const Route = createFileRoute('/')({
           setOpened((o) => ({...o, [botId]: made.sessionId}))
           if (!made.kept) setUnsaved((u) => ({...u, [botId]: {sessionId: made.sessionId, startedAt: made.startedAt}}))
         }}
-        unsaved={chat.sessionId ? undefined : unsaved[botId]}
+        unsaved={unsaved[botId]}
         kept={kept[botId]}
         onKeep={(id, start) => setKept(({[id]: _, ...k}) => (start ? {...k, [id]: start} : k))}
         onPick={(id) => navigate({to: '/', search: {bot: id}})}
@@ -170,8 +171,11 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
     }
     await navigate({to: '/', search: {bot: id}})
   }
-  const [started, setStarted] = useState<Started | null>(unsaved ?? null)
-  const sessionId = started?.sessionId ?? chat.sessionId
+  // `started`: the conversation this page's own first message opened. Then the record's (the loader
+  // reads it again after a cached page shows), and only when it names none, this bot's unsaved one.
+  const [started, setStarted] = useState<Started | null>(null)
+  const sessionId = started?.sessionId ?? chat.sessionId ?? unsaved?.sessionId ?? null
+  const startedAt = started?.startedAt ?? (chat.sessionId ? chat.startedAt : (unsaved?.startedAt ?? chat.startedAt))
   const convo = useConversation(sessionId, live, state)
   const [opening, setOpening] = useState(false)
   const [waiting, setWaiting] = useState<{text: string; outgoing: Outgoing[]; done: (why: string | null) => void} | null>(null)
@@ -280,7 +284,7 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
         leaving ? (
           <div className="transcript" />
         ) : chat.host ? (
-          <Transcript bot={name} startedAt={started?.startedAt ?? chat.startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? failedLine ?? note ?? chat.notice ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
+          <Transcript bot={name} startedAt={startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? failedLine ?? note ?? chat.notice ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
         ) : (
           <div className="transcript">
             <p className="chat-note">
