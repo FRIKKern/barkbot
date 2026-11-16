@@ -173,10 +173,13 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   const [name, setName] = useState(chat.bot)
   // A plain line when the name or the conversation was not saved (the page goes on).
   const [note, setNote] = useState<string | null>(null)
-  const rename = async (_id: string, next: string) => {
+  // A name is saved only to the bot it was typed for: `id` is the bot whose name the panel shows.
+  // While a pick loads that is the picked bot, not this page's, and nothing is written.
+  const rename = async (id: string, next: string) => {
+    if (id !== chat.botId) return
     setName(next)
     try {
-      await renameBot({data: {id: chat.botId, name: next}})
+      await renameBot({data: {id, name: next}})
       setNote(null)
     } catch (e) {
       setNote(`The new name was not saved: ${(e as Error).message}`)

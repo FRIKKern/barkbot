@@ -113,6 +113,8 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
       </main>
 
       <Details scene={{...scene, overlay: opened ?? scene.overlay}} name={shown} between={between} onRename={(n) => {
+        // While a pick loads the field belongs to no page yet: a change to it is not a rename.
+        if (between) return
         setNames((m) => ({...m, [active]: n}))
         onRenameBot?.(active, n)
       }} onClose={() => setPanelOpen(false)} />

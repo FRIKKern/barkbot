@@ -1529,6 +1529,18 @@ else {
     await wait(5000); stub.readDelay = 0; await wait(1500);
     const during = { mid, typed, zeds: zeds(w0), ria: nameOf(RIA), sam: nameOf(SAM), header: (await live()).header, field: await field() };
     check("a name typed into the panel while a pick loads is written to no bot: both records keep their names, and after the load the picked bot shows its own (control: the field showed the picked bot's name)", mid.field === 'Sam' && during.zeds.length === 0 && during.ria === 'Ria' && during.sam === 'Sam' && during.header === 'Sam' && during.field === 'Sam', during);
+    // The same window, the change made by a script rather than typed (as an extension or a tool would:
+    // focus, React's value setter and an input event, blur). The field being read-only does not stop
+    // that, so the save path itself must write to no bot (review of #77, P2b).
+    await openOn(RIA, 'Ria');
+    w0 = stub.writes.length;
+    const progs = () => stub.writes.slice(w0).filter((w) => w.method === 'PUT' && /^barkbot\.bot\./.test(w.key) && w.body?.value?.name === 'Prog').map((w) => w.key.slice('barkbot.bot.'.length));
+    stub.readDelay = 4000; await clickTile('Sam'); await wait(300);
+    const progMid = { header: (await live()).header, field: await field(), readOnly: await ev(() => document.querySelector('.who-name')?.readOnly ?? null) };
+    await ev(() => { const f = document.querySelector('.who-name'); f.focus(); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(f, 'Prog'); f.dispatchEvent(new Event('input', { bubbles: true })); f.blur(); });
+    await wait(5000); stub.readDelay = 0; await wait(1500);
+    const prog = { mid: progMid, progs: progs(), ria: nameOf(RIA), sam: nameOf(SAM), header: (await live()).header };
+    check("a change made by a script on the panel's name field while a pick loads is written to no bot either: both records keep their names (control: the field showed the picked bot, read-only)", progMid.field === 'Sam' && progMid.readOnly === true && prog.progs.length === 0 && prog.ria === 'Ria' && prog.sam === 'Sam' && prog.header === 'Sam', prog);
     // Control: with nothing loading, the same typing renames the open bot, once.
     await openOn(SAM, 'Sam');
     w0 = stub.writes.length;
