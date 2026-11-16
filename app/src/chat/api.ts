@@ -26,6 +26,27 @@ async function findHost(): Promise<Host | null> {
   return h ? {id: h.id, name: h.name, online: h.online} : null
 }
 
+/** Today's conversation for the Main Bot: the newest of `onHost` that no listed bot names (`taken`)
+ *  and that Barkpark shows with no bot folder. A conversation with a folder is a made bot's, whose
+ *  record may never have saved it, and the Main Bot works in the computer's shared root, never in a
+ *  bot's folder. Barkpark's list carries no bot_folder, so each one is read on its own, newest
+ *  first. One that is gone (404) is passed over; a read that fails is not "no folder", so none is
+ *  picked. */
+async function folderless<S extends {id: string}>(onHost: S[], taken: Set<string | null>): Promise<S | undefined> {
+  for (const s of onHost) {
+    if (taken.has(s.id)) continue
+    try {
+      const shown = await bp<{bot_folder?: unknown}>(`/v1/chat/sessions/${encodeURIComponent(s.id)}?since=${NO_MESSAGES}`)
+      if (shown.bot_folder === null || shown.bot_folder === undefined) return s
+    } catch (e) {
+      if (e instanceof BarkparkError && e.status === 404) continue
+      console.warn(`barkbot: could not read a conversation for the Main Bot (${(e as Error).message})`)
+      return undefined
+    }
+  }
+  return undefined
+}
+
 // The caller's own computers and sessions, as Barkpark lists them to the caller: what a stored
 // bot record is checked against (server/bots.ts trusted).
 async function ownHosts(): Promise<Host[]> {
@@ -53,9 +74,9 @@ const got = <T,>(p: Promise<T>, what: string): Promise<{ok: true; v: T} | {ok: f
  *  The Main Bot is today's bot, made from today's state, additively, on the first load that finds
  *  its id missing from the list, whatever else the list holds: its id is a UUID v5 of the
  *  computer's id (two tabs write the same keys), its name the legacy pref (or BARKBOT_NAME when it
- *  is unset). Its conversation is the newest one on that computer that no listed bot names (today's
- *  rule, used this once); none when a record could not be read. Only the new keys are written; the
- *  legacy barkbot.bot is never written or deleted.
+ *  is unset). Its conversation is the newest one on that computer that no listed bot names and that
+ *  has no bot folder (today's rule, used this once); none when a record could not be read. Only the
+ *  new keys are written; the legacy barkbot.bot is never written or deleted.
  *  A preference read or write that fails never fails the page: it shows what it could read, writes
  *  nothing more, and says so (`notice`). A Main Bot record already there is kept, never written
  *  over: a load whose list add failed is repaired by the next.
@@ -81,11 +102,17 @@ export const loadChat = createServerFn({method: 'GET'})
   // Today's conversation: the newest on the computer, if it is surely no other bot's (task-b910d6ee3d466fd1).
   // Sure only when every listed bot was read and kept: a dropped record, one that could not be read,
   // or one beyond what a load reads may name it, and the pick is saved. Otherwise none.
+  // A conversation with a bot folder is never today's: it is a made bot's (folderless). It is
+  // picked only when it is used, once: a load whose Main Bot is listed reads no conversation.
   const whole = listed !== null && listed.length <= READ_CAP && !r.unread && r.bots.length === listed.length
   const taken = new Set(r.bots.map(({bot}) => bot.session_id))
-  const today = whole ? onHost.find((s) => !taken.has(s.id)) : undefined
-  const main: Bot = {id: mainBotId(host.id), name: todays, host_id: host.id, session_id: today?.id ?? null, created_at: today?.inserted_at ?? new Date().toISOString()}
-  const withToday = {bot: main, session: today ? ({is: 'open', session: today} as const) : ({is: 'none'} as const)}
+  const main: Bot = {id: mainBotId(host.id), name: todays, host_id: host.id, session_id: null, created_at: new Date().toISOString()}
+  let picked: Promise<{bot: Bot; session: SessionCheck}> | undefined
+  const withToday = () =>
+    (picked ??= (whole ? folderless(onHost, taken) : Promise.resolve(undefined)).then((today) => ({
+      bot: {...main, session_id: today?.id ?? null, created_at: today?.inserted_at ?? main.created_at},
+      session: today ? ({is: 'open', session: today} as const) : ({is: 'none'} as const),
+    })))
   // The move-in never makes the list longer than a load reads: at READ_CAP it waits, nothing written.
   if (listed && !listed.includes(main.id) && listed.length < READ_CAP) {
     if (!legacy.ok) {
@@ -104,9 +131,10 @@ export const loadChat = createServerFn({method: 'GET'})
         }
       } else if (!there.v) {
         // Nothing half-made: the id joins the list only after its record is whole.
-        if (!(await got(putBot(main), 'save the Main Bot')).ok) notice = NOT_SAVED
+        const moving = await withToday()
+        if (!(await got(putBot(moving.bot), 'save the Main Bot')).ok) notice = NOT_SAVED
         else {
-          rail = [...rail, withToday]
+          rail = [...rail, moving]
           if (!(await got(addId(main.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
         }
       }
@@ -116,7 +144,7 @@ export const loadChat = createServerFn({method: 'GET'})
   // Nothing to show: the Main Bot from what the caller itself can see, written nowhere. Once the
   // store exists (or could not be read) it opens no conversation: the newest one on the computer
   // may be another bot's, and a message would go to the wrong bot.
-  if (!rail.length) rail = [listed?.length === 0 ? withToday : {bot: {...main, session_id: null}, session: {is: 'none'}}]
+  if (!rail.length) rail = [listed?.length === 0 ? await withToday() : {bot: main, session: {is: 'none'}}]
   const open = rail.find((x) => x.bot.id === want) ?? rail[0]
   const session = open.session.is === 'open' ? open.session.session : null
   const home = hosts.find((h) => h.id === open.bot.host_id) ?? host
