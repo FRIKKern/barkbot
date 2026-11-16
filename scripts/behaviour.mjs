@@ -40,7 +40,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -126,6 +126,8 @@ await new Promise((ok) => httpServer((req, res) => {
       const m = JSON.parse(body);
       // `holdSend`: Barkpark takes the message and does not answer until the rule lets it (503 then).
       if (stub.holdSend) { stub.heldSends.push(() => json(503, { error: { code: 'unavailable', message: 'the stand-in gave up' } })); return; }
+      // `dropAnswer`: Barkpark takes the message, then the answer is lost (the socket drops).
+      if (stub.dropAnswer) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); return void req.socket.destroy(); }
       if (stub.failSend) { stub.failedSends.push(m); return json(500, { error: { code: 'internal_error', message: 'the stand-in could not take it' } }); }
       // Barkpark's shared 422 chat_unsupported for any session (a revoked host, a provider not ready, …).
       if (stub.unsupported) { stub.refused.push({ unsupported: m }); return json(422, { error: { code: 'chat_unsupported', message: "chat is not supported for this session's provider or operation" } }); }
@@ -1097,21 +1099,39 @@ else {
     await until(() => stub.failedSends.length > f0, 8000, 'the send to fail').catch(() => {}); await wait(800);
     const kept1 = { prompt: await promptText(), line: await errLine(), refused: await refusedLine(), sent: stub.sent.slice(s0).length };
     stub.failSend = false;
-    check('a send that Barkpark fails, in an open conversation: the words stay in the box and one plain line says why; nothing is sent', kept1.prompt === 'keep these words' && /could not take it/.test(kept1.line ?? '') && kept1.refused === null && kept1.sent === 0, kept1);
+    check('a send that Barkpark fails, in an open conversation: the words stay in the box and one plain line says why, never that it may have been sent; nothing is sent', kept1.prompt === 'keep these words' && /could not take it/.test(kept1.line ?? '') && kept1.refused === null && kept1.sent === 0 && !/may have been sent/.test(`${kept1.line} ${kept1.refused}`), kept1);
     await clearPrompt(); s0 = stub.sent.length; await typeSend('now it goes');
     await until(() => stub.sent.length > s0, 8000, 'the next send').catch(() => {}); await wait(500);
     const went = { prompt: await promptText(), sent: stub.sent.slice(s0).map((m) => m.content) };
     check('control: the next send goes, and the box is empty after it', went.prompt === '' && JSON.stringify(went.sent) === JSON.stringify(['now it goes']), went);
     // A made bot's first message: refused 422 chat_unsupported, and the read that asks whether it
     // has a folder fails too (review F5), so the send throws.
-    const FAY = 'f6a7b8c9-d0e1-4f2a-8b3c-4d5e6f708192';
-    await newBot('Fay', FAY);
+    const FEN = 'f6a7b8c9-d0e1-4f2a-8b3c-4d5e6f708193';
+    await newBot('Fen', FEN);
     const r0 = stub.refused.length; s0 = stub.sent.length;
-    stub.noFolders = true; stub.failShow.set('*', 503); await typeSend('hello fay');
-    await until(() => stub.refused.length > r0, 8000, "Fay's message to be refused").catch(() => {}); await wait(1000);
+    stub.noFolders = true; stub.failShow.set('*', 503); await typeSend('hello fen');
+    await until(() => stub.refused.length > r0, 8000, "Fen's message to be refused").catch(() => {}); await wait(1000);
     const kept2 = { prompt: await promptText(), line: await errLine(), refused: await refusedLine(), sent: stub.sent.slice(s0).length, shown: stub.refused.slice(r0).length };
     stub.noFolders = false; stub.failShow.clear();
-    check("a made bot's first message refused as chat_unsupported, whose folder read fails too: the words stay in the box and one plain line says what Barkpark said; nothing is sent", kept2.prompt === 'hello fay' && /not supported/.test(kept2.line ?? '') && kept2.refused === null && kept2.sent === 0 && kept2.shown === 1, kept2);
+    check("a made bot's first message refused as chat_unsupported, whose folder read fails too: the words stay in the box and one plain line says what Barkpark said, never that it may have been sent; nothing is sent", kept2.prompt === 'hello fen' && /not supported/.test(kept2.line ?? '') && kept2.refused === null && kept2.sent === 0 && kept2.shown === 1 && !/may have been sent/.test(`${kept2.line} ${kept2.refused}`), kept2);
+    await clearPrompt();
+    // Barkpark takes a message and its answer is lost (the socket drops): it may have gone. The words
+    // stay, and the one line says so, so one Enter does not send it twice without a word.
+    const lost = async (words) => {
+      const at = stub.sent.length; stub.dropAnswer = true; await typeSend(words);
+      await until(() => stub.sent.length > at, 8000, 'the message to reach the stand-in').catch(() => {}); await wait(1500);
+      stub.dropAnswer = false;
+      return { prompt: await promptText(), refused: await refusedLine(), line: await errLine(), sent: stub.sent.slice(at).map((m) => m.content) };
+    };
+    stub.opened = []; await open(`${base}/`);
+    await until(() => stub.opened.includes(SF), 15000, "the Main Bot's conversation to open again").catch(() => {}); await wait(800);
+    const lost1 = await lost('did this go');
+    check('in an open conversation, a message Barkpark took whose answer was lost: the words stay and one line says it may have been sent, to look before sending again', lost1.prompt === 'did this go' && /may have been sent/.test(lost1.refused ?? '') && /look in the conversation/.test(lost1.refused ?? '') && lost1.line === null && JSON.stringify(lost1.sent) === JSON.stringify(['did this go']), lost1);
+    await clearPrompt();
+    const GIL = 'a7b8c9d0-e1f2-4a3b-8c4d-5e6f70819203';
+    await newBot('Gil', GIL);
+    const lost2 = await lost('hello gil');
+    check("a new bot's first message Barkpark took whose answer was lost: the words stay and one line says it may have been sent, to look before sending again", lost2.prompt === 'hello gil' && /may have been sent/.test(lost2.refused ?? '') && /look in the conversation/.test(lost2.refused ?? '') && lost2.line === null && JSON.stringify(lost2.sent) === JSON.stringify(['hello gil']), lost2);
     await clearPrompt();
     // The Main Bot's id comes from its computer's id, whatever its case: a host id in upper case
     // still names the Main Bot, so its conversation asks for no folder, and no second Main Bot appears.
