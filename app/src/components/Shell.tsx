@@ -68,6 +68,9 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
   const talk = useMemo(() => (start.transcript ? fromScene(start.transcript.bubbles) : null), [start.transcript])
   const unread = useUnread(workingBots)
   const active = scene.active ?? ''
+  // A pick the page is still loading: the panel shows the picked bot while the page still holds the
+  // one it is leaving, so nothing typed in the panel can belong to either. The name field is read-only.
+  const between = pageActive !== undefined && start.active !== undefined && pageActive !== start.active
   // A bot's name as the person renamed it in the details panel, by the bot's id. On Enter the header
   // pill, the rail tile's label and the composer's "Message <name>" all follow in the same frame
   // (traces/2026-11-09-rename.json and the lead's re-run on oracle/focus-bot-name).
@@ -109,7 +112,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
         {composer ?? <Composer placeholder={placeholderFor(shown, talk?.ask)} start={start.composer} />}
       </main>
 
-      <Details scene={{...scene, overlay: opened ?? scene.overlay}} name={shown} onRename={(n) => {
+      <Details scene={{...scene, overlay: opened ?? scene.overlay}} name={shown} between={between} onRename={(n) => {
         setNames((m) => ({...m, [active]: n}))
         onRenameBot?.(active, n)
       }} onClose={() => setPanelOpen(false)} />
