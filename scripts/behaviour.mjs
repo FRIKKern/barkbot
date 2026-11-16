@@ -40,7 +40,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], dropPatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], dropPatch: null, failAfterPatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -90,7 +90,8 @@ await new Promise((ok) => httpServer((req, res) => {
         else return json(422, { error: { code: 'bad_request', message: 'unknown op' } });
         stub.prefs.set(key, v);
         // `dropPatch`: Barkpark applies the list op, then the answer is lost (the socket drops).
-        if (stub.dropPatch === key) return void req.socket.destroy();
+        // `failAfterPatch` ('GET <key>' → status): from then on that read fails too.
+        if (stub.dropPatch === key) { if (stub.failAfterPatch) stub.fail.set(...stub.failAfterPatch); return void req.socket.destroy(); }
         return got();
       }
     }
@@ -1570,6 +1571,13 @@ else {
     const made = { lost, listed: listed(), dangling: dangling(), before: ids0 };
     const id = lost.v?.id;
     check("Create's list add is applied and its answer lost: no id is left without a record, and the bot is made with its record (Create answers its id)", made.dangling.length === 0 && !!id && made.listed.includes(id) && stub.prefs.get(`barkbot.bot.${id}`)?.name === 'Vic', made);
+    // The add's answer is lost and the list cannot be read after it: nothing proves the id is not
+    // listed, so the record is kept, and Create says plainly it does not know.
+    await fresh(); ids0 = [...listed()];
+    stub.dropPatch = 'barkbot.bots'; stub.failAfterPatch = ['GET barkbot.bots', 500];
+    const blind = await create('Wyn'); stub.dropPatch = null; stub.failAfterPatch = null; stub.fail.clear();
+    const kept = { blind, listed: listed(), dangling: dangling(), before: ids0 };
+    check("Create's list add answer is lost and the list cannot be read after it: no record is deleted (no id is left without a record), and Create does not say the bot was made", kept.dangling.length === 0 && !!blind.e, kept);
     stub.sessions = []; freshStore();
   }
 }
