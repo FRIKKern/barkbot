@@ -1549,6 +1549,49 @@ else {
     check('control: with nothing loading, a name typed into the panel is written once, to the open bot', JSON.stringify(plain.zeds) === JSON.stringify([`${SAM} Zed`]) && plain.ria === 'Ria' && plain.sam === 'Zed' && plain.header === 'Zed', plain);
     stub.sessions = []; freshStore();
   }
+
+  // ── An unsaved first conversation stays reachable; a taken-back pick's hold is over (task-f54c1a937d06f629) ──
+  console.log('Behaviour · an unsaved conversation and a taken-back pick (the live page, against the stand-in Barkpark)');
+  {
+    const NIA = '6a7b8c9d-0e1f-4a2b-9c3d-4e5f6a7b8c9d', OMI = '7b8c9d0e-1f2a-4b3c-8d4e-5f6a7b8c9d0e';
+    const KEYN = `barkbot.bot.${NIA}`;
+    const twoBots = async () => {
+      stub.hosts = host(true); stub.sessions = []; freshStore(); stub.prefs.set('barkbot.bots', { ids: [NIA, OMI] });
+      stub.prefs.set(KEYN, rec('Nia', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${OMI}`, rec('Omi', HOST_ID, null));
+      await open(`${base}/?bot=${NIA}`); await until(async () => (await live()).header === 'Nia', 15000, "Nia's page").catch(() => {}); await wait(500);
+    };
+    const onPage = (n) => until(async () => (await live()).header === n, 15000, `${n}'s page`).catch(() => {});
+    // Nia's first conversation cannot be saved to her record; the person goes to Omi and back.
+    await twoBots(); stub.fail.set(`PUT ${KEYN}`, 500);
+    const m0 = stub.made.length, t0 = stub.to.length;
+    await typeSend('hello nia');
+    await until(() => stub.to.length > t0, 8000, "Nia's message").catch(() => {}); await wait(800);
+    stub.fail.clear();
+    const made = stub.made.slice(m0);
+    const lineThen = await ev(() => document.querySelector('.chat-error')?.textContent ?? null);
+    await clickTile('Omi'); await onPage('Omi'); await wait(500);
+    stub.opened = []; await clickTile('Nia'); await onPage('Nia'); await wait(1500);
+    const reopened = [...stub.opened];
+    const m1 = stub.made.length, t1 = stub.to.length;
+    await typeSend('back again');
+    await until(() => stub.to.length > t1, 8000, "Nia's next message").catch(() => {}); await wait(800);
+    const back = { made, lineThen, reopened, header: (await live()).header, nextTo: stub.to.slice(t1), newMade: stub.made.length - m1, record: stub.prefs.get(KEYN) ?? null };
+    check("a first conversation not saved to Nia, then Omi picked and Nia again: her page opens that conversation, and the next message goes there with no new one (the line said only that a reload may not open it)", made.length === 1 && /reload may not open it/.test(back.lineThen ?? '') && back.header === 'Nia' && back.reopened.includes(made[0]) && JSON.stringify(back.nextTo) === JSON.stringify(made) && back.newMade === 0 && back.record?.session_id === null, back);
+    await clearPrompt();
+    // A held pick taken back stops its hold: picking Omi again later waits a fresh 6 s (PICK_HOLD_MS).
+    await twoBots(); stub.deafNew = true;
+    await typeSend('hello again nia');
+    await until(() => stub.deaf.size > 0, 8000, "Nia's conversation").catch(() => {}); await wait(300);
+    await clickTile('Omi'); await wait(2400);
+    await clickTile('Nia'); await wait(300);
+    const stayed = (await live()).header;
+    const repickAt = Date.now(); await clickTile('Omi');
+    await until(async () => (await live()).header === 'Omi', 15000, "Omi's page after the re-pick").catch(() => {});
+    const hold = { stayed, header: (await live()).header, ms: Date.now() - repickAt };
+    stub.deafNew = false; stub.deaf.clear();
+    check('a held pick taken back, then the same bot picked again: the new pick waits a fresh hold of about 6 s, not what was left of the first (control: taking it back kept the page)', hold.stayed === 'Nia' && hold.header === 'Omi' && hold.ms >= 5500 && hold.ms < 9000, hold);
+    await clearPrompt(); stub.sessions = []; freshStore();
+  }
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
