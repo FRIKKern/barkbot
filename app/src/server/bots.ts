@@ -60,6 +60,9 @@ export function botFolder(id: string, hostId: string): string | null | {refused:
   return `bot-${low.slice(0, 8)}`
 }
 
+// A random UUID as randomUUID() makes it: version 4, variant 8, 9, a or b, lower case.
+const V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+
 /** How many ids Create tries for a folder no listed bot works in. */
 export const MINT_TRIES = 8
 
@@ -67,13 +70,13 @@ export const MINT_TRIES = 8
  *  listed bot's folder, or null when every one clashes. A folder is only the first 8 hex of an id,
  *  so two ids can share one (task-c7929f26e51c447a), and two bots in one folder would work in each
  *  other's files. Every listed id counts, on any computer: a stricter check, never a looser one.
- *  An id that gives no folder (not a UUID, or the Main Bot's) is never taken. */
+ *  Only a lower-case v4 UUID is taken, whatever gave it; anything else is passed over. */
 export function freshId(listed: string[], hostId: string, next: (i: number) => string): string | null {
   const used = new Set(listed.map((id) => botFolder(id, hostId)).filter((f) => typeof f === 'string'))
   for (let i = 0; i < MINT_TRIES; i++) {
     const id = next(i)
     const f = botFolder(id, hostId)
-    if (typeof f === 'string' && !used.has(f)) return id.toLowerCase()
+    if (V4.test(id) && typeof f === 'string' && !used.has(f)) return id
   }
   return null
 }

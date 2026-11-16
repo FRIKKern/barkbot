@@ -154,15 +154,19 @@ export const loadChat = createServerFn({method: 'GET'})
   return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice, sessions: byBot}
 })
 
-// Each Create try's id: random. BARKBOT_TEST_MINT_FILE, set only by scripts/behaviour.mjs against
-// its stand-in Barkpark, names a file whose lines are the ids the tries take first, one per try.
-function minter(): (i: number) => string {
-  const file = process.env.BARKBOT_TEST_MINT_FILE
-  let given: string[] = []
+// Each Create try's id: random. In dev only (vite build leaves it out), BARKBOT_TEST_MINT_FILE, set
+// by scripts/behaviour.mjs against its stand-in Barkpark, names a file whose lines are the ids the
+// tries take first. A line whose record is there, or could not be read, is dropped: the test hook
+// never writes over a record, listed or not.
+async function minter(): Promise<(i: number) => string> {
+  const file = import.meta.env.DEV ? process.env.BARKBOT_TEST_MINT_FILE : undefined
+  const given: string[] = []
   if (file) {
+    let lines: string[] = []
     try {
-      given = readFileSync(file, 'utf8').split('\n').map((x) => x.trim()).filter(Boolean)
+      lines = readFileSync(file, 'utf8').split('\n').map((x) => x.trim()).filter(Boolean)
     } catch {}
+    for (const id of lines) if ((await readBot(id).catch(() => 'unread')) === null) given.push(id)
   }
   return (i) => given[i] ?? randomUUID()
 }
@@ -190,8 +194,8 @@ export const createBot = createServerFn({method: 'POST'})
     })
     if ((ids?.length ?? 0) >= READ_CAP) throw new Error(`you have ${READ_CAP} bots, the most BarkBot shows.`)
     // A new id whose folder no listed bot works in; a few tries, then a plain refusal, nothing written.
-    const id = freshId(ids ?? [], host.id, minter())
-    if (!id) throw new Error('every id tried for this bot gave a folder one of your bots already works in, so it was not made. Try again.')
+    const id = freshId(ids ?? [], host.id, await minter())
+    if (!id) throw new Error('every id tried gave a folder one of your bots already works in. Try again.')
     const bot: Bot = {id, ...data, host_id: host.id, session_id: null, created_at: new Date().toISOString()}
     await putBot(bot)
     try {
