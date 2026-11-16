@@ -167,10 +167,53 @@ export async function readBots(ids: string[], hosts: OwnHost[], listed: OwnSessi
   return {bots: kept.map((bot, i) => ({bot, session: checks[i]})).filter((x) => x.session.is !== 'foreign'), unread}
 }
 
-/** Writes a bot's own key. The record is whole before its id is added to the list. */
-export async function putBot(bot: Bot): Promise<void> {
+// One change at a time per bot record. A change reads the record, changes one field and writes
+// the whole record back (Barkpark prefs have no per-field write and no compare-and-set,
+// docs/contracts/user-prefs.md), so two at once (a rename while the first message opens a
+// conversation, or two tabs) would each write what they read and lose the other's field. Every
+// tab goes through this one BarkBot server, so a queue here keeps both; the next change starts
+// after the last one ended, whether it worked or not. Another bot's changes never wait on it.
+// Both waits are bounded, since a write to Barkpark has no time bound of its own:
+//  - HOLD_MS: a change holds its bot for at most 10 s. Then its write is called off (`signal`; one
+//    not yet sent is never sent), it fails with SLOW, and the next change starts.
+//  - WAIT_MS: a change waits at most 15 s for its turn (one held change and some), else it fails
+//    with BUSY and never runs, so nothing is written after its caller was told it was not.
+export const HOLD_MS = 10_000
+export const WAIT_MS = 15_000
+const SLOW = 'Barkpark did not answer within 10 s. Reload to see what was kept.'
+const BUSY = 'Another change to this bot is still being saved, so this one was not made. Try again in a moment.'
+const changing = new Map<string, Promise<void>>()
+export function oneAtATime<T>(id: string, change: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  const before = changing.get(id) ?? Promise.resolve()
+  const turn = new Promise<boolean>((ok) => {
+    const late = setTimeout(() => ok(false), WAIT_MS)
+    void before.then(() => {
+      clearTimeout(late)
+      ok(true)
+    })
+  })
+  const run = turn.then((mine) => {
+    if (!mine) throw new Error(BUSY)
+    const stop = new AbortController()
+    const timer = setTimeout(() => stop.abort(), HOLD_MS)
+    const called = new Promise<never>((_, no) => stop.signal.addEventListener('abort', () => no(new Error(SLOW))))
+    return Promise.race([change(stop.signal), called]).finally(() => clearTimeout(timer))
+  })
+  // The next change waits for this one to end, or, if this one gave up, for the one it waited on.
+  const after = turn.then((mine) => (mine ? run.then(() => undefined, () => undefined) : before))
+  changing.set(id, after)
+  void after.then(() => {
+    if (changing.get(id) === after) changing.delete(id)
+  })
+  return run
+}
+
+/** Writes a bot's own key. The record is whole before its id is added to the list. `signal`
+ *  calls the write off (oneAtATime's bound): one not yet sent is never sent. */
+export async function putBot(bot: Bot, signal?: AbortSignal): Promise<void> {
   const {id, ...value} = bot
-  await bp(prefs(botKey(id)), {method: 'PUT', json: {value}})
+  signal?.throwIfAborted()
+  await bp(prefs(botKey(id)), {method: 'PUT', json: {value}, signal})
 }
 
 /** Removes a bot's own key: Create's clean-up when its list add failed, so nothing half-made stays. */

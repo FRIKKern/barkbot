@@ -4,7 +4,7 @@ import {randomUUID} from 'node:crypto'
 import {readFileSync} from 'node:fs'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError} from '../server/barkpark'
-import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
+import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
 /** A bot as the page gets it: its id and its name only (the record's pointers stay on the server). */
@@ -248,13 +248,16 @@ export const startChat = createServerFn({method: 'POST'})
     const s = await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: data.hostId, ...(folder ? {bot_folder: folder} : {})}})
     let kept = false
     try {
-      const raw = await readBot(data.botId)
-      const bot = raw && trusted(data.botId, raw, await ownHosts())
-      const now = bot && bot.host_id === data.hostId ? await sessionOf(bot) : null
-      if (bot && now?.is === 'none') {
-        await putBot({...bot, session_id: s.id})
-        kept = true
-      }
+      kept = await oneAtATime(data.botId, async (signal) => {
+        const raw = await readBot(data.botId)
+        const bot = raw && trusted(data.botId, raw, await ownHosts())
+        const now = bot && bot.host_id === data.hostId ? await sessionOf(bot) : null
+        if (bot && now?.is === 'none') {
+          await putBot({...bot, session_id: s.id}, signal)
+          return true
+        }
+        return false
+      })
     } catch (e) {
       console.warn(`barkbot: could not save the new conversation in its bot (${(e as Error).message})`)
       kept = false
@@ -353,9 +356,12 @@ export const renameBot = createServerFn({method: 'POST'})
   })
   .handler(async ({data}) => {
     // The bot's own key, and only a record that is the caller's own: nothing else is written.
-    const raw = await readBot(data.id)
-    const bot = raw && trusted(data.id, raw, await ownHosts())
-    if (!bot || (await sessionOf(bot)).is === 'foreign') throw new Error('This bot is not saved yet, so its name is not kept')
-    await putBot({...bot, name: data.name})
-    return {name: data.name}
+    // One change at a time per bot (oneAtATime): a new conversation saved meanwhile stays.
+    return oneAtATime(data.id, async (signal) => {
+      const raw = await readBot(data.id)
+      const bot = raw && trusted(data.id, raw, await ownHosts())
+      if (!bot || (await sessionOf(bot)).is === 'foreign') throw new Error('This bot is not saved yet, so its name is not kept')
+      await putBot({...bot, name: data.name}, signal)
+      return {name: data.name}
+    })
   })
