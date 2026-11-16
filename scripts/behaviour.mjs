@@ -1241,13 +1241,16 @@ else {
     await open(`${base}/?bot=${OLA}`); await until(async () => (await live()).header === 'Ola' && (await machine()).state === 'Asleep', 20000, "Ola's page").catch(() => {});
     const on = { header: (await live()).header, ...(await machine()) };
     precondition("Ola's page is open, its computer reachable, no alert", on.header === 'Ola' && on.state === 'Asleep' && on.alert === null, on);
-    stub.hosts = two(false, true); await wait(11000);
-    const namedOff = await machine();
-    check("control: the computer named BARKBOT_HOST_NAME stops, Ola's does not: after 11 s the card still says Asleep and no alert", namedOff.state === 'Asleep' && namedOff.alert === null, namedOff);
     stub.hosts = two(true, false);
     await until(async () => (await machine()).state === 'Unreachable', 10000, 'the page to notice').catch(() => {});
     const otherOff = await machine();
     check("Ola's own computer stops (the named one is on): within 10 s the card says Unreachable and the conversation says why", otherOff.state === 'Unreachable' && /unreachable/.test(otherOff.alert ?? ''), otherOff);
+    stub.hosts = two(true, true);
+    await until(async () => (await machine()).state === 'Asleep', 10000, 'the page to notice').catch(() => {});
+    const back = await machine();
+    stub.hosts = two(false, true); await wait(11000);
+    const namedOff = { ...(await machine()), before: back };
+    check("control: the computer named BARKBOT_HOST_NAME stops, Ola's does not: from Asleep with no alert, after 11 s still Asleep and no alert", back.state === 'Asleep' && back.alert === null && namedOff.state === 'Asleep' && namedOff.alert === null, namedOff);
     // The answer is only ever about one of the caller's own enrolled, unrevoked computers.
     stub.hosts = two(true, true);
     const asked = await ev(async ([ids]) => { const m = await import('/src/chat/api.ts'); const out = []; for (const hostId of ids) { try { out.push(await m.computerOnline({ data: { hostId } })); } catch (e) { out.push('threw: ' + e.message); } } return out; }, [[OTHER, GONE, '00000000-0000-4000-8000-0000000000ff']]);
