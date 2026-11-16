@@ -217,6 +217,13 @@ export const createBot = createServerFn({method: 'POST'})
     try {
       await addId(bot.id)
     } catch (e) {
+      // A failed add may still have been applied (its answer lost). Read the list again: the id
+      // there means the bot is made; the record is dropped only when the list is read and the id is
+      // not in it. A record is never dropped while its id may be listed, which would leave an id
+      // with no record: never shown, never removed, a cap slot (task-4338079c878d4cc7).
+      const now = await listIds().catch(() => undefined)
+      if (now?.includes(bot.id)) return {id: bot.id}
+      if (now === undefined) throw new Error('Barkpark did not say whether the bot was made. Reload to see.')
       await dropBot(bot.id).catch(() => console.warn('barkbot: a bot record whose list add failed could not be removed'))
       throw e
     }
