@@ -1413,7 +1413,7 @@ else {
     const b = await atOnce('rename', 'name');
     check("a rename's record write is held until a new chat of the same bot has been written: the record ends with the new name and the new conversation", b.heldSeen && b.made.length === 1 && b.record?.name === 'Ria Two' && b.record?.session_id === b.made[0], b);
     // A write for Ria that Barkpark never answers holds her queue for at most 10 s (app/src/server/bots.ts
-    // HOLD_MS): the next change to Ria runs after it; a change to another bot is never held by Ria's.
+    // WRITE_MS): the next change to Ria runs after it; a change to another bot is never held by Ria's.
     // A change that waits past its own 15 s (WAIT_MS) fails with a plain line and never writes later.
     const ZED = '3d4e5f6a-7b8c-4d9e-8f0a-1b2c3d4e5f6a', KEYZ = `barkbot.bot.${ZED}`;
     const hungStart = async () => {
