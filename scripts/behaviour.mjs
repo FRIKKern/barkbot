@@ -2576,6 +2576,28 @@ else {
       check('two sends on their way at once; the first comes back and is split in two; then the second comes back: the box reads onex, y two, three', JSON.stringify(split.prompt) === JSON.stringify(['onex', 'y two', 'three']), split);
       await clearPrompt();
     }
+    // PROBES (rev63, throwaway): a paste of two paragraphs, and a paste at the end, inside a returned paragraph.
+    {
+      const runProbe = async (name, act) => {
+        await open(`${base}/`); await until(() => stub.opened.includes(SM), 15000, 'open').catch(() => {}); await wait(800); await clearPrompt();
+        const g0 = stub.heldSends.length; stub.holdSend = true;
+        await typeSend('one two'); await until(() => stub.heldSends.length > g0, 8000, 's1').catch(() => {}); await wait(200);
+        await typeSend('three'); await until(() => stub.heldSends.length > g0 + 1, 8000, 's2').catch(() => {}); await wait(200);
+        stub.holdSend = false; const held = stub.heldSends.splice(g0);
+        held[0](); await until(async () => (await promptText()) === 'one two', 8000, 'back1').catch(() => {}); await wait(300);
+        const caret = (off) => ev((off) => { const box = document.querySelector('.prompt'); box.focus(); const t = box.querySelector('p')?.firstChild; const r = document.createRange(); r.setStart(t, off === -1 ? t.length : off); r.collapse(true); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); return true; }, off);
+        await act(caret); await wait(300);
+        const mid = lines(await ev(() => document.querySelector('.prompt')?.innerText ?? ''));
+        held[1](); await until(async () => /three/.test(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), 8000, 'back2').catch(() => {}); await wait(500);
+        check(`PROBE ${name}`, false, { name, mid, prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')) });
+        await clearPrompt();
+      };
+      const paste = (html) => ev((html) => { const box = document.querySelector('.prompt'); const dt = new DataTransfer(); dt.setData('text/html', html); box.dispatchEvent(new InputEvent('beforeinput', { inputType: 'insertFromPaste', dataTransfer: dt, bubbles: true, cancelable: true })); document.execCommand('insertHTML', false, html); }, html);
+      await runProbe('paste two paragraphs after one', async (caret) => { await caret(3); await paste('<p>x</p><p>y</p>'); });
+      await runProbe('paste marked paragraph after one', async (caret) => { await caret(3); await paste('<p data-unsent="0">x</p><p data-unsent="0">y</p>'); });
+      await runProbe('insertText newline at end then z', async (caret) => { await caret(-1); await page.send('Input.insertText', { text: '\nz' }); });
+      await runProbe('backspace-merge: typed line before, then shift-enter', async (caret) => { await caret(0); await page.send('Input.insertText', { text: 'pre\n' }); });
+    }
     stub.sessions = []; freshStore();
   }
 }
