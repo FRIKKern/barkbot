@@ -7,9 +7,9 @@
 // trigger, found by the trigger's captured label, so the frame needs no handler of its own yet;
 // Escape or a click outside closes it.
 //
-// A modal (Create New Bot, Connect Apps, Settings) makes the rest of the window inert while it is
-// open: traces/2026-11-08-new-bot.json shows the oracle (Floating UI) marking the rail, the
-// conversation and the panel the moment the dialog appears.
+// A modal (Create New Bot, Connect Apps, Settings) hides the rest of the window while it is open
+// (aria-hidden, and inert): traces/2026-11-08-new-bot.json shows the oracle (Floating UI) setting
+// aria-hidden on the rail, the conversation and the panel the moment the dialog appears.
 //
 // Keys and focus, as traces/2026-11-09-keys.json measured them on the oracle:
 //   on open   a modal focuses the dialog itself (Create New Bot: its name field); a menu focuses
@@ -139,14 +139,24 @@ export function Overlay({name, scene, onOpenChange, onCreateBot}: {name?: string
       document.removeEventListener('keydown', onKey)
     }
   }, [held])
-  // A modal makes everything beside it inert (no focus, no clicks, hidden from assistive tech).
+  // A modal hides everything beside it with aria-hidden="true", as the oracle does (traces/2026-11-08-
+  // new-bot.json: the rail, the main column, its header and the panel, the frame the dialog appears),
+  // and makes it inert too: aria-hidden alone hides it from assistive tech only, while inert also
+  // keeps focus and clicks out of it (the keys trace: Tab stays in the dialog). Each attribute is
+  // taken back on close only where this set it.
   const modal = !!shownName && modals.has(shownName)
   useEffect(() => {
     const app = layer.current?.parentElement
     if (!modal || !app) return
-    const rest = [...app.children].filter((c) => c !== layer.current && !c.hasAttribute('inert'))
-    rest.forEach((c) => c.setAttribute('inert', ''))
-    return () => rest.forEach((c) => c.removeAttribute('inert'))
+    const rest = [...app.children].filter((c) => c !== layer.current)
+    const inert = rest.filter((c) => !c.hasAttribute('inert'))
+    const hidden = rest.filter((c) => c.getAttribute('aria-hidden') !== 'true')
+    inert.forEach((c) => c.setAttribute('inert', ''))
+    hidden.forEach((c) => c.setAttribute('aria-hidden', 'true'))
+    return () => {
+      inert.forEach((c) => c.removeAttribute('inert'))
+      hidden.forEach((c) => c.removeAttribute('aria-hidden'))
+    }
   }, [modal])
   // Focus on open and on close (see the top of this file).
   useEffect(() => {
