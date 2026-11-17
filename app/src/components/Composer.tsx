@@ -110,7 +110,10 @@ export function Composer({placeholder, onSend, disabled, start}: {placeholder: s
     setRefused(null)
     el.focus()
     const why = await onSend(text, sent.pictures, sent.files)
-    if (why === null || why === undefined) return
+    if (why === null || why === undefined) {
+      if (text && el.innerText.trim()) { const p = document.createElement('p'); p.textContent = text; el.prepend(p) }
+      return
+    }
     // Nothing went (or it may have): the words and what waited with them come back, and the line says
     // why (if it is not said elsewhere). Words typed meanwhile stay, after them, as pictures and files do.
     setRefused(why || null)
