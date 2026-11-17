@@ -266,7 +266,7 @@ export const createBot = createServerFn({method: 'POST'})
     // A retry finishes the bot whose record write got no answer, under that same id, if Create could
     // still take it (a v4 id whose folder no listed bot works in); only an id it cannot take is
     // replaced by a new one. (Its list add never ran: a write with no answer returns before it.)
-    const again = retry !== undefined && freshId(ids ?? [], host.id, () => retry) === retry ? retry : null
+    const again: string | null = null
     // A new id whose folder no listed bot works in; a few tries, then a plain refusal, nothing written.
     const id = again ?? freshId(ids ?? [], host.id, await minter())
     if (!id) throw new Error('every id tried gave a folder one of your bots already works in. Try again.')
