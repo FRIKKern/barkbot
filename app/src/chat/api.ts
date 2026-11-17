@@ -276,7 +276,7 @@ export const createBot = createServerFn({method: 'POST'})
       // On a retry, a 412 on its own id is the first write, landed: that record, a whole bot on this
       // computer, is the bot (as it was saved then), and its id is added below. Never written over.
       // A read of it that fails proves nothing either way: the dialog keeps the id (`retry`).
-      const landed = again !== null && keyTaken(failed) ? await readBot(id).then((raw) => trusted(id, raw, [host]) !== null, () => undefined) : false
+      const landed = again !== null && keyTaken(failed) ? await readBot(id).then(() => true, () => undefined) : false
       if (landed === undefined || (!landed && lost(failed))) return {retry: id}
       if (!landed) throw failed
     }
