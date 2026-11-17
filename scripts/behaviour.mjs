@@ -2306,7 +2306,20 @@ else {
     const out = { box, ups: { fast: ups.filter((x) => x === fastId).length, slow: ups.filter((x) => x === slowId).length, all: ups.length }, named, chipsEnd: await chipNames() };
     rmSync(fastPic, { force: true }); rmSync(slowPic, { force: true });
     check('a picture added while another is still being read, then Enter sends the first: the box afterwards holds only the picture not yet sent, and the next Enter sends it alone; each picture is stored once', before.length === 1 && box.after.length === 1 && /slow-/.test(box.after[0] ?? '') && out.ups.fast === 1 && out.ups.slow === 1 && out.ups.all === 2 && JSON.stringify(named) === JSON.stringify([[fastId], [slowId]]) && out.chipsEnd.length === 0, out);
-    await clearPrompt(); stub.sessions = []; freshStore();
+    await clearPrompt();
+    // Three wait in the box; two more are picked at once and both read late: the limit is counted
+    // when each lands, so the box holds four, and the line says why the fifth was not taken.
+    const three = [0, 1, 2].map((i) => { const f = path('.cache', `three-${i}-${CHROME_PORT}.png`); writeFileSync(f, Buffer.concat([PNG, Buffer.from(`t${i}`)])); return f; });
+    const late = ['a', 'b'].map((x) => { const f = path('.cache', `slow-${x}-${CHROME_PORT}.png`); writeFileSync(f, Buffer.concat([PNG, Buffer.from(`l${x}`)])); return f; });
+    for (const f of three) { const n = (await chipNames()).length; await pickFile(f); await until(async () => (await chipNames()).length > n, 10000, 'a chip').catch(() => {}); }
+    const had = (await chipNames()).length;
+    await pickFile(late[0]); await pickFile(late[1]);
+    await wait(3000); // both reads are done
+    const four = { had, chips: await chipNames(), line: await ev(() => document.querySelector('.composer-refused')?.textContent ?? null) };
+    [...three, ...late].forEach((f) => rmSync(f, { force: true }));
+    check('three pictures wait, and two more are read at once: the box holds four, and the line says a message takes four at most', had === 3 && four.chips.length === 4 && four.chips.filter((c) => /slow-/.test(c)).length === 1 && /four pictures and files at most/.test(four.line ?? ''), four);
+    await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    stub.sessions = []; freshStore();
   }
 }
 

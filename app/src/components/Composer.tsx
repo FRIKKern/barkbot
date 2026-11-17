@@ -19,6 +19,8 @@ const sendableName = (name: string) => name !== '.' && name !== '..' && !/[\/\\\
 /** The composer menu's "Attach files" asks the composer to open its file chooser. */
 export const ATTACH_EVENT = 'barkbot:attach'
 
+const FOUR_AT_MOST = 'A message takes four pictures and files at most'
+
 const base64 = (f: File) =>
   new Promise<string>((ok, no) => {
     const r = new FileReader()
@@ -52,7 +54,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   const [draft, setDraft] = useState(!!start?.draft)
   const [pictures, setPictures] = useState<Picture[]>(start?.pictures ?? [])
   const [files, setFiles] = useState<WaitingFile[]>(start?.files ?? [])
-  // How many wait in the box as last drawn: a pick read after a send counts what is left.
+  // How many wait in the box: as last drawn, plus any read that landed since (add counts it at once).
   const held = useRef(0)
   held.current = pictures.length + files.length
   const [refused, setRefused] = useState<string | null>(start?.line ?? null)
@@ -102,26 +104,28 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   const add = async (picked: File[]) => {
     // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes.
     if (!about) say(null)
-    // Only what this pick adds. Reading a file takes time, and Enter may send what the box held
-    // meanwhile: the pick is added to what the box holds when it is read, never to a copy taken
-    // before, which would put back a picture that already went (task-9b801b838c6f4078).
-    const pics: Picture[] = []
-    const docs: WaitingFile[] = []
+    // Each file is added when it is read, to what the box holds then, never to a copy taken before
+    // (that would put back a picture that went meanwhile: task-9b801b838c6f4078). The four-at-most
+    // limit is counted then too, so two reads at once cannot make five.
+    const full = () => held.current >= MAX_ATTACHMENTS
     for (const f of picked) {
       const picture = PICTURE_TYPES.includes(f.type)
       if (!picture && !FILE_TYPES.test(f.type)) say(`${f.name} is not a picture, a text file or a PDF`)
       else if (f.size > MAX_BYTES) say(`${f.name} is over 3 MB`)
       else if (!f.size) say(`${f.name} is empty`)
-      else if (held.current + pics.length + docs.length >= MAX_ATTACHMENTS) say('A message takes four pictures and files at most')
+      else if (full()) say(FOUR_AT_MOST)
       else if (!picture && !sendableName(f.name)) say(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
       else {
         const data = await base64(f)
-        if (picture) pics.push({name: f.name, data, src: `data:${f.type};base64,${data}`})
-        else docs.push({name: f.name, size: fileSize(f.size), data})
+        if (full()) {
+          say(FOUR_AT_MOST)
+          continue
+        }
+        held.current++ // counted now: another read landing before the box is drawn again sees it
+        if (picture) setPictures((now) => [...now, {name: f.name, data, src: `data:${f.type};base64,${data}`}])
+        else setFiles((now) => [...now, {name: f.name, size: fileSize(f.size), data}])
       }
     }
-    if (pics.length) setPictures((now) => [...now, ...pics])
-    if (docs.length) setFiles((now) => [...now, ...docs])
   }
   const submit = async () => {
     const el = box.current
