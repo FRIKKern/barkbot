@@ -19,6 +19,7 @@ import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
 import { overlayKeys } from './lib/overlay-keys.mjs';
+import { pickerPick } from './lib/picker-pick.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
 import { createOnce } from './lib/create-once.mjs';
@@ -430,6 +431,10 @@ check('renaming the second Twin leaves the first tile\'s label as it was', tw.ti
 // ── The overlays' keys and focus (traces/2026-11-09-keys.json, task-4d9930cf48ab41fb) ──────────
 console.log("Behaviour · the overlays' keys and focus (traces/2026-11-09-keys.json)");
 await overlayKeys({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
+
+// ── A pick in the Voice chat card's pickers changes its row (task-d2fde20bf4539af1, item N4) ──
+console.log("Behaviour · a picker's pick changes its row");
+await pickerPick({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
 
 // ── Rename persists: the live page (/) saves the name to Barkpark (task-c3e0bc88ce28833d) ─────
 // Grok keeps a renamed bot's name across a restart. Ours saves it as a Barkpark pref on Enter or
