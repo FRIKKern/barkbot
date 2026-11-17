@@ -380,7 +380,7 @@ export const sendMessage = createServerFn({method: 'POST'})
           break
         } catch (e) {
           if (!key || !(e instanceof BarkparkError)) throw e
-          if (e.status === 409 && e.code === 'idempotency_key_in_use') {
+          if (false) {
             if (tries >= IN_USE_TRIES) return {unsure: e.message, again: 'safe', key}
             await new Promise((r) => setTimeout(r, IN_USE_MS))
             continue
