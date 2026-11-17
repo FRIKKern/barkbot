@@ -155,7 +155,7 @@ await new Promise((ok) => httpServer((req, res) => {
       const { data } = JSON.parse(body); const bytes = Buffer.from(data, 'base64'); const id = createHash('sha256').update(bytes).digest('hex');
       const media_type = bytes[0] === 0x89 && bytes.subarray(1, 4).toString() === 'PNG' ? 'image/png' : bytes.subarray(0, 5).toString() === '%PDF-' ? 'application/pdf' : bytes.length && !bytes.includes(0) && Buffer.from(bytes.toString('utf8'), 'utf8').equals(bytes) ? 'text/plain' : null;
       if (!media_type) { stub.refused.push({ upload: id }); return json(400, { error: { code: 'invalid_request', message: 'attachment must be UTF-8 text, a PDF, or one of: image/png, image/jpeg, image/gif, image/webp' } }); }
-      stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
+      if (stub.slowUpload) { const w = stub.slowUpload; stub.slowAsked = (stub.slowAsked ?? 0) + 1; return void setTimeout(() => { stub.uploads.push(id); stub.pictures.set(id, data); json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } }); }, w); } stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
     }
     if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const id = req.url.split('/').pop(); return stub.pictures.has(id) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(id) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/messages(\?.*)?$/.test(req.url) && req.method === 'POST') {
@@ -1995,6 +1995,38 @@ else {
     const zed = { back: zback, keys: [...new Set(stub.keyed.slice(k0).map((x) => x.key))], requests: stub.keyed.length - k0, replays: stub.replays - zr0, turns: stub.sent.slice(s0).map((m) => m.content), made: stub.made.length - zm0, prompt: await promptText(), line: await refusedLine(), shown: await userBubbles('hello zed') };
     check("a new bot's first message given back while on its way and taken (202) before it is sent again: the resend carries the same key and gets that answer again; one turn, shown once", zback.prompt === 'hello zed' && SAFE.test(zback.line ?? '') && zed.keys.length === 1 && typeof zed.keys[0] === 'string' && zed.requests === 2 && zed.replays === 1 && JSON.stringify(zed.turns) === '["hello zed"]' && zed.made === 1 && zed.prompt === '' && zed.line === null && zed.shown === 1, zed);
     await clearPrompt();
+
+    // PROBE (rev63, not a rule to land): a new bot's first message with a picture; the pick away is held
+    // and gives up while the picture is still being stored (before the message itself goes). The words
+    // come back saying sending again is safe; the message then goes (202). Enter must not run it twice.
+    {
+      const RA = '6a2e3f4a-5b6c-4d7e-8f8a-9b0c1d2e3ff7', RB = '7b3f4a5b-6c7d-4e8f-9a9b-0c1d2e3f4aa8';
+      stub.hosts = host(true); stub.sessions = []; freshStore();
+      stub.prefs.set('barkbot.bots', { ids: [RA, RB] }); stub.prefs.set(`barkbot.bot.${RA}`, rec('Rho', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${RB}`, rec('Ria', HOST_ID, null));
+      await open(`${base}/?bot=${RA}`); await until(async () => (await live()).header === 'Rho', 15000, "Rho's page").catch(() => {}); await wait(500);
+      const { root: r2 } = await page.send('DOM.getDocument');
+      const { nodeId: n2 } = await page.send('DOM.querySelector', { nodeId: r2.nodeId, selector: '.composer-wrap input[type=file]' });
+      await page.send('DOM.setFileInputFiles', { nodeId: n2, files: [pngPath] });
+      await until(async () => (await chipCount()) === 1, 10000, "Rho's picture chip").catch(() => {});
+      const rchip = await chipCount();
+      k0 = stub.keyed.length; s0 = stub.sent.length; const ra0 = stub.slowAsked ?? 0;
+      stub.slowUpload = 10000;
+      await typeSend('hello rho');
+      await until(() => (stub.slowAsked ?? 0) > ra0, 15000, "Rho's picture being stored").catch(() => {}); await wait(200);
+      const asked = (stub.slowAsked ?? 0) - ra0;
+      await clickTile('Ria');
+      await until(async () => (await onBot()) === RB, 20000, "Ria's page after the hold").catch(() => {});
+      const sentBeforeLeave = stub.sent.length - s0;
+      stub.slowUpload = 0;
+      await until(() => stub.sent.length > s0, 15000, "Rho's message to go after its picture").catch(() => {}); await wait(1000);
+      await clickTile('Rho');
+      await until(async () => (await onBot()) === RA && (await promptText()) !== '', 15000, "Rho's page with its words").catch(() => {}); await wait(800);
+      const rback = { line: await refusedLine(), prompt: await promptText(), chips: await chipCount() };
+      await enter(); await wait(4000);
+      const r = { rchip, asked, sentBeforeLeave, rback, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), prompt: await promptText(), line: await refusedLine() };
+      check('PROBE upload-given-back: words given back while their picture was still being stored say sending again is safe; the message then goes; Enter again runs no second turn', rchip === 1 && asked >= 1 && sentBeforeLeave === 0 && SAFE.test(rback.line ?? '') && JSON.stringify(r.turns) === '["hello rho"]', r);
+      await clearPrompt();
+    }
     stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
 }
