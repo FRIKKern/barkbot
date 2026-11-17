@@ -18,6 +18,7 @@ import { createHash } from 'node:crypto';
 import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
+import { overlayKeys } from './lib/overlay-keys.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
 
@@ -420,6 +421,10 @@ check('picking the second Twin marks only that tile current (control: the first 
 await ev(() => document.querySelector('.who-name').focus()); await clear(); await typeIn('Twin Two'); await key('Enter'); await nextFrame();
 tw = await twins();
 check('renaming the second Twin leaves the first tile\'s label as it was', tw.tiles[0].label === 'Twin' && tw.tiles[1].label === 'Twin Two' && tw.header === 'Twin Two', tw);
+
+// ── The overlays' keys and focus (traces/2026-11-09-keys.json, task-4d9930cf48ab41fb) ──────────
+console.log("Behaviour · the overlays' keys and focus (traces/2026-11-09-keys.json)");
+await overlayKeys({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
 
 // ── Rename persists: the live page (/) saves the name to Barkpark (task-c3e0bc88ce28833d) ─────
 // Grok keeps a renamed bot's name across a restart. Ours saves it as a Barkpark pref on Enter or
