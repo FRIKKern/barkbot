@@ -2542,6 +2542,30 @@ else {
     check('control: the pasted paragraph carries a data-unsent mark into the box', out.marked >= 1, out);
     check('a paragraph carrying data-unsent pasted while a send is on its way, the send comes back unsent: its words come back first, before the pasted words', JSON.stringify(out.prompt) === JSON.stringify(['first words', 'pasted words']) && /may have been sent/.test(out.line ?? ''), out);
     await clearPrompt();
+    // Two sends on their way at once; the first comes back and is split in two (a new paragraph inside
+    // it, as Enter makes one); then the second comes back: it goes after both halves of the first.
+    {
+      await open(`${base}/`); await until(() => stub.opened.includes(SM), 15000, 'the conversation to open').catch(() => {}); await wait(800); await clearPrompt();
+      const g0 = stub.heldSends.length; stub.holdSend = true;
+      await typeSend('one two'); await until(() => stub.heldSends.length > g0, 8000, 'the first message on its way').catch(() => {}); await wait(200);
+      await typeSend('three'); await until(() => stub.heldSends.length > g0 + 1, 8000, 'the second message on its way').catch(() => {}); await wait(200);
+      stub.holdSend = false; const held = stub.heldSends.splice(g0);
+      held[0](); await until(async () => (await promptText()) === 'one two', 8000, 'the first words back').catch(() => {}); await wait(300);
+      // The caret after "one", then a new paragraph there: Chrome's beforeinput, then the edit.
+      const splitOk = await ev(() => {
+        const box = document.querySelector('.prompt'); box.focus();
+        const t = box.querySelector('p')?.firstChild; if (!t) return false;
+        const r = document.createRange(); r.setStart(t, 3); r.collapse(true); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        if (!box.dispatchEvent(new InputEvent('beforeinput', { inputType: 'insertParagraph', bubbles: true, cancelable: true }))) return false;
+        document.execCommand('insertParagraph');
+        return box.querySelectorAll('p').length === 2;
+      });
+      held[1](); await until(async () => lines(await promptText()).length === 3, 8000, 'the second words back').catch(() => {}); await wait(500);
+      const split = { splitOk, prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')) };
+      check('control: the first send\'s words, back in the box, are split into two paragraphs', split.splitOk === true, split);
+      check('two sends on their way at once; the first comes back and is split in two; then the second comes back: the box reads one, two, three', JSON.stringify(split.prompt) === JSON.stringify(['one', 'two', 'three']), split);
+      await clearPrompt();
+    }
     stub.sessions = []; freshStore();
   }
 }
