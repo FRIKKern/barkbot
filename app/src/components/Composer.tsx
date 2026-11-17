@@ -52,6 +52,9 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   const [draft, setDraft] = useState(!!start?.draft)
   const [pictures, setPictures] = useState<Picture[]>(start?.pictures ?? [])
   const [files, setFiles] = useState<WaitingFile[]>(start?.files ?? [])
+  // How many wait in the box as last drawn: a pick read after a send counts what is left.
+  const held = useRef(0)
+  held.current = pictures.length + files.length
   const [refused, setRefused] = useState<string | null>(start?.line ?? null)
   // What a send's line is about: that send's words, pictures and files. The line is shown as it is
   // only while the box holds exactly that; any change, by any path (typing, a paste, a picture or
@@ -99,14 +102,17 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   const add = async (picked: File[]) => {
     // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes.
     if (!about) say(null)
-    const pics = [...pictures]
-    const docs = [...files]
+    // Only what this pick adds. Reading a file takes time, and Enter may send what the box held
+    // meanwhile: the pick is added to what the box holds when it is read, never to a copy taken
+    // before, which would put back a picture that already went (task-9b801b838c6f4078).
+    const pics: Picture[] = []
+    const docs: WaitingFile[] = []
     for (const f of picked) {
       const picture = PICTURE_TYPES.includes(f.type)
       if (!picture && !FILE_TYPES.test(f.type)) say(`${f.name} is not a picture, a text file or a PDF`)
       else if (f.size > MAX_BYTES) say(`${f.name} is over 3 MB`)
       else if (!f.size) say(`${f.name} is empty`)
-      else if (pics.length + docs.length >= MAX_ATTACHMENTS) say('A message takes four pictures and files at most')
+      else if (held.current + pics.length + docs.length >= MAX_ATTACHMENTS) say('A message takes four pictures and files at most')
       else if (!picture && !sendableName(f.name)) say(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
       else {
         const data = await base64(f)
@@ -114,8 +120,8 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
         else docs.push({name: f.name, size: fileSize(f.size), data})
       }
     }
-    setPictures(pics)
-    setFiles(docs)
+    if (pics.length) setPictures((now) => [...now, ...pics])
+    if (docs.length) setFiles((now) => [...now, ...docs])
   }
   const submit = async () => {
     const el = box.current
