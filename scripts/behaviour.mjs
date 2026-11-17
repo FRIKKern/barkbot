@@ -2420,6 +2420,19 @@ else {
     const P = CHROME_PORT;
     check('one pick with two pictures over 3 MB, one empty and one fine: the line names both big ones and the empty one, and the fine one waits', all.line === `big-x-${P}.png and big-z-${P}.png are over 3 MB. empty-w-${P}.png is empty` && JSON.stringify(all.chips) === JSON.stringify([`good-y-${P}.png`]), all);
     await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    // 4. A pick's refusal goes when the next send goes.
+    await openOn();
+    const big = path('.cache', `gone-${CHROME_PORT}.png`); writeFileSync(big, Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)]));
+    await pick([big]); await wait(800);
+    const named = await refusedLine();
+    const s1 = stub.sent.length;
+    await typeSend('words alone');
+    await until(() => stub.sent.length > s1, 8000, 'the words to go').catch(() => {}); await wait(800);
+    const after = { named, sent: stub.sent.slice(s1).map((m) => m.content), line: await refusedLine(), shown: await ev(() => !!document.querySelector('.composer-refused')) };
+    rmSync(big, { force: true });
+    check('control: a picture over 3 MB is picked: the line names it', new RegExp(`gone-${CHROME_PORT}\\.png is over 3 MB`).test(named ?? ''), after);
+    check('then words are sent and go: the line about the refused picture is gone', JSON.stringify(after.sent) === '["words alone"]' && after.line === null && after.shown === false, after);
+    await clearPrompt();
     stub.sessions = []; freshStore();
   }
 
