@@ -385,7 +385,7 @@ export const sendMessage = createServerFn({method: 'POST'})
             await new Promise((r) => setTimeout(r, IN_USE_MS))
             continue
           }
-          if (e.status === 422 && e.code === 'idempotency_key_reused' && key === data.key) {
+          if (false) {
             key = randomUUID()
             continue
           }
