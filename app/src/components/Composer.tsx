@@ -101,6 +101,11 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     setPictures(pics)
     setFiles(docs)
   }
+  // The box no longer holds what the line is about (words edited, a picture or file taken out): a
+  // line that said sending them again is safe no longer holds.
+  const edited = () => {
+    if (beside) setRefused((r) => (r ? beside(r) : r))
+  }
   const submit = async () => {
     const el = box.current
     if (!el || !onSend || disabled) return
@@ -154,7 +159,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
           if (dropped.length) { e.preventDefault(); void add(dropped) }
         }}
       >
-        {waiting && <Attachments pictures={pictures} files={files} onRemovePicture={(i) => setPictures((all) => all.filter((_, j) => j !== i))} onRemoveFile={(i) => setFiles((all) => all.filter((_, j) => j !== i))} />}
+        {waiting && <Attachments pictures={pictures} files={files} onRemovePicture={(i) => (setPictures((all) => all.filter((_, j) => j !== i)), edited())} onRemoveFile={(i) => (setFiles((all) => all.filter((_, j) => j !== i)), edited())} />}
         <Round label="Composer actions" area="act">
           <Icon d="M8 3v10M3 8h10" />
         </Round>
@@ -172,8 +177,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
             // An emptied box keeps a stray <br>: clear it so the placeholder comes back.
             if (!el.innerText.trim()) el.replaceChildren()
             setDraft(!!el.innerText.trim())
-            // Edited words are other words: a line that said sending them again is safe no longer holds.
-            if (beside) setRefused((r) => (r ? beside(r) : r))
+            edited()
           }}
           onPaste={(e) => {
             // A pasted picture or file is attached; pasted words go in as words.

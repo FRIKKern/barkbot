@@ -2186,6 +2186,23 @@ else {
     check("a new bot's first message with a picture, its words given back while the picture uploads and then taken: back on the bot the safe line, and Enter gets the first answer again under the same key; one upload, one turn", wChips === 1 && wHeld === 1 && wback.prompt === 'hello wes' && SAFE.test(wback.line ?? '') && wback.chips === 1 && wes.keys.length === 1 && typeof wes.keys[0] === 'string' && JSON.stringify(wes.turns) === '["hello wes"]' && wes.uploads === 1 && wes.replays === 1 && wes.made === 1 && wes.prompt === '' && wes.line === null, wes);
     await clearPrompt();
 
+    // 14. (rev63's probe) The safe line over words with a picture, then the picture is taken out: Enter
+    // would send the words alone under another key, so the line turns to look first.
+    const SP5 = '00000000-0000-4000-8000-0000000002e5';
+    await openOn(SP5); await clearPrompt();
+    const p5 = path('.cache', `p5-picture-${CHROME_PORT}.png`); writeFileSync(p5, PNG);
+    const { root: r5 } = await page.send('DOM.getDocument');
+    const { nodeId: n5 } = await page.send('DOM.querySelector', { nodeId: r5.nodeId, selector: '.composer-wrap input[type=file]' });
+    await page.send('DOM.setFileInputFiles', { nodeId: n5, files: [p5] });
+    await until(async () => (await chipCount()) === 1, 10000, 'the chip').catch(() => {});
+    const lostP = await lostOnce('with p');
+    const chipsBack = await chipCount();
+    await ev(() => document.querySelector('.attach-pic-remove')?.click()); await wait(500);
+    const removed = { lostP, chipsBack, chips: await chipCount(), line: await refusedLine() };
+    rmSync(p5, { force: true });
+    check('the safe line over words with a picture, then the picture is taken out: the line turns to look before sending again', SAFE.test(lostP.line ?? '') && chipsBack === 1 && removed.chips === 0 && !SAFE.test(removed.line ?? '') && /look in the conversation/.test(removed.line ?? ''), removed);
+    await clearPrompt();
+
     // 12. Taken for sure, the key goes: the same words sent again on purpose run again, under a new key.
     k0 = stub.keyed.length; s0 = stub.sent.length;
     await typeSend('twice on purpose'); await until(() => stub.sent.length > s0, 8000, 'the first').catch(() => {}); await wait(800);
