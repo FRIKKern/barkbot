@@ -87,7 +87,12 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // line, never in its place: after a send with no answer that line is the only word that it may have
   // gone (task-e1fc137f265fbe22).
   const [note, setNote] = useState<string | null>(null)
-  const shown = note && said ? `${note}. ${said}` : note ?? said
+  // A send that comes back unsent puts its pictures and files back beside any added meanwhile, so the
+  // box can hold more than four (task-724aa2a5a9b5e5cf). None is dropped: the line says a message takes
+  // four at most, still saying what it said before, and Enter sends nothing until some are taken out.
+  const over = pictures.length + files.length > MAX_ATTACHMENTS
+  // Four at most (once, if the note does not say it already), then the pick's note, then the send's line.
+  const shown = [over && !note?.includes(FOUR_AT_MOST) ? FOUR_AT_MOST : null, note, said].filter(Boolean).join('. ') || null
   // Each send's number. What comes back unsent goes after what came back from an earlier send and
   // before what came back from a later one, so two sends on their way at once read back in the order
   // they were sent, whichever answer comes first; what was typed or attached since stays after them.
@@ -154,6 +159,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     if (!el || !onSend || disabled) return
     const text = read(el)
     if (!text && !pictures.length && !files.length) return
+    if (pictures.length + files.length > MAX_ATTACHMENTS) return // the line already says why
     el.replaceChildren()
     setDraft(false)
     const sent = {pictures, files}
