@@ -117,10 +117,6 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
       else if (!picture && !sendableName(f.name)) say(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
       else {
         const data = await base64(f)
-        if (full()) {
-          say(FOUR_AT_MOST)
-          continue
-        }
         held.current++ // counted now: another read landing before the box is drawn again sees it
         if (picture) setPictures((now) => [...now, {name: f.name, data, src: `data:${f.type};base64,${data}`}])
         else setFiles((now) => [...now, {name: f.name, size: fileSize(f.size), data}])
