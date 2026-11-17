@@ -40,7 +40,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -158,16 +158,42 @@ await new Promise((ok) => httpServer((req, res) => {
       stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
     }
     if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const id = req.url.split('/').pop(); return stub.pictures.has(id) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(id) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
-    if (/^\/v1\/chat\/sessions\/[^/]+\/messages$/.test(req.url) && req.method === 'POST') {
+    if (/^\/v1\/chat\/sessions\/[^/]+\/messages(\?.*)?$/.test(req.url) && req.method === 'POST') {
       const m = JSON.parse(body);
+      // Idempotency-Key as Barkpark answers it (PR #26689, plugs/idempotency.ex, bind_request: true):
+      // one key per path (one token here), bound to the query string and body together (keys sorted).
+      // The same request again: the first answer again, `Idempotency-Replay: true`, nothing runs. Another
+      // request: 422 idempotency_key_reused, whatever the first's state. While the first is still being
+      // answered: 409 idempotency_key_in_use. A 5xx, or no answer at all, is not remembered.
+      const ikey = req.headers['idempotency-key'];
+      stub.keyed.push({ key: ikey ?? null, content: m.content, to: req.url.split('/')[4] });
+      let idem = null;
+      if (ikey) {
+        const canon = (v) => (Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v);
+        const bound = createHash('sha256').update(JSON.stringify(canon({ ...Object.fromEntries(new URLSearchParams(req.url.split('?')[1] ?? '')), ...m }))).digest('hex');
+        const k = `${req.url.split('?')[0]}|${ikey}`, was = stub.idem.get(k);
+        // `reuseNext`: this key was first used for another request (the stand-in says so once).
+        if (stub.reuseNext) { stub.reuseNext = false; stub.idem.set(k, { bound: 'another request', state: 'done', status: 202, body: '{"accepted":true}' }); return json(422, { error: { code: 'idempotency_key_reused', message: 'this Idempotency-Key was used for a different request' } }); }
+        if (was && was.bound !== bound) return json(422, { error: { code: 'idempotency_key_reused', message: 'this Idempotency-Key was used for a different request' } });
+        if (was?.state === 'pending') { stub.inUse++; return json(409, { error: { code: 'idempotency_key_in_use', message: 'a request with this Idempotency-Key is still being answered' } }); }
+        if (was) { stub.replays++; res.writeHead(was.status, { 'content-type': 'application/json', 'idempotency-replay': 'true' }); return res.end(was.body); }
+        idem = { bound, state: 'pending' }; stub.idem.set(k, idem);
+        const end = res.end.bind(res);
+        res.end = (b) => { if (idem.state === 'pending') { if (res.statusCode < 500) Object.assign(idem, { state: 'done', status: res.statusCode, body: b ?? '' }); else stub.idem.delete(k); } return end(b); };
+        res.once('close', () => { if (idem.state === 'pending') stub.idem.delete(k); });
+      }
+      // Barkpark's own answer was 202 though the caller never got it (lost on the way, or a gateway's).
+      const tookIt = () => idem && Object.assign(idem, { state: 'done', status: 202, body: '{"accepted":true}' });
+      // `holdTake`: Barkpark takes the message (its turn goes) and answers 202 only when the rule lets it.
+      if (stub.holdTake) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); stub.heldSends.push(() => json(202, { accepted: true })); return; }
       // `holdSend`: Barkpark takes the message and does not answer until the rule lets it: 503 then,
       // or, when let go with `true`, it goes (202).
       if (stub.holdSend) { stub.heldSends.push((ok) => (ok ? (stub.sent.push(m), stub.to.push(req.url.split('/')[4]), json(202, { accepted: true })) : json(503, { error: { code: 'unavailable', message: 'the stand-in gave up' } }))); return; }
       // `dropAnswer`: Barkpark takes the message, then the answer is lost (the socket drops).
-      if (stub.dropAnswer) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); return void req.socket.destroy(); }
+      if (stub.dropAnswer) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); tookIt(); return void req.socket.destroy(); }
       // `afterTake` {status, body}: Barkpark takes the message, then answers that (a 500 from storing the
       // user's turn after it went, chat_controller.ex create_message; a gateway's empty 502).
-      if (stub.afterTake) { const { status, body: b } = stub.afterTake; stub.sent.push(m); stub.to.push(req.url.split('/')[4]); res.writeHead(status, b ? { 'content-type': 'application/json' } : {}); return res.end(b ? JSON.stringify(b) : ''); }
+      if (stub.afterTake) { const { status, body: b } = stub.afterTake; if (!b) tookIt(); stub.sent.push(m); stub.to.push(req.url.split('/')[4]); res.writeHead(status, b ? { 'content-type': 'application/json' } : {}); return res.end(b ? JSON.stringify(b) : ''); }
       // `failSend`: Barkpark refuses before the turn goes (503 runtime_unavailable): nothing is sent.
       if (stub.failSend) { stub.failedSends.push(m); return json(503, { error: { code: 'runtime_unavailable', message: 'the stand-in could not take it' } }); }
       // Barkpark's shared 422 chat_unsupported for any session (a revoked host, a provider not ready, …).
@@ -1206,27 +1232,27 @@ else {
     stub.opened = []; await open(`${base}/`);
     await until(() => stub.opened.includes(SF), 15000, "the Main Bot's conversation to open again").catch(() => {}); await wait(800);
     const lost1 = await lost('did this go');
-    check('in an open conversation, a message Barkpark took whose answer was lost: the words stay and one line says it may have been sent, to look before sending again', lost1.prompt === 'did this go' && /may have been sent/.test(lost1.refused ?? '') && /look in the conversation/.test(lost1.refused ?? '') && lost1.line === null && JSON.stringify(lost1.sent) === JSON.stringify(['did this go']), lost1);
+    check('in an open conversation, a message Barkpark took whose answer was lost: the words stay and one line says it may have been sent, and that sending it again is safe (its key is kept)', lost1.prompt === 'did this go' && /may have been sent/.test(lost1.refused ?? '') && /sending it again is safe/.test(lost1.refused ?? '') && lost1.line === null && JSON.stringify(lost1.sent) === JSON.stringify(['did this go']), lost1);
     await clearPrompt();
     // The same "may have gone" for every answer that can come after the turn went: Barkpark's 500
     // (it stores the user's turn after it sends it on), a gateway's empty 502, and the page's own
     // call lost on its way back after the stand-in took the message.
     const mayHaveGone = (x, words) => x.prompt === words && /may have been sent/.test(x.refused ?? '') && x.line === null && JSON.stringify(x.sent) === JSON.stringify([words]);
     const crash = await lost('crash after take', () => (stub.afterTake = { status: 500, body: { error: { code: 'internal_error', message: 'Internal server error (DBConnection.ConnectionError)' } } }));
-    check('a 500 from Barkpark after it took the message: the words stay and one line says it may have been sent', mayHaveGone(crash, 'crash after take'), crash);
+    check('a 500 from Barkpark after it took the message: the words stay and one line says it may have been sent, to look before sending again: Barkpark does not remember a key it answered 5xx', mayHaveGone(crash, 'crash after take') && /look in the conversation/.test(crash.refused ?? ''), crash);
     await clearPrompt();
     const gate = await lost('gateway gave up', () => (stub.afterTake = { status: 502, body: null }));
-    check("a gateway's empty 502 after the message was taken: the words stay and one line says it may have been sent", mayHaveGone(gate, 'gateway gave up'), gate);
+    check("a gateway's empty 502 after the message was taken: the words stay and one line says it may have been sent, and that sending it again is safe (the gateway's, not Barkpark's)", mayHaveGone(gate, 'gateway gave up') && /sending it again is safe/.test(gate.refused ?? ''), gate);
     await clearPrompt();
     // The page's own call to its server is lost after the stand-in took the message (fetch rejects).
     await ev(() => { if (window.__loseOn) return; window.__loseOn = true; const real = window.fetch; window.fetch = async (u, init) => { const r = await real(u, init); if (window.__lose && typeof init?.body === 'string' && init.body.includes(window.__lose)) { window.__lose = null; throw new TypeError('Failed to fetch'); } return r; }; });
     const own = await lost('lost on the way back', () => ev(() => (window.__lose = 'lost on the way back')));
-    check("the page's own call is lost after the message was taken: the words stay and one line says it may have been sent", mayHaveGone(own, 'lost on the way back'), own);
+    check("the page's own call is lost after the message was taken: the words stay and one line says it may have been sent, and that sending it again is safe", mayHaveGone(own, 'lost on the way back') && /sending it again is safe/.test(own.refused ?? ''), own);
     await clearPrompt();
     const GIL = 'a7b8c9d0-e1f2-4a3b-8c4d-5e6f70819203';
     await newBot('Gil', GIL);
     const lost2 = await lost('hello gil');
-    check("a new bot's first message Barkpark took whose answer was lost: the words stay and one line says it may have been sent, to look before sending again", lost2.prompt === 'hello gil' && /may have been sent/.test(lost2.refused ?? '') && /look in the conversation/.test(lost2.refused ?? '') && lost2.line === null && JSON.stringify(lost2.sent) === JSON.stringify(['hello gil']), lost2);
+    check("a new bot's first message Barkpark took whose answer was lost: the words stay and one line says it may have been sent, and that sending it again is safe", lost2.prompt === 'hello gil' && /may have been sent/.test(lost2.refused ?? '') && /sending it again is safe/.test(lost2.refused ?? '') && lost2.line === null && JSON.stringify(lost2.sent) === JSON.stringify(['hello gil']), lost2);
     await clearPrompt();
     // The Main Bot's id comes from its computer's id, whatever its case: a host id in upper case
     // still names the Main Bot, so its conversation asks for no folder, and no second Main Bot appears.
@@ -1923,6 +1949,109 @@ else {
       await clearPrompt();
     }
     stub.sessions = []; freshStore();
+  }
+
+  // ── A send carries an Idempotency-Key kept with its words (task-188ff036d1c39132) ──
+  console.log('Behaviour · a send that is safe to send again (the live page, against the stand-in Barkpark)');
+  {
+    const enter = async () => { await ev(() => document.querySelector('.prompt').focus()); await key('Enter'); };
+    const userBubbles = (t) => ev((t) => [...document.querySelectorAll('.bubble-user .bubble-text')].filter((b) => b.textContent.trim() === t).length, t);
+    const openOn = async (sid) => {
+      stub.hosts = host(true); stub.fleet = null; stub.rows = []; freshStore(); stub.sessions = [session(sid)]; stub.failShow.clear(); stub.opened = [];
+      await open(`${base}/`); await until(() => stub.opened.includes(sid), 15000, 'the conversation to open').catch(() => {}); await wait(800);
+    };
+    // Sent, its answer lost (the socket drops after Barkpark took it), then the words come back.
+    const lostOnce = async (words) => {
+      const s0 = stub.sent.length; stub.dropAnswer = true; await typeSend(words);
+      await until(() => stub.sent.length > s0, 8000, 'the message to reach the stand-in').catch(() => {});
+      await until(async () => (await promptText()) !== '', 5000, 'the words back').catch(() => {}); await wait(500);
+      stub.dropAnswer = false;
+      return { prompt: await promptText(), line: await refusedLine() };
+    };
+    const SAFE = /may have been sent, but sending it again is safe/;
+
+    // 1. The answer is lost; Enter again with the words unchanged: the same key, one turn, shown once.
+    await openOn('00000000-0000-4000-8000-0000000002a1');
+    let k0 = stub.keyed.length, s0 = stub.sent.length, r0 = stub.replays;
+    const a1 = await lostOnce('did it go');
+    await enter();
+    await until(() => stub.keyed.length > k0 + 1, 8000, 'the second send').catch(() => {}); await wait(1500);
+    const again = { first: a1, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), replays: stub.replays - r0, prompt: await promptText(), line: await refusedLine(), shown: await userBubbles('did it go') };
+    check('a send whose answer was lost and is sent again unchanged carries the same Idempotency-Key: the stand-in runs one turn, the message shows once, the box is empty and says nothing', a1.prompt === 'did it go' && SAFE.test(a1.line ?? '') && again.keys.length === 2 && typeof again.keys[0] === 'string' && again.keys[0] === again.keys[1] && JSON.stringify(again.turns) === '["did it go"]' && again.replays === 1 && again.prompt === '' && again.line === null && again.shown === 1, again);
+    await clearPrompt();
+
+    // 2. The answer is lost; the words are edited, then sent: a new key, and the new words go.
+    k0 = stub.keyed.length; s0 = stub.sent.length;
+    const b1 = await lostOnce('first try');
+    await clearPrompt(); await typeSend('first try, edited');
+    await until(() => stub.keyed.length > k0 + 1, 8000, 'the edited send').catch(() => {}); await wait(1000);
+    const edited = { first: b1, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), prompt: await promptText(), line: await refusedLine() };
+    check('words edited before the resend carry a new Idempotency-Key: both go, each under its own key', edited.keys.length === 2 && edited.keys.every((k) => typeof k === 'string' && k.length >= 16) && edited.keys[0] !== edited.keys[1] && JSON.stringify(edited.turns) === '["first try","first try, edited"]' && edited.prompt === '' && edited.line === null, edited);
+    await clearPrompt();
+
+    // 3. Barkpark says the key was first used for another request (422 idempotency_key_reused, which runs
+    // nothing): the words go once more under a new key, once.
+    k0 = stub.keyed.length; s0 = stub.sent.length; stub.reuseNext = true;
+    await typeSend('a reused key');
+    await until(() => stub.sent.length > s0, 8000, 'the message to go').catch(() => {}); await wait(1000);
+    stub.reuseNext = false;
+    const reused = { keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), prompt: await promptText(), line: await refusedLine(), shown: await userBubbles('a reused key') };
+    check('a 422 idempotency_key_reused: the words go once more under a new key, one turn, shown once, no line', reused.keys.length === 2 && reused.keys.every((k) => typeof k === 'string') && reused.keys[0] !== reused.keys[1] && JSON.stringify(reused.turns) === '["a reused key"]' && reused.prompt === '' && reused.line === null && reused.shown === 1, reused);
+    await clearPrompt();
+
+    // 4. A picture with it: sent again unchanged, the same key and the same stored id; stored once.
+    const { root } = await page.send('DOM.getDocument');
+    const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' });
+    await page.send('DOM.setFileInputFiles', { nodeId, files: [pngPath] }); await wait(500);
+    k0 = stub.keyed.length; s0 = stub.sent.length; const u0 = stub.uploads.length;
+    const c1 = await lostOnce('with a picture');
+    const chips = await ev(() => document.querySelectorAll('.composer-attachments [role=listitem]').length);
+    await enter();
+    await until(() => stub.keyed.length > k0 + 1, 8000, 'the second send').catch(() => {}); await wait(1500);
+    const pic = { first: c1, chips, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => JSON.stringify(m)), uploads: stub.uploads.length - u0, prompt: await promptText(), line: await refusedLine() };
+    check('a message with a picture whose answer was lost, sent again unchanged: the same key, the picture stored once and named by the same id, one turn', SAFE.test(c1.line ?? '') && chips === 1 && pic.keys.length === 2 && typeof pic.keys[0] === 'string' && pic.keys[0] === pic.keys[1] && pic.turns.length === 1 && pic.turns[0].includes(pngId) && pic.uploads === 1 && pic.prompt === '' && pic.line === null, pic);
+    await clearPrompt();
+
+    // 5. The same words in another conversation: never the same key.
+    const XA = 'e14c5d6e-7f8a-4b9c-8d0e-1f2a3b4c5d7f', XB = 'f25d6e7f-8a9b-4c0d-9e1f-2a3b4c5d6e80', SA = '00000000-0000-4000-8000-0000000002a2', SB = '00000000-0000-4000-8000-0000000002a3';
+    stub.hosts = host(true); freshStore(); stub.sessions = [session(SA), session(SB)];
+    stub.prefs.set('barkbot.bots', { ids: [XA, XB] }); stub.prefs.set(`barkbot.bot.${XA}`, rec('Xan', HOST_ID, SA)); stub.prefs.set(`barkbot.bot.${XB}`, rec('Xia', HOST_ID, SB));
+    stub.opened = []; await open(`${base}/?bot=${XA}`); await until(() => stub.opened.includes(SA), 15000, "Xan's conversation").catch(() => {}); await wait(800);
+    k0 = stub.keyed.length;
+    await lostOnce('same words'); await clearPrompt();
+    await clickTile('Xia'); await until(() => stub.opened.includes(SB), 15000, "Xia's conversation").catch(() => {}); await wait(800);
+    await typeSend('same words');
+    await until(() => stub.keyed.length > k0 + 1, 8000, "Xia's send").catch(() => {}); await wait(800);
+    const two = stub.keyed.slice(k0).map((x) => ({ key: x.key, to: x.to }));
+    check('the same words sent to another conversation never carry the first one\'s key', two.length === 2 && two[0].to === SA && two[1].to === SB && two.every((x) => typeof x.key === 'string') && two[0].key !== two[1].key, two);
+    await clearPrompt();
+
+    // 6. A new bot's first message, on its way with no answer while a pick is held: the pick goes after
+    // its hold, and back on the bot its words wait with the line that sending again is safe. Enter
+    // while Barkpark is still answering the first (409 idempotency_key_in_use, asked again each second):
+    // once the first is answered, the resend gets that answer again. One turn, shown once.
+    const YA = '0a6e7f8a-9b0c-4d1e-8f2a-3b4c5d6e7f91', YB = '1b7f8a9b-0c1d-4e2f-9a3b-4c5d6e7f8aa2';
+    stub.hosts = host(true); stub.sessions = []; freshStore();
+    stub.prefs.set('barkbot.bots', { ids: [YA, YB] }); stub.prefs.set(`barkbot.bot.${YA}`, rec('Yul', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${YB}`, rec('Yve', HOST_ID, null));
+    await open(`${base}/?bot=${YA}`); await until(async () => (await live()).header === 'Yul', 15000, "Yul's page").catch(() => {}); await wait(500);
+    k0 = stub.keyed.length; s0 = stub.sent.length; const h0 = stub.heldSends.length, i0 = stub.inUse, m0 = stub.made.length, rp0 = stub.replays;
+    stub.holdTake = true;
+    await typeSend('hello yul');
+    await until(() => stub.heldSends.length > h0, 10000, "Yul's message on its way").catch(() => {}); await wait(200);
+    stub.holdTake = false;
+    await clickTile('Yve');
+    await until(async () => (await onBot()) === YB, 20000, "Yve's page after the hold").catch(() => {}); await wait(800);
+    await clickTile('Yul');
+    await until(async () => (await onBot()) === YA && (await promptText()) !== '', 15000, "Yul's page with its words").catch(() => {}); await wait(800);
+    const back = { prompt: await promptText(), line: await refusedLine() };
+    await enter(); await wait(2500);
+    const busy = stub.inUse - i0;
+    stub.heldSends.splice(0).forEach((answer) => answer());
+    await until(() => stub.replays > rp0, 12000, 'the resend to be answered').catch(() => {}); await wait(1500);
+    const yul = { back, busy, keys: [...new Set(stub.keyed.slice(k0).map((x) => x.key))], turns: stub.sent.slice(s0).map((m) => m.content), made: stub.made.length - m0, prompt: await promptText(), line: await refusedLine(), shown: await userBubbles('hello yul') };
+    check("a new bot's first message given back while on its way, sent again while Barkpark still answers it: the line says sending again is safe; the resend waits out the 409 under the same key and gets the first answer; one turn, one conversation, shown once", back.prompt === 'hello yul' && SAFE.test(back.line ?? '') && busy >= 1 && yul.keys.length === 1 && typeof yul.keys[0] === 'string' && JSON.stringify(yul.turns) === '["hello yul"]' && yul.made === 1 && yul.prompt === '' && yul.line === null && yul.shown === 1, yul);
+    await clearPrompt();
+    stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
 }
 
