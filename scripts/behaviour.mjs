@@ -2542,6 +2542,24 @@ else {
     check('control: the pasted paragraph carries a data-unsent mark into the box', out.marked >= 1, out);
     check('a paragraph carrying data-unsent pasted while a send is on its way, the send comes back unsent: its words come back first, before the pasted words', JSON.stringify(out.prompt) === JSON.stringify(['first words', 'pasted words']) && /may have been sent/.test(out.line ?? ''), out);
     await clearPrompt();
+    // PROBE (rev63, throwaway): two sends out; the first comes back and is split in two by Enter; then the second comes back.
+    {
+      const h1 = stub.heldSends.length; stub.holdSend = true;
+      await typeSend('one two');
+      await until(() => stub.heldSends.length > h1, 8000, 'send 1 out').catch(() => {}); await wait(200);
+      await typeSend('three');
+      await until(() => stub.heldSends.length > h1 + 1, 8000, 'send 2 out').catch(() => {}); await wait(200);
+      const held = stub.heldSends.splice(h1); stub.holdSend = false;
+      held[0]();
+      await until(async () => /one two/.test(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), 8000, 'send 1 back').catch(() => {}); await wait(400);
+      const split = await ev(() => { const el = document.querySelector('.prompt'); el.focus(); const p = [...el.children].find((c) => c.textContent.includes('one two')); if (!p) return 'no p'; const t = p.firstChild; const r = document.createRange(); r.setStart(t, 3); r.collapse(true); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); document.execCommand('insertParagraph'); return [...el.children].map((c) => c.outerHTML); });
+      await wait(300);
+      held[1]();
+      await until(async () => /three/.test(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), 8000, 'send 2 back').catch(() => {}); await wait(600);
+      const got = { split, prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), html: await ev(() => [...document.querySelector('.prompt').children].map((c) => c.outerHTML)) };
+      check('PROBE split restore order (expected to print)', false, got);
+      await clearPrompt();
+    }
     stub.sessions = []; freshStore();
   }
 }
