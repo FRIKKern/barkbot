@@ -259,7 +259,7 @@ export const startChat = createServerFn({method: 'POST'})
     // Bounded as a read is: a conversation that does not open in time is said, not waited on forever.
     let s: RawSession
     try {
-      s = await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: data.hostId, ...(folder ? {bot_folder: folder} : {})}, signal: AbortSignal.timeout(READ_MS)})
+      s = await bp<RawSession>('/v1/chat/sessions', {method: 'POST', json: {provider: 'claude', execution_target: 'registered_host', execution_host_id: data.hostId, ...(folder ? {bot_folder: folder} : {})}})
     } catch (e) {
       if ((e as Error)?.name === 'TimeoutError') throw new Error(`This message was not sent: Barkpark did not open its conversation within ${READ_MS / 1000} s. Send it again.`)
       throw e
