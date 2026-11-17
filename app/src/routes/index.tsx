@@ -4,7 +4,7 @@ import {Shell, useUnread} from '../components/Shell'
 import {Transcript} from '../components/Transcript'
 import {Composer, placeholderFor, type ComposerStart, type Picture, type WaitingFile} from '../components/Composer'
 import {computerOnline, createBot, loadChat, renameBot, startChat, type Chat} from '../chat/api'
-import {barkpark, MAY_HAVE_GONE, useConversation, type BotState, type Outgoing, type Transport} from '../chat/useConversation'
+import {barkpark, SAFE_AGAIN, useConversation, type BotState, type Outgoing, type Transport} from '../chat/useConversation'
 import {useFleet} from '../chat/useFleet'
 
 // The bot, live: its computer and conversation come from Barkpark (loadChat). No made-up data:
@@ -69,7 +69,8 @@ const NOT_SENT = 'This message was not sent: its conversation did not open in ti
 const OPEN_MS = 10000
 // The line over its words when that wait is over: it was never sent, and never will be on its own.
 const NOT_OPENED = 'This message was not sent: its conversation did not open in time. Send it again.'
-const MAYBE_SENT = `This message was on its way when you left and had no answer yet, so ${MAY_HAVE_GONE}`
+// Its key goes with it (useConversation's giveBack): sent again as it is, it runs at most once.
+const MAYBE_SENT = `This message was on its way when you left and had no answer yet, so it may have been sent, but ${SAFE_AGAIN}`
 
 type Started = {sessionId: string; startedAt: string}
 type HomeProps = {chat: Chat; state: BotState; working: string[]; unread: string[]; onOpened: (made: Started & {kept: boolean}) => void; unsaved?: Started; onPick: (id: string) => Promise<void>; kept?: ComposerStart; onKeep: (botId: string, start: ComposerStart | null) => void}
@@ -87,7 +88,8 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
   // - picking this bot again takes the pick back; the last pick wins
   // - after PICK_HOLD_MS the pick goes through, and the words wait in this bot's box with a line:
   //   not sent (the conversation never opened; they are never sent later on their own), or
-  //   perhaps sent (the send was on its way and had no answer yet: look before sending again)
+  //   perhaps sent (the send was on its way and had no answer yet: its key stays with the words, so
+  //   sending them again is safe)
   const [target, setTarget] = useState<string | null>(null)
   const leaving = target !== null
   const pendingPick = useRef<string | null>(null)
@@ -157,6 +159,7 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
     gaveUp.current = true
     const words = parkedWords.current
     parkedMessage.current = null
+    if (sending.current) convo.giveBack()
     if (words) onKeep(chat.botId, {...words, line: sending.current ? MAYBE_SENT : NOT_SENT})
     parked.current = false
   }
