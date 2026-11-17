@@ -46,6 +46,20 @@ export function Composer({placeholder, onSend, disabled, start}: {placeholder: s
   const [pictures, setPictures] = useState<Picture[]>(start?.pictures ?? [])
   const [files, setFiles] = useState<WaitingFile[]>(start?.files ?? [])
   const [refused, setRefused] = useState<string | null>(start?.line ?? null)
+  // Each send's number. What comes back unsent goes after what came back from an earlier send and
+  // before what came back from a later one, so two sends on their way at once read back in the order
+  // they were sent, whichever answer comes first; what was typed or attached since stays after them.
+  const sends = useRef(0)
+  const unsentFrom = useRef(new WeakMap<object, number>())
+  const back = <T extends object>(now: T[], sent: T[], n: number): T[] => {
+    sent.forEach((x) => unsentFrom.current.set(x, n))
+    let at = 0
+    now.forEach((x, i) => {
+      const m = unsentFrom.current.get(x)
+      if (m !== undefined && m < n) at = i + 1
+    })
+    return [...now.slice(0, at), ...sent, ...now.slice(at)]
+  }
   const ready = draft || pictures.length > 0 || files.length > 0
   // A scene's words, as the oracle's editor holds them: a paragraph in the box.
   useLayoutEffect(() => {
@@ -90,20 +104,28 @@ export function Composer({placeholder, onSend, disabled, start}: {placeholder: s
     el.replaceChildren()
     setDraft(false)
     const sent = {pictures, files}
+    const n = ++sends.current
     setPictures([])
     setFiles([])
     setRefused(null)
     el.focus()
     const why = await onSend(text, sent.pictures, sent.files)
     if (why === null || why === undefined) return
-    // Nothing went: the words and what waited with them come back, and the line says why (if it is not said elsewhere).
+    // Nothing went (or it may have): the words and what waited with them come back, and the line says
+    // why (if it is not said elsewhere). Words typed meanwhile stay, after them, as pictures and files do.
     setRefused(why || null)
-    setPictures((now) => [...sent.pictures, ...now])
-    setFiles((now) => [...sent.files, ...now])
-    if (text && !el.innerText.trim()) {
+    setPictures((now) => back(now, sent.pictures, n))
+    setFiles((now) => back(now, sent.files, n))
+    if (text) {
       const p = document.createElement('p')
       p.textContent = text
-      el.replaceChildren(p)
+      p.dataset.unsent = String(n)
+      if (!el.innerText.trim()) el.replaceChildren(p)
+      else {
+        const earlier = [...el.children].filter((c) => c instanceof HTMLElement && Number(c.dataset.unsent) < n).at(-1)
+        if (earlier) earlier.after(p)
+        else el.prepend(p)
+      }
       setDraft(true)
     }
   }
