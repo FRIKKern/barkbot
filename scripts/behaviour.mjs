@@ -2453,6 +2453,20 @@ else {
     rmSync(lateA, { force: true }); rmSync(bigB, { force: true });
     check('a pick still being read when a second pick is refused: when the first one\'s file fails, the line names both, the second\'s refusal is not lost', overlap.line === `big-b-${CHROME_PORT}.png is over 3 MB. lateb-a-${CHROME_PORT}.png could not be read` && overlap.chips.length === 0, overlap);
     await clearPrompt();
+    // 6. The other order: the first pick refuses one file at once and is still reading another when the
+    // second pick starts and is refused; the first refusal is kept.
+    const bigA = path('.cache', `big-a-${CHROME_PORT}.png`), lateA2 = path('.cache', `lateb-a2-${CHROME_PORT}.png`), bigB2 = path('.cache', `big-b2-${CHROME_PORT}.png`);
+    writeFileSync(bigA, Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)])); writeFileSync(lateA2, PNG); writeFileSync(bigB2, Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 2)]));
+    await pick([bigA, lateA2]); await wait(300);
+    const firstSaid = await refusedLine();
+    await pick([bigB2]); await wait(300);
+    const bothBig = await refusedLine();
+    await wait(2000); // the first pick's late read has failed
+    const order = { firstSaid, bothBig, line: await refusedLine(), chips: await chipNames() };
+    [bigA, lateA2, bigB2].forEach((f) => rmSync(f, { force: true }));
+    const Q = CHROME_PORT;
+    check('a pick refuses a file and is still reading another when a second pick starts and is refused: the line names both refused pictures, then the late unreadable one too', order.firstSaid === `big-a-${Q}.png is over 3 MB` && order.bothBig === `big-a-${Q}.png and big-b2-${Q}.png are over 3 MB` && order.line === `big-a-${Q}.png and big-b2-${Q}.png are over 3 MB. lateb-a2-${Q}.png could not be read` && order.chips.length === 0, order);
+    await clearPrompt();
     stub.sessions = []; freshStore();
   }
 

@@ -89,8 +89,10 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // gone (task-e1fc137f265fbe22).
   const [note, setNote] = useState<string | null>(null)
   // The refusals the note names, kept across picks still being read: a late refusal of an earlier
-  // pick joins the later pick's, never writes over it.
+  // pick joins the later pick's, never writes over it, and a pick that starts while another is read
+  // keeps what that one refused already. `reading`: how many picks are being read now.
   const refusals = useRef(new Map<Reason, string[]>())
+  const reading = useRef(0)
   const unsay = () => {
     refusals.current = new Map()
     setNote(null)
@@ -132,8 +134,17 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // Pictures, text files and PDFs: what Barkpark stores for a conversation. Anything else is
   // refused here, with the reason, instead of failing after the send.
   const add = async (picked: File[]) => {
-    // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes.
-    unsay()
+    // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes, once
+    // no pick is still being read.
+    if (!reading.current) unsay()
+    reading.current++
+    try {
+      await take(picked)
+    } finally {
+      reading.current--
+    }
+  }
+  const take = async (picked: File[]) => {
     // Each file is added when it is read, to what the box holds then, never to a copy taken before
     // (that would put back a picture that went meanwhile: task-9b801b838c6f4078). The four-at-most
     // limit is counted then too, so two reads at once cannot make five.
