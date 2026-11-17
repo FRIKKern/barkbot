@@ -88,6 +88,13 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // line, never in its place: after a send with no answer that line is the only word that it may have
   // gone (task-e1fc137f265fbe22).
   const [note, setNote] = useState<string | null>(null)
+  // The refusals the note names, kept across picks still being read: a late refusal of an earlier
+  // pick joins the later pick's, never writes over it.
+  const refusals = useRef(new Map<Reason, string[]>())
+  const unsay = () => {
+    refusals.current = new Map()
+    setNote(null)
+  }
   // A send that comes back unsent puts its pictures and files back beside any added meanwhile, so the
   // box can hold more than four (task-724aa2a5a9b5e5cf). None is dropped: the line says a message takes
   // four at most, still saying what it said before, and Enter sends nothing until some are taken out.
@@ -126,15 +133,14 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // refused here, with the reason, instead of failing after the send.
   const add = async (picked: File[]) => {
     // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes.
-    setNote(null)
+    unsay()
     // Each file is added when it is read, to what the box holds then, never to a copy taken before
     // (that would put back a picture that went meanwhile: task-9b801b838c6f4078). The four-at-most
     // limit is counted then too, so two reads at once cannot make five.
     const full = () => held.current >= MAX_ATTACHMENTS
-    const refused = new Map<Reason, string[]>()
     const refuse = (r: Reason, name: string) => {
-      refused.set(r, [...(refused.get(r) ?? []), name])
-      setNote(noteOf(refused))
+      refusals.current.set(r, [...(refusals.current.get(r) ?? []), name])
+      setNote(noteOf(refusals.current))
     }
     for (const f of picked) {
       const picture = PICTURE_TYPES.includes(f.type)
@@ -177,7 +183,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     setFiles([])
     setWords('')
     say(null)
-    setNote(null)
+    unsay()
     el.focus()
     const why = await onSend(text, sent.pictures, sent.files)
     if (why === null || why === undefined) return

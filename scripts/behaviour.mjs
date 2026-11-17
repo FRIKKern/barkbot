@@ -2433,6 +2433,16 @@ else {
     check('control: a picture over 3 MB is picked: the line names it', new RegExp(`gone-${CHROME_PORT}\\.png is over 3 MB`).test(named ?? ''), after);
     check('then words are sent and go: the line about the refused picture is gone', JSON.stringify(after.sent) === '["words alone"]' && after.line === null && after.shown === false, after);
     await clearPrompt();
+    // 5. Two picks at once: the first still reading (its file fails late) when the second is refused.
+    await openOn();
+    await ev(() => { const real = FileReader.prototype.readAsDataURL; FileReader.prototype.readAsDataURL = function (f) { if (f?.name?.startsWith('lateb-')) setTimeout(() => this.onerror?.(new ProgressEvent('error')), 1500); else real.call(this, f); }; });
+    const lateA = path('.cache', `lateb-a-${CHROME_PORT}.png`), bigB = path('.cache', `big-b-${CHROME_PORT}.png`);
+    writeFileSync(lateA, PNG); writeFileSync(bigB, Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)]));
+    await pick([lateA]); await wait(200); await pick([bigB]); await wait(2500); // the first pick's read has failed
+    const overlap = { line: await refusedLine(), chips: await chipNames() };
+    rmSync(lateA, { force: true }); rmSync(bigB, { force: true });
+    check('a pick still being read when a second pick is refused: when the first one\'s file fails, the line names both, the second\'s refusal is not lost', overlap.line === `big-b-${CHROME_PORT}.png is over 3 MB. lateb-a-${CHROME_PORT}.png could not be read` && overlap.chips.length === 0, overlap);
+    await clearPrompt();
     stub.sessions = []; freshStore();
   }
 
