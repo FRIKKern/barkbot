@@ -2275,6 +2275,39 @@ else {
     await clearPrompt();
     stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
+
+  // ── A picture that already went out never comes back into the box (task-9b801b838c6f4078) ──
+  console.log('Behaviour · a picture added while another is read (the live page, against the stand-in Barkpark)');
+  {
+    const SR = '00000000-0000-4000-8000-0000000003a1';
+    stub.hosts = host(true); stub.fleet = null; stub.rows = []; freshStore(); stub.sessions = [session(SR)]; stub.failShow.clear(); stub.opened = [];
+    await open(`${base}/`); await until(() => stub.opened.includes(SR), 15000, 'the conversation to open').catch(() => {}); await wait(800); await clearPrompt();
+    const chipNames = () => ev(() => [...document.querySelectorAll('.composer-attachments [role=listitem]')].map((x) => x.getAttribute('aria-label')));
+    const pickFile = async (file) => { const { root } = await page.send('DOM.getDocument'); const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId, files: [file] }); };
+    // Two pictures, different bytes (so different stored ids). The browser reads "slow-…" 1.5 s late.
+    const fastPic = path('.cache', `fast-${CHROME_PORT}.png`), slowPic = path('.cache', `slow-${CHROME_PORT}.png`);
+    const slowBytes = Buffer.concat([PNG, Buffer.from('slow')]);
+    writeFileSync(fastPic, PNG); writeFileSync(slowPic, slowBytes);
+    const fastId = createHash('sha256').update(PNG).digest('hex'), slowId = createHash('sha256').update(slowBytes).digest('hex');
+    await ev(() => { if (window.__slowRead) return; window.__slowRead = true; const real = FileReader.prototype.readAsDataURL; FileReader.prototype.readAsDataURL = function (f) { if (f?.name?.startsWith('slow-')) setTimeout(() => real.call(this, f), 1500); else real.call(this, f); }; });
+    const s0 = stub.sent.length, u0 = stub.uploads.length;
+    await pickFile(fastPic);
+    await until(async () => (await chipNames()).length === 1, 10000, 'the first chip').catch(() => {});
+    const before = await chipNames();
+    // The second is still being read when Enter sends the first.
+    await pickFile(slowPic); await typeSend('the first picture');
+    await until(() => stub.sent.length > s0, 8000, 'the first message').catch(() => {});
+    await wait(2500); // the slow read is done
+    const box = { before, after: await chipNames() };
+    await ev(() => document.querySelector('.prompt').focus()); await key('Enter');
+    await until(() => stub.sent.length > s0 + 1, 8000, 'the second message').catch(() => {}); await wait(800);
+    const ups = stub.uploads.slice(u0);
+    const named = stub.sent.slice(s0).map((m) => (m.attachments ?? []).map((a) => (typeof a === 'string' ? a : a.id)));
+    const out = { box, ups: { fast: ups.filter((x) => x === fastId).length, slow: ups.filter((x) => x === slowId).length, all: ups.length }, named, chipsEnd: await chipNames() };
+    rmSync(fastPic, { force: true }); rmSync(slowPic, { force: true });
+    check('a picture added while another is still being read, then Enter sends the first: the box afterwards holds only the picture not yet sent, and the next Enter sends it alone; each picture is stored once', before.length === 1 && box.after.length === 1 && /slow-/.test(box.after[0] ?? '') && out.ups.fast === 1 && out.ups.slow === 1 && out.ups.all === 2 && JSON.stringify(named) === JSON.stringify([[fastId], [slowId]]) && out.chipsEnd.length === 0, out);
+    await clearPrompt(); stub.sessions = []; freshStore();
+  }
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
