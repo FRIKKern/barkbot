@@ -17,6 +17,7 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
+import { queueProbe } from './lib/queue-probe.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -1972,6 +1973,9 @@ else {
     stub.sessions = []; freshStore();
   }
 }
+
+console.log('Behaviour · the bot-record queue on its own (the app\'s bots.ts in this Node process, task-2ad4f1be48ff7f4d)');
+await queueProbe({ check, path });
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
 process.exit(failed ? 1 : 0);
