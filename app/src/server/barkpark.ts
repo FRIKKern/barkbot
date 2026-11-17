@@ -56,7 +56,7 @@ export const READ_MS = 8000
 
 /** One JSON call. A refusal throws with Barkpark's own code and message; a read past READ_MS throws a
  *  plain Error (not a BarkparkError: Barkpark did not answer). */
-export async function bp<T>(path: string, init: {method?: string; json?: unknown; unbounded?: boolean; signal?: AbortSignal} = {}): Promise<T> {
+export async function bp<T>(path: string, init: {method?: string; json?: unknown; unbounded?: boolean; signal?: AbortSignal; headers?: Record<string, string>; answered?: (res: Response) => void} = {}): Promise<T> {
   const c = conf()
   const method = init.method ?? 'GET'
   const bounded = method === 'GET' && !init.unbounded
@@ -65,7 +65,7 @@ export async function bp<T>(path: string, init: {method?: string; json?: unknown
   try {
     res = await fetch(c.url + path, {
       method,
-      headers: {authorization: `Bearer ${c.token}`, accept: 'application/json', ...(init.json === undefined ? {} : {'content-type': 'application/json'})},
+      headers: {authorization: `Bearer ${c.token}`, accept: 'application/json', ...(init.json === undefined ? {} : {'content-type': 'application/json'}), ...init.headers},
       body: init.json === undefined ? undefined : JSON.stringify(init.json),
       signal: bounded ? AbortSignal.timeout(READ_MS) : init.signal,
     })
@@ -74,6 +74,7 @@ export async function bp<T>(path: string, init: {method?: string; json?: unknown
     if (bounded && (e as Error)?.name === 'TimeoutError') throw new Error(`Barkpark did not answer a read within ${READ_MS / 1000} s`)
     throw e
   }
+  init.answered?.(res)
   const body = text ? JSON.parse(text) : null
   if (!res.ok) throw new BarkparkError(res.status, body?.error?.code ?? 'http_' + res.status, body?.error?.message ?? res.statusText)
   return body as T
