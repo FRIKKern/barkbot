@@ -1919,14 +1919,18 @@ else {
     // 4. A picture with it: sent again unchanged, the same key and the same stored id; stored once.
     const { root } = await page.send('DOM.getDocument');
     const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' });
-    await page.send('DOM.setFileInputFiles', { nodeId, files: [pngPath] }); await wait(500);
+    await page.send('DOM.setFileInputFiles', { nodeId, files: [pngPath] });
+    const chipCount = () => ev(() => document.querySelectorAll('.composer-attachments [role=listitem]').length);
+    // The chip shows once the picture is read; Enter before that sends the words alone.
+    await until(async () => (await chipCount()) === 1, 10000, 'the picture chip').catch(() => {});
+    const chipsBefore = await chipCount();
     k0 = stub.keyed.length; s0 = stub.sent.length; const u0 = stub.uploads.length;
     const c1 = await lostOnce('with a picture');
-    const chips = await ev(() => document.querySelectorAll('.composer-attachments [role=listitem]').length);
+    const chips = await chipCount();
     await enter();
     await until(() => stub.keyed.length > k0 + 1, 8000, 'the second send').catch(() => {}); await wait(1500);
-    const pic = { first: c1, chips, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => JSON.stringify(m)), uploads: stub.uploads.length - u0, prompt: await promptText(), line: await refusedLine() };
-    check('a message with a picture whose answer was lost, sent again unchanged: the same key, the picture stored once and named by the same id, one turn', SAFE.test(c1.line ?? '') && chips === 1 && pic.keys.length === 2 && typeof pic.keys[0] === 'string' && pic.keys[0] === pic.keys[1] && pic.turns.length === 1 && pic.turns[0].includes(pngId) && pic.uploads === 1 && pic.prompt === '' && pic.line === null, pic);
+    const pic = { first: c1, chipsBefore, chips, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => JSON.stringify(m)), uploads: stub.uploads.length - u0, prompt: await promptText(), line: await refusedLine() };
+    check('a message with a picture whose answer was lost, sent again unchanged: the same key, the picture stored once and named by the same id, one turn', chipsBefore === 1 && SAFE.test(c1.line ?? '') && chips === 1 && pic.keys.length === 2 && typeof pic.keys[0] === 'string' && pic.keys[0] === pic.keys[1] && pic.turns.length === 1 && pic.turns[0].includes(pngId) && pic.uploads === 1 && pic.prompt === '' && pic.line === null, pic);
     await clearPrompt();
 
     // 5. The same words in another conversation: never the same key.
