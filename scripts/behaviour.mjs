@@ -1995,6 +1995,31 @@ else {
     const zed = { back: zback, keys: [...new Set(stub.keyed.slice(k0).map((x) => x.key))], requests: stub.keyed.length - k0, replays: stub.replays - zr0, turns: stub.sent.slice(s0).map((m) => m.content), made: stub.made.length - zm0, prompt: await promptText(), line: await refusedLine(), shown: await userBubbles('hello zed') };
     check("a new bot's first message given back while on its way and taken (202) before it is sent again: the resend carries the same key and gets that answer again; one turn, shown once", zback.prompt === 'hello zed' && SAFE.test(zback.line ?? '') && zed.keys.length === 1 && typeof zed.keys[0] === 'string' && zed.requests === 2 && zed.replays === 1 && JSON.stringify(zed.turns) === '["hello zed"]' && zed.made === 1 && zed.prompt === '' && zed.line === null && zed.shown === 1, zed);
     await clearPrompt();
+
+    // PROBE (rev63, not a rule to land): the resend gives up on 409 (8 tries) with the "safe" line while
+    // the first is still on its way; the first is then taken (202); Enter once more must not run it twice.
+    {
+      const QA = '4e0c1d2e-3f4a-4b5c-8d6e-7f8a9b0c1dd5', QB = '5f1d2e3f-4a5b-4c6d-9e7f-8a9b0c1d2ee6';
+      stub.hosts = host(true); stub.sessions = []; freshStore();
+      stub.prefs.set('barkbot.bots', { ids: [QA, QB] }); stub.prefs.set(`barkbot.bot.${QA}`, rec('Qua', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${QB}`, rec('Qin', HOST_ID, null));
+      await open(`${base}/?bot=${QA}`); await until(async () => (await live()).header === 'Qua', 15000, "Qua's page").catch(() => {}); await wait(500);
+      k0 = stub.keyed.length; s0 = stub.sent.length; const qh0 = stub.heldSends.length, qi0 = stub.inUse;
+      stub.holdTake = true;
+      await typeSend('hello qua');
+      await until(() => stub.heldSends.length > qh0, 10000, "Qua's message on its way").catch(() => {}); await wait(200);
+      stub.holdTake = false;
+      await clickTile('Qin'); await until(async () => (await onBot()) === QB, 20000, "Qin's page after the hold").catch(() => {}); await wait(800);
+      await clickTile('Qua'); await until(async () => (await onBot()) === QA && (await promptText()) !== '', 15000, "Qua's page with its words").catch(() => {}); await wait(800);
+      const qback = await refusedLine();
+      await enter();
+      await until(() => stub.inUse - qi0 >= 8, 25000, 'the resend to give up on 409').catch(() => {}); await wait(2000);
+      const gaveUp = { line: await refusedLine(), prompt: await promptText(), busy: stub.inUse - qi0 };
+      stub.heldSends.splice(0).forEach((answer) => answer()); await wait(2000);
+      await enter(); await wait(4000);
+      const q = { qback, gaveUp, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), prompt: await promptText(), line: await refusedLine() };
+      check('PROBE gave-up: a resend that gave up on 409 says sending again is safe; the first is then taken; Enter again runs no second turn', SAFE.test(gaveUp.line ?? '') && gaveUp.prompt === 'hello qua' && JSON.stringify(q.turns) === '["hello qua"]', q);
+      await clearPrompt();
+    }
     stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
 }
