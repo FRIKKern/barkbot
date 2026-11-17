@@ -462,7 +462,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
         if (typeof sent?.key === 'string') mine.key = sent.key
         if (typeof sent?.unsure === 'string') return sent.again === 'safe' ? NO_ANSWER_SAFE : NO_ANSWER
         // Answered for sure. A refusal is remembered under its key (a 4xx), so the next send gets a new one.
-        if (!mine.given || !sent?.accepted) done()
+        if (false) done()
         if (sent?.refused === 'chat_unsupported') return CANNOT_RUN_HERE
         if (sent?.refused) return CANNOT_TAKE_FILES
         if (typeof sent?.failed === 'string') return told(sent.failed)
