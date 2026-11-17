@@ -415,9 +415,11 @@ export const renameBot = createServerFn({method: 'POST'})
     // be removed (the set then makes a record of the name alone, which setBotField removes again;
     // nothing in BarkBot removes a record a page has open: dropBot is Create's clean-up of its own
     // new id). The write is bounded as a queued one is (WRITE_MS).
-    const raw = await readBot(data.id)
-    const bot = raw && trusted(data.id, raw, await ownHosts())
-    if (!bot || (await sessionOf(bot)).is === 'foreign') throw new Error(NOT_KEPT)
-    if (!(await write((signal) => setBotField(data.id, 'name', data.name, signal)))) throw new Error(NOT_KEPT)
-    return {name: data.name}
+    return oneAtATime(data.id, async (write) => {
+      const raw = await readBot(data.id)
+      const bot = raw && trusted(data.id, raw, await ownHosts())
+      if (!bot || (await sessionOf(bot)).is === 'foreign') throw new Error(NOT_KEPT)
+      if (!(await write((signal) => setBotField(data.id, 'name', data.name, signal)))) throw new Error(NOT_KEPT)
+      return {name: data.name}
+    })
   })
