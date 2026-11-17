@@ -172,6 +172,8 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
             // An emptied box keeps a stray <br>: clear it so the placeholder comes back.
             if (!el.innerText.trim()) el.replaceChildren()
             setDraft(!!el.innerText.trim())
+            // Edited words are other words: a line that said sending them again is safe no longer holds.
+            if (beside) setRefused((r) => (r ? beside(r) : r))
           }}
           onPaste={(e) => {
             // A pasted picture or file is attached; pasted words go in as words.

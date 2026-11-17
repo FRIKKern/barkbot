@@ -2140,7 +2140,16 @@ else {
     check('two on their way, the first taken with its answer lost: it comes back saying sending again is safe, and Enter gets its first answer again, with no second turn', JSON.stringify(both.prompt) === '["one"]' && SAFE.test(both.line ?? '') && JSON.stringify(both.turns) === '["one","two"]' && both.replays === 1 && both.after === '' && both.afterLine === null, both);
     await clearPrompt();
 
-    // 11. Taken for sure, the key goes: the same words sent again on purpose run again, under a new key.
+    // 11. The safe line, then the words are edited: Enter would send other words under another key, so
+    // the line turns to look first.
+    const e1 = await lostOnce('edit me');
+    await ev(() => { const p = document.querySelector('.prompt'); p.focus(); const r = document.createRange(); r.selectNodeContents(p); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); });
+    await page.send('Input.insertText', { text: ' now' }); await wait(300);
+    const edit = { first: e1, prompt: await promptText(), line: await refusedLine() };
+    check('the safe line, then the words are edited: the line turns to look before sending again', SAFE.test(e1.line ?? '') && edit.prompt === 'edit me now' && !SAFE.test(edit.line ?? '') && /look in the conversation/.test(edit.line ?? ''), edit);
+    await clearPrompt();
+
+    // 12. Taken for sure, the key goes: the same words sent again on purpose run again, under a new key.
     k0 = stub.keyed.length; s0 = stub.sent.length;
     await typeSend('twice on purpose'); await until(() => stub.sent.length > s0, 8000, 'the first').catch(() => {}); await wait(800);
     await typeSend('twice on purpose'); await until(() => stub.sent.length > s0 + 1, 8000, 'the second').catch(() => {}); await wait(800);

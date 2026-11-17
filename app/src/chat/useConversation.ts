@@ -111,9 +111,10 @@ export const SAFE_AGAIN = 'sending it again is safe: it will not go twice.'
 /** Barkpark gave no answer of its own, and the message has its key: the words stay, and sending
  *  them again as they are either sends them or finds they already went. */
 export const NO_ANSWER_SAFE = `This message had no answer from Barkpark, so it may have been sent, but ${SAFE_AGAIN}`
-/** The line for words that come back beside others (typed meanwhile, or another message's): Enter
- *  then sends other words, under another key, so a resend is no longer known to be safe. */
-export const besideOthers = (why: string) => (why === NO_ANSWER_SAFE ? NO_ANSWER : why)
+/** The line once the box holds other words than the ones it is about (typed meanwhile, another
+ *  message's, or an edit): Enter then sends other words, under another key, so a resend is no
+ *  longer known to be safe, and the line says to look first, as before keys. */
+export const besideOthers = (why: string) => why.replace(`it may have been sent, but ${SAFE_AGAIN}`, MAY_HAVE_GONE)
 export const CANNOT_TAKE_FILES = "The bot's computer cannot take this file yet, so nothing was sent. Update its chat host, or send the words alone."
 
 /** Each message whose fate is not known, per conversation, with its Idempotency-Key and what it
