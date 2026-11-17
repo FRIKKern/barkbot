@@ -18,6 +18,7 @@ import { createHash } from 'node:crypto';
 import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
+import { renameReach } from './lib/rename-reach.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -1650,6 +1651,9 @@ else {
     const plain = { zeds: zeds(w0), ria: nameOf(RIA), sam: nameOf(SAM), header: (await live()).header };
     check('control: with nothing loading, a name typed into the panel is written once, to the open bot', JSON.stringify(plain.zeds) === JSON.stringify([`${SAM} Zed`]) && plain.ria === 'Ria' && plain.sam === 'Zed' && plain.header === 'Zed', plain);
   }
+
+  console.log("Behaviour · Home's own rename save, reached past the panel (the live page, task-42a9dd8ec9408de2)");
+  await renameReach({ check, ev, open, live, until, wait, stub, base, nameIn, freshStore, host, rec, HOST_ID });
 
   // ── Create's two writes end in step whatever answer is lost (task-4338079c878d4cc7) ──
   console.log("Behaviour · Create's list add with a lost answer (the live page, against the stand-in Barkpark)");
