@@ -105,18 +105,36 @@ export const MAY_HAVE_GONE = 'it may have been sent: look in the conversation be
 /** Barkpark may have taken it (it gave no answer): the words stay, and this says so, so one Enter
  *  does not send it twice without a word. */
 export const NO_ANSWER = `This message had no answer from Barkpark, so ${MAY_HAVE_GONE}`
+/** The one sentence for a message whose fate is not known but whose resend is safe: it carries the
+ *  same Idempotency-Key, so Barkpark runs it at most once. */
+export const SAFE_AGAIN = 'sending it again is safe: it will not go twice.'
+/** Barkpark gave no answer of its own, and the message has its key: the words stay, and sending
+ *  them again as they are either sends them or finds they already went. */
+export const NO_ANSWER_SAFE = `This message had no answer from Barkpark, so it may have been sent, but ${SAFE_AGAIN}`
 export const CANNOT_TAKE_FILES = "The bot's computer cannot take this file yet, so nothing was sent. Update its chat host, or send the words alone."
+
+/** The last message of each conversation whose fate is not known, with its Idempotency-Key and what
+ *  it named (task-188ff036d1c39132). The same words with the same pictures and files, sent again to
+ *  the same conversation, reuse both: Barkpark binds the key to the request, so the stored ids must
+ *  be the same ones, and it then answers the first answer again and runs nothing twice. Any other
+ *  message, or another conversation, gets a new key. Module-wide, so it outlives the page that sent
+ *  it: words given back while on their way (Home's keepParked) are sent again from a new page.
+ *  It goes once a send of it is answered for sure: refused, failed, or taken where the page shows
+ *  it. One taken after its words were given back stays, so sending those words again replays. */
+type Unsent = {content: string; sig: string; refs: AttachmentRef[]; images: string[]; files: {name: string; size: string}[]; key: string; given?: boolean}
+const unsent = new Map<string, Unsent>()
+const sigOf = (outgoing: Outgoing[]) => JSON.stringify(outgoing.map((o) => [o.name, !!o.file, o.data]))
 
 const flat = (s: string) => s.replace(/\s+/g, '')
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 /** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay.
  *  `fleet` is the stream of every bot's state (Barkpark's /v1/chat/events: snapshot, then state). */
-export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string, attachments?: AttachmentRef[]) => Promise<unknown>; upload?: (sessionId: string, data: string) => Promise<Stored | {refused: string}>; picture?: (sessionId: string, id: string) => string; answer?: (sessionId: string, requestId: string, decision: 'allow' | 'deny') => Promise<unknown>; choose?: (sessionId: string, requestId: string, answers: Answers) => Promise<unknown>}
+export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string, attachments?: AttachmentRef[], key?: string) => Promise<unknown>; upload?: (sessionId: string, data: string) => Promise<Stored | {refused: string}>; picture?: (sessionId: string, id: string) => string; answer?: (sessionId: string, requestId: string, decision: 'allow' | 'deny') => Promise<unknown>; choose?: (sessionId: string, requestId: string, answers: Answers) => Promise<unknown>}
 export const barkpark: Transport = {
   events: (id) => `/api/chat/${id}/events`,
   fleet: () => '/api/chat/events',
-  send: (id, content, attachments) => sendMessage({data: {id, content, attachments}}),
+  send: (id, content, attachments, key) => sendMessage({data: {id, content, attachments, key}}),
   upload: (id, data) => uploadAttachment({data: {id, data}}),
   picture: (id, aid) => `/api/chat/${id}/attachments/${aid}`,
   answer: (id, requestId, decision) => answerApproval({data: {id, requestId, decision}}),
@@ -388,7 +406,17 @@ export function useConversation(sessionId: string | null, transport: Transport =
   /** Sends a message with what goes with it. Answers null once it is sent, or the plain words for why it was not
    *  (a file Barkpark does not take, a computer that cannot take files): then nothing was sent and the draft stays.
    *  A send Barkpark refused answers '': its reason is told as the conversation's line (or to `failed`), and
-   *  the draft stays too. A send with no answer may have gone: it answers NO_ANSWER, and the draft stays. */
+   *  the draft stays too. A send with no answer may have gone: it answers NO_ANSWER_SAFE (its key is kept, a
+   *  resend runs at most once) or, after Barkpark's own 5xx (not remembered), NO_ANSWER; the draft stays. */
+  // The message on its way now, so a page that gives its words back can say so (giveBack).
+  const flying = useRef<Unsent | null>(null)
+  const shown = useRef(bubbles)
+  shown.current = bubbles
+  /** The words of the message on its way were given back to a box (Home's keepParked): if it was
+   *  taken, its key stays, so sending the same words again finds it went and runs nothing. */
+  const giveBack = useCallback(() => {
+    if (flying.current) flying.current.given = true
+  }, [])
   const send = useCallback(
     // `failed`: a send that fails is told there, not shown as the conversation's error.
     async (content: string, outgoing: Outgoing[] = [], failed?: (why: string) => void): Promise<string | null> => {
@@ -401,28 +429,51 @@ export function useConversation(sessionId: string | null, transport: Transport =
       }
       let asked = false // the message itself is on its way: from here a lost answer may mean it went
       try {
-        // Each is stored for the conversation first; the message then names a picture by its id,
-        // a text file or PDF by its id and its name.
-        const refs: AttachmentRef[] = []
-        const images: string[] = []
-        const files: {name: string; size: string}[] = []
-        for (const o of outgoing) {
-          if (!transport.upload) throw new Error('This conversation cannot take pictures or files')
-          const r = await transport.upload(sessionId, o.data)
-          if ('refused' in r) return `${o.name} was not taken: ${r.refused}`
-          if (o.file && !isPicture(r.media_type)) refs.push({id: r.id, name: o.name}), files.push({name: o.name, size: fileSize(r.byte_size)})
-          else refs.push(r.id), images.push(r.id)
+        // The same message whose fate is not known goes again as it went: same key, same stored ids.
+        const before = unsent.get(sessionId)
+        const sig = sigOf(outgoing)
+        let mine: Unsent
+        if (before && before.content === content && before.sig === sig) mine = before
+        else {
+          // Each is stored for the conversation first; the message then names a picture by its id,
+          // a text file or PDF by its id and its name.
+          const refs: AttachmentRef[] = []
+          const images: string[] = []
+          const files: {name: string; size: string}[] = []
+          for (const o of outgoing) {
+            if (!transport.upload) throw new Error('This conversation cannot take pictures or files')
+            const r = await transport.upload(sessionId, o.data)
+            if ('refused' in r) return `${o.name} was not taken: ${r.refused}`
+            if (o.file && !isPicture(r.media_type)) refs.push({id: r.id, name: o.name}), files.push({name: o.name, size: fileSize(r.byte_size)})
+            else refs.push(r.id), images.push(r.id)
+          }
+          mine = {content, sig, refs, images, files, key: crypto.randomUUID()}
+        }
+        mine.given = false
+        unsent.set(sessionId, mine)
+        flying.current = mine
+        const done = () => {
+          if (unsent.get(sessionId) === mine) unsent.delete(sessionId)
         }
         asked = true
-        const sent = (await transport.send(sessionId, content, refs.length ? refs : undefined)) as {refused?: string; failed?: string; unsure?: string} | undefined
+        const sent = (await transport.send(sessionId, content, mine.refs.length ? mine.refs : undefined, mine.key)) as {refused?: string; failed?: string; unsure?: string; again?: 'safe' | 'look'; key?: string; accepted?: true; replay?: boolean} | undefined
+        if (flying.current === mine) flying.current = null
+        // A 422 idempotency_key_reused: the words went again under a new key, kept from here.
+        if (typeof sent?.key === 'string') mine.key = sent.key
+        if (typeof sent?.unsure === 'string') return sent.again === 'safe' ? NO_ANSWER_SAFE : NO_ANSWER
+        // Answered for sure. A refusal is remembered under its key (a 4xx), so the next send gets a new one.
+        if (!mine.given || !sent?.accepted) done()
         if (sent?.refused === 'chat_unsupported') return CANNOT_RUN_HERE
         if (sent?.refused) return CANNOT_TAKE_FILES
-        if (typeof sent?.unsure === 'string') return NO_ANSWER
         if (typeof sent?.failed === 'string') return told(sent.failed)
-        land({role: 'user', text: content, ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
+        // A replay: it went before. The conversation may show it already (its stored row): not twice.
+        const last = sent?.replay ? [...shown.current].reverse().find((b) => b.role === 'user') : undefined
+        if (last && flat(last.text) === flat(content)) return null
+        land({role: 'user', text: content, ...(mine.images.length ? {images: mine.images} : {}), ...(mine.files.length ? {files: mine.files} : {})})
       } catch (e) {
-        // The page's own call was lost on its way back: the message may have gone all the same.
-        if (asked) return NO_ANSWER
+        // The page's own call was lost on its way back: the message may have gone all the same, and
+        // its key is kept, so sending it again is safe.
+        if (asked) return NO_ANSWER_SAFE
         return told(e instanceof Error ? e.message : String(e))
       }
       return null
@@ -481,5 +532,5 @@ export function useConversation(sessionId: string | null, transport: Transport =
 
   const picture = useCallback((id: string) => (sessionId && transport.picture ? transport.picture(sessionId, id) : null), [sessionId, transport])
 
-  return {bubbles, working, botState, error, ready, send, picture, ask: ask?.stored && botState !== 'blocked' ? null : ask, answer, choose}
+  return {bubbles, working, botState, error, ready, send, giveBack, picture, ask: ask?.stored && botState !== 'blocked' ? null : ask, answer, choose}
 }
