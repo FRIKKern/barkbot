@@ -150,7 +150,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
         try {
           data = await base64(f)
         } catch {
-          refuse('unread', f.name)
+          setNote(`${f.name} could not be read`)
           continue
         }
         if (full()) {
