@@ -39,18 +39,33 @@ export type ComposerStart = {draft?: string; pictures?: Picture[]; files?: Waiti
  *  was sent and the reason is already said elsewhere (the conversation's line): the draft comes back alone. */
 export type OnSend = (text: string, pictures: Picture[], files: WaitingFile[]) => Promise<string | null | void> | void
 
-/** `beside`: the line for words that come back beside others in the box (typed meanwhile, or
- *  another message's): Enter then sends other words than the ones the line is about. */
+/** What a box holds, as a send takes it. Pictures and files are the same when their names and bytes are. */
+type Held = {text: string; pictures: Picture[]; files: WaitingFile[]}
+const sameAll = (a: {name: string; data?: string}[], b: {name: string; data?: string}[]) => a.length === b.length && a.every((x, i) => x.name === b[i].name && x.data === b[i].data)
+const holds = (a: Held, b: Held) => a.text === b.text && sameAll(a.pictures, b.pictures) && sameAll(a.files, b.files)
+
+/** `beside`: the line a send's line becomes while the box holds anything but what that send was
+ *  (its words, pictures and files, exactly): Enter would then send something else. */
 export function Composer({placeholder, onSend, disabled, start, beside}: {placeholder: string; onSend?: OnSend; disabled?: boolean; start?: ComposerStart; beside?: (why: string) => string}) {
   const box = useRef<HTMLDivElement>(null)
   const chooser = useRef<HTMLInputElement>(null)
   const [draft, setDraft] = useState(!!start?.draft)
   const [pictures, setPictures] = useState<Picture[]>(start?.pictures ?? [])
   const [files, setFiles] = useState<WaitingFile[]>(start?.files ?? [])
-  // What waits in the box as last drawn, for a send that answers later (submit's restore).
-  const inBox = useRef({pictures, files})
-  inBox.current = {pictures, files}
   const [refused, setRefused] = useState<string | null>(start?.line ?? null)
+  // What a send's line is about: that send's words, pictures and files. The line is shown as it is
+  // only while the box holds exactly that; any change, by any path (typing, a paste, a picture or
+  // file added or taken out, another send's words coming back), shows `beside` of it. Another line
+  // (a file refused) is about nothing.
+  const [about, setAbout] = useState<Held | null>(start?.line ? {text: start.draft ?? '', pictures: start.pictures ?? [], files: start.files ?? []} : null)
+  const say = (line: string | null, what: Held | null = null) => {
+    setRefused(line)
+    setAbout(line ? what : null)
+  }
+  // The box's words as a send takes them.
+  const [words, setWords] = useState(start?.draft?.trim() ?? '')
+  const read = (el: HTMLElement) => el.innerText.replace(/\n+$/, '').trim()
+  const shown = refused && about && beside && !holds(about, {text: words, pictures, files}) ? beside(refused) : refused
   // Each send's number. What comes back unsent goes after what came back from an earlier send and
   // before what came back from a later one, so two sends on their way at once read back in the order
   // they were sent, whichever answer comes first; what was typed or attached since stays after them.
@@ -82,16 +97,17 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // Pictures, text files and PDFs: what Barkpark stores for a conversation. Anything else is
   // refused here, with the reason, instead of failing after the send.
   const add = async (picked: File[]) => {
-    setRefused(null)
+    // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes.
+    if (!about) say(null)
     const pics = [...pictures]
     const docs = [...files]
     for (const f of picked) {
       const picture = PICTURE_TYPES.includes(f.type)
-      if (!picture && !FILE_TYPES.test(f.type)) setRefused(`${f.name} is not a picture, a text file or a PDF`)
-      else if (f.size > MAX_BYTES) setRefused(`${f.name} is over 3 MB`)
-      else if (!f.size) setRefused(`${f.name} is empty`)
-      else if (pics.length + docs.length >= MAX_ATTACHMENTS) setRefused('A message takes four pictures and files at most')
-      else if (!picture && !sendableName(f.name)) setRefused(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
+      if (!picture && !FILE_TYPES.test(f.type)) say(`${f.name} is not a picture, a text file or a PDF`)
+      else if (f.size > MAX_BYTES) say(`${f.name} is over 3 MB`)
+      else if (!f.size) say(`${f.name} is empty`)
+      else if (pics.length + docs.length >= MAX_ATTACHMENTS) say('A message takes four pictures and files at most')
+      else if (!picture && !sendableName(f.name)) say(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
       else {
         const data = await base64(f)
         if (picture) pics.push({name: f.name, data, src: `data:${f.type};base64,${data}`})
@@ -101,15 +117,10 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     setPictures(pics)
     setFiles(docs)
   }
-  // The box no longer holds what the line is about (words edited, a picture or file taken out): a
-  // line that said sending them again is safe no longer holds.
-  const edited = () => {
-    if (beside) setRefused((r) => (r ? beside(r) : r))
-  }
   const submit = async () => {
     const el = box.current
     if (!el || !onSend || disabled) return
-    const text = el.innerText.replace(/\n+$/, '').trim()
+    const text = read(el)
     if (!text && !pictures.length && !files.length) return
     el.replaceChildren()
     setDraft(false)
@@ -117,14 +128,14 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     const n = ++sends.current
     setPictures([])
     setFiles([])
-    setRefused(null)
+    setWords('')
+    say(null)
     el.focus()
     const why = await onSend(text, sent.pictures, sent.files)
     if (why === null || why === undefined) return
     // Nothing went (or it may have): the words and what waited with them come back, and the line says
     // why (if it is not said elsewhere). Words typed meanwhile stay, after them, as pictures and files do.
-    const others = !!el.innerText.trim() || inBox.current.pictures.length > 0 || inBox.current.files.length > 0
-    setRefused(why ? (others && beside ? beside(why) : why) : null)
+    say(why || null, {text, pictures: sent.pictures, files: sent.files})
     setPictures((now) => back(now, sent.pictures, n))
     setFiles((now) => back(now, sent.files, n))
     if (text) {
@@ -138,15 +149,16 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
         else el.prepend(p)
       }
       setDraft(true)
+      setWords(read(el))
     }
   }
   const waiting = pictures.length > 0 || files.length > 0
   return (
     <div className="composer-wrap">
-      {refused && (
+      {shown && (
         // Why a file was not taken, above the box so the box itself never moves.
         <div className="composer-refused">
-          <span className="picture-refused" role="alert">{refused}</span>
+          <span className="picture-refused" role="alert">{shown}</span>
         </div>
       )}
       <input ref={chooser} type="file" accept={[...PICTURE_TYPES, 'text/*', 'application/pdf', '.txt', '.md', '.csv', '.json', '.log', '.pdf'].join(',')} multiple hidden onChange={(e) => { void add([...(e.target.files ?? [])]); e.target.value = '' }} />
@@ -159,7 +171,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
           if (dropped.length) { e.preventDefault(); void add(dropped) }
         }}
       >
-        {waiting && <Attachments pictures={pictures} files={files} onRemovePicture={(i) => (setPictures((all) => all.filter((_, j) => j !== i)), edited())} onRemoveFile={(i) => (setFiles((all) => all.filter((_, j) => j !== i)), edited())} />}
+        {waiting && <Attachments pictures={pictures} files={files} onRemovePicture={(i) => setPictures((all) => all.filter((_, j) => j !== i))} onRemoveFile={(i) => setFiles((all) => all.filter((_, j) => j !== i))} />}
         <Round label="Composer actions" area="act">
           <Icon d="M8 3v10M3 8h10" />
         </Round>
@@ -177,7 +189,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
             // An emptied box keeps a stray <br>: clear it so the placeholder comes back.
             if (!el.innerText.trim()) el.replaceChildren()
             setDraft(!!el.innerText.trim())
-            edited()
+            setWords(read(el))
           }}
           onPaste={(e) => {
             // A pasted picture or file is attached; pasted words go in as words.

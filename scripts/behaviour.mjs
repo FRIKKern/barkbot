@@ -2203,6 +2203,22 @@ else {
     check('the safe line over words with a picture, then the picture is taken out: the line turns to look before sending again', SAFE.test(lostP.line ?? '') && chipsBack === 1 && removed.chips === 0 && !SAFE.test(removed.line ?? '') && /look in the conversation/.test(removed.line ?? ''), removed);
     await clearPrompt();
 
+    // 15. The safe line, then a picture is added: Enter would send the words with it, under another key,
+    // so the line turns to look first. Taken out again, the box holds exactly what the key was made
+    // for, and the line is safe again.
+    const lostA = await lostOnce('add to me');
+    const p6 = path('.cache', `p6-picture-${CHROME_PORT}.png`); writeFileSync(p6, PNG);
+    const { root: r6 } = await page.send('DOM.getDocument');
+    const { nodeId: n6 } = await page.send('DOM.querySelector', { nodeId: r6.nodeId, selector: '.composer-wrap input[type=file]' });
+    await page.send('DOM.setFileInputFiles', { nodeId: n6, files: [p6] });
+    await until(async () => (await chipCount()) === 1, 10000, 'the chip').catch(() => {}); await wait(300);
+    const added = { lostA, chips: await chipCount(), line: await refusedLine() };
+    await ev(() => document.querySelector('.attach-pic-remove')?.click()); await wait(500);
+    Object.assign(added, { chipsAfter: await chipCount(), lineAfter: await refusedLine(), prompt: await promptText() });
+    rmSync(p6, { force: true });
+    check('the safe line, then a picture is added: the line turns to look before sending again; taken out again, the box holds what the key was made for and the line is safe again', SAFE.test(lostA.line ?? '') && added.chips === 1 && !SAFE.test(added.line ?? '') && /look in the conversation/.test(added.line ?? '') && added.chipsAfter === 0 && added.prompt === 'add to me' && SAFE.test(added.lineAfter ?? ''), added);
+    await clearPrompt();
+
     // 12. Taken for sure, the key goes: the same words sent again on purpose run again, under a new key.
     k0 = stub.keyed.length; s0 = stub.sent.length;
     await typeSend('twice on purpose'); await until(() => stub.sent.length > s0, 8000, 'the first').catch(() => {}); await wait(800);
