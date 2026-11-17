@@ -444,7 +444,7 @@ else {
   await until(() => botPuts().length > 0, 5000, 'the Main Bot record').catch(() => {});
   const made = botPuts().length;
   precondition('the live page read the store, shows BarkBot, made one Main Bot record and wrote the legacy key zero times',
-    stub.reads > reads && made === 1 && legacyWrites().length === 0 && s.value === 'BarkBot' && s.placeholder === 'Message BarkBot' && s.tiles.includes('BarkBot'), { reads: stub.reads, writes: stub.writes, other: stub.other, s });
+    stub.reads > reads && made === 1 && legacyWrites().length === 0 && s.value === 'BarkBot' && s.placeholder === 'Message BarkBot' && s.tiles.includes('BarkBot, Main Bot'), { reads: stub.reads, writes: stub.writes, other: stub.other, s });
   // Every write of a name after the Main Bot's record was made: whole or as the one field.
   const named0 = stub.writes.length;
   const renames = () => stub.writes.slice(named0).filter((w) => nameIn(w) !== undefined).map((w) => ({ name: nameIn(w) }));
@@ -460,12 +460,12 @@ else {
   check('Enter: writes the name once, to the bot\'s own key, and the live composer says "Message BarkBot Two" at once', renames().length === 1 && renames()[0]?.name === 'BarkBot Two' && legacyWrites().length === 0 && s.placeholder === 'Message BarkBot Two' && s.header === 'BarkBot Two', { writes: stub.writes, s });
 
   s = await reload('BarkBot Two');
-  check('reload: header, rail tile and placeholder show the saved name (control: "BarkBot" before the rename)', s.value === 'BarkBot Two' && s.tiles.includes('BarkBot Two') && s.placeholder === 'Message BarkBot Two' && renames().length === 1, { writes: stub.writes, s });
+  check('reload: header, rail tile and placeholder show the saved name (control: "BarkBot" before the rename)', s.value === 'BarkBot Two' && s.tiles.includes('BarkBot Two, Main Bot') && s.placeholder === 'Message BarkBot Two' && renames().length === 1, { writes: stub.writes, s });
 
   await into(); await key('End'); await typeIn('X'); await click(400, 300);
   await until(async () => renames().length > 1, 5000, 'the click-away rename to reach the stand-in').catch(() => {});
   s = await reload('BarkBot TwoX');
-  check('click away: writes too, and a reload keeps it', renames().length === 2 && renames()[1]?.name === 'BarkBot TwoX' && s.tiles.includes('BarkBot TwoX') && legacyWrites().length === 0, { writes: stub.writes, s });
+  check('click away: writes too, and a reload keeps it', renames().length === 2 && renames()[1]?.name === 'BarkBot TwoX' && s.tiles.includes('BarkBot TwoX, Main Bot') && legacyWrites().length === 0, { writes: stub.writes, s });
 
   // ── The bot store: today's bot moves in, additively; a record is checked, never trusted ─────
   console.log('Behaviour · the bot store (the live page, against the stand-in Barkpark)');
@@ -485,7 +485,7 @@ else {
   freshStore({ name: 'Legacy Name' }); let w0 = stub.writes.length;
   s = await showing('Legacy Name');
   const moved = stub.writes.slice(w0);
-  check('today\'s bot moves in: one bot with the legacy name and its conversation; one bot key and one add written, the legacy key never', s.tiles.filter((t) => !t.startsWith('Open account')).length === 1 && s.tiles.includes('Legacy Name') && stub.opened.includes(S1) && moved.filter((w) => w.method === 'PUT' && w.key.startsWith('barkbot.bot.')).length === 1 && moved.filter((w) => w.method === 'PATCH' && w.key === 'barkbot.bots').length === 1 && moved.filter((w) => w.key === 'barkbot.bot').length === 0 && stub.prefs.get('barkbot.bot')?.name === 'Legacy Name', { moved, opened: stub.opened, s });
+  check('today\'s bot moves in: one bot with the legacy name and its conversation; one bot key and one add written, the legacy key never', s.tiles.filter((t) => !t.startsWith('Open account')).length === 1 && s.tiles.includes('Legacy Name, Main Bot') && stub.opened.includes(S1) && moved.filter((w) => w.method === 'PUT' && w.key.startsWith('barkbot.bot.')).length === 1 && moved.filter((w) => w.method === 'PATCH' && w.key === 'barkbot.bots').length === 1 && moved.filter((w) => w.key === 'barkbot.bot').length === 0 && stub.prefs.get('barkbot.bot')?.name === 'Legacy Name', { moved, opened: stub.opened, s });
   // Two first loads at once (two tabs) against an empty store: the same id, so one bot.
   freshStore({ name: 'Legacy Name' });
   await Promise.all([fetch(`${base}/`).then((r) => r.text()), fetch(`${base}/`).then((r) => r.text())]);
@@ -577,13 +577,13 @@ else {
 
   stub.prefs.set('barkbot.bots', { ids: [main, main] });
   s = await showing('Kept Name');
-  check('an id twice in the list is one bot in the rail', s.tiles.filter((t) => t === 'Kept Name').length === 1, { tiles: s.tiles });
+  check('an id twice in the list is one bot in the rail', s.tiles.filter((t) => t === 'Kept Name, Main Bot').length === 1, { tiles: s.tiles });
   const many = Array.from({ length: 60 }, (_, i) => `a0000000-0000-4000-8000-0000000000${i.toString(16).padStart(2, '0')}`);
   many.forEach((id, i) => stub.prefs.set(`barkbot.bot.${id}`, rec(`Bot ${i}`, HOST_ID, null)));
   stub.prefs.set('barkbot.bots', { ids: [main, ...many] });
   const r0 = stub.readKeys.length; w0 = stub.writes.length;
   s = await showing('Kept Name');
-  const recordReads = stub.readKeys.slice(r0).filter((k) => k.startsWith('barkbot.bot.')).length, tiles = s.tiles.filter((t) => t === 'Kept Name' || /^Bot \d+$/.test(t));
+  const recordReads = stub.readKeys.slice(r0).filter((k) => k.startsWith('barkbot.bot.')).length, tiles = s.tiles.filter((t) => t === 'Kept Name, Main Bot' || /^Bot \d+$/.test(t));
   check('one page load reads at most 50 bot records: the first 50 in the list are shown, the rest stay in the list untouched', recordReads === 50 && tiles.length === 50 && tiles.at(-1) === 'Bot 48' && ids().length === 61 && since(w0).length === 0, { recordReads, tiles: tiles.length, last: tiles.at(-1), ids: ids().length, writes: since(w0) });
   stub.sessions = []; freshStore(); stub.fail.clear(); stub.sent = []; stub.to = []; stub.made = []; stub.shown = []; stub.bodies = [];
 
@@ -721,7 +721,7 @@ else {
   stub.prefs.set('barkbot.bots', { ids: [OTHER] }); stub.prefs.set(`barkbot.bot.${OTHER}`, rec('Other', HOST_ID, null));
   w0 = stub.writes.length; s = await showing('Other');
   const moved2 = stub.writes.slice(w0);
-  check('one other bot already listed and a computer enrolled: today\'s bot still moves in, with its name and its conversation; the legacy key is never written', s.tiles.includes('Other') && s.tiles.includes('Legacy Name') && stub.prefs.get(KEY)?.name === 'Legacy Name' && stub.prefs.get(KEY)?.session_id === S1 && ids().join() === [OTHER, main].join() && moved2.filter((w) => w.key === 'barkbot.bot').length === 0, { tiles: s.tiles, record: stub.prefs.get(KEY), ids: ids(), moved2 });
+  check('one other bot already listed and a computer enrolled: today\'s bot still moves in, with its name and its conversation; the legacy key is never written', s.tiles.includes('Other') && s.tiles.includes('Legacy Name, Main Bot') && stub.prefs.get(KEY)?.name === 'Legacy Name' && stub.prefs.get(KEY)?.session_id === S1 && ids().join() === [OTHER, main].join() && moved2.filter((w) => w.key === 'barkbot.bot').length === 0, { tiles: s.tiles, record: stub.prefs.get(KEY), ids: ids(), moved2 });
   // Today's bot moving in late takes today's conversation only when it is surely no other bot's
   // (task-b910d6ee3d466fd1): a record that is dropped, or one beyond what a load reads, may name it.
   const S_NEW = '00000000-0000-4000-8000-0000000000e1', S_OLD = '00000000-0000-4000-8000-0000000000e0';
@@ -781,9 +781,10 @@ else {
   await windowFocus(true);
   const fleets0 = stub.fleetOpens;
   const words = () => ev(() => document.querySelector('.transcript')?.textContent ?? '');
-  // Every pinned tile: Ada, Bea, and today's bot, which moves in after them (#60).
-  const labels = () => ev(() => [...document.querySelectorAll('.rail-list .rail-tile')].map((t) => t.getAttribute('aria-label')));
-  const tileOf = (n) => ev((n) => { const t = [...document.querySelectorAll('.rail-list .rail-tile')].find((x) => x.getAttribute('aria-label').split(', ')[0] === n); const r = t?.getBoundingClientRect(); return r ? [r.x + r.width / 2, r.y + r.height / 2] : null; }, n);
+  // Every bot's tile, top to bottom: today's bot moves in after Ada and Bea (#60), but as the Main Bot it
+  // is drawn alone in the main slot, above Pinned Bots (task-b04631fa0d533e9a).
+  const labels = () => ev(() => [...document.querySelectorAll('.rail-main .rail-tile, .rail-list .rail-tile')].map((t) => t.getAttribute('aria-label')));
+  const tileOf = (n) => ev((n) => { const t = [...document.querySelectorAll('.rail-main .rail-tile, .rail-list .rail-tile')].find((x) => x.getAttribute('aria-label').split(', ')[0] === n); const r = t?.getBoundingClientRect(); return r ? [r.x + r.width / 2, r.y + r.height / 2] : null; }, n);
   const pickTile = async (n, want) => { const at = await tileOf(n); if (at) await click(...at); await until(async () => (await live()).header === n && want.test(await words()), 10000, `${n}'s conversation`).catch(() => {}); await wait(500); return { header: (await live()).header, t: await words(), url: await ev(() => location.search) }; };
   await showing('Ada');
   await until(async () => /apples/.test(await words()), 10000, "Ada's rows").catch(() => {});
@@ -804,9 +805,9 @@ else {
   flip(SB, 'idle'); await until(async () => (await labels()).some((l) => l.startsWith('Bea, Unread')), 5000, "Bea's dot").catch(() => {});
   await wait(300);
   const after = await labels();
-  check("Bea works while Ada is open: only Bea's tile says Working, then, with no focus, only Bea's says Unread activity", JSON.stringify(during) === JSON.stringify(['Ada', 'Bea, Working', 'BarkBot']) && JSON.stringify(after) === JSON.stringify(['Ada', 'Bea, Unread activity', 'BarkBot']) && (await live()).header === 'Ada', { during, after });
+  check("Bea works while Ada is open: only Bea's tile says Working, then, with no focus, only Bea's says Unread activity", JSON.stringify(during) === JSON.stringify(['BarkBot, Main Bot', 'Ada', 'Bea, Working']) && JSON.stringify(after) === JSON.stringify(['BarkBot, Main Bot', 'Ada', 'Bea, Unread activity']) && (await live()).header === 'Ada', { during, after });
   await windowFocus(true);
-  check('control: the window getting focus clears the dot', JSON.stringify(await labels()) === JSON.stringify(['Ada', 'Bea', 'BarkBot']), await labels());
+  check('control: the window getting focus clears the dot', JSON.stringify(await labels()) === JSON.stringify(['BarkBot, Main Bot', 'Ada', 'Bea']), await labels());
   await railMain({ check, ev, mainName: 'BarkBot', pinned: ['Ada', 'Bea'], open: 'Ada' });
   // A first message still opening its conversation, then a pick (task-f954370021fb60fb): the
   // message goes once, to the bot it was written to, and never to the bot picked.
@@ -842,7 +843,7 @@ else {
   const clearPrompt = () => ev(() => { const p = document.querySelector('.prompt'); p.replaceChildren(); p.dispatchEvent(new InputEvent('input', { bubbles: true })); });
   const typeSend = async (t) => { await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: t }); await key('Enter'); };
   // With many bots the rail scrolls to the open one: the tile is scrolled into view first.
-  const clickTile = async (n) => { await ev((n) => [...document.querySelectorAll('.rail-list .rail-tile')].find((x) => x.getAttribute('aria-label').split(', ')[0] === n)?.scrollIntoView({ block: 'nearest' }), n); await wait(100); const at = await tileOf(n); if (at) await click(...at); };
+  const clickTile = async (n) => { await ev((n) => [...document.querySelectorAll('.rail-main .rail-tile, .rail-list .rail-tile')].find((x) => x.getAttribute('aria-label').split(', ')[0] === n)?.scrollIntoView({ block: 'nearest' }), n); await wait(100); const at = await tileOf(n); if (at) await click(...at); };
   // … and back on Dot: the words given up on wait in its box, with a line that they were not sent.
   await clickTile('Dot');
   await until(async () => (await onBot()) === DOT && (await promptText()) !== '', 15000, "Dot's page with its words").catch(() => {}); await wait(1000);
