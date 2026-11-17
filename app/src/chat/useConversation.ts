@@ -433,7 +433,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
         const before = unsent.get(sessionId)
         const sig = sigOf(outgoing)
         let mine: Unsent
-        if (before && before.content === content && before.sig === sig) mine = before
+        if (before && before.content === content && before.sig === sig && !outgoing.length) mine = before
         else {
           // Each is stored for the conversation first; the message then names a picture by its id,
           // a text file or PDF by its id and its name.
