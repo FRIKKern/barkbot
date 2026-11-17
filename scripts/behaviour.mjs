@@ -40,7 +40,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -65,6 +65,15 @@ await new Promise((ok) => httpServer((req, res) => {
     if (req.url.startsWith(PREFS)) {
       const key = decodeURIComponent(req.url.slice(PREFS.length)); const got = () => json(200, { key, dataset: 'production', value: stub.prefs.get(key) ?? null });
       const failing = stub.fail.get(`${req.method} ${key}`);
+      // `readAs` (key → how) answers one key's read oddly: 'hang' never answers (BarkBot's 8 s read
+      // bound calls it off); 'otherKey' / 'otherDataset' answer 200 value:null for another key or
+      // dataset; 'empty' answers 200 {} (no prefs answer at all). Hung reads go to stub.hung.
+      const readAs = req.method === 'GET' ? stub.readAs.get(key) : undefined;
+      if (readAs) { stub.reads++; stub.readKeys.push(key); }
+      if (readAs === 'hang') return void stub.hung.push(res);
+      if (readAs === 'otherKey') return json(200, { key: 'barkbot.other', dataset: 'production', value: null });
+      if (readAs === 'otherDataset') return json(200, { key, dataset: 'staging', value: null });
+      if (readAs === 'empty') return json(200, {});
       if (req.method === 'GET') { stub.reads++; stub.readKeys.push(key); const answer = () => (failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got()); return stub.readDelay ? setTimeout(answer, stub.readDelay) : answer(); }
       const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing });
       if (failing) return json(failing, { error: { code: 'internal', message: 'the stand-in fails this write' } });
@@ -612,7 +621,8 @@ else {
   const folderTry = await ev(async ([hostId, upper]) => { const m = await import('/src/chat/api.ts'); const out = []; for (const botId of ['not-a-bot-id', upper]) { try { await m.startChat({ data: { hostId, botId } }); out.push('made'); } catch (e) { out.push(String(e?.message ?? e)); } } return out; }, [stub.hosts[0].id, pipId.toUpperCase()]);
   const folderBodies = stub.made.slice(folderMade0).map((id) => stub.bodies.findLast((x) => x.id === id)?.body.bot_folder ?? null);
   check("a made bot whose id gives no folder makes no conversation and says so plainly; an upper-case id is read as lower and gets the bot's own folder", /no folder/.test(folderTry[0]) && folderTry[1] === 'made' && JSON.stringify(folderBodies) === JSON.stringify([`bot-${pipId.slice(0, 8)}`]), { folderTry, folderBodies });
-  const full = [...ids()]; for (let i = full.length; i < 50; i++) full.push(crypto.randomUUID());
+  // 50 bots that each show: a listed id with no record is no bot (task-c95974b430641fe6).
+  const full = [...ids()]; for (let i = full.length; i < 50; i++) { const id = crypto.randomUUID(); full.push(id); stub.prefs.set(`barkbot.bot.${id}`, rec(`Full ${i}`, HOST_ID, null)); }
   stub.prefs.set('barkbot.bots', { ids: full });
   tc = await tryCreate('Over');
   check('with 50 bots listed (the most one load shows), Create refuses in one plain line and writes nothing, makes no conversation', /50 bots/.test(tc.line ?? '') && tc.open && tc.writes.length === 0 && tc.made.length === 0, tc);
@@ -1621,6 +1631,61 @@ else {
     check('control: every Barkpark read answers in 2 s: a rename of a bot with a conversation is saved', quick.out?.v?.name === 'Pax Two' && quick.record?.name === 'Pax Two' && quick.record?.session_id === SPAX, quick);
     const slow = await renameAt(3500, 'Pax Three');
     check('every Barkpark read answers in 3.5 s: a rename of a bot with a conversation is still saved, with no "did not answer" line', slow.out?.v?.name === 'Pax Three' && slow.record?.name === 'Pax Three' && slow.record?.session_id === SPAX, slow);
+    stub.sessions = []; freshStore();
+  }
+
+  // ── The 50-bot cap counts bots that show (task-c95974b430641fe6) ──
+  console.log('Behaviour · the 50-bot cap and ids that show no bot (the live page, against the stand-in Barkpark)');
+  {
+    const create = (name) => ev(async (n) => { const m = await import('/src/chat/api.ts'); return m.createBot({ data: { name: n } }).then((v) => ({ v }), (e) => ({ e: String(e?.message ?? e) })); }, name);
+    const listed = () => stub.prefs.get('barkbot.bots')?.ids ?? [];
+    const dangling = () => listed().filter((id) => !stub.prefs.has(`barkbot.bot.${id}`));
+    const GONE_HOST = '00000000-0000-4000-8000-0000000000ff';
+    stub.hosts = host(true); stub.sessions = []; freshStore(); await open(`${base}/`); await until(async () => (await live()).header === 'BarkBot', 15000, 'the page').catch(() => {}); await wait(500);
+    // 45 bots that show, then 5 listed ids of `kind`: 'none' (no record), 'gone' (a record on a computer no longer enrolled), 'shown' (5 more that show).
+    const fill = (kind) => {
+      freshStore(); const all = [], extra = [];
+      for (let i = 0; i < 45; i++) { const id = crypto.randomUUID(); all.push(id); stub.prefs.set(`barkbot.bot.${id}`, rec(`Shown ${i}`, HOST_ID, null)); }
+      for (let i = 0; i < 5; i++) { const id = crypto.randomUUID(); all.push(id); extra.push(id); if (kind === 'gone') stub.prefs.set(`barkbot.bot.${id}`, rec(`Old ${i}`, GONE_HOST, null)); if (kind === 'shown') stub.prefs.set(`barkbot.bot.${id}`, rec(`More ${i}`, HOST_ID, null)); }
+      stub.prefs.set('barkbot.bots', { ids: all }); return { all, extra };
+    };
+    // 45 that show and 5 ids with no record: the 5 are proven gone (their read answered "unset"), so they leave the list and the bot is made.
+    let f = fill('none'); let w0 = stub.writes.length; let out = await create('Ada');
+    const none = { out, listed: listed().length, dangling: dangling().length, kept45: f.all.slice(0, 45).every((id) => listed().includes(id)), removed: stub.writes.slice(w0).filter((w) => w.method === 'PATCH' && w.body.op === 'remove').map((w) => w.body.item) };
+    check('45 bots that show and 5 listed ids with no record: Create makes the bot, the 5 ids leave the list (their reads answered "unset"), and the 45 stay', !!none.out.v?.id && listed().includes(none.out.v.id) && none.dangling === 0 && none.kept45 && none.listed === 46, none);
+    // 45 that show and 5 records on a computer no longer enrolled: not proven gone, so nothing is removed; Create says plainly why it is not made, never "you have 50 bots".
+    f = fill('gone'); w0 = stub.writes.length; out = await create('Bea');
+    const gone = { out, writes: stub.writes.slice(w0).map((w) => `${w.method} ${w.key}`), same: JSON.stringify(listed()) === JSON.stringify(f.all) };
+    check('45 bots that show and 5 listed bots on a computer no longer enrolled: nothing is written or removed, and Create says 45 show, never "you have 50 bots"', !!gone.out.e && !/you have 50 bots/.test(gone.out.e) && /\b45\b/.test(gone.out.e) && gone.writes.length === 0 && gone.same, gone);
+    // 45 that show and 5 ids with no record whose reads fail: a failed read proves nothing, so nothing is removed, and Create says the bots could not all be read.
+    f = fill('none'); for (const id of f.extra) stub.fail.set(`GET barkbot.bot.${id}`, 500);
+    w0 = stub.writes.length; out = await create('Cy'); stub.fail.clear();
+    const blind = { out, writes: stub.writes.slice(w0).map((w) => `${w.method} ${w.key}`), same: JSON.stringify(listed()) === JSON.stringify(f.all) };
+    check('45 bots that show and 5 listed ids whose reads fail: nothing is removed or written, and Create says they could not be read, never "you have 50 bots"', !!blind.out.e && !/you have 50 bots/.test(blind.out.e) && /could not be read/.test(blind.out.e) && blind.writes.length === 0 && blind.same, blind);
+    // Present records whose reads time out (8 s): a read that did not answer proves nothing, so no
+    // id is removed and Create says they could not be read. (Mutant: a timeout counted as gone.)
+    f = fill('shown'); for (const id of f.extra) stub.readAs.set(`barkbot.bot.${id}`, 'hang');
+    w0 = stub.writes.length; out = await create('Dee'); stub.readAs.clear(); stub.hung.splice(0).forEach((r) => r.destroy());
+    const hung = { out, writes: stub.writes.slice(w0).map((w) => `${w.method} ${w.key}`), same: JSON.stringify(listed()) === JSON.stringify(f.all) };
+    check('45 bots that show and 5 present records whose reads time out: nothing is removed or written, and Create says they could not be read', !!hung.out.e && /could not be read/.test(hung.out.e) && hung.writes.length === 0 && hung.same, hung);
+    // An answer counts as "unset" only for the key and dataset it was asked for: value:null under
+    // another key or another dataset says nothing about this record, and a 200 {} is no answer.
+    f = fill('shown'); f.extra.forEach((id, n) => stub.readAs.set(`barkbot.bot.${id}`, ['otherKey', 'otherKey', 'otherDataset', 'otherDataset', 'empty'][n]));
+    w0 = stub.writes.length; out = await create('Eli'); stub.readAs.clear();
+    const odd = { out, writes: stub.writes.slice(w0).map((w) => `${w.method} ${w.key}`), same: JSON.stringify(listed()) === JSON.stringify(f.all) };
+    check('45 bots that show and 5 present records whose reads answer value:null for another key or dataset, or {}: nothing is removed or written, and Create says they could not be read', !!odd.out.e && /could not be read/.test(odd.out.e) && odd.writes.length === 0 && odd.same, odd);
+    // 50 bots that all show: Create refuses with "you have 50 bots", reading each record once.
+    f = fill('shown'); let r0 = stub.readKeys.length; out = await create('Fay');
+    const reads = stub.readKeys.slice(r0).filter((k) => k.startsWith('barkbot.bot.'));
+    check('50 bots that all show: Create says "you have 50 bots", and reads each record once (50 record reads, not 100)', /you have 50 bots/.test(out.e ?? '') && reads.length === 50 && new Set(reads).size === 50, { out, reads: reads.length });
+    // 51 listed (two Creates at once at 49) and the first 50 all show: the line is "you have 50 bots", never that bots are hidden.
+    f = fill('shown'); { const id = crypto.randomUUID(); stub.prefs.set(`barkbot.bot.${id}`, rec('One more', HOST_ID, null)); stub.prefs.set('barkbot.bots', { ids: [...f.all, id] }); }
+    out = await create('Gus');
+    check('51 listed and the first 50 all show: Create says "you have 50 bots", never that some do not show', /you have 50 bots/.test(out.e ?? '') && !/show:|do not show|only/.test(out.e ?? ''), { out });
+    // A malformed record (no name) is not on a gone computer: the line says what is true of it.
+    f = fill('shown'); for (const id of f.extra) stub.prefs.set(`barkbot.bot.${id}`, { host_id: HOST_ID, session_id: null, created_at: '2026-11-15T09:00:00Z' });
+    w0 = stub.writes.length; out = await create('Hal');
+    check('45 bots that show and 5 records that are not well formed: nothing is removed, and the line says 5 are not well formed, never that their computer is gone', !!out.e && /not well formed/.test(out.e) && !/no longer enrolled/.test(out.e) && stub.writes.length === w0, { out });
     stub.sessions = []; freshStore();
   }
 }
