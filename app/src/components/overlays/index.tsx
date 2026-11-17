@@ -17,6 +17,8 @@
 //   arrows    move focus and data-highlighted through the rows (no wrap)
 //   Escape    closes without choosing; focus goes back to what had it when the overlay opened
 //             (the trigger, when the trigger took focus on the click)
+//             A view opened from a menu's row (account menu > Settings): what had it before the
+//             menu opened (the trace: Connect apps, not the account menu's button)
 //   outside   a click outside closes it and leaves focus on the page (body)
 // Enter on a highlighted row clicks it; the oracle probe pressed no Enter, so that one is ours.
 import {useEffect, useRef, useState, type FocusEvent, type KeyboardEvent, type ReactNode} from 'react'
@@ -26,7 +28,10 @@ import {LanguagePicker, SpeedPicker, VoicePicker} from './Pickers'
 import {NewBotDialog} from './NewBotDialog'
 import {AvatarEditor, ConnectApps, Settings} from './Views'
 
-type Open = {name: string; picked?: string; trigger?: HTMLElement; back?: HTMLElement | null}
+// `before`: what had focus before the trigger was pressed (a click on a button moves focus to it
+// first). A view opened from a menu's row gives focus back there on close: the keys trace's
+// Settings (account menu > Settings) gave it to Connect apps, focused before the menu opened.
+type Open = {name: string; picked?: string; trigger?: HTMLElement; back?: HTMLElement | null; before?: HTMLElement | null}
 /** Create in the New Bot dialog: makes the bot; the dialog closes once it is made. `retry`: the id of
  *  a bot whose record write got no answer (CreateRetry), which this Create finishes. */
 export type CreateBot = (b: {name: string; shape: string; colour: string; retry?: string}) => Promise<void>
@@ -93,6 +98,8 @@ export function Overlay({name, scene, onOpenChange, onCreateBot}: {name?: string
   // Where focus goes when the overlay closes: what had it when the first overlay opened, or the
   // trigger; null after an outside click (the oracle leaves focus on the page then).
   const back = useRef<HTMLElement | null>(null)
+  // Focus as it was when the pointer went down, before the browser moved it to what was pressed.
+  const prior = useRef<Element | null>(null)
   const returnFocus = useRef(true)
   const close = (focusBack: boolean) => {
     returnFocus.current = focusBack
@@ -111,7 +118,11 @@ export function Overlay({name, scene, onOpenChange, onCreateBot}: {name?: string
       if (next) {
         const had = document.activeElement as HTMLElement | null
         next.back = had && had !== document.body ? had : next.trigger
+        // A key press (detail 0) moves no focus: what had it is what had it before.
+        const was = (e.detail === 0 ? had : prior.current) as HTMLElement | null
+        next.before = was && was !== document.body && was.isConnected ? was : null
       }
+      prior.current = null
       setOpen((cur) => {
         if (next && cur?.name !== next.name) return next
         returnFocus.current = !!next // the trigger again: a toggle; anything else: outside
@@ -119,9 +130,12 @@ export function Overlay({name, scene, onOpenChange, onCreateBot}: {name?: string
       })
     }
     const onKey = (e: globalThis.KeyboardEvent) => e.key === 'Escape' && close(true)
+    const onDown = () => (prior.current = document.activeElement)
+    document.addEventListener('pointerdown', onDown, true)
     document.addEventListener('click', onClick)
     document.addEventListener('keydown', onKey)
     return () => {
+      document.removeEventListener('pointerdown', onDown, true)
       document.removeEventListener('click', onClick)
       document.removeEventListener('keydown', onKey)
     }
@@ -189,7 +203,7 @@ export function Overlay({name, scene, onOpenChange, onCreateBot}: {name?: string
         picked: shown.picked,
         scene,
         close: () => !held && close(true),
-        go: (n: string) => !held && setOpen({name: n}),
+        go: (n: string) => !held && setOpen((cur) => ({name: n, back: cur?.before ?? cur?.back})),
         create: onCreateBot,
       })}
     </div>
