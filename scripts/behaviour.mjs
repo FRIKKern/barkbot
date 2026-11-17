@@ -1922,6 +1922,53 @@ else {
       check('a picture attached while a send with a picture is on its way, both unsent: the box holds the sent picture, then the new one, each once, and the words', pics.between.length === 0 && JSON.stringify(pics.chips) === JSON.stringify([`unsent-a-${CHROME_PORT}.png`, `unsent-b-${CHROME_PORT}.png`]) && JSON.stringify(pics.prompt) === JSON.stringify(['with a picture']), pics);
       await clearPrompt();
     }
+    // ── PROBES (reviewer rev62, throwaway) ──
+    {
+      const L = (t) => t.split('\n').map((x) => x.trim()).filter(Boolean);
+      const boxNow = () => ev(() => { const b = document.querySelector('.prompt'); return { lines: (b?.innerText ?? '').split('\n').map((x) => x.trim()).filter(Boolean), kids: [...(b?.children ?? [])].map((c) => `${c.tagName.toLowerCase()}[${c.dataset.unsent ?? '-'}]:${c.textContent}`) }; });
+      const setup = async () => { stub.hosts = host(true); stub.sessions = [session(SQ)]; freshStore(); stub.opened = []; await open(`${base}/`); await until(() => stub.opened.includes(SQ), 15000, 'open').catch(() => {}); await wait(800); await clearPrompt(); };
+      const holdAll = async (words) => { const h0 = stub.heldSends.length; stub.holdSend = true; for (let i = 0; i < words.length; i++) { await typeSend(words[i]); await until(() => stub.heldSends.length > h0 + i, 8000, `held ${i}`).catch(() => {}); await wait(200); } stub.holdSend = false; return stub.heldSends.splice(h0); };
+      const typeNow = async (t) => { await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: t }); await wait(200); };
+      const shiftEnter = async () => { for (const type of ['keyDown', 'keyUp']) await page.send('Input.dispatchKeyEvent', { type, key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, modifiers: 8, ...(type === 'keyDown' ? { text: '\r' } : {}) }); await wait(150); };
+      const R = {};
+      // T3: three sends held, "four" typed, answered 3rd, 1st, 2nd (all unsent)
+      await setup(); { const h = await holdAll(['one', 'two', 'three']); await typeNow('four'); for (const i of [2, 0, 1]) { h[i]?.(); await wait(700); } await wait(800); R.t3 = { held: h.length, ...(await boxNow()) }; }
+      // FS1: two held, "x" typed; the 1st goes, the 2nd fails
+      await clearPrompt(); { const h = await holdAll(['one', 'two']); await typeNow('x'); h[0]?.(true); await wait(700); h[1]?.(); await wait(1200); R.fs1 = { held: h.length, ...(await boxNow()) }; }
+      // FS2: the 1st fails, the 2nd goes (2nd answered first)
+      await clearPrompt(); { const h = await holdAll(['one', 'two']); await typeNow('x'); h[1]?.(true); await wait(700); h[0]?.(); await wait(1200); R.fs2 = { held: h.length, ...(await boxNow()) }; }
+      // DEL: two held, "x"; the 2nd fails first; the person deletes the restored "two" (select it, Backspace); then the 1st fails
+      await clearPrompt(); { const h = await holdAll(['one', 'two']); await typeNow('x'); h[1]?.(); await wait(1200); const mid = await boxNow();
+        await ev(() => { const p = document.querySelector('.prompt [data-unsent]'); const r = document.createRange(); r.selectNodeContents(p); const s = getSelection(); s.removeAllRanges(); s.addRange(r); });
+        await key('Backspace'); await wait(200); await key('Backspace'); await wait(300); const afterDel = await boxNow();
+        h[0]?.(); await wait(1200); R.del = { mid, afterDel, end: await boxNow() }; }
+      // EDIT: two held, "x"; the 1st fails; the person types at the end of the restored "one": " more", Shift+Enter, "y"; then the 2nd fails
+      await clearPrompt(); { const h = await holdAll(['one', 'two']); await typeNow('x'); h[0]?.(); await wait(1200); const mid = await boxNow();
+        await ev(() => { const p = document.querySelector('.prompt [data-unsent]'); const r = document.createRange(); r.selectNodeContents(p); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r); });
+        await page.send('Input.insertText', { text: ' more' }); await shiftEnter(); await page.send('Input.insertText', { text: 'y' }); await wait(300); const edited = await boxNow();
+        h[1]?.(); await wait(1200); R.edit = { mid, edited, end: await boxNow() }; }
+      // PASTE: rich paste of a <p data-unsent="0"> while a send is held; then the send fails; then the whole box is sent and goes
+      await clearPrompt(); { let pasted = null; try { await page.send('Browser.grantPermissions', { permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'] }); } catch (e) { pasted = 'grant: ' + e.message; }
+        const h = await holdAll(['one']);
+        await ev(() => document.querySelector('.prompt').focus());
+        const wrote = await ev(async () => { try { await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob(['<p data-unsent="0">pasted <b>bold</b></p><p data-unsent="0">second para</p>'], { type: 'text/html' }), 'text/plain': new Blob(['pasted bold\nsecond para'], { type: 'text/plain' }) })]); return 'ok'; } catch (e) { return 'write: ' + e.message; } });
+        for (const type of ['keyDown', 'keyUp']) await page.send('Input.dispatchKeyEvent', { type, key: 'v', code: 'KeyV', windowsVirtualKeyCode: 86, modifiers: 4, commands: type === 'keyDown' ? ['paste'] : [] }); await wait(400);
+        const afterPaste = await boxNow(); const html = await ev(() => document.querySelector('.prompt').innerHTML);
+        h[0]?.(); await wait(1200); const end = await boxNow();
+        const s0 = stub.sent.length; await ev(() => document.querySelector('.prompt').focus()); await key('Enter'); await until(() => stub.sent.length > s0, 8000, 'the box to go').catch(() => {}); await wait(500);
+        R.paste = { pasted, wrote, afterPaste, html, end, sent: stub.sent.slice(s0).map((m) => m.content), boxAfterSend: await boxNow() }; }
+      // SENT: a restored paragraph, then more typing, sent: the content is plain text
+      await clearPrompt(); { const h = await holdAll(['alpha']); await typeNow('beta'); h[0]?.(); await wait(1200); const s0 = stub.sent.length; await ev(() => document.querySelector('.prompt').focus()); await key('Enter'); await until(() => stub.sent.length > s0, 8000, 'go').catch(() => {}); await wait(500); R.sent = { sent: stub.sent.slice(s0).map((m) => m.content), boxAfter: await boxNow() }; }
+      console.log('PROBE-DETAIL', JSON.stringify(R));
+      check('PROBE T3: three unsent, answered 3,1,2, typing after: one two three four', JSON.stringify(R.t3.lines) === JSON.stringify(['one', 'two', 'three', 'four']), R.t3);
+      check('PROBE FS1: 1st goes, 2nd fails: two, x', JSON.stringify(R.fs1.lines) === JSON.stringify(['two', 'x']), R.fs1);
+      check('PROBE FS2: 1st fails, 2nd goes: one, x', JSON.stringify(R.fs2.lines) === JSON.stringify(['one', 'x']), R.fs2);
+      check('PROBE DEL: restored two deleted, then one comes back: one, x (nothing lost or doubled)', JSON.stringify(R.del.end.lines) === JSON.stringify(['one', 'x']), R.del);
+      check('PROBE EDIT: restored one edited, then two comes back: nothing lost or doubled (order logged)', ['one more', 'y', 'two', 'x'].every((w) => R.edit.end.lines.filter((l) => l === w).length === 1) && R.edit.end.lines.length === 4, R.edit);
+      check('PROBE PASTE: what is sent is plain text, no markup or tag', R.paste.sent.length === 1 && !/[<>]|data-unsent/.test(R.paste.sent[0] ?? ''), R.paste);
+      check('PROBE SENT: a restored paragraph plus typing sends as plain text alpha, beta', R.sent.sent.length === 1 && L(R.sent.sent[0]).join('|') === 'alpha|beta' && !/[<>]|data-/.test(R.sent.sent[0]), R.sent);
+      await clearPrompt();
+    }
     stub.sessions = []; freshStore();
   }
 }
