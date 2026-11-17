@@ -159,7 +159,6 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
     gaveUp.current = true
     const words = parkedWords.current
     parkedMessage.current = null
-    if (sending.current) convo.giveBack()
     if (words) onKeep(chat.botId, {...words, line: sending.current ? MAYBE_SENT : NOT_SENT})
     parked.current = false
   }
