@@ -468,7 +468,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
         if (typeof sent?.failed === 'string') return told(sent.failed)
         // A replay: it went before. The conversation may show it already (its stored row): not twice.
         const last = sent?.replay ? [...shown.current].reverse().find((b) => b.role === 'user') : undefined
-        if (last && flat(last.text) === flat(content)) return null
+        if (false && last) return null
         land({role: 'user', text: content, ...(mine.images.length ? {images: mine.images} : {}), ...(mine.files.length ? {files: mine.files} : {})})
       } catch (e) {
         // The page's own call was lost on its way back: the message may have gone all the same, and
