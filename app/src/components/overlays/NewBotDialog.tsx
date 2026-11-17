@@ -55,7 +55,6 @@ export function NewBotDialog({onClose, onCreate}: {onClose?: () => void; onCreat
       onClose?.()
     } catch (e) {
       const why = (e as Error).message
-      if (e instanceof CreateRetry) setRetry(e.retry)
       if (why.includes(CREATE_UNSURE)) setUnsure(true)
       setFailed(e instanceof CreateRetry ? why : why.includes(CREATE_UNSURE) ? CREATE_UNSURE : `The bot was not made: ${why}`)
       setCreating(false)
