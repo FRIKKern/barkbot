@@ -113,6 +113,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     // (that would put back a picture that went meanwhile: task-9b801b838c6f4078). The four-at-most
     // limit is counted then too, so two reads at once cannot make five.
     const full = () => held.current >= MAX_ATTACHMENTS
+    const unread: string[] = [] // every file of this pick that could not be read, named together
     for (const f of picked) {
       const picture = PICTURE_TYPES.includes(f.type)
       if (!picture && !FILE_TYPES.test(f.type)) say(`${f.name} is not a picture, a text file or a PDF`)
@@ -121,7 +122,16 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
       else if (full()) say(FOUR_AT_MOST)
       else if (!picture && !sendableName(f.name)) say(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
       else {
-        const data = await base64(f)
+        // A read that fails (the file went, or cannot be opened) is said by name, with any other of this
+        // pick that failed; the rest of the pick is still added (task-f50dffe109dfda73).
+        let data: string
+        try {
+          data = await base64(f)
+        } catch {
+          unread.push(f.name)
+          say(`${unread.length > 1 ? `${unread.slice(0, -1).join(', ')} and ${unread.at(-1)}` : f.name} could not be read`)
+          continue
+        }
         if (full()) {
           say(FOUR_AT_MOST)
           continue
