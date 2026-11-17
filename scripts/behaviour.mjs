@@ -20,6 +20,7 @@ import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
+import { createOnce } from './lib/create-once.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -80,7 +81,7 @@ await new Promise((ok) => httpServer((req, res) => {
       if (readAs === 'otherDataset') return json(200, { key, dataset: 'staging', value: null });
       if (readAs === 'empty') return json(200, {});
       if (req.method === 'GET') { stub.reads++; stub.readKeys.push(key); const answer = () => (failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got()); return stub.readDelay ? setTimeout(answer, stub.readDelay) : answer(); }
-      const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing });
+      const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing, inm: req.headers['if-none-match'] ?? null });
       if (failing) return json(failing, { error: { code: 'internal', message: 'the stand-in fails this write' } });
       // A record write: a whole-record PUT, or a PATCH set of one top-level field (Barkpark's row-locked
       // op, docs/contracts/user-prefs.md: a missing key is created with that one field; item null is 422).
@@ -103,6 +104,10 @@ await new Promise((ok) => httpServer((req, res) => {
       const lw = stub.lateWrite;
       if (record && lw?.key === key && !lw.taken && changes(lw.field)) { lw.taken = true; stub.hung.push(res); return void setTimeout(() => { land(); lw.landed = true; }, lw.ms); }
       if (record && stub.goneBeforeWrite === key) { stub.goneBeforeWrite = null; stub.prefs.delete(key); }
+      // `madeBeforePut` {key, value}: another writer makes that record just before a PUT to it lands.
+      // If-None-Match: * (user-prefs.md): a PUT writes only an unset key, else 412 and nothing written.
+      if (req.method === 'PUT' && stub.madeBeforePut?.key === key) { stub.prefs.set(key, stub.madeBeforePut.value); stub.madeBeforePut = null; }
+      if (req.method === 'PUT' && req.headers['if-none-match'] === '*' && stub.prefs.has(key)) return json(412, { error: { code: 'precondition_failed', message: 'the key already holds a value; If-None-Match: * creates only an unset key' } });
       const h = stub.holdPut;
       if (record && h?.key === key) {
         if (!h.pending && !h.done && changes(h.field)) {
@@ -724,6 +729,7 @@ else {
     check('a seeded id whose record is there, off the list, is passed over: Create takes the next, and that record is untouched', t.id === C && JSON.stringify(stub.prefs.get(`barkbot.bot.${O}`)) === JSON.stringify(orphan) && !t.writes.includes(`PUT barkbot.bot.${O}`), { ...t, orphan: stub.prefs.get(`barkbot.bot.${O}`) });
     rmSync(MINT, { force: true }); freshStore();
   }
+  await createOnce({ check, ev, stub, freshStore, showing, alertLine, rec, session, ids, botPuts, HOST_ID, S1, KEY, MINT });
   // A bot already listed when today's bot has not moved in yet: today's bot still moves in.
   const OTHER = '9d2a3b4c-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
   freshStore({ name: 'Legacy Name' }); stub.sessions = [session(S1)];

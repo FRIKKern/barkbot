@@ -2,7 +2,8 @@
 // plan: /papers/barkbot-many-bots-plan, "The record"):
 //
 //   barkbot.bots        {ids: [id, ...]}   the order in the rail; changed only by PATCH add/remove (row-locked)
-//   barkbot.bot.<id>    {name, shape, colour, host_id, session_id, created_at}   PUT whole by Create and the move-in;
+//   barkbot.bot.<id>    {name, shape, colour, host_id, session_id, created_at}   PUT whole by Create and the move-in,
+//                       only while the key is unset (If-None-Match: *);
 //                       one field (name, session_id) by PATCH set (row-locked: setBotField)
 //   barkbot.bot         {name}             today's one bot, before the store: read, never written or deleted
 //
@@ -245,12 +246,23 @@ export function oneAtATime<T>(id: string, change: (write: Write) => Promise<T>):
   return run
 }
 
-/** Writes a bot's own key. The record is whole before its id is added to the list. `signal`
- *  calls the write off (oneAtATime's bound): one not yet sent is never sent. */
+/** Create's line when Barkpark refused its write because the key already holds a record. */
+export const TAKEN = 'another bot was saved under its new id first, and nothing was written over it. Try again.'
+/** Barkpark refused a create (412): the key already holds a record, another tab's or device's. */
+export const keyTaken = (e: unknown): boolean => e instanceof BarkparkError && e.status === 412
+
+/** Makes a bot's own key, whole, and only while it is unset (If-None-Match: *, task-c1f9452e1b8216ee):
+ *  a record another tab or device made after the caller read the key is never written over. Then
+ *  it throws a BarkparkError 412 saying TAKEN (`keyTaken`). The record is whole before its id is added
+ *  to the list. `signal` calls the write off (oneAtATime's bound): one not yet sent is never sent. */
 export async function putBot(bot: Bot, signal?: AbortSignal): Promise<void> {
   const {id, ...value} = bot
   signal?.throwIfAborted()
-  await bp(prefs(botKey(id)), {method: 'PUT', json: {value}, signal})
+  try {
+    await bp(prefs(botKey(id)), {method: 'PUT', json: {value}, headers: {'if-none-match': '*'}, signal})
+  } catch (e) {
+    throw keyTaken(e) ? new BarkparkError(412, 'precondition_failed', TAKEN) : e
+  }
 }
 
 /** Sets one top-level field of a bot's record, under Barkpark's row lock (PATCH set), so a change
