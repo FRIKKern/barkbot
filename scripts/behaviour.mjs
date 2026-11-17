@@ -190,6 +190,7 @@ await new Promise((ok) => httpServer((req, res) => {
       // or, when let go with `true`, it goes (202).
       if (stub.holdSend) { stub.heldSends.push((ok) => (ok ? (stub.sent.push(m), stub.to.push(req.url.split('/')[4]), json(202, { accepted: true })) : json(503, { error: { code: 'unavailable', message: 'the stand-in gave up' } }))); return; }
       // `dropAnswer`: Barkpark takes the message, then the answer is lost (the socket drops).
+      if (stub.holdDrop) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); tookIt(); stub.heldSends.push(() => req.socket.destroy()); return; }
       if (stub.dropAnswer) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); tookIt(); return void req.socket.destroy(); }
       // `afterTake` {status, body}: Barkpark takes the message, then answers that (a 500 from storing the
       // user's turn after it went, chat_controller.ex create_message; a gateway's empty 502).
@@ -2078,6 +2079,38 @@ else {
     const zed = { back: zback, keys: [...new Set(stub.keyed.slice(k0).map((x) => x.key))], requests: stub.keyed.length - k0, replays: stub.replays - zr0, turns: stub.sent.slice(s0).map((m) => m.content), made: stub.made.length - zm0, prompt: await promptText(), line: await refusedLine(), shown: await userBubbles('hello zed') };
     check("a new bot's first message given back while on its way and taken (202) before it is sent again: the resend carries the same key and gets that answer again; one turn, shown once", zback.prompt === 'hello zed' && SAFE.test(zback.line ?? '') && zed.keys.length === 1 && typeof zed.keys[0] === 'string' && zed.requests === 2 && zed.replays === 1 && JSON.stringify(zed.turns) === '["hello zed"]' && zed.made === 1 && zed.prompt === '' && zed.line === null && zed.shown === 1, zed);
     await clearPrompt();
+
+    // PROBE (rev63, not a rule to land): the "safe" line must show only when the next send carries the key.
+    {
+      const SP = '00000000-0000-4000-8000-0000000002e1';
+      const ls = (t) => t.split('\n').map((x) => x.trim()).filter(Boolean);
+      const openSP = async () => { stub.hosts = host(true); stub.sessions = [session(SP)]; freshStore(); stub.opened = []; await open(`${base}/`); await until(() => stub.opened.includes(SP), 15000, 'the conversation').catch(() => {}); await wait(800); await clearPrompt(); };
+      // a. Taken, its answer lost while more was typed: the box holds both, under the line.
+      await openSP();
+      k0 = stub.keyed.length; s0 = stub.sent.length; let h0 = stub.heldSends.length; stub.holdDrop = true;
+      await typeSend('first words'); await until(() => stub.heldSends.length > h0, 8000, 'on its way').catch(() => {}); await wait(200);
+      await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'more' }); await wait(200);
+      stub.holdDrop = false; stub.heldSends.splice(h0).forEach((drop) => drop());
+      await until(async () => !!(await refusedLine()), 10000, 'the line').catch(() => {}); await wait(500);
+      const pa = { prompt: ls(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), line: await refusedLine() };
+      await enter(); await wait(3000);
+      pa.keys = stub.keyed.slice(k0).map((x) => x.key); pa.turns = stub.sent.slice(s0).map((m) => m.content);
+      check('PROBE typed-meanwhile: a lost answer with more typed meanwhile says sending again is safe only if Enter then runs the first words once', !SAFE.test(pa.line ?? '') || pa.turns.filter((t) => t.startsWith('first words')).length === 1, pa);
+      await clearPrompt();
+      // b. Two on their way: the first is taken and its answer lost, the second goes. The first comes back.
+      await openSP();
+      k0 = stub.keyed.length; s0 = stub.sent.length; h0 = stub.heldSends.length; stub.holdDrop = true;
+      await typeSend('one'); await until(() => stub.heldSends.length > h0, 8000, 'one on its way').catch(() => {}); await wait(200);
+      stub.holdDrop = false;
+      await typeSend('two'); await until(() => stub.sent.length > s0 + 1, 8000, 'two to go').catch(() => {}); await wait(800);
+      stub.heldSends.splice(h0).forEach((drop) => drop());
+      await until(async () => !!(await refusedLine()), 10000, 'the line').catch(() => {}); await wait(500);
+      const pb = { prompt: ls(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), line: await refusedLine() };
+      await enter(); await wait(3000);
+      pb.keys = stub.keyed.slice(k0).map((x) => x.key); pb.turns = stub.sent.slice(s0).map((m) => m.content);
+      check('PROBE two-on-their-way: the first comes back saying sending again is safe only if Enter then runs it once', !SAFE.test(pb.line ?? '') || pb.turns.filter((t) => t === 'one').length === 1, pb);
+      await clearPrompt();
+    }
     stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
 }
