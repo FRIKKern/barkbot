@@ -579,10 +579,11 @@ else {
   // A made bot listed twice: Rail draws the Main Bot once whatever the list holds, so the twice-listed
   // id must be a made bot's, or the rule would hold without the list's dedupe (rev63, mutant #176 on #171).
   const TWICE = 'b1c2d3e4-5f6a-4b7c-8d9e-0f1a2b3c4d5e';
-  stub.prefs.set(`barkbot.bot.${TWICE}`, rec('Twice', HOST_ID, null));
+  // Named as the Main Bot, so the rule also tells the Main Bot by its id, not its name (rev63, mutant #182 on #171).
+  stub.prefs.set(`barkbot.bot.${TWICE}`, rec('Kept Name', HOST_ID, null));
   stub.prefs.set('barkbot.bots', { ids: [main, TWICE, TWICE] });
   s = await showing('Kept Name');
-  check('an id twice in the list is one bot in the rail: a made bot listed twice has one tile, next to the one Main Bot', s.tiles.filter((t) => t === 'Twice').length === 1 && s.tiles.filter((t) => t === 'Kept Name, Main Bot').length === 1, { tiles: s.tiles });
+  check('an id twice in the list is one bot in the rail: a made bot listed twice, named as the Main Bot, has one plain tile, next to the one Main Bot', s.tiles.filter((t) => t === 'Kept Name').length === 1 && s.tiles.filter((t) => t === 'Kept Name, Main Bot').length === 1, { tiles: s.tiles });
   stub.prefs.delete(`barkbot.bot.${TWICE}`);
   const many = Array.from({ length: 60 }, (_, i) => `a0000000-0000-4000-8000-0000000000${i.toString(16).padStart(2, '0')}`);
   many.forEach((id, i) => stub.prefs.set(`barkbot.bot.${id}`, rec(`Bot ${i}`, HOST_ID, null)));
