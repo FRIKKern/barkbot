@@ -30,7 +30,6 @@ export function Rail({scene, onPick, working = [], unread = [], names = {}}: {sc
         {main && (
           <Tile id={main.id} shown={shown(main)} label={busy(main.id, `${shown(main)}, Main Bot`)} current={main.id === active} line={scene.previews?.[main.id]} onPick={onPick} unread={unread.includes(main.id)} hint={hint(0)}>
             <span className="face face-main" />
-            <span className="badge" role="img" aria-label="Main Bot" />
           </Tile>
         )}
       </div>
