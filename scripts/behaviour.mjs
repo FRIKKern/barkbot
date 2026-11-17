@@ -40,7 +40,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -152,10 +152,15 @@ await new Promise((ok) => httpServer((req, res) => {
     // anything else is a 400 and is not stored) and it answers the sha256 of its bytes; a message
     // names a picture by id and a file by {id, name}. A computer that cannot take files: 422.
     if (/^\/v1\/chat\/sessions\/[^/]+\/attachments$/.test(req.url) && req.method === 'POST') {
-      const { data } = JSON.parse(body); const bytes = Buffer.from(data, 'base64'); const id = createHash('sha256').update(bytes).digest('hex');
-      const media_type = bytes[0] === 0x89 && bytes.subarray(1, 4).toString() === 'PNG' ? 'image/png' : bytes.subarray(0, 5).toString() === '%PDF-' ? 'application/pdf' : bytes.length && !bytes.includes(0) && Buffer.from(bytes.toString('utf8'), 'utf8').equals(bytes) ? 'text/plain' : null;
-      if (!media_type) { stub.refused.push({ upload: id }); return json(400, { error: { code: 'invalid_request', message: 'attachment must be UTF-8 text, a PDF, or one of: image/png, image/jpeg, image/gif, image/webp' } }); }
-      stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
+      // `holdUpload`: the upload is taken and answered only when the rule lets it (heldUploads).
+      const take = () => {
+        const { data } = JSON.parse(body); const bytes = Buffer.from(data, 'base64'); const id = createHash('sha256').update(bytes).digest('hex');
+        const media_type = bytes[0] === 0x89 && bytes.subarray(1, 4).toString() === 'PNG' ? 'image/png' : bytes.subarray(0, 5).toString() === '%PDF-' ? 'application/pdf' : bytes.length && !bytes.includes(0) && Buffer.from(bytes.toString('utf8'), 'utf8').equals(bytes) ? 'text/plain' : null;
+        if (!media_type) { stub.refused.push({ upload: id }); return json(400, { error: { code: 'invalid_request', message: 'attachment must be UTF-8 text, a PDF, or one of: image/png, image/jpeg, image/gif, image/webp' } }); }
+        stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
+      };
+      if (stub.holdUpload) { stub.heldUploads.push(take); return; }
+      return take();
     }
     if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const id = req.url.split('/').pop(); return stub.pictures.has(id) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(id) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/messages(\?.*)?$/.test(req.url) && req.method === 'POST') {
@@ -2147,6 +2152,38 @@ else {
     await page.send('Input.insertText', { text: ' now' }); await wait(300);
     const edit = { first: e1, prompt: await promptText(), line: await refusedLine() };
     check('the safe line, then the words are edited: the line turns to look before sending again', SAFE.test(e1.line ?? '') && edit.prompt === 'edit me now' && !SAFE.test(edit.line ?? '') && /look in the conversation/.test(edit.line ?? ''), edit);
+    await clearPrompt();
+
+    // 13. A new bot's first message with a picture, its words given back while the picture is still
+    // uploading (a pick held 6 s): the picture is then stored and the message taken. Back on the bot,
+    // the words and picture wait with the safe line, and Enter gets the first answer again under the
+    // same key: one upload, one turn.
+    const WA = '6a2e3f4a-5b6c-4d7e-8f8a-9b0c1d2e3ff7', WB = '7b3f4a5b-6c7d-4e8f-9a9b-0c1d2e3f4a08';
+    stub.hosts = host(true); stub.sessions = []; freshStore();
+    stub.prefs.set('barkbot.bots', { ids: [WA, WB] }); stub.prefs.set(`barkbot.bot.${WA}`, rec('Wes', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${WB}`, rec('Wyn', HOST_ID, null));
+    await open(`${base}/?bot=${WA}`); await until(async () => (await live()).header === 'Wes', 15000, "Wes's page").catch(() => {}); await wait(500);
+    const wesPic = path('.cache', `wes-picture-${CHROME_PORT}.png`); writeFileSync(wesPic, PNG);
+    const { root: wr } = await page.send('DOM.getDocument');
+    const { nodeId: wn } = await page.send('DOM.querySelector', { nodeId: wr.nodeId, selector: '.composer-wrap input[type=file]' });
+    await page.send('DOM.setFileInputFiles', { nodeId: wn, files: [wesPic] });
+    await until(async () => (await chipCount()) === 1, 10000, "Wes's picture chip").catch(() => {});
+    const wChips = await chipCount();
+    k0 = stub.keyed.length; s0 = stub.sent.length; const wu0 = stub.uploads.length, wr0 = stub.replays, wm0 = stub.made.length;
+    stub.holdUpload = true;
+    await typeSend('hello wes');
+    await until(() => stub.heldUploads.length > 0, 15000, "Wes's picture uploading").catch(() => {});
+    stub.holdUpload = false;
+    const wHeld = stub.heldUploads.length;
+    await clickTile('Wyn'); await until(async () => (await onBot()) === WB, 20000, "Wyn's page after the hold").catch(() => {}); await wait(800);
+    stub.heldUploads.splice(0).forEach((take) => take());
+    await until(() => stub.sent.length > s0, 8000, "Wes's message to be taken").catch(() => {}); await wait(1000);
+    await clickTile('Wes'); await until(async () => (await onBot()) === WA && (await promptText()) === 'hello wes', 15000, "Wes's page with its words").catch(() => {}); await wait(800);
+    const wback = { prompt: await promptText(), line: await refusedLine(), chips: await chipCount() };
+    await enter();
+    await until(() => stub.keyed.length > k0 + 1, 10000, 'the resend').catch(() => {}); await wait(1500);
+    rmSync(wesPic, { force: true });
+    const wes = { chipsBefore: wChips, held: wHeld, back: wback, keys: [...new Set(stub.keyed.slice(k0).map((x) => x.key))], turns: stub.sent.slice(s0).map((m) => m.content), uploads: stub.uploads.length - wu0, replays: stub.replays - wr0, made: stub.made.length - wm0, prompt: await promptText(), line: await refusedLine() };
+    check("a new bot's first message with a picture, its words given back while the picture uploads and then taken: back on the bot the safe line, and Enter gets the first answer again under the same key; one upload, one turn", wChips === 1 && wHeld === 1 && wback.prompt === 'hello wes' && SAFE.test(wback.line ?? '') && wback.chips === 1 && wes.keys.length === 1 && typeof wes.keys[0] === 'string' && JSON.stringify(wes.turns) === '["hello wes"]' && wes.uploads === 1 && wes.replays === 1 && wes.made === 1 && wes.prompt === '' && wes.line === null, wes);
     await clearPrompt();
 
     // 12. Taken for sure, the key goes: the same words sent again on purpose run again, under a new key.
