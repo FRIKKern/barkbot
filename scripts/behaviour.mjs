@@ -2570,6 +2570,32 @@ else {
       check('two sends on their way at once; the first comes back and is split in two; then the second comes back: the box reads one, two, three', JSON.stringify(split.prompt) === JSON.stringify(['one', 'two', 'three']), split);
       await clearPrompt();
     }
+    // PROBES (rev63, throwaway): other ways to split a returned paragraph, then the second send comes back.
+    {
+      const runProbe = async (name, act) => {
+        await open(`${base}/`); await until(() => stub.opened.includes(SM), 15000, 'open').catch(() => {}); await wait(800); await clearPrompt();
+        const g0 = stub.heldSends.length; stub.holdSend = true;
+        await typeSend('one two'); await until(() => stub.heldSends.length > g0, 8000, 's1').catch(() => {}); await wait(200);
+        await typeSend('three'); await until(() => stub.heldSends.length > g0 + 1, 8000, 's2').catch(() => {}); await wait(200);
+        stub.holdSend = false; const held = stub.heldSends.splice(g0);
+        held[0](); await until(async () => (await promptText()) === 'one two', 8000, 'back1').catch(() => {}); await wait(300);
+        const caret = (off) => ev((off) => { const box = document.querySelector('.prompt'); box.focus(); const t = box.querySelector('p')?.firstChild; const r = document.createRange(); r.setStart(t, off === -1 ? t.length : off); r.collapse(true); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); return true; }, off);
+        await act(caret);
+        await wait(300);
+        const mid = await ev(() => [...document.querySelector('.prompt').children].map((c) => c.outerHTML));
+        held[1](); await until(async () => /three/.test(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), 8000, 'back2').catch(() => {}); await wait(500);
+        const out = { name, mid, prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), html: await ev(() => [...document.querySelector('.prompt').children].map((c) => c.outerHTML)), sent: stub.sent.length };
+        check(`PROBE ${name}`, false, out);
+        await clearPrompt();
+      };
+      const shiftEnter = async () => { await page.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, modifiers: 8 }); await page.send('Input.dispatchKeyEvent', { type: 'char', key: 'Enter', code: 'Enter', text: '\r', windowsVirtualKeyCode: 13, modifiers: 8 }); await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, modifiers: 8 }); };
+      await runProbe('shift-enter after one', async (caret) => { await caret(3); await shiftEnter(); });
+      await runProbe('cdp insertText x\\ny after one', async (caret) => { await caret(3); await page.send('Input.insertText', { text: 'x\ny' }); });
+      await runProbe('paste html two paragraphs after one', async (caret) => { await caret(3); await ev(() => { const dt = new DataTransfer(); dt.setData('text/html', '<p>x</p><p>y</p>'); dt.setData('text/plain', 'x\ny'); const box = document.querySelector('.prompt'); const ok = box.dispatchEvent(new InputEvent('beforeinput', { inputType: 'insertFromPaste', dataTransfer: dt, bubbles: true, cancelable: true })); document.execCommand('insertHTML', false, '<p>x</p><p>y</p>'); return ok; }); });
+      await runProbe('paste plain x\\ny after one (execCommand insertText)', async (caret) => { await caret(3); await ev(() => document.execCommand('insertText', false, 'x\ny')); });
+      await runProbe('split at start (beforeinput + insertParagraph)', async (caret) => { await caret(0); await ev(() => { const box = document.querySelector('.prompt'); box.dispatchEvent(new InputEvent('beforeinput', { inputType: 'insertParagraph', bubbles: true, cancelable: true })); document.execCommand('insertParagraph'); }); });
+      await runProbe('split at end then type z (beforeinput + insertParagraph)', async (caret) => { await caret(-1); await ev(() => { const box = document.querySelector('.prompt'); box.dispatchEvent(new InputEvent('beforeinput', { inputType: 'insertParagraph', bubbles: true, cancelable: true })); document.execCommand('insertParagraph'); }); await page.send('Input.insertText', { text: 'z' }); });
+    }
     stub.sessions = []; freshStore();
   }
 }
