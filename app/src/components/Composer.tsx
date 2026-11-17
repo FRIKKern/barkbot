@@ -159,7 +159,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
           if (dropped.length) { e.preventDefault(); void add(dropped) }
         }}
       >
-        {waiting && <Attachments pictures={pictures} files={files} onRemovePicture={(i) => (setPictures((all) => all.filter((_, j) => j !== i)), edited())} onRemoveFile={(i) => (setFiles((all) => all.filter((_, j) => j !== i)), edited())} />}
+        {waiting && <Attachments pictures={pictures} files={files} onRemovePicture={(i) => setPictures((all) => all.filter((_, j) => j !== i))} onRemoveFile={(i) => (setFiles((all) => all.filter((_, j) => j !== i)), edited())} />}
         <Round label="Composer actions" area="act">
           <Icon d="M8 3v10M3 8h10" />
         </Round>
