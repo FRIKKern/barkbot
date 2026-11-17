@@ -70,7 +70,12 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // The box's words as a send takes them.
   const [words, setWords] = useState(start?.draft?.trim() ?? '')
   const read = (el: HTMLElement) => el.innerText.replace(/\n+$/, '').trim()
-  const shown = refused && about && beside && !holds(about, {text: words, pictures, files}) ? beside(refused) : refused
+  const said = refused && about && beside && !holds(about, {text: words, pictures, files}) ? beside(refused) : refused
+  // A send that comes back unsent puts its pictures and files back beside any added meanwhile, so the
+  // box can hold more than four (task-724aa2a5a9b5e5cf). None is dropped: the line says a message takes
+  // four at most, still saying what it said before, and Enter sends nothing until some are taken out.
+  const over = pictures.length + files.length > MAX_ATTACHMENTS
+  const shown = over ? (said && said !== FOUR_AT_MOST ? `${FOUR_AT_MOST}. ${said}` : FOUR_AT_MOST) : said
   // Each send's number. What comes back unsent goes after what came back from an earlier send and
   // before what came back from a later one, so two sends on their way at once read back in the order
   // they were sent, whichever answer comes first; what was typed or attached since stays after them.
@@ -142,6 +147,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     if (!el || !onSend || disabled) return
     const text = read(el)
     if (!text && !pictures.length && !files.length) return
+    if (pictures.length + files.length > MAX_ATTACHMENTS) return // the line already says why
     el.replaceChildren()
     setDraft(false)
     const sent = {pictures, files}
