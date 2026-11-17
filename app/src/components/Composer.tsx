@@ -123,7 +123,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
           data = await base64(f)
         } catch {
           say(`${f.name} could not be read`)
-          continue
+          break
         }
         if (full()) {
           say(FOUR_AT_MOST)
