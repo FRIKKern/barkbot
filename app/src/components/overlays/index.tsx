@@ -128,7 +128,7 @@ export function Overlay({name, scene, onOpenChange, onCreateBot}: {name?: string
         return null
       })
     }
-    const onKey = (e: globalThis.KeyboardEvent) => e.key === 'Escape' && close(true)
+    const onKey = (e: globalThis.KeyboardEvent) => e.key === 'Escape' && close(false)
     const onDown = () => (prior.current = document.activeElement)
     document.addEventListener('pointerdown', onDown, true)
     document.addEventListener('click', onClick)
