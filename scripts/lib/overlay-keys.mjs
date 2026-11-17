@@ -20,7 +20,8 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
     if (!a || a === document.body) return 'body';
     const role = a.getAttribute('role') || (a.tagName === 'INPUT' ? 'input' : a.tagName.toLowerCase());
     const by = a.getAttribute('aria-labelledby');
-    const label = a.getAttribute('aria-label') || (by && document.getElementById(by)?.textContent.trim()) || (a.querySelector('.menu-label span, .option-text div, span')?.textContent ?? a.textContent).trim();
+    const own = (a.querySelector('.menu-label span') ?? a.querySelector('.option-text div') ?? a).textContent;
+    const label = a.getAttribute('aria-label') || (by && document.getElementById(by)?.textContent.trim()) || own.trim();
     return `${role} ${label}${a.hasAttribute('data-highlighted') ? ' [highlighted]' : ''}${a.closest('.overlay') ? ' (overlay)' : ''}`;
   });
   const highlighted = () => ev(() => [...document.querySelectorAll('.overlay [data-highlighted]')].length);
@@ -32,7 +33,20 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
     await wait(250);
     return !!at;
   };
-  const outside = async () => { await click(960, 40); await wait(250); };
+  // An outside click: the trace's point (960, 40) is in the oracle's window, and at this page's size
+  // it can fall inside a dialog (Connect apps is wide), so the click goes to the nearest corner of the
+  // page that is outside the open dialog or menu.
+  const outside = async () => {
+    const at = await ev(() => {
+      const box = document.querySelector('.overlay [role=dialog], .overlay [role=menu], .overlay [role=listbox]')?.getBoundingClientRect();
+      const w = innerWidth, h = innerHeight;
+      const corners = [[8, 8], [w - 8, 8], [8, h - 8], [w - 8, h - 8]];
+      return corners.find(([x, y]) => !box || x < box.left || x > box.right || y < box.top || y > box.bottom) ?? null;
+    });
+    if (at) await click(...at);
+    await wait(250);
+    return at;
+  };
   const fresh = async () => {
     await open(`${base}/gate/oracle-turn-1040`); await windowFocus(true);
     await until(async () => (await ev(() => !!document.querySelector('button[aria-label="New Bot"]'))), 15000, 'the oracle scene').catch(() => {});
@@ -47,7 +61,7 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
   await press('Tab'); nb.tab = await focused();
   await press('Escape'); nb.escape = await focused(); nb.after = await shown();
   await clickOn('button[aria-label="New Bot"]'); nb.again = await shown();
-  await outside(); nb.outside = await focused(); nb.afterOutside = await shown();
+  nb.at = await outside(); nb.outside = await focused(); nb.afterOutside = await shown();
   check('New Bot (keys trace): open puts focus in its Bot name field; Tab goes to the first character shape; Escape closes it and gives focus back to New Bot; an outside click closes it and leaves focus on the page (control: it was open again before the click)',
     nb.open === 'input Bot name (overlay)' && nb.tab === 'button blob character shape (overlay)' && nb.escape === 'button New Bot' && nb.after === null && nb.again === 'new-bot-dialog' && nb.outside === 'body' && nb.afterOutside === null, nb);
 
@@ -71,9 +85,14 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
     ca.open === 'dialog Connect Apps (overlay)' && ca.tab === 'button Close (overlay)' && ca.escape === 'button Connect apps' && ca.after === null, ca);
   check('Settings from the account menu (keys trace): open puts focus on the dialog itself; Tab goes to General; Escape closes it and gives focus back to what had it before the account menu opened, Connect apps (control: the account menu opened)',
     st.before === 'button Connect apps' && st.menu === 'account-menu' && st.shown === 'settings' && st.open === 'dialog Grok Bot settings (overlay)' && st.tab === 'button General (overlay)' && st.escape === 'button Connect apps' && st.after === null, st);
-  // Outside clicks on the two modals.
+  // Outside clicks on the modals (the trace records one for each).
+  await clickOn('button[aria-label^="Open account menu"]');
+  await ev(() => [...document.querySelectorAll('.overlay [role=menuitem]')].find((r) => r.textContent.trim().startsWith('Settings'))?.setAttribute('data-test-settings', ''));
+  await clickOn('.overlay [data-test-settings]'); const stAgain = await shown();
+  const stAt = await outside(); const stOut = { again: stAgain, at: stAt, focus: await focused(), after: await shown() };
+  check('Settings (keys trace): an outside click closes it and leaves focus on the page (control: it was open before the click)', stOut.again === 'settings' && stOut.focus === 'body' && stOut.after === null, stOut);
   await clickOn('button[aria-label="Connect apps"]'); const caAgain = await shown();
-  await outside(); const caOut = { again: caAgain, focus: await focused(), after: await shown() };
+  const caAt = await outside(); const caOut = { again: caAgain, at: caAt, focus: await focused(), after: await shown() };
   check('Connect apps (keys trace): an outside click closes it and leaves focus on the page (control: it was open before the click)', caOut.again === 'connect-apps' && caOut.focus === 'body' && caOut.after === null, caOut);
 
   // Composer menu: the menu itself on open, no row highlighted; arrows walk the rows; Escape back to its button.
