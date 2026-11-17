@@ -240,7 +240,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
     if (!sessionId && !opening) {
       const hostId = chat.host.id
       setOpening(true)
-      void (async () => {
+      await (async () => {
         try {
           const made = await startChat({data: {hostId, botId: chat.botId}})
           setStarted(made)
