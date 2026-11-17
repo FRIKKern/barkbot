@@ -337,16 +337,7 @@ export type AttachmentRef = string | {id: string; name: string}
  *  runtime could not take it (runtime_capacity, runtime_unavailable). That is `failed`, with
  *  Barkpark's words. Anything else may come after the turn went: a 500 or another 503 (storing it
  *  failed), a gateway's 502 or 504, no answer at all. That is `unsure`. Neither is thrown, so the
- *  page can tell "Barkpark said no" from "it may have gone".
- *  `key` is the message's Idempotency-Key (Barkpark PR #26689, docs/api-v1.md): the same key with
- *  the same request (query and body) answers the first answer again and runs nothing; with another
- *  request, 422 idempotency_key_reused; while the first is still being answered, 409
- *  idempotency_key_in_use. A 5xx is not remembered. So `unsure` says whether sending the same
- *  message again is safe (`again: 'safe'`: no answer, or not Barkpark's own) or may run it twice
- *  (`again: 'look'`: Barkpark's own 5xx, released, or no key). A 409 is asked again, the same key,
- *  every IN_USE_MS up to IN_USE_TRIES; then it is `unsure`, safe. A 422 reused means this key was
- *  first used for other words and ran nothing for these: they go once more under a new key. The
- *  answer names the key it is under, so the page keeps that one with the words. */
+ *  page can tell "Barkpark said no" from "it may have gone". */
 /** A refusal Barkpark gives before the turn goes: the message was surely not sent. */
 const refusedBeforeSending = (e: BarkparkError) =>
   (e.status >= 400 && e.status < 500) || (e.status === 503 && (e.code === 'runtime_capacity' || e.code === 'runtime_unavailable'))
@@ -361,47 +352,22 @@ async function askedForFolder(id: string): Promise<boolean> {
   }
 }
 
-/** Barkpark's own 5xx (its error envelope): its key is not remembered, so the same key runs again. */
-const ownFiveHundred = (e: unknown) => e instanceof BarkparkError && e.status >= 500 && !e.code.startsWith('http_')
-const IN_USE_MS = 1000
-const IN_USE_TRIES = 8
-
 export const sendMessage = createServerFn({method: 'POST'})
-  .validator((d: {id: string; content: string; attachments?: AttachmentRef[]; key?: string}) => d)
-  .handler(async ({data}): Promise<{accepted: true; key?: string; replay?: boolean} | {refused: string} | {failed: string} | {unsure: string; again: 'safe' | 'look'; key?: string}> => {
+  .validator((d: {id: string; content: string; attachments?: AttachmentRef[]}) => d)
+  .handler(async ({data}): Promise<{accepted: true} | {refused: string} | {failed: string} | {unsure: string}> => {
     // What it names was stored for this conversation first (uploadAttachment below).
     const json = data.attachments?.length ? {content: data.content, attachments: data.attachments} : {content: data.content}
-    let key = data.key
-    let replay = false
     try {
-      for (let tries = 1; ; tries++) {
-        try {
-          await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`, {method: 'POST', json, ...(key ? {headers: {'idempotency-key': key}} : {}), answered: (res) => void (replay = res.headers.get('idempotency-replay') === 'true')})
-          break
-        } catch (e) {
-          if (!key || !(e instanceof BarkparkError)) throw e
-          if (e.status === 409 && e.code === 'idempotency_key_in_use') {
-            if (tries >= IN_USE_TRIES) return {unsure: e.message, again: 'safe', key}
-            await new Promise((r) => setTimeout(r, IN_USE_MS))
-            continue
-          }
-          if (e.status === 422 && e.code === 'idempotency_key_reused' && key === data.key) {
-            key = randomUUID()
-            continue
-          }
-          throw e
-        }
-      }
+      await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`, {method: 'POST', json})
     } catch (e) {
-      if (!(e instanceof BarkparkError) || !refusedBeforeSending(e)) return {unsure: (e as Error).message, again: key && !ownFiveHundred(e) ? 'safe' : 'look', key}
+      if (!(e instanceof BarkparkError) || !refusedBeforeSending(e)) return {unsure: (e as Error).message}
       if (e.status === 422 && e.code === 'host_cannot_receive_attachments') return {refused: 'host_cannot_receive_attachments'}
       // chat_unsupported is Barkpark's shared code (a revoked host, a provider not ready, …): it is
       // the folder only when this conversation asked for one; otherwise it goes on as any failure.
       if (e.status === 422 && e.code === 'chat_unsupported' && (await askedForFolder(data.id))) return {refused: 'chat_unsupported'}
       return {failed: e.message}
     }
-    // A replay: it went before, once; this is that first answer again.
-    return {accepted: true, key, ...(replay ? {replay} : {})}
+    return {accepted: true}
   })
 
 /** Stores one picture, text file or PDF for a conversation and answers its id and type. Barkpark
