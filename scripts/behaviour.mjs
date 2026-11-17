@@ -1972,6 +1972,29 @@ else {
     const yul = { back, busy, keys: [...new Set(stub.keyed.slice(k0).map((x) => x.key))], turns: stub.sent.slice(s0).map((m) => m.content), made: stub.made.length - m0, prompt: await promptText(), line: await refusedLine(), shown: await userBubbles('hello yul') };
     check("a new bot's first message given back while on its way, sent again while Barkpark still answers it: the line says sending again is safe; the resend waits out the 409 under the same key and gets the first answer; one turn, one conversation, shown once", back.prompt === 'hello yul' && SAFE.test(back.line ?? '') && busy >= 1 && yul.keys.length === 1 && typeof yul.keys[0] === 'string' && JSON.stringify(yul.turns) === '["hello yul"]' && yul.made === 1 && yul.prompt === '' && yul.line === null && yul.shown === 1, yul);
     await clearPrompt();
+
+    // 7. The same, but Barkpark answers the first (202) after its words were given back and before
+    // they are sent again: the resend still carries its key and gets that answer again. One turn.
+    const ZA = '2c8a9b0c-1d2e-4f3a-8b4c-5d6e7f8a9bb3', ZB = '3d9b0c1d-2e3f-4a4b-9c5d-6e7f8a9b0cc4';
+    stub.hosts = host(true); stub.sessions = []; freshStore();
+    stub.prefs.set('barkbot.bots', { ids: [ZA, ZB] }); stub.prefs.set(`barkbot.bot.${ZA}`, rec('Zed', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${ZB}`, rec('Zoe', HOST_ID, null));
+    await open(`${base}/?bot=${ZA}`); await until(async () => (await live()).header === 'Zed', 15000, "Zed's page").catch(() => {}); await wait(500);
+    k0 = stub.keyed.length; s0 = stub.sent.length; const zh0 = stub.heldSends.length, zr0 = stub.replays, zm0 = stub.made.length;
+    stub.holdTake = true;
+    await typeSend('hello zed');
+    await until(() => stub.heldSends.length > zh0, 10000, "Zed's message on its way").catch(() => {}); await wait(200);
+    stub.holdTake = false;
+    await clickTile('Zoe');
+    await until(async () => (await onBot()) === ZB, 20000, "Zoe's page after the hold").catch(() => {}); await wait(800);
+    stub.heldSends.splice(0).forEach((answer) => answer()); await wait(1000);
+    await clickTile('Zed');
+    await until(async () => (await onBot()) === ZA && (await promptText()) !== '', 15000, "Zed's page with its words").catch(() => {}); await wait(800);
+    const zback = { prompt: await promptText(), line: await refusedLine() };
+    await enter();
+    await until(() => stub.replays > zr0, 10000, 'the resend to be answered').catch(() => {}); await wait(1500);
+    const zed = { back: zback, keys: [...new Set(stub.keyed.slice(k0).map((x) => x.key))], requests: stub.keyed.length - k0, replays: stub.replays - zr0, turns: stub.sent.slice(s0).map((m) => m.content), made: stub.made.length - zm0, prompt: await promptText(), line: await refusedLine(), shown: await userBubbles('hello zed') };
+    check("a new bot's first message given back while on its way and taken (202) before it is sent again: the resend carries the same key and gets that answer again; one turn, shown once", zback.prompt === 'hello zed' && SAFE.test(zback.line ?? '') && zed.keys.length === 1 && typeof zed.keys[0] === 'string' && zed.requests === 2 && zed.replays === 1 && JSON.stringify(zed.turns) === '["hello zed"]' && zed.made === 1 && zed.prompt === '' && zed.line === null && zed.shown === 1, zed);
+    await clearPrompt();
     stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
 }
