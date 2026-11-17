@@ -2,7 +2,8 @@
 // plan: /papers/barkbot-many-bots-plan, "The record"):
 //
 //   barkbot.bots        {ids: [id, ...]}   the order in the rail; changed only by PATCH add/remove (row-locked)
-//   barkbot.bot.<id>    {name, shape, colour, host_id, session_id, created_at}   PUT on its own key
+//   barkbot.bot.<id>    {name, shape, colour, host_id, session_id, created_at}   PUT whole by Create and the move-in;
+//                       one field (name, session_id) by PATCH set (row-locked: setBotField)
 //   barkbot.bot         {name}             today's one bot, before the store: read, never written or deleted
 //
 // A pref is written by a client, so a record is a claim, not a fact. A record is shown only if its
@@ -167,12 +168,16 @@ export async function readBots(ids: string[], hosts: OwnHost[], listed: OwnSessi
   return {bots: kept.map((bot, i) => ({bot, session: checks[i]})).filter((x) => x.session.is !== 'foreign'), unread}
 }
 
-// One change at a time per bot record. A change reads the record, changes one field and writes
-// the whole record back (Barkpark prefs have no per-field write and no compare-and-set,
-// docs/contracts/user-prefs.md), so two at once (a rename while the first message opens a
-// conversation, or two tabs) would each write what they read and lose the other's field. Every
-// tab goes through this one BarkBot server, so a queue here keeps both; the next change starts
-// after the last one ended, whether it worked or not. Another bot's changes never wait on it.
+// One change at a time per bot record, for a change that must check the record before it writes
+// and is wrong if the record changed in between. A one-field write itself needs no queue: it is a
+// PATCH set (setBotField), which Barkpark applies under the row lock, so a rename and a new
+// conversation saved at the same moment both stay, from this server or any other. Today only a
+// new chat's save goes through here (api.ts startChat): it saves its conversation only if the
+// record names none yet, and two new chats at once (two tabs) would both see none and the second
+// would save over the first. The queue makes the second read after the first is saved, so it sees
+// it and keeps the record's. That holds for one BarkBot server only: Barkpark has no compare-and-set.
+// The next change starts after the last one ended, whether it worked or not. Another bot's changes
+// never wait on it.
 // Every step of a change is bounded, so no change holds its bot for ever:
 //  - its reads: each by READ_MS (8 s, barkpark.ts), and a read that does not answer fails the change
 //    with its own line. A slow read that answers is an answer, so it is not counted below.
@@ -188,7 +193,7 @@ const BUSY = 'Another change to this bot is still being saved, so this one was n
 const changing = new Map<string, Promise<void>>()
 /** `write` runs a change's write under WRITE_MS: its `signal` calls the write off at the bound. */
 export type Write = <W>(save: (signal: AbortSignal) => Promise<W>) => Promise<W>
-const write: Write = (save) => {
+export const write: Write = (save) => {
   const stop = new AbortController()
   const timer = setTimeout(() => stop.abort(), WRITE_MS)
   const called = new Promise<never>((_, no) => stop.signal.addEventListener('abort', () => no(new Error(SLOW))))
@@ -222,6 +227,21 @@ export async function putBot(bot: Bot, signal?: AbortSignal): Promise<void> {
   const {id, ...value} = bot
   signal?.throwIfAborted()
   await bp(prefs(botKey(id)), {method: 'PUT', json: {value}, signal})
+}
+
+/** Sets one top-level field of a bot's record, under Barkpark's row lock (PATCH set), so a change
+ *  to another field at the same moment stays. Answers the record as it is now. A set on a key that
+ *  is gone creates it with that one field: that half record is removed again at once, and the
+ *  answer is null. (A record always holds more than one field, so only a set that made the key
+ *  answers just its own.) `signal` calls the write off, as putBot's does. */
+export async function setBotField(id: string, field: 'name' | 'session_id', item: string, signal?: AbortSignal): Promise<Record<string, unknown> | null> {
+  signal?.throwIfAborted()
+  const {value} = await bp<{value: Record<string, unknown> | null}>(prefs(botKey(id)), {method: 'PATCH', json: {op: 'set', field, item}, signal})
+  if (!value || (Object.keys(value).length === 1 && field in value)) {
+    await bp(prefs(botKey(id)), {method: 'DELETE'})
+    return null
+  }
+  return value
 }
 
 /** Removes a bot's own key: Create's clean-up when its list add failed, so nothing half-made stays. */
