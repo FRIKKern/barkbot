@@ -104,7 +104,7 @@ export const READ_CAP = 50
 export async function listIds(): Promise<string[] | null> {
   const v = await read<{ids?: unknown}>(LIST_KEY)
   if (!v || !Array.isArray(v.ids)) return null
-  return [...new Set(v.ids.filter((x): x is string => typeof x === 'string' && UUID.test(x)))]
+  return [...v.ids.filter((x): x is string => typeof x === 'string' && UUID.test(x))]
 }
 
 /** Today's one bot's name (the legacy pref), or null when it is unset. Read only. Throws if the
