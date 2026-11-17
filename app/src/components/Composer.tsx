@@ -116,15 +116,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
       else if (full()) say(FOUR_AT_MOST)
       else if (!picture && !sendableName(f.name)) say(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
       else {
-        // A read that fails (the file went, or cannot be opened) is said by name; the rest of the pick
-        // is still added (task-f50dffe109dfda73).
-        let data: string
-        try {
-          data = await base64(f)
-        } catch {
-          say(`${f.name} could not be read`)
-          continue
-        }
+        const data = await base64(f)
         if (full()) {
           say(FOUR_AT_MOST)
           continue
