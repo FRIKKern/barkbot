@@ -177,7 +177,6 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     setFiles([])
     setWords('')
     say(null)
-    setNote(null)
     el.focus()
     const why = await onSend(text, sent.pictures, sent.files)
     if (why === null || why === undefined) return
