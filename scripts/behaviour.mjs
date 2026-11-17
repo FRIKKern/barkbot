@@ -21,6 +21,7 @@ import { queueProbe } from './lib/queue-probe.mjs';
 import { overlayKeys } from './lib/overlay-keys.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
+import { createOnce } from './lib/create-once.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -81,7 +82,7 @@ await new Promise((ok) => httpServer((req, res) => {
       if (readAs === 'otherDataset') return json(200, { key, dataset: 'staging', value: null });
       if (readAs === 'empty') return json(200, {});
       if (req.method === 'GET') { stub.reads++; stub.readKeys.push(key); const answer = () => (failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got()); return stub.readDelay ? setTimeout(answer, stub.readDelay) : answer(); }
-      const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing });
+      const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing, inm: req.headers['if-none-match'] ?? null });
       if (failing) return json(failing, { error: { code: 'internal', message: 'the stand-in fails this write' } });
       // A record write: a whole-record PUT, or a PATCH set of one top-level field (Barkpark's row-locked
       // op, docs/contracts/user-prefs.md: a missing key is created with that one field; item null is 422).
@@ -104,6 +105,10 @@ await new Promise((ok) => httpServer((req, res) => {
       const lw = stub.lateWrite;
       if (record && lw?.key === key && !lw.taken && changes(lw.field)) { lw.taken = true; stub.hung.push(res); return void setTimeout(() => { land(); lw.landed = true; }, lw.ms); }
       if (record && stub.goneBeforeWrite === key) { stub.goneBeforeWrite = null; stub.prefs.delete(key); }
+      // `madeBeforePut` {key, value}: another writer makes that record just before a PUT to it lands.
+      // If-None-Match: * (user-prefs.md): a PUT writes only an unset key, else 412 and nothing written.
+      if (req.method === 'PUT' && stub.madeBeforePut?.key === key) { stub.prefs.set(key, stub.madeBeforePut.value); stub.madeBeforePut = null; }
+      if (req.method === 'PUT' && req.headers['if-none-match'] === '*' && stub.prefs.has(key)) return json(412, { error: { code: 'precondition_failed', message: 'the key already holds a value; If-None-Match: * creates only an unset key' } });
       const h = stub.holdPut;
       if (record && h?.key === key) {
         if (!h.pending && !h.done && changes(h.field)) {
@@ -584,10 +589,11 @@ else {
   // A made bot listed twice: Rail draws the Main Bot once whatever the list holds, so the twice-listed
   // id must be a made bot's, or the rule would hold without the list's dedupe (rev63, mutant #176 on #171).
   const TWICE = 'b1c2d3e4-5f6a-4b7c-8d9e-0f1a2b3c4d5e';
-  stub.prefs.set(`barkbot.bot.${TWICE}`, rec('Twice', HOST_ID, null));
+  // Named as the Main Bot, so the rule also tells the Main Bot by its id, not its name (rev63, mutant #182 on #171).
+  stub.prefs.set(`barkbot.bot.${TWICE}`, rec('Kept Name', HOST_ID, null));
   stub.prefs.set('barkbot.bots', { ids: [main, TWICE, TWICE] });
   s = await showing('Kept Name');
-  check('an id twice in the list is one bot in the rail: a made bot listed twice has one tile, next to the one Main Bot', s.tiles.filter((t) => t === 'Twice').length === 1 && s.tiles.filter((t) => t === 'Kept Name, Main Bot').length === 1, { tiles: s.tiles });
+  check('an id twice in the list is one bot in the rail: a made bot listed twice, named as the Main Bot, has one plain tile, next to the one Main Bot', s.tiles.filter((t) => t === 'Kept Name').length === 1 && s.tiles.filter((t) => t === 'Kept Name, Main Bot').length === 1, { tiles: s.tiles });
   stub.prefs.delete(`barkbot.bot.${TWICE}`);
   const many = Array.from({ length: 60 }, (_, i) => `a0000000-0000-4000-8000-0000000000${i.toString(16).padStart(2, '0')}`);
   many.forEach((id, i) => stub.prefs.set(`barkbot.bot.${id}`, rec(`Bot ${i}`, HOST_ID, null)));
@@ -728,6 +734,7 @@ else {
     check('a seeded id whose record is there, off the list, is passed over: Create takes the next, and that record is untouched', t.id === C && JSON.stringify(stub.prefs.get(`barkbot.bot.${O}`)) === JSON.stringify(orphan) && !t.writes.includes(`PUT barkbot.bot.${O}`), { ...t, orphan: stub.prefs.get(`barkbot.bot.${O}`) });
     rmSync(MINT, { force: true }); freshStore();
   }
+  await createOnce({ check, ev, stub, freshStore, showing, alertLine, rec, session, ids, botPuts, HOST_ID, S1, KEY, MINT });
   // A bot already listed when today's bot has not moved in yet: today's bot still moves in.
   const OTHER = '9d2a3b4c-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
   freshStore({ name: 'Legacy Name' }); stub.sessions = [session(S1)];
@@ -2374,6 +2381,104 @@ else {
     two.forEach((f) => rmSync(f, { force: true }));
     check('a pick of three whose first and last files cannot be read: the line names both, the readable one waits in the box, and nothing is left unhandled', JSON.stringify(both.chips) === JSON.stringify([`good-y-${CHROME_PORT}.png`]) && both.line === `broken-x-${CHROME_PORT}.png and broken-z-${CHROME_PORT}.png could not be read` && both.unhandled === 0, both);
     await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    // A picture over 3 MB between two that cannot be read: each reason is said once, naming all its files (task-e1fc137f265fbe22).
+    const mix = [['broken-x', PNG], ['big-y', Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)])], ['broken-z', PNG]].map(([x, b]) => { const f = path('.cache', `${x}-${CHROME_PORT}.png`); writeFileSync(f, b); return f; });
+    await ev(() => (window.__unhandled = 0));
+    { const { root } = await page.send('DOM.getDocument'); const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId, files: mix }); }
+    await wait(1500); // both failed reads have landed
+    const mixed = { chips: await chipNames(), line: await ev(() => document.querySelector('.composer-refused')?.textContent ?? null), unhandled: await ev(() => window.__unhandled) };
+    mix.forEach((f) => rmSync(f, { force: true }));
+    check('a pick of an unreadable file, a picture over 3 MB, and another unreadable file: the line names both unreadable ones and the big one, each once, and nothing waits', mixed.line === `broken-x-${CHROME_PORT}.png and broken-z-${CHROME_PORT}.png could not be read. big-y-${CHROME_PORT}.png is over 3 MB` && mixed.chips.length === 0 && mixed.unhandled === 0, mixed);
+    await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    stub.sessions = []; freshStore();
+  }
+
+  // ── A pick's refusal is said beside a send's may-have-been-sent line, never in its place (task-e1fc137f265fbe22) ──
+  console.log('Behaviour · a file refused after a send had no answer (the live page, against the stand-in Barkpark)');
+  {
+    const SN = '00000000-0000-4000-8000-0000000003d1';
+    const chipNames = () => ev(() => [...document.querySelectorAll('.composer-attachments [role=listitem]')].map((x) => x.getAttribute('aria-label')));
+    const pick = async (files) => { const { root } = await page.send('DOM.getDocument'); const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId, files }); };
+    const SAFE = /may have been sent, but sending it again is safe/;
+    // Sent, its answer lost after Barkpark took it: the words (and pictures) come back with the safe line.
+    const lost = async (words) => {
+      const s0 = stub.sent.length; stub.dropAnswer = true; await typeSend(words);
+      await until(() => stub.sent.length > s0, 8000, 'the message to reach the stand-in').catch(() => {});
+      await until(async () => SAFE.test((await refusedLine()) ?? ''), 8000, 'the safe line').catch(() => {}); await wait(500);
+      stub.dropAnswer = false;
+      return refusedLine();
+    };
+    const openOn = async () => {
+      stub.hosts = host(true); stub.fleet = null; stub.rows = []; freshStore(); stub.sessions = [session(SN)]; stub.failShow.clear(); stub.opened = [];
+      await open(`${base}/`); await until(() => stub.opened.includes(SN), 15000, 'the conversation to open').catch(() => {}); await wait(800); await clearPrompt();
+    };
+    // 1. Words alone come back unsure; a picture over 3 MB is picked.
+    await openOn();
+    const zip = path('.cache', `refused-${CHROME_PORT}.png`); writeFileSync(zip, Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)]));
+    const before = await lost('did it go');
+    await pick([zip]); await wait(1000);
+    const kind = { before, line: await refusedLine(), prompt: await promptText(), chips: await chipNames() };
+    rmSync(zip, { force: true });
+    check('a send with no answer, then a picture over 3 MB is picked: the line says why the picture was not taken, and still says the message may have been sent and sending it again is safe', SAFE.test(kind.before ?? '') && /refused-\d+\.png is over 3 MB/.test(kind.line ?? '') && SAFE.test(kind.line ?? '') && kind.prompt === 'did it go' && kind.chips.length === 0, kind);
+    await clearPrompt();
+    // 2. Four pictures with words come back unsure; a fifth is picked.
+    await openOn();
+    const four = [0, 1, 2, 3].map((i) => { const f = path('.cache', `note-${i}-${CHROME_PORT}.png`); writeFileSync(f, Buffer.concat([PNG, Buffer.from(`n${i}`)])); return f; });
+    const fifth = path('.cache', `note-5-${CHROME_PORT}.png`); writeFileSync(fifth, Buffer.concat([PNG, Buffer.from('n5')]));
+    await pick(four); await until(async () => (await chipNames()).length === 4, 10000, 'four chips').catch(() => {});
+    const before4 = await lost('four of them');
+    await until(async () => (await chipNames()).length === 4, 8000, 'the four back').catch(() => {});
+    await pick([fifth]); await wait(1000);
+    const five = { before: before4, line: await refusedLine(), chips: await chipNames() };
+    [...four, fifth].forEach((f) => rmSync(f, { force: true }));
+    check('four pictures sent with no answer come back, then a fifth is picked: the line says a message takes four at most, and still says the message may have been sent and sending it again is safe', SAFE.test(five.before ?? '') && /four pictures and files at most/.test(five.line ?? '') && SAFE.test(five.line ?? '') && five.chips.length === 4, five);
+    await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    // 3. One pick refused for two reasons, two files for one of them: every refused file is named, once.
+    await openOn();
+    const mixed = [['big-x', Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)])], ['good-y', PNG], ['big-z', Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 2)])], ['empty-w', Buffer.alloc(0)]].map(([x, b]) => { const f = path('.cache', `${x}-${CHROME_PORT}.png`); writeFileSync(f, b); return f; });
+    await pick(mixed); await until(async () => (await chipNames()).length >= 1, 8000, 'the one taken').catch(() => {}); await wait(800);
+    const all = { line: await refusedLine(), chips: await chipNames() };
+    mixed.forEach((f) => rmSync(f, { force: true }));
+    const P = CHROME_PORT;
+    check('one pick with two pictures over 3 MB, one empty and one fine: the line names both big ones and the empty one, and the fine one waits', all.line === `big-x-${P}.png and big-z-${P}.png are over 3 MB. empty-w-${P}.png is empty` && JSON.stringify(all.chips) === JSON.stringify([`good-y-${P}.png`]), all);
+    await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    // 4. A pick's refusal goes when the next send goes.
+    await openOn();
+    const big = path('.cache', `gone-${CHROME_PORT}.png`); writeFileSync(big, Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)]));
+    await pick([big]); await wait(800);
+    const named = await refusedLine();
+    const s1 = stub.sent.length;
+    await typeSend('words alone');
+    await until(() => stub.sent.length > s1, 8000, 'the words to go').catch(() => {}); await wait(800);
+    const after = { named, sent: stub.sent.slice(s1).map((m) => m.content), line: await refusedLine(), shown: await ev(() => !!document.querySelector('.composer-refused')) };
+    rmSync(big, { force: true });
+    check('control: a picture over 3 MB is picked: the line names it', new RegExp(`gone-${CHROME_PORT}\\.png is over 3 MB`).test(named ?? ''), after);
+    check('then words are sent and go: the line about the refused picture is gone', JSON.stringify(after.sent) === '["words alone"]' && after.line === null && after.shown === false, after);
+    await clearPrompt();
+    // 5. Two picks at once: the first still reading (its file fails late) when the second is refused.
+    await openOn();
+    await ev(() => { const real = FileReader.prototype.readAsDataURL; FileReader.prototype.readAsDataURL = function (f) { if (f?.name?.startsWith('lateb-')) setTimeout(() => this.onerror?.(new ProgressEvent('error')), 1500); else real.call(this, f); }; });
+    const lateA = path('.cache', `lateb-a-${CHROME_PORT}.png`), bigB = path('.cache', `big-b-${CHROME_PORT}.png`);
+    writeFileSync(lateA, PNG); writeFileSync(bigB, Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)]));
+    await pick([lateA]); await wait(200); await pick([bigB]); await wait(2500); // the first pick's read has failed
+    const overlap = { line: await refusedLine(), chips: await chipNames() };
+    rmSync(lateA, { force: true }); rmSync(bigB, { force: true });
+    check('a pick still being read when a second pick is refused: when the first one\'s file fails, the line names both, the second\'s refusal is not lost', overlap.line === `big-b-${CHROME_PORT}.png is over 3 MB. lateb-a-${CHROME_PORT}.png could not be read` && overlap.chips.length === 0, overlap);
+    await clearPrompt();
+    // 6. The other order: the first pick refuses one file at once and is still reading another when the
+    // second pick starts and is refused; the first refusal is kept.
+    const bigA = path('.cache', `big-a-${CHROME_PORT}.png`), lateA2 = path('.cache', `lateb-a2-${CHROME_PORT}.png`), bigB2 = path('.cache', `big-b2-${CHROME_PORT}.png`);
+    writeFileSync(bigA, Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)])); writeFileSync(lateA2, PNG); writeFileSync(bigB2, Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 2)]));
+    await pick([bigA, lateA2]); await wait(300);
+    const firstSaid = await refusedLine();
+    await pick([bigB2]); await wait(300);
+    const bothBig = await refusedLine();
+    await wait(2000); // the first pick's late read has failed
+    const order = { firstSaid, bothBig, line: await refusedLine(), chips: await chipNames() };
+    [bigA, lateA2, bigB2].forEach((f) => rmSync(f, { force: true }));
+    const Q = CHROME_PORT;
+    check('a pick refuses a file and is still reading another when a second pick starts and is refused: the line names both refused pictures, then the late unreadable one too', order.firstSaid === `big-a-${Q}.png is over 3 MB` && order.bothBig === `big-a-${Q}.png and big-b2-${Q}.png are over 3 MB` && order.line === `big-a-${Q}.png and big-b2-${Q}.png are over 3 MB. lateb-a2-${Q}.png could not be read` && order.chips.length === 0, order);
+    await clearPrompt();
     stub.sessions = []; freshStore();
   }
 

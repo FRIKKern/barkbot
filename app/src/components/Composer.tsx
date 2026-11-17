@@ -21,6 +21,19 @@ export const ATTACH_EVENT = 'barkbot:attach'
 
 const FOUR_AT_MOST = 'A message takes four pictures and files at most'
 
+/** Why a pick was not all taken: one sentence per reason, naming every file it refused, in the order
+ *  first met, so no refusal of a pick hides another. */
+const REASONS = {
+  kind: ['is not a picture, a text file or a PDF', 'are not pictures, text files or PDFs'],
+  big: ['is over 3 MB', 'are over 3 MB'],
+  empty: ['is empty', 'are empty'],
+  unread: ['could not be read', 'could not be read'],
+  name: ['has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most', 'have names that cannot be sent: no / or \\, no control characters, 255 bytes at most'],
+} as const
+type Reason = keyof typeof REASONS | 'four'
+const listed = (n: string[]) => (n.length > 1 ? `${n.slice(0, -1).join(', ')} and ${n.at(-1)}` : n[0])
+const noteOf = (refused: Map<Reason, string[]>) => [...refused].map(([r, n]) => (r === 'four' ? FOUR_AT_MOST : `${listed(n)} ${REASONS[r][n.length > 1 ? 1 : 0]}`)).join('. ')
+
 const base64 = (f: File) =>
   new Promise<string>((ok, no) => {
     const r = new FileReader()
@@ -71,11 +84,25 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   const [words, setWords] = useState(start?.draft?.trim() ?? '')
   const read = (el: HTMLElement) => el.innerText.replace(/\n+$/, '').trim()
   const said = refused && about && beside && !holds(about, {text: words, pictures, files}) ? beside(refused) : refused
+  // Why the last pick was not all taken (a file refused, four at most). It is said beside a send's
+  // line, never in its place: after a send with no answer that line is the only word that it may have
+  // gone (task-e1fc137f265fbe22).
+  const [note, setNote] = useState<string | null>(null)
+  // The refusals the note names, kept across picks still being read: a late refusal of an earlier
+  // pick joins the later pick's, never writes over it, and a pick that starts while another is read
+  // keeps what that one refused already. `reading`: how many picks are being read now.
+  const refusals = useRef(new Map<Reason, string[]>())
+  const reading = useRef(0)
+  const unsay = () => {
+    refusals.current = new Map()
+    setNote(null)
+  }
   // A send that comes back unsent puts its pictures and files back beside any added meanwhile, so the
   // box can hold more than four (task-724aa2a5a9b5e5cf). None is dropped: the line says a message takes
   // four at most, still saying what it said before, and Enter sends nothing until some are taken out.
   const over = pictures.length + files.length > MAX_ATTACHMENTS
-  const shown = over ? (said && said !== FOUR_AT_MOST ? `${FOUR_AT_MOST}. ${said}` : FOUR_AT_MOST) : said
+  // Four at most (once, if the note does not say it already), then the pick's note, then the send's line.
+  const shown = [over && !note?.includes(FOUR_AT_MOST) ? FOUR_AT_MOST : null, note, said].filter(Boolean).join('. ') || null
   // Each send's number. What comes back unsent goes after what came back from an earlier send and
   // before what came back from a later one, so two sends on their way at once read back in the order
   // they were sent, whichever answer comes first; what was typed or attached since stays after them.
@@ -107,33 +134,44 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // Pictures, text files and PDFs: what Barkpark stores for a conversation. Anything else is
   // refused here, with the reason, instead of failing after the send.
   const add = async (picked: File[]) => {
-    // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes.
-    if (!about) say(null)
+    // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes, once
+    // no pick is still being read.
+    if (!reading.current) unsay()
+    reading.current++
+    try {
+      await take(picked)
+    } finally {
+      reading.current--
+    }
+  }
+  const take = async (picked: File[]) => {
     // Each file is added when it is read, to what the box holds then, never to a copy taken before
     // (that would put back a picture that went meanwhile: task-9b801b838c6f4078). The four-at-most
     // limit is counted then too, so two reads at once cannot make five.
     const full = () => held.current >= MAX_ATTACHMENTS
-    const unread: string[] = [] // every file of this pick that could not be read, named together
+    const refuse = (r: Reason, name: string) => {
+      refusals.current.set(r, [...(refusals.current.get(r) ?? []), name])
+      setNote(noteOf(refusals.current))
+    }
     for (const f of picked) {
       const picture = PICTURE_TYPES.includes(f.type)
-      if (!picture && !FILE_TYPES.test(f.type)) say(`${f.name} is not a picture, a text file or a PDF`)
-      else if (f.size > MAX_BYTES) say(`${f.name} is over 3 MB`)
-      else if (!f.size) say(`${f.name} is empty`)
-      else if (full()) say(FOUR_AT_MOST)
-      else if (!picture && !sendableName(f.name)) say(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
+      if (!picture && !FILE_TYPES.test(f.type)) refuse('kind', f.name)
+      else if (f.size > MAX_BYTES) refuse('big', f.name)
+      else if (!f.size) refuse('empty', f.name)
+      else if (full()) refuse('four', f.name)
+      else if (!picture && !sendableName(f.name)) refuse('name', f.name)
       else {
-        // A read that fails (the file went, or cannot be opened) is said by name, with any other of this
-        // pick that failed; the rest of the pick is still added (task-f50dffe109dfda73).
+        // A read that fails (the file went, or cannot be opened) is said by name, with the pick's other
+        // refusals; the rest of the pick is still added (task-f50dffe109dfda73).
         let data: string
         try {
           data = await base64(f)
         } catch {
-          unread.push(f.name)
-          say(`${unread.length > 1 ? `${unread.slice(0, -1).join(', ')} and ${unread.at(-1)}` : f.name} could not be read`)
+          refuse('unread', f.name)
           continue
         }
         if (full()) {
-          say(FOUR_AT_MOST)
+          refuse('four', f.name)
           continue
         }
         held.current++ // counted now: another read landing before the box is drawn again sees it
@@ -156,6 +194,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     setFiles([])
     setWords('')
     say(null)
+    unsay()
     el.focus()
     const why = await onSend(text, sent.pictures, sent.files)
     if (why === null || why === undefined) return

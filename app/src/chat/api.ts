@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError, READ_MS} from '../server/barkpark'
 import {CREATE_UNSURE} from './create-unsure'
-import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, readListed, removeId, sessionOf, setBotField, trusted, validColour, validName, validShape, write, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
+import {addId, botFolder, dropBot, freshId, keyTaken, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, readListed, removeId, sessionOf, setBotField, trusted, validColour, validName, validShape, write, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
 /** A bot as the page gets it: its id, its name, and `main` on the Main Bot (its id is made from its
@@ -81,6 +81,7 @@ async function ownSessions(): Promise<OwnSession[]> {
 // A preference that could not be read or saved is said in one plain line; the page goes on.
 const NOT_READ = 'Some of your bots could not be read from Barkpark, so this may not be all of them. Reload to try again.'
 const NOT_SAVED = 'Your bot could not be saved to Barkpark, so a new name or conversation may not be kept. Reload to try again.'
+const MAIN_TAKEN = 'Your Main Bot was saved from another tab or device just now, so this page did not save over it. Reload to see it.'
 const got = <T,>(p: Promise<T>, what: string): Promise<{ok: true; v: T} | {ok: false}> =>
   p.then(
     (v) => ({ok: true as const, v}),
@@ -151,9 +152,14 @@ export const loadChat = createServerFn({method: 'GET'})
         }
       } else if (!there.v) {
         // Nothing half-made: the id joins the list only after its record is whole.
+        // Another tab or device may make it after the read above: Barkpark then refuses the write
+        // (putBot creates only an unset key), nothing is written over it, and the page says so.
         const moving = await withToday()
-        if (!(await got(putBot(moving.bot), 'save the Main Bot')).ok) notice = NOT_SAVED
-        else {
+        const failed = await putBot(moving.bot).then(() => null, (e: unknown) => e)
+        if (failed) {
+          if (!keyTaken(failed)) console.warn(`barkbot: could not save the Main Bot (${(failed as Error).message})`)
+          notice = keyTaken(failed) ? MAIN_TAKEN : NOT_SAVED
+        } else {
           rail = [...rail, moving]
           if (!(await got(addId(main.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
         }
