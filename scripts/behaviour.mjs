@@ -1668,6 +1668,21 @@ else {
     fay.sent = stub.sent.slice(s0).map((m) => m.content);
     await clearPrompt();
     check("a first message whose conversation is slow to be saved to the bot: within 12.5 s of Enter its words are back with the not-sent line, and it is not sent later", fay.prompt === 'hello fay' && /was not sent/.test(fay.line ?? '') && fay.after <= 12500 && fay.sent.length === 0, fay);
+    // The same slow save (request 6 s, the save's reads held 2.5 s and its write 6 s): the words come
+    // back at 10 s while it is still out, and Enter at once sends them, once, to the conversation
+    // that then opens; the box is not dead while it opens.
+    const GUS = 'd03b4c5d-6e7f-4a8b-9c9d-0e1f2a3b4c6e';
+    await fresh(GUS, 'Gus');
+    stub.createDelay = 6000; s0 = stub.sent.length; const g0 = stub.to.length, gm0 = stub.made.length; t0 = Date.now();
+    await typeSend('hello gus'); stub.readDelay = 2500;
+    await until(async () => (await promptText()) === 'hello gus', 14000, "Gus's words back").catch(() => {});
+    const gus = { back: Date.now() - t0, line: await refusedLine() };
+    await enter();
+    await until(() => stub.sent.length > s0, 15000, "Gus's message").catch(() => {});
+    gus.at = Date.now() - t0; stub.createDelay = 0; stub.readDelay = 0; await wait(3000);
+    Object.assign(gus, { sent: stub.sent.slice(s0).map((m) => m.content), to: stub.to.slice(g0), made: stub.made.slice(gm0), prompt: await promptText() });
+    await clearPrompt();
+    check("a slow save still out when the words come back: Enter at once sends them once, to the conversation that opens", gus.back <= 12000 && /not sent/.test(gus.line ?? '') && JSON.stringify(gus.sent) === JSON.stringify(['hello gus']) && gus.made.length === 1 && JSON.stringify(gus.to) === JSON.stringify(gus.made) && gus.prompt === '', gus);
     stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
 }

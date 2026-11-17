@@ -85,6 +85,10 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   const sending = useRef(false)
   const gaveUp = useRef(false)
   const parkedWords = useRef<ComposerStart | null>(null)
+  // The parked message, by its own `done`: only that message may be sent, given back or failed. A
+  // message given back is no longer it, so a send effect that runs late cannot send it, and the
+  // same words sent again are a new message.
+  const parkedMessage = useRef<((why: string | null) => void) | null>(null)
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const unhold = () => {
     if (holdTimer.current) clearTimeout(holdTimer.current)
@@ -104,6 +108,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
     parked.current = false
     sending.current = false
     parkedWords.current = null
+    parkedMessage.current = null
     unhold()
     if (openTimer.current) clearTimeout(openTimer.current)
     openTimer.current = null
@@ -141,6 +146,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
   const keepParked = () => {
     gaveUp.current = true
     const words = parkedWords.current
+    parkedMessage.current = null
     if (words) onKeep(chat.botId, {...words, line: sending.current ? MAYBE_SENT : NOT_SENT})
     parked.current = false
   }
@@ -215,19 +221,22 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
       done = d
       setWaiting({text, outgoing, done: d})
     })
+    const mine = done
+    parkedMessage.current = mine
     // Its conversation has OPEN_MS to open. Then, if it is not on its way, the words come back to the
     // box with a line, and it is never sent on its own. A held pick has its own bound (giveUp): wait for it.
     const bound = () => {
       openTimer.current = null
-      if (!parked.current || sending.current || gaveUp.current) return
+      if (parkedMessage.current !== mine || sending.current || gaveUp.current) return
       if (pendingPick.current) return void (openTimer.current = setTimeout(bound, 1000))
       setWaiting(null)
-      done(NOT_OPENED)
+      mine(NOT_OPENED)
       settle(NOT_OPENED)
     }
     openTimer.current = setTimeout(bound, OPEN_MS)
     // Opened beside the wait, not before it: `sent` answers when OPEN_MS is over, even while
-    // Barkpark has not answered this yet.
+    // Barkpark has not answered this yet. The box stays usable while it opens: words sent again
+    // after a give-back park on this same opening, with their own bound.
     if (!sessionId && !opening) {
       const hostId = chat.host.id
       setOpening(true)
@@ -247,10 +256,14 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
           }
         } catch (e) {
           // No conversation was made (botFolder refused, or Barkpark did): say why; the draft stays.
-          setWaiting(null)
-          const why = (e as Error).message
-          done(why)
-          settle(why)
+          // The words parked on it now (they may be sent again after a give-back) are told.
+          const now = parkedMessage.current
+          if (now) {
+            setWaiting(null)
+            const why = (e as Error).message
+            now(why)
+            settle(why)
+          }
         } finally {
           setOpening(false)
         }
@@ -259,7 +272,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
     return sent
   }
   useEffect(() => {
-    if (waiting && convo.ready && !gaveUp.current) {
+    if (waiting && convo.ready && !gaveUp.current && parkedMessage.current === waiting.done) {
       setWaiting(null)
       sending.current = true
       let failed: string | null = null
@@ -311,7 +324,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
           </div>
         )
       }
-      composer={<Composer placeholder={placeholderFor(name, convo.ask)} onSend={send} disabled={!chat.host || opening || !!waiting || leaving} start={kept} />}
+      composer={<Composer placeholder={placeholderFor(name, convo.ask)} onSend={send} disabled={!chat.host || !!waiting || leaving} start={kept} />}
     />
   )
 }
