@@ -108,7 +108,6 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // refused here, with the reason, instead of failing after the send.
   const add = async (picked: File[]) => {
     // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes.
-    setNote(null)
     // Each file is added when it is read, to what the box holds then, never to a copy taken before
     // (that would put back a picture that went meanwhile: task-9b801b838c6f4078). The four-at-most
     // limit is counted then too, so two reads at once cannot make five.
@@ -145,7 +144,6 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     setFiles([])
     setWords('')
     say(null)
-    setNote(null)
     el.focus()
     const why = await onSend(text, sent.pictures, sent.files)
     if (why === null || why === undefined) return
