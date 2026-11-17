@@ -149,10 +149,12 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     // (that would put back a picture that went meanwhile: task-9b801b838c6f4078). The four-at-most
     // limit is counted then too, so two reads at once cannot make five.
     const full = () => held.current >= MAX_ATTACHMENTS
+    const seen = new Set<string>() // this pick only
     const refuse = (r: Reason, name: string) => {
       // The same file picked again while the first pick is still read is named once (task-efe912c50389b7a0).
       const named = refusals.current.get(r) ?? []
-      if (!named.includes(name)) refusals.current.set(r, [...named, name])
+      if (!seen.has(r + '\0' + name)) refusals.current.set(r, [...named, name])
+      seen.add(r + '\0' + name)
       setNote(noteOf(refusals.current))
     }
     for (const f of picked) {
