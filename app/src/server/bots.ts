@@ -228,7 +228,7 @@ export function oneAtATime<T>(id: string, change: (write: Write) => Promise<T>):
     if (!mine) throw new Error(BUSY)
     // This change's own write: refused once the change has ended; one on its way then is called off.
     const over = new AbortController()
-    const own: Write = (save) => (over.signal.aborted ? Promise.reject(new Error(ENDED)) : bounded(save, over.signal))
+    const own: Write = (save) => (over.signal.aborted ? Promise.reject(new Error(ENDED)) : bounded(save))
     let timer: ReturnType<typeof setTimeout> | undefined
     const held = new Promise<never>((_, no) => (timer = setTimeout(() => no(new Error(HELD)), HOLD_MS)))
     return Promise.race([change(own), held]).finally(() => {
