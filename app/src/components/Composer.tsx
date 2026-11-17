@@ -127,7 +127,8 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     const full = () => held.current >= MAX_ATTACHMENTS
     const refused = new Map<Reason, string[]>()
     const refuse = (r: Reason, name: string) => {
-      refused.set(r, [...(refused.get(r) ?? []), name])
+      refused.clear()
+      refused.set(r, [name])
       setNote(noteOf(refused))
     }
     for (const f of picked) {
