@@ -22,6 +22,7 @@ import { overlayKeys } from './lib/overlay-keys.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
 import { createOnce } from './lib/create-once.mjs';
+import { createLost } from './lib/create-lost.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -109,6 +110,8 @@ await new Promise((ok) => httpServer((req, res) => {
       // If-None-Match: * (user-prefs.md): a PUT writes only an unset key, else 412 and nothing written.
       if (req.method === 'PUT' && stub.madeBeforePut?.key === key) { stub.prefs.set(key, stub.madeBeforePut.value); stub.madeBeforePut = null; }
       if (req.method === 'PUT' && req.headers['if-none-match'] === '*' && stub.prefs.has(key)) return json(412, { error: { code: 'precondition_failed', message: 'the key already holds a value; If-None-Match: * creates only an unset key' } });
+      // `dropPut` 'after' | 'before': the next bot-record PUT's answer is lost (the socket drops), after it lands or before.
+      if (req.method === 'PUT' && stub.dropPut && key.startsWith('barkbot.bot.')) { const when = stub.dropPut; stub.dropPut = null; if (when === 'after') stub.prefs.set(key, b.value); return void req.socket.destroy(); }
       const h = stub.holdPut;
       if (record && h?.key === key) {
         if (!h.pending && !h.done && changes(h.field)) {
@@ -691,6 +694,7 @@ else {
   check('a Create whose list add fails says so in the dialog, makes no Barkpark conversation, and leaves no record behind', /not made/.test(tc.line ?? '') && tc.open && tc.made.length === 0 && tc.keys === 0 && tc.writes.some((w) => w.method === 'DELETE'), tc);
   const odd = await ev(async (id) => { const m = await import('/src/chat/api.ts'); const out = []; for (const d of [{ name: 'Odd', shape: '<svg onload=x>' }, { name: 'Odd', colour: 'url(javascript:x)' }]) { try { await m.createBot({ data: d }); out.push('made'); } catch (e) { out.push(String(e?.message ?? e)); } } return out; });
   check('Create refuses a shape or colour that is not one of the dialog\'s own, and writes nothing', odd.length === 2 && odd.every((x) => x !== 'made') && ![...stub.prefs].some(([k, v]) => k.startsWith('barkbot.bot.') && v?.name === 'Odd'), { odd });
+  await createLost({ check, stub, ids, live, until, wait, key, openDialog, typeName, press, failLine, dialog });
   // A made bot's folder comes from its id: an id that gives none makes no conversation (never the
   // shared root in its place); upper-case hex is read as lower.
   const folderMade0 = stub.made.length;
