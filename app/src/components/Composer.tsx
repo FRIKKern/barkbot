@@ -126,16 +126,16 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     p.textContent = start.draft
     el.replaceChildren(p)
   }, [])
-  // A restored paragraph split in two (a new paragraph inside it) keeps its send's number in both
-  // halves, so the words that came back from one send stay together and a later send's come after
-  // them, not between them. A paragraph pasted in carries no number, whatever marks its HTML has.
+  // A restored paragraph split by an edit inside it (a typed or pasted line break, a pasted paragraph)
+  // gives the paragraphs that edit makes its send's number, so the words that came back from one send
+  // stay together and a later send's come after them, not between them. A paragraph pasted into no
+  // numbered paragraph carries no number, whatever marks its HTML has.
   useEffect(() => {
     const el = box.current
     if (!el) return
     let split: {was: Set<Element>; n: number} | null = null
-    const before = (e: InputEvent) => {
+    const before = () => {
       split = null
-      if (e.inputType !== 'insertParagraph') return
       const at = window.getSelection()?.anchorNode
       const p = at ? [...el.children].find((c) => c.contains(at)) : undefined
       const n = p ? unsentFrom.current.get(p) : undefined

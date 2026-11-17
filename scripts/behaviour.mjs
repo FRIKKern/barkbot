@@ -2562,19 +2562,18 @@ else {
       await typeSend('three'); await until(() => stub.heldSends.length > g0 + 1, 8000, 'the second message on its way').catch(() => {}); await wait(200);
       stub.holdSend = false; const held = stub.heldSends.splice(g0);
       held[0](); await until(async () => (await promptText()) === 'one two', 8000, 'the first words back').catch(() => {}); await wait(300);
-      // The caret after "one", then a new paragraph there: Chrome's beforeinput, then the edit.
-      const splitOk = await ev(() => {
+      // The caret after "one", then "x", a line break and "y" put in there (as a paste of two lines does).
+      await ev(() => {
         const box = document.querySelector('.prompt'); box.focus();
-        const t = box.querySelector('p')?.firstChild; if (!t) return false;
+        const t = box.querySelector('p')?.firstChild; if (!t) return;
         const r = document.createRange(); r.setStart(t, 3); r.collapse(true); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
-        if (!box.dispatchEvent(new InputEvent('beforeinput', { inputType: 'insertParagraph', bubbles: true, cancelable: true }))) return false;
-        document.execCommand('insertParagraph');
-        return box.querySelectorAll('p').length === 2;
       });
+      await page.send('Input.insertText', { text: 'x\ny' }); await wait(200);
+      const splitOk = JSON.stringify(lines(await promptText())) === JSON.stringify(['onex', 'y two']);
       held[1](); await until(async () => lines(await promptText()).length === 3, 8000, 'the second words back').catch(() => {}); await wait(500);
       const split = { splitOk, prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')) };
-      check('control: the first send\'s words, back in the box, are split into two paragraphs', split.splitOk === true, split);
-      check('two sends on their way at once; the first comes back and is split in two; then the second comes back: the box reads one, two, three', JSON.stringify(split.prompt) === JSON.stringify(['one', 'two', 'three']), split);
+      check('control: the first send\'s words, back in the box, are split in two by the line put in (onex, y two)', split.splitOk === true, split);
+      check('two sends on their way at once; the first comes back and is split in two; then the second comes back: the box reads onex, y two, three', JSON.stringify(split.prompt) === JSON.stringify(['onex', 'y two', 'three']), split);
       await clearPrompt();
     }
     stub.sessions = []; freshStore();
