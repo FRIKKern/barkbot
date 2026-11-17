@@ -245,25 +245,42 @@ async function roomFor(ids: string[]): Promise<string[]> {
   throw new Error(`your list holds ${now.length} bots, the most BarkBot reads, and only ${shown} show: ${parts.join(', ')}. No bot was made.`)
 }
 
+// A record write with no answer: Barkpark may have saved it, or may yet. Like a lost list add it
+// proves nothing, so Create answers `retry` with that bot's id, never "not made" (task-acd834992251353b).
+const lost = (e: unknown) => !(e instanceof BarkparkError) || [502, 503, 504].includes(e.status)
+
 export const createBot = createServerFn({method: 'POST'})
-  .validator((d: {name: unknown; shape?: unknown; colour?: unknown}) => {
+  .validator((d: {name: unknown; shape?: unknown; colour?: unknown; retry?: unknown}) => {
     if (!validName(d.name)) throw new Error('a bot name is 1 to 200 characters')
     if (d.shape !== undefined && !validShape(d.shape)) throw new Error('that shape is not one of the shapes')
     if (d.colour !== undefined && !validColour(d.colour)) throw new Error('that colour is not one of the colours')
-    return {name: d.name.trim(), shape: d.shape as string | undefined, colour: d.colour as string | undefined}
+    return {name: d.name.trim(), shape: d.shape as string | undefined, colour: d.colour as string | undefined, retry: typeof d.retry === 'string' ? d.retry : undefined}
   })
-  .handler(async ({data}) => {
+  .handler(async ({data: {retry, ...looks}}): Promise<{id: string} | {retry: string}> => {
     const host = await findHost()
     if (!host) throw new Error('a bot works on a computer, and none is enrolled. Enroll one: npm run host:enroll, then npm run host.')
     let ids = await listIds().catch(() => {
       throw new Error('your bots could not be read from Barkpark. Try again.')
     })
+    // A retry finishes the bot whose record write got no answer, under that same id: already listed,
+    // it is made; else it is used again if Create could still take it (a v4 id whose folder no listed
+    // bot works in). Only an id Create cannot take is replaced by a new one.
+    if (retry !== undefined && ids?.includes(retry)) return {id: retry}
     if (ids && ids.length >= READ_CAP) ids = await roomFor(ids)
+    const again = retry !== undefined && freshId(ids ?? [], host.id, () => retry) === retry ? retry : null
     // A new id whose folder no listed bot works in; a few tries, then a plain refusal, nothing written.
-    const id = freshId(ids ?? [], host.id, await minter())
+    const id = again ?? freshId(ids ?? [], host.id, await minter())
     if (!id) throw new Error('every id tried gave a folder one of your bots already works in. Try again.')
-    const bot: Bot = {id, ...data, host_id: host.id, session_id: null, created_at: new Date().toISOString()}
-    await putBot(bot)
+    const bot: Bot = {id, ...looks, host_id: host.id, session_id: null, created_at: new Date().toISOString()}
+    const failed = await putBot(bot).then(() => null, (e: unknown) => e)
+    if (failed) {
+      // On a retry, a 412 on its own id is the first write, landed: that record, a whole bot on this
+      // computer, is the bot (as it was saved then), and its id is added below. Never written over.
+      // A read of it that fails proves nothing either way: the dialog keeps the id (`retry`).
+      const landed = again !== null && keyTaken(failed) ? await readBot(id).then((raw) => trusted(id, raw, [host]) !== null, () => undefined) : false
+      if (landed === undefined || (!landed && lost(failed))) return {retry: id}
+      if (!landed) throw failed
+    }
     try {
       await addId(bot.id)
     } catch (e) {
