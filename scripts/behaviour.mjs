@@ -2479,6 +2479,13 @@ else {
     const Q = CHROME_PORT;
     check('a pick refuses a file and is still reading another when a second pick starts and is refused: the line names both refused pictures, then the late unreadable one too', order.firstSaid === `big-a-${Q}.png is over 3 MB` && order.bothBig === `big-a-${Q}.png and big-b2-${Q}.png are over 3 MB` && order.line === `big-a-${Q}.png and big-b2-${Q}.png are over 3 MB. lateb-a2-${Q}.png could not be read` && order.chips.length === 0, order);
     await clearPrompt();
+    // 8. The same file picked again while its first pick is still read: named once (task-efe912c50389b7a0).
+    const again = path('.cache', `lateb-again-${CHROME_PORT}.png`); writeFileSync(again, PNG);
+    await pick([again]); await wait(200); await pick([again]); await wait(2500); // both reads have failed
+    const repick = { line: await refusedLine(), chips: await chipNames() };
+    rmSync(again, { force: true });
+    check('the same unreadable file picked twice while the first pick is still read: the line names it once', repick.line === `lateb-again-${CHROME_PORT}.png could not be read` && repick.chips.length === 0, repick);
+    await clearPrompt();
     stub.sessions = []; freshStore();
   }
 
