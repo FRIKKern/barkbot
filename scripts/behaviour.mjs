@@ -157,7 +157,7 @@ await new Promise((ok) => httpServer((req, res) => {
         const { data } = JSON.parse(body); const bytes = Buffer.from(data, 'base64'); const id = createHash('sha256').update(bytes).digest('hex');
         const media_type = bytes[0] === 0x89 && bytes.subarray(1, 4).toString() === 'PNG' ? 'image/png' : bytes.subarray(0, 5).toString() === '%PDF-' ? 'application/pdf' : bytes.length && !bytes.includes(0) && Buffer.from(bytes.toString('utf8'), 'utf8').equals(bytes) ? 'text/plain' : null;
         if (!media_type) { stub.refused.push({ upload: id }); return json(400, { error: { code: 'invalid_request', message: 'attachment must be UTF-8 text, a PDF, or one of: image/png, image/jpeg, image/gif, image/webp' } }); }
-        stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
+        if (stub.slowUpload) { const w = stub.slowUpload; stub.slowAsked = (stub.slowAsked ?? 0) + 1; return void setTimeout(() => { stub.uploads.push(id); stub.pictures.set(id, data); json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } }); }, w); } stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
       };
       if (stub.holdUpload) { stub.heldUploads.push(take); return; }
       return take();
@@ -197,6 +197,7 @@ await new Promise((ok) => httpServer((req, res) => {
       // or, when let go with `true`, it goes (202).
       if (stub.holdSend) { stub.heldSends.push((ok) => (ok ? (stub.sent.push(m), stub.to.push(req.url.split('/')[4]), json(202, { accepted: true })) : json(503, { error: { code: 'unavailable', message: 'the stand-in gave up' } }))); return; }
       // `dropAnswer`: Barkpark takes the message, then the answer is lost (the socket drops).
+      if (stub.holdDrop) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); tookIt(); stub.heldSends.push(() => req.socket.destroy()); return; }
       if (stub.dropAnswer) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); tookIt(); return void req.socket.destroy(); }
       // `afterTake` {status, body}: Barkpark takes the message, then answers that (a 500 from storing the
       // user's turn after it went, chat_controller.ex create_message; a gateway's empty 502).
@@ -2226,7 +2227,118 @@ else {
     const twice = { keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), shown: await userBubbles('twice on purpose') };
     check('a message taken for sure lets its key go: the same words sent again on purpose go again, under a new key, and show twice', twice.keys.length === 2 && twice.keys.every((k) => typeof k === 'string') && twice.keys[0] !== twice.keys[1] && JSON.stringify(twice.turns) === '["twice on purpose","twice on purpose"]' && twice.shown === 2, twice);
     await clearPrompt();
-    stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
+
+        // PROBE (rev63, not a rule to land): the resend gives up on 409 (8 tries) with the "safe" line while
+        // the first is still on its way; the first is then taken (202); Enter once more must not run it twice.
+        {
+          const QA = '4e0c1d2e-3f4a-4b5c-8d6e-7f8a9b0c1dd5', QB = '5f1d2e3f-4a5b-4c6d-9e7f-8a9b0c1d2ee6';
+          stub.hosts = host(true); stub.sessions = []; freshStore();
+          stub.prefs.set('barkbot.bots', { ids: [QA, QB] }); stub.prefs.set(`barkbot.bot.${QA}`, rec('Qua', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${QB}`, rec('Qin', HOST_ID, null));
+          await open(`${base}/?bot=${QA}`); await until(async () => (await live()).header === 'Qua', 15000, "Qua's page").catch(() => {}); await wait(500);
+          k0 = stub.keyed.length; s0 = stub.sent.length; const qh0 = stub.heldSends.length, qi0 = stub.inUse;
+          stub.holdTake = true;
+          await typeSend('hello qua');
+          await until(() => stub.heldSends.length > qh0, 10000, "Qua's message on its way").catch(() => {}); await wait(200);
+          stub.holdTake = false;
+          await clickTile('Qin'); await until(async () => (await onBot()) === QB, 20000, "Qin's page after the hold").catch(() => {}); await wait(800);
+          await clickTile('Qua'); await until(async () => (await onBot()) === QA && (await promptText()) !== '', 15000, "Qua's page with its words").catch(() => {}); await wait(800);
+          const qback = await refusedLine();
+          await enter();
+          await until(() => stub.inUse - qi0 >= 8, 25000, 'the resend to give up on 409').catch(() => {}); await wait(2000);
+          const gaveUp = { line: await refusedLine(), prompt: await promptText(), busy: stub.inUse - qi0 };
+          stub.heldSends.splice(0).forEach((answer) => answer()); await wait(2000);
+          await enter(); await wait(4000);
+          const q = { qback, gaveUp, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), prompt: await promptText(), line: await refusedLine() };
+          check('PROBE gave-up: a resend that gave up on 409 says sending again is safe; the first is then taken; Enter again runs no second turn', SAFE.test(gaveUp.line ?? '') && gaveUp.prompt === 'hello qua' && JSON.stringify(q.turns) === '["hello qua"]', q);
+          await clearPrompt();
+        }
+    
+        // PROBE (rev63, not a rule to land): the "safe" line must show only when the next send carries the key.
+        {
+          const SP = '00000000-0000-4000-8000-0000000002e1';
+          const ls = (t) => t.split('\n').map((x) => x.trim()).filter(Boolean);
+          const openSP = async () => { stub.hosts = host(true); stub.sessions = [session(SP)]; freshStore(); stub.opened = []; await open(`${base}/`); await until(() => stub.opened.includes(SP), 15000, 'the conversation').catch(() => {}); await wait(800); await clearPrompt(); };
+          // a. Taken, its answer lost while more was typed: the box holds both, under the line.
+          await openSP();
+          k0 = stub.keyed.length; s0 = stub.sent.length; let h0 = stub.heldSends.length; stub.holdDrop = true;
+          await typeSend('first words'); await until(() => stub.heldSends.length > h0, 8000, 'on its way').catch(() => {}); await wait(200);
+          await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'more' }); await wait(200);
+          stub.holdDrop = false; stub.heldSends.splice(h0).forEach((drop) => drop());
+          await until(async () => !!(await refusedLine()), 10000, 'the line').catch(() => {}); await wait(500);
+          const pa = { prompt: ls(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), line: await refusedLine() };
+          await enter(); await wait(3000);
+          pa.keys = stub.keyed.slice(k0).map((x) => x.key); pa.turns = stub.sent.slice(s0).map((m) => m.content);
+          check('PROBE typed-meanwhile: a lost answer with more typed meanwhile says sending again is safe only if Enter then runs the first words once', !SAFE.test(pa.line ?? '') || pa.turns.filter((t) => t.startsWith('first words')).length === 1, pa);
+          await clearPrompt();
+          // b. Two on their way: the first is taken and its answer lost, the second goes. The first comes back.
+          await openSP();
+          k0 = stub.keyed.length; s0 = stub.sent.length; h0 = stub.heldSends.length; stub.holdDrop = true;
+          await typeSend('one'); await until(() => stub.heldSends.length > h0, 8000, 'one on its way').catch(() => {}); await wait(200);
+          stub.holdDrop = false;
+          await typeSend('two'); await until(() => stub.sent.length > s0 + 1, 8000, 'two to go').catch(() => {}); await wait(800);
+          stub.heldSends.splice(h0).forEach((drop) => drop());
+          await until(async () => !!(await refusedLine()), 10000, 'the line').catch(() => {}); await wait(500);
+          const pb = { prompt: ls(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), line: await refusedLine() };
+          await enter(); await wait(3000);
+          pb.keys = stub.keyed.slice(k0).map((x) => x.key); pb.turns = stub.sent.slice(s0).map((m) => m.content);
+          check('PROBE two-on-their-way: the first comes back saying sending again is safe only if Enter then runs it once', !SAFE.test(pb.line ?? '') || pb.turns.filter((t) => t === 'one').length === 1, pb);
+          await clearPrompt();
+        }
+    
+        // PROBE (rev63, not a rule to land): a new bot's first message with a picture; the pick away is held
+        // and gives up while the picture is still being stored (before the message itself goes). The words
+        // come back saying sending again is safe; the message then goes (202). Enter must not run it twice.
+        {
+          const RA = '6a2e3f4a-5b6c-4d7e-8f8a-9b0c1d2e3ff7', RB = '7b3f4a5b-6c7d-4e8f-9a9b-0c1d2e3f4aa8';
+          stub.hosts = host(true); stub.sessions = []; freshStore();
+          stub.prefs.set('barkbot.bots', { ids: [RA, RB] }); stub.prefs.set(`barkbot.bot.${RA}`, rec('Rho', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${RB}`, rec('Ria', HOST_ID, null));
+          await open(`${base}/?bot=${RA}`); await until(async () => (await live()).header === 'Rho', 15000, "Rho's page").catch(() => {}); await wait(500);
+          const { root: r2 } = await page.send('DOM.getDocument');
+          const { nodeId: n2 } = await page.send('DOM.querySelector', { nodeId: r2.nodeId, selector: '.composer-wrap input[type=file]' });
+          const rPic = path('.cache', `rho-picture-${CHROME_PORT}.png`); writeFileSync(rPic, PNG);
+          await page.send('DOM.setFileInputFiles', { nodeId: n2, files: [rPic] });
+          await until(async () => (await chipCount()) === 1, 10000, "Rho's picture chip").catch(() => {});
+          const rchip = await chipCount();
+          k0 = stub.keyed.length; s0 = stub.sent.length; const ra0 = stub.slowAsked ?? 0;
+          stub.slowUpload = 10000;
+          await typeSend('hello rho');
+          await until(() => (stub.slowAsked ?? 0) > ra0, 15000, "Rho's picture being stored").catch(() => {}); await wait(200);
+          const asked = (stub.slowAsked ?? 0) - ra0;
+          await clickTile('Ria');
+          await until(async () => (await onBot()) === RB, 20000, "Ria's page after the hold").catch(() => {});
+          const sentBeforeLeave = stub.sent.length - s0;
+          stub.slowUpload = 0;
+          await until(() => stub.sent.length > s0, 15000, "Rho's message to go after its picture").catch(() => {}); await wait(1000);
+          await clickTile('Rho');
+          await until(async () => (await onBot()) === RA && (await promptText()) !== '', 15000, "Rho's page with its words").catch(() => {}); await wait(800);
+          const rback = { line: await refusedLine(), prompt: await promptText(), chips: await chipCount() };
+          await enter(); await wait(4000);
+          const r = { rchip, asked, sentBeforeLeave, rback, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), prompt: await promptText(), line: await refusedLine() };
+          check('PROBE upload-given-back: words given back while their picture was still being stored say sending again is safe; the message then goes; Enter again runs no second turn', rchip === 1 && asked >= 1 && sentBeforeLeave === 0 && SAFE.test(rback.line ?? '') && JSON.stringify(r.turns) === '["hello rho"]', r);
+          await clearPrompt();
+        }
+    
+        // PROBE (rev63, not a rule to land): the safe line over words with a picture; the chip is removed.
+        {
+          const SP5 = '00000000-0000-4000-8000-0000000002e5';
+          stub.hosts = host(true); stub.sessions = [session(SP5)]; freshStore(); stub.opened = []; await open(`${base}/`); await until(() => stub.opened.includes(SP5), 15000, 'the conversation').catch(() => {}); await wait(800); await clearPrompt();
+          const p5 = path('.cache', `p5-picture-${CHROME_PORT}.png`); writeFileSync(p5, PNG);
+          const { root: r5 } = await page.send('DOM.getDocument');
+          const { nodeId: n5 } = await page.send('DOM.querySelector', { nodeId: r5.nodeId, selector: '.composer-wrap input[type=file]' });
+          await page.send('DOM.setFileInputFiles', { nodeId: n5, files: [p5] });
+          await until(async () => (await chipCount()) === 1, 10000, 'the chip').catch(() => {});
+          k0 = stub.keyed.length; s0 = stub.sent.length;
+          const lostP = await lostOnce('with p');
+          const chipsBack = await chipCount();
+          await ev(() => document.querySelector('.attach-pic-remove')?.click()); await wait(500);
+          const after = { chips: await chipCount(), line: await refusedLine() };
+          await enter(); await wait(3000);
+          rmSync(p5, { force: true });
+          const q5 = { lostP, chipsBack, after, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => JSON.stringify(m)) };
+          check('PROBE chip-removed: the safe line over words with a picture, the picture removed: the line says safe only if Enter then runs the words once', SAFE.test(lostP.line ?? '') && chipsBack === 1 && after.chips === 0 && (!SAFE.test(after.line ?? '') || q5.turns.filter((t) => t.includes('"with p"')).length === 1), q5);
+          await clearPrompt();
+        }
+        stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
 }
 
