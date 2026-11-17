@@ -165,6 +165,7 @@ export const loadChat = createServerFn({method: 'GET'})
   // store exists (or could not be read) it opens no conversation: the newest one on the computer
   // may be another bot's, and a message would go to the wrong bot.
   if (!rail.length) rail = [listed?.length === 0 ? await withToday() : {bot: main, session: {is: 'none'}}]
+  rail = rail.filter((x, i) => rail.findIndex((y) => y.bot.name === x.bot.name) === i)
   const open = rail.find((x) => x.bot.id === want) ?? rail[0]
   const session = open.session.is === 'open' ? open.session.session : null
   const home = hosts.find((h) => h.id === open.bot.host_id) ?? host
