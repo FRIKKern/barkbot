@@ -1779,6 +1779,68 @@ else {
     check("a held pick taken back because the first conversation could not be saved, then Omi picked again: the new pick waits a fresh hold of about 6 s (control: the pick was taken back, with the line)", kept2.back2.bot === NIA && /not saved to the bot/.test(kept2.back2.line ?? '') && kept2.bot === OMI && kept2.ms >= 5500 && kept2.ms < 9000, kept2);
     await clearPrompt(); stub.sessions = []; freshStore();
   }
+
+  // ── A first message whose conversation does not open, with no pick (task-252c44a41576121a) ──
+  console.log('Behaviour · a first message whose conversation does not open (the live page, against the stand-in Barkpark)');
+  {
+    const DOT = 'ad0e1f2a-3b4c-4d5e-8f6a-7b8c9d0e1f3b', EVE = 'be1f2a3b-4c5d-4e6f-9a7b-8c9d0e1f2a4c';
+    const fresh = async (id, n) => {
+      stub.hosts = host(true); stub.sessions = []; freshStore(); stub.prefs.set('barkbot.bots', { ids: [id] }); stub.prefs.set(`barkbot.bot.${id}`, rec(n, HOST_ID, null));
+      await open(`${base}/?bot=${id}`); await until(async () => (await live()).header === n, 15000, `${n}'s page`).catch(() => {}); await wait(500);
+    };
+    const enter = async () => { await ev(() => document.querySelector('.prompt').focus()); await key('Enter'); };
+    // Its conversation is made but its stream never opens (Barkpark refuses it).
+    await fresh(DOT, 'Dot');
+    stub.deafNew = true; let s0 = stub.sent.length; let t0 = Date.now();
+    await typeSend('hello dot');
+    await until(async () => (await promptText()) === 'hello dot', 18000, "Dot's words back").catch(() => {});
+    const dot = { after: Date.now() - t0, prompt: await promptText(), line: await refusedLine() };
+    await wait(3000);
+    dot.sent = stub.sent.slice(s0).map((m) => m.content);
+    stub.deafNew = false; stub.deaf.clear(); await clearPrompt();
+    check("a first message whose conversation never opens, with no pick: within 12 s its words are back in the box with the not-sent line, and it is not sent later", dot.prompt === 'hello dot' && /was not sent/.test(dot.line ?? '') && dot.after <= 12000 && dot.sent.length === 0, dot);
+    // Barkpark does not answer the request that opens the conversation (held 20 s): it is given up
+    // on, so the next Enter opens a conversation and sends the words once.
+    await fresh(EVE, 'Eve');
+    stub.createDelay = 20000; s0 = stub.sent.length; t0 = Date.now();
+    await typeSend('hello eve');
+    await until(async () => (await promptText()) === 'hello eve', 18000, "Eve's words back").catch(() => {});
+    const eve = { after: Date.now() - t0, prompt: await promptText(), line: await refusedLine() };
+    stub.createDelay = 0;
+    await enter();
+    await until(() => stub.sent.length > s0, 8000, "Eve's message").catch(() => {}); await wait(500);
+    eve.sent = stub.sent.slice(s0).map((m) => m.content); eve.at = Date.now() - t0;
+    await clearPrompt();
+    check("a first message whose conversation Barkpark does not open: its words come back with the not-sent line, and Enter then sends them once", eve.prompt === 'hello eve' && /not sent/.test(eve.line ?? '') && eve.after <= 12000 && JSON.stringify(eve.sent) === JSON.stringify(['hello eve']) && eve.at < 20000, eve);
+    // Barkpark answers the request in time (7 s) but saving the conversation to the bot is slow (its
+    // reads and writes held): the wait is still bounded from Enter, not from when that is done.
+    const FAY = 'cf2a3b4c-5d6e-4f7a-8b8c-9d0e1f2a3b5d';
+    await fresh(FAY, 'Fay');
+    stub.createDelay = 7000; s0 = stub.sent.length; t0 = Date.now();
+    await typeSend('hello fay'); stub.readDelay = 5000;
+    await until(async () => (await promptText()) === 'hello fay', 25000, "Fay's words back").catch(() => {});
+    const fay = { after: Date.now() - t0, prompt: await promptText(), line: await refusedLine() };
+    stub.createDelay = 0; stub.readDelay = 0; await wait(8000);
+    fay.sent = stub.sent.slice(s0).map((m) => m.content);
+    await clearPrompt();
+    check("a first message whose conversation is slow to be saved to the bot: within 12.5 s of Enter its words are back with the not-sent line, and it is not sent later", fay.prompt === 'hello fay' && /was not sent/.test(fay.line ?? '') && fay.after <= 12500 && fay.sent.length === 0, fay);
+    // The same slow save (request 6 s, the save's reads held 2.5 s and its write 6 s): the words come
+    // back at 10 s while it is still out, and Enter at once sends them, once, to the conversation
+    // that then opens; the box is not dead while it opens.
+    const GUS = 'd03b4c5d-6e7f-4a8b-9c9d-0e1f2a3b4c6e';
+    await fresh(GUS, 'Gus');
+    stub.createDelay = 6000; s0 = stub.sent.length; const g0 = stub.to.length, gm0 = stub.made.length; t0 = Date.now();
+    await typeSend('hello gus'); stub.readDelay = 2500;
+    await until(async () => (await promptText()) === 'hello gus', 14000, "Gus's words back").catch(() => {});
+    const gus = { back: Date.now() - t0, line: await refusedLine() };
+    await enter();
+    await until(() => stub.sent.length > s0, 15000, "Gus's message").catch(() => {});
+    gus.at = Date.now() - t0; stub.createDelay = 0; stub.readDelay = 0; await wait(3000);
+    Object.assign(gus, { sent: stub.sent.slice(s0).map((m) => m.content), to: stub.to.slice(g0), made: stub.made.slice(gm0), prompt: await promptText() });
+    await clearPrompt();
+    check("a slow save still out when the words come back: Enter at once sends them once, to the conversation that opens", gus.back <= 12000 && /not sent/.test(gus.line ?? '') && JSON.stringify(gus.sent) === JSON.stringify(['hello gus']) && gus.made.length === 1 && JSON.stringify(gus.to) === JSON.stringify(gus.made) && gus.prompt === '', gus);
+    stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
+  }
 }
 
 console.log(failed ? `Behaviour: ${failed} of ${ran} rules fail` : `Behaviour: all ${ran} rules hold`);
