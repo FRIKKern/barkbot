@@ -2363,6 +2363,15 @@ else {
     [...four, fifth].forEach((f) => rmSync(f, { force: true }));
     check('four pictures sent with no answer come back, then a fifth is picked: the line says a message takes four at most, and still says the message may have been sent and sending it again is safe', SAFE.test(five.before ?? '') && /four pictures and files at most/.test(five.line ?? '') && SAFE.test(five.line ?? '') && five.chips.length === 4, five);
     await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    // 3. One pick refused for two reasons, two files for one of them: every refused file is named, once.
+    await openOn();
+    const mixed = [['big-x', Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)])], ['good-y', PNG], ['big-z', Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 2)])], ['empty-w', Buffer.alloc(0)]].map(([x, b]) => { const f = path('.cache', `${x}-${CHROME_PORT}.png`); writeFileSync(f, b); return f; });
+    await pick(mixed); await until(async () => (await chipNames()).length >= 1, 8000, 'the one taken').catch(() => {}); await wait(800);
+    const all = { line: await refusedLine(), chips: await chipNames() };
+    mixed.forEach((f) => rmSync(f, { force: true }));
+    const P = CHROME_PORT;
+    check('one pick with two pictures over 3 MB, one empty and one fine: the line names both big ones and the empty one, and the fine one waits', all.line === `big-x-${P}.png and big-z-${P}.png are over 3 MB. empty-w-${P}.png is empty` && JSON.stringify(all.chips) === JSON.stringify([`good-y-${P}.png`]), all);
+    await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
     stub.sessions = []; freshStore();
   }
 }

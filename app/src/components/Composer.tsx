@@ -21,6 +21,18 @@ export const ATTACH_EVENT = 'barkbot:attach'
 
 const FOUR_AT_MOST = 'A message takes four pictures and files at most'
 
+/** Why a pick was not all taken: one sentence per reason, naming every file it refused, in the order
+ *  first met, so no refusal of a pick hides another. */
+const REASONS = {
+  kind: ['is not a picture, a text file or a PDF', 'are not pictures, text files or PDFs'],
+  big: ['is over 3 MB', 'are over 3 MB'],
+  empty: ['is empty', 'are empty'],
+  name: ['has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most', 'have names that cannot be sent: no / or \\, no control characters, 255 bytes at most'],
+} as const
+type Reason = keyof typeof REASONS | 'four'
+const listed = (n: string[]) => (n.length > 1 ? `${n.slice(0, -1).join(', ')} and ${n.at(-1)}` : n[0])
+const noteOf = (refused: Map<Reason, string[]>) => [...refused].map(([r, n]) => (r === 'four' ? FOUR_AT_MOST : `${listed(n)} ${REASONS[r][n.length > 1 ? 1 : 0]}`)).join('. ')
+
 const base64 = (f: File) =>
   new Promise<string>((ok, no) => {
     const r = new FileReader()
@@ -113,17 +125,22 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     // (that would put back a picture that went meanwhile: task-9b801b838c6f4078). The four-at-most
     // limit is counted then too, so two reads at once cannot make five.
     const full = () => held.current >= MAX_ATTACHMENTS
+    const refused = new Map<Reason, string[]>()
+    const refuse = (r: Reason, name: string) => {
+      refused.set(r, [...(refused.get(r) ?? []), name])
+      setNote(noteOf(refused))
+    }
     for (const f of picked) {
       const picture = PICTURE_TYPES.includes(f.type)
-      if (!picture && !FILE_TYPES.test(f.type)) setNote(`${f.name} is not a picture, a text file or a PDF`)
-      else if (f.size > MAX_BYTES) setNote(`${f.name} is over 3 MB`)
-      else if (!f.size) setNote(`${f.name} is empty`)
-      else if (full()) setNote(FOUR_AT_MOST)
-      else if (!picture && !sendableName(f.name)) setNote(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
+      if (!picture && !FILE_TYPES.test(f.type)) refuse('kind', f.name)
+      else if (f.size > MAX_BYTES) refuse('big', f.name)
+      else if (!f.size) refuse('empty', f.name)
+      else if (full()) refuse('four', f.name)
+      else if (!picture && !sendableName(f.name)) refuse('name', f.name)
       else {
         const data = await base64(f)
         if (full()) {
-          setNote(FOUR_AT_MOST)
+          refuse('four', f.name)
           continue
         }
         held.current++ // counted now: another read landing before the box is drawn again sees it
