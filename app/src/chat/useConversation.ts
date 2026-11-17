@@ -430,7 +430,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
       let asked = false // the message itself is on its way: from here a lost answer may mean it went
       try {
         // The same message whose fate is not known goes again as it went: same key, same stored ids.
-        const before = unsent.get(sessionId)
+        const before = unsent.get('all')
         const sig = sigOf(outgoing)
         let mine: Unsent
         if (before && before.content === content && before.sig === sig) mine = before
@@ -450,10 +450,10 @@ export function useConversation(sessionId: string | null, transport: Transport =
           mine = {content, sig, refs, images, files, key: crypto.randomUUID()}
         }
         mine.given = false
-        unsent.set(sessionId, mine)
+        unsent.set('all', mine)
         flying.current = mine
         const done = () => {
-          if (unsent.get(sessionId) === mine) unsent.delete(sessionId)
+          if (unsent.get('all') === mine) unsent.delete('all')
         }
         asked = true
         const sent = (await transport.send(sessionId, content, mine.refs.length ? mine.refs : undefined, mine.key)) as {refused?: string; failed?: string; unsure?: string; again?: 'safe' | 'look'; key?: string; accepted?: true; replay?: boolean} | undefined
