@@ -170,7 +170,7 @@ export const loadChat = createServerFn({method: 'GET'})
   const home = hosts.find((h) => h.id === open.bot.host_id) ?? host
   // Each bot's conversation, for the fleet stream's Working and Unread per tile: only a session sessionOf opened.
   const byBot = Object.fromEntries(rail.flatMap((x) => (x.session.is === 'open' ? [[x.bot.id, x.session.session.id]] : [])))
-  return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name, ...(bot.id === main.id && {main: true})})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice, sessions: byBot}
+  return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name, ...(bot.name === rail.find((x) => x.bot.id === main.id)?.bot.name && {main: true})})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice, sessions: byBot}
 })
 
 // Each Create try's id: random. In dev only (vite build leaves it out), BARKBOT_TEST_MINT_FILE, set
