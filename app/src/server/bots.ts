@@ -261,7 +261,7 @@ export async function putBot(bot: Bot, signal?: AbortSignal): Promise<void> {
   try {
     await bp(prefs(botKey(id)), {method: 'PUT', json: {value}, headers: {'if-none-match': '*'}, signal})
   } catch (e) {
-    throw keyTaken(e) ? new BarkparkError(412, 'precondition_failed', TAKEN) : e
+    if (!keyTaken(e)) throw e
   }
 }
 
