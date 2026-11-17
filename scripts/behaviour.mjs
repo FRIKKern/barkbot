@@ -1748,7 +1748,7 @@ else {
     };
     const onPage = (n) => until(async () => (await live()).header === n, 15000, `${n}'s page`).catch(() => {});
     // Nia's first conversation cannot be saved to her record; the person goes to Omi and back.
-    await twoBots(); stub.fail.set(`PUT ${KEYN}`, 500);
+    await twoBots(); stub.fail.set(`PATCH ${KEYN}`, 500);
     const m0 = stub.made.length, t0 = stub.to.length;
     await typeSend('hello nia');
     await until(() => stub.to.length > t0, 8000, "Nia's message").catch(() => {}); await wait(800);
@@ -1791,9 +1791,9 @@ else {
     const go = async (n) => { stub.opened = []; await clickTile(n); await until(async () => (await live()).header === n && NM[await onBot()] === n, 15000, `${n}'s page`).catch(() => {}); await wait(1500); return { bot: NM[await onBot()], opened: [...stub.opened] }; };
     const sendTo = async (w) => { const t = stub.to.length, m = stub.made.length; await typeSend(w); await until(() => stub.to.length > t, 9000, w).catch(() => {}); await wait(700); return { to: stub.to.slice(t), made: stub.made.slice(m) }; };
     await threeBots();
-    stub.fail.set(`PUT ${KEYN}`, 500); const n1 = await sendTo('n1 hello'); stub.fail.clear();
+    stub.fail.set(`PATCH ${KEYN}`, 500); const n1 = await sendTo('n1 hello'); stub.fail.clear();
     const omiEmpty = await go('Omi');
-    stub.fail.set(`PUT barkbot.bot.${OMI}`, 500); const o1 = await sendTo('o1 hello'); stub.fail.clear();
+    stub.fail.set(`PATCH barkbot.bot.${OMI}`, 500); const o1 = await sendTo('o1 hello'); stub.fail.clear();
     const pax = await go('Pax');
     const niaBack = await go('Nia'); const n2 = await sendTo('n2 again');
     const omiBack = await go('Omi'); const o2 = await sendTo('o2 again');
@@ -1805,14 +1805,14 @@ else {
       && omiBack.opened.includes(o1.made[0]) && JSON.stringify(o2.to) === JSON.stringify(o1.made) && o2.made.length === 0, own);
     await clearPrompt();
     await threeBots();
-    stub.fail.set(`PUT ${KEYN}`, 500); const s1 = await sendTo('p2 first'); stub.fail.clear();
+    stub.fail.set(`PATCH ${KEYN}`, 500); const s1 = await sendTo('p2 first'); stub.fail.clear();
     stub.sessions.push(session(S2)); stub.prefs.set(KEYN, rec('Nia', HOST_ID, S2)); // another tab saved S2 to Nia
     await go('Omi'); const niaAgain = await go('Nia'); const toS2 = await sendTo('p2 to the saved one');
     const theirs = { s1: s1.made, niaAgain, toS2 };
     check("another tab saved a conversation to Nia after her unsaved one: back on Nia, the saved one is open and the next message goes to it, not to the unsaved one", one(s1) && niaAgain.opened.at(-1) === S2 && JSON.stringify(toS2.to) === JSON.stringify([S2]) && toS2.made.length === 0, theirs);
     await clearPrompt();
     // A held pick taken back because the first conversation could not be saved (#75) stops its hold too.
-    await twoBots(); stub.deafNew = true; stub.fail.set(`PUT ${KEYN}`, 500); stub.createDelay = 700;
+    await twoBots(); stub.deafNew = true; stub.fail.set(`PATCH ${KEYN}`, 500); stub.createDelay = 700;
     await typeSend('kept or not'); await wait(150);
     const firstAt = Date.now(); await clickTile('Omi');
     await until(() => stub.made.length > 0 && stub.deaf.size > 0, 8000, "Nia's conversation").catch(() => {}); await wait(800);
