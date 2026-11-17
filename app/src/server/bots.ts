@@ -231,7 +231,7 @@ export function oneAtATime<T>(id: string, change: (write: Write) => Promise<T>):
     const own: Write = (save) => (over.signal.aborted ? Promise.reject(new Error(ENDED)) : bounded(save, over.signal))
     let timer: ReturnType<typeof setTimeout> | undefined
     const held = new Promise<never>((_, no) => (timer = setTimeout(() => no(new Error(HELD)), HOLD_MS)))
-    return Promise.race([change(own), held]).finally(() => {
+    return Promise.race([change(write), held]).finally(() => {
       clearTimeout(timer)
       over.abort()
     })
