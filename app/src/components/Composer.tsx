@@ -134,8 +134,9 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     const el = box.current
     if (!el) return
     let split: {was: Set<Element>; n: number} | null = null
-    const before = () => {
+    const before = (e: InputEvent) => {
       split = null
+      if (e.inputType !== 'insertParagraph') return
       const at = window.getSelection()?.anchorNode
       const p = at ? [...el.children].find((c) => c.contains(at)) : undefined
       const n = p ? unsentFrom.current.get(p) : undefined
