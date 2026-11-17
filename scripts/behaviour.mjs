@@ -19,6 +19,7 @@ import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
 import { railMain } from './lib/rail-main.mjs';
+import { renameReach } from './lib/rename-reach.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -1654,6 +1655,9 @@ else {
     check('control: with nothing loading, a name typed into the panel is written once, to the open bot', JSON.stringify(plain.zeds) === JSON.stringify([`${SAM} Zed`]) && plain.ria === 'Ria' && plain.sam === 'Zed' && plain.header === 'Zed', plain);
   }
 
+  console.log("Behaviour · Home's own rename save, reached past the panel (the live page, task-42a9dd8ec9408de2)");
+  await renameReach({ check, ev, open, live, until, wait, stub, base, nameIn, freshStore, host, rec, HOST_ID });
+
   // ── Create's two writes end in step whatever answer is lost (task-4338079c878d4cc7) ──
   console.log("Behaviour · Create's list add with a lost answer (the live page, against the stand-in Barkpark)");
   {
@@ -2323,6 +2327,81 @@ else {
     [...three, ...late].forEach((f) => rmSync(f, { force: true }));
     check('three pictures wait, and two more are read at once: the box holds four, and the line says a message takes four at most', had === 3 && four.chips.length === 4 && four.chips.filter((c) => /slow-/.test(c)).length === 1 && /four pictures and files at most/.test(four.line ?? ''), four);
     await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    stub.sessions = []; freshStore();
+  }
+
+  // ── A file that cannot be read is named, and the rest of its pick is still added (task-f50dffe109dfda73) ──
+  console.log('Behaviour · a file in a pick that cannot be read (the live page, against the stand-in Barkpark)');
+  {
+    const SB = '00000000-0000-4000-8000-0000000003b1';
+    stub.hosts = host(true); stub.fleet = null; stub.rows = []; freshStore(); stub.sessions = [session(SB)]; stub.failShow.clear(); stub.opened = [];
+    await open(`${base}/`); await until(() => stub.opened.includes(SB), 15000, 'the conversation to open').catch(() => {}); await wait(800); await clearPrompt();
+    const chipNames = () => ev(() => [...document.querySelectorAll('.composer-attachments [role=listitem]')].map((x) => x.getAttribute('aria-label')));
+    // The browser fails to read any file named "broken-…", as it does for a file gone from disk.
+    await ev(() => {
+      window.__unhandled = 0;
+      if (window.__brokenRead) return; window.__brokenRead = true;
+      window.addEventListener('unhandledrejection', () => { window.__unhandled++; });
+      const real = FileReader.prototype.readAsDataURL;
+      FileReader.prototype.readAsDataURL = function (f) { if (f?.name?.startsWith('broken-')) setTimeout(() => this.onerror?.(new ProgressEvent('error')), 50); else real.call(this, f); };
+    });
+    const files = ['broken-a', 'good-b', 'good-c'].map((x) => { const f = path('.cache', `${x}-${CHROME_PORT}.png`); writeFileSync(f, Buffer.concat([PNG, Buffer.from(x)])); return f; });
+    // One pick of three, the unreadable one first.
+    { const { root } = await page.send('DOM.getDocument'); const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId, files }); }
+    await until(async () => (await chipNames()).length >= 2, 8000, 'the readable two').catch(() => {}); await wait(500);
+    const out = { chips: await chipNames(), line: await ev(() => document.querySelector('.composer-refused')?.textContent ?? null), unhandled: await ev(() => window.__unhandled) };
+    files.forEach((f) => rmSync(f, { force: true }));
+    check('a pick of three whose first file cannot be read: the line names that file, the other two wait in the box, and nothing is left unhandled', out.chips.length === 2 && out.chips.every((c) => /good-/.test(c)) && new RegExp(`broken-a-${CHROME_PORT}\\.png`).test(out.line ?? '') && out.unhandled === 0, out);
+    await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    // Two of one pick cannot be read: the line names both, once.
+    const two = ['broken-x', 'good-y', 'broken-z'].map((x) => { const f = path('.cache', `${x}-${CHROME_PORT}.png`); writeFileSync(f, Buffer.concat([PNG, Buffer.from(x)])); return f; });
+    await ev(() => (window.__unhandled = 0));
+    { const { root } = await page.send('DOM.getDocument'); const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId, files: two }); }
+    await until(async () => (await chipNames()).length >= 1, 8000, 'the readable one').catch(() => {}); await wait(800);
+    const both = { chips: await chipNames(), line: await ev(() => document.querySelector('.composer-refused')?.textContent ?? null), unhandled: await ev(() => window.__unhandled) };
+    two.forEach((f) => rmSync(f, { force: true }));
+    check('a pick of three whose first and last files cannot be read: the line names both, the readable one waits in the box, and nothing is left unhandled', JSON.stringify(both.chips) === JSON.stringify([`good-y-${CHROME_PORT}.png`]) && both.line === `broken-x-${CHROME_PORT}.png and broken-z-${CHROME_PORT}.png could not be read` && both.unhandled === 0, both);
+    await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    stub.sessions = []; freshStore();
+  }
+
+  // ── A send that comes back unsent beside four added meanwhile: eight wait, none goes (task-724aa2a5a9b5e5cf) ──
+  console.log('Behaviour · more than four in the box after a send comes back (the live page, against the stand-in Barkpark)');
+  {
+    const SF = '00000000-0000-4000-8000-0000000003c1';
+    stub.hosts = host(true); stub.fleet = null; stub.rows = []; freshStore(); stub.sessions = [session(SF)]; stub.failShow.clear(); stub.opened = [];
+    await open(`${base}/`); await until(() => stub.opened.includes(SF), 15000, 'the conversation to open').catch(() => {}); await wait(800); await clearPrompt();
+    const chipNames = () => ev(() => [...document.querySelectorAll('.composer-attachments [role=listitem]')].map((x) => x.getAttribute('aria-label')));
+    const pick = async (files) => { const { root } = await page.send('DOM.getDocument'); const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId, files }); };
+    const make = (tag) => [0, 1, 2, 3].map((i) => { const f = path('.cache', `${tag}-${i}-${CHROME_PORT}.png`); writeFileSync(f, Buffer.concat([PNG, Buffer.from(`${tag}${i}`)])); return f; });
+    const first = make('first'), more = make('more');
+    const firstNames = first.map((f) => f.split('/').pop()), moreNames = more.map((f) => f.split('/').pop());
+    await pick(first); await until(async () => (await chipNames()).length === 4, 10000, 'four chips').catch(() => {});
+    // Four go with words; Barkpark takes the message and gives no answer until let go (503: unsure).
+    const h0 = stub.heldSends.length; stub.holdSend = true;
+    await typeSend('four pictures');
+    await until(() => stub.heldSends.length > h0, 10000, 'the message on its way').catch(() => {}); await wait(200);
+    const between = await chipNames();
+    await pick(more); await until(async () => (await chipNames()).length === 4, 10000, 'four more chips').catch(() => {});
+    stub.holdSend = false; stub.heldSends.splice(h0).forEach((answer) => answer());
+    await until(async () => (await chipNames()).length > 4, 8000, 'the first four back').catch(() => {}); await wait(800);
+    const back = { between, chips: await chipNames(), line: await refusedLine() };
+    // Enter with eight: nothing goes, nothing is dropped.
+    const s0 = stub.sent.length, k0 = stub.keyed.length, u0 = stub.uploads.length, h1 = stub.heldSends.length;
+    await ev(() => document.querySelector('.prompt').focus()); await key('Enter'); await wait(2000);
+    const eight = { sent: stub.sent.length - s0, keyed: stub.keyed.length - k0, uploads: stub.uploads.length - u0, held: stub.heldSends.length - h1, chips: await chipNames(), line: await refusedLine(), prompt: await promptText() };
+    // The four added meanwhile taken out: Enter sends the first four with their words.
+    await ev(async (names) => { for (const n of names) { document.querySelector(`.attach-pic-remove[aria-label="Remove ${n}"]`)?.click(); await new Promise((r) => setTimeout(r, 80)); } }, moreNames);
+    await wait(300);
+    const four = { chips: await chipNames(), line: await refusedLine() };
+    await ev(() => document.querySelector('.prompt').focus()); await key('Enter');
+    await until(() => stub.sent.length > s0, 8000, 'the first four to go').catch(() => {}); await wait(800);
+    const went = stub.sent.slice(s0).map((m) => ({ content: m.content, n: (m.attachments ?? []).length }));
+    const out = { back, eight, four, went, chipsEnd: await chipNames() };
+    [...first, ...more].forEach((f) => rmSync(f, { force: true }));
+    check('four sent, four added while it is on its way, the first comes back unsure: the box holds all eight, the line says a message takes four at most and that the first may have been sent, and Enter sends nothing', between.length === 0 && JSON.stringify(back.chips) === JSON.stringify([...firstNames, ...moreNames]) && /four pictures and files at most/.test(back.line ?? '') && /may have been sent/.test(back.line ?? '') && eight.sent === 0 && eight.keyed === 0 && eight.uploads === 0 && eight.held === 0 && eight.chips.length === 8 && eight.prompt === 'four pictures' && /four pictures and files at most/.test(eight.line ?? ''), out);
+    check('then the four added meanwhile are taken out: the limit line goes, and Enter sends the first four with their words', JSON.stringify(four.chips) === JSON.stringify(firstNames) && !/four pictures and files at most/.test(four.line ?? '') && /may have been sent/.test(four.line ?? '') && JSON.stringify(went) === JSON.stringify([{ content: 'four pictures', n: 4 }]) && out.chipsEnd.length === 0, out);
+    await clearPrompt(); await ev(async () => { for (let i = 0; i < 10; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
     stub.sessions = []; freshStore();
   }
 }
