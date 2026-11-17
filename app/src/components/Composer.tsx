@@ -137,7 +137,6 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     if (!el || !onSend || disabled) return
     const text = read(el)
     if (!text && !pictures.length && !files.length) return
-    if (pictures.length + files.length > MAX_ATTACHMENTS) return // the line already says why
     el.replaceChildren()
     setDraft(false)
     const sent = {pictures, files}
