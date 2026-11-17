@@ -40,7 +40,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -186,6 +186,8 @@ await new Promise((ok) => httpServer((req, res) => {
       const tookIt = () => idem && Object.assign(idem, { state: 'done', status: 202, body: '{"accepted":true}' });
       // `holdTake`: Barkpark takes the message (its turn goes) and answers 202 only when the rule lets it.
       if (stub.holdTake) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); stub.heldSends.push(() => json(202, { accepted: true })); return; }
+      // `holdDrop` (rev63's probe): Barkpark takes it (202, remembered), and the answer is lost when the rule lets go.
+      if (stub.holdDrop) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); tookIt(); stub.heldSends.push(() => req.socket.destroy()); return; }
       // `holdSend`: Barkpark takes the message and does not answer until the rule lets it: 503 then,
       // or, when let go with `true`, it goes (202).
       if (stub.holdSend) { stub.heldSends.push((ok) => (ok ? (stub.sent.push(m), stub.to.push(req.url.split('/')[4]), json(202, { accepted: true })) : json(503, { error: { code: 'unavailable', message: 'the stand-in gave up' } }))); return; }
@@ -2073,13 +2075,77 @@ else {
     await clickTile('Zoe');
     await until(async () => (await onBot()) === ZB, 20000, "Zoe's page after the hold").catch(() => {}); await wait(800);
     stub.heldSends.splice(0).forEach((answer) => answer()); await wait(1000);
+    // Barkpark stored the turn: Zed's page shows it from the conversation's history.
+    const zsid = stub.made.at(-1); stub.rowsBy.set(zsid, [{ seq: 1, role: 'user', source_markdown: 'hello zed' }]);
     await clickTile('Zed');
     await until(async () => (await onBot()) === ZA && (await promptText()) !== '', 15000, "Zed's page with its words").catch(() => {}); await wait(800);
     const zback = { prompt: await promptText(), line: await refusedLine() };
     await enter();
     await until(() => stub.replays > zr0, 10000, 'the resend to be answered').catch(() => {}); await wait(1500);
     const zed = { back: zback, keys: [...new Set(stub.keyed.slice(k0).map((x) => x.key))], requests: stub.keyed.length - k0, replays: stub.replays - zr0, turns: stub.sent.slice(s0).map((m) => m.content), made: stub.made.length - zm0, prompt: await promptText(), line: await refusedLine(), shown: await userBubbles('hello zed') };
-    check("a new bot's first message given back while on its way and taken (202) before it is sent again: the resend carries the same key and gets that answer again; one turn, shown once", zback.prompt === 'hello zed' && SAFE.test(zback.line ?? '') && zed.keys.length === 1 && typeof zed.keys[0] === 'string' && zed.requests === 2 && zed.replays === 1 && JSON.stringify(zed.turns) === '["hello zed"]' && zed.made === 1 && zed.prompt === '' && zed.line === null && zed.shown === 1, zed);
+    check("a new bot's first message given back while on its way and taken (202) before it is sent again: the resend carries the same key and gets that answer again; one turn, and shown once though the history already shows it", zback.prompt === 'hello zed' && SAFE.test(zback.line ?? '') && zed.keys.length === 1 && typeof zed.keys[0] === 'string' && zed.requests === 2 && zed.replays === 1 && JSON.stringify(zed.turns) === '["hello zed"]' && zed.made === 1 && zed.prompt === '' && zed.line === null && zed.shown === 1, zed);
+    await clearPrompt(); stub.rowsBy.delete(zsid);
+
+    // 8. (rev63's probe) The resend gives up on 409 with the safe line while the first is still on its
+    // way; the first is then taken (202). Enter once more: the same key, a replay, no second turn.
+    const QA = '4e0c1d2e-3f4a-4b5c-8d6e-7f8a9b0c1dd5', QB = '5f1d2e3f-4a5b-4c6d-9e7f-8a9b0c1d2ee6';
+    stub.hosts = host(true); stub.sessions = []; freshStore();
+    stub.prefs.set('barkbot.bots', { ids: [QA, QB] }); stub.prefs.set(`barkbot.bot.${QA}`, rec('Qua', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${QB}`, rec('Qin', HOST_ID, null));
+    await open(`${base}/?bot=${QA}`); await until(async () => (await live()).header === 'Qua', 15000, "Qua's page").catch(() => {}); await wait(500);
+    k0 = stub.keyed.length; s0 = stub.sent.length; const qh0 = stub.heldSends.length, qi0 = stub.inUse, qr0 = stub.replays;
+    stub.holdTake = true;
+    await typeSend('hello qua');
+    await until(() => stub.heldSends.length > qh0, 10000, "Qua's message on its way").catch(() => {}); await wait(200);
+    stub.holdTake = false;
+    await clickTile('Qin'); await until(async () => (await onBot()) === QB, 20000, "Qin's page after the hold").catch(() => {}); await wait(800);
+    await clickTile('Qua'); await until(async () => (await onBot()) === QA && (await promptText()) !== '', 15000, "Qua's page with its words").catch(() => {}); await wait(800);
+    await enter();
+    await until(() => stub.inUse - qi0 >= 8, 25000, 'the resend to give up on 409').catch(() => {});
+    await until(async () => (await promptText()) === 'hello qua', 5000, 'the words back').catch(() => {}); await wait(500);
+    const gaveUp = { line: await refusedLine(), prompt: await promptText(), busy: stub.inUse - qi0 };
+    stub.heldSends.splice(0).forEach((answer) => answer()); await wait(2000);
+    await enter();
+    await until(() => stub.replays > qr0, 8000, 'the replay').catch(() => {}); await wait(1500);
+    const qua = { gaveUp, keys: [...new Set(stub.keyed.slice(k0).map((x) => x.key))], turns: stub.sent.slice(s0).map((m) => m.content), replays: stub.replays - qr0, prompt: await promptText(), line: await refusedLine(), shown: await userBubbles('hello qua') };
+    check('a resend that gave up on 409 says sending again is safe; the first is then taken; Enter again carries the same key, is answered by a replay, and runs no second turn', SAFE.test(gaveUp.line ?? '') && gaveUp.prompt === 'hello qua' && gaveUp.busy >= 8 && qua.keys.length === 1 && typeof qua.keys[0] === 'string' && JSON.stringify(qua.turns) === '["hello qua"]' && qua.replays === 1 && qua.prompt === '' && qua.line === null && qua.shown === 1, qua);
+    await clearPrompt();
+
+    // 9. (rev63's probe) Taken, its answer lost, while more was typed: the box holds both, and Enter sends
+    // other words under another key, so the line must not say it is safe.
+    const lines = (t) => t.split('\n').map((x) => x.trim()).filter(Boolean);
+    const SP = '00000000-0000-4000-8000-0000000002e1';
+    await openOn(SP); await clearPrompt();
+    k0 = stub.keyed.length; s0 = stub.sent.length; let ph0 = stub.heldSends.length; stub.holdDrop = true;
+    await typeSend('first words'); await until(() => stub.heldSends.length > ph0, 8000, 'on its way').catch(() => {}); await wait(200);
+    await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'more' }); await wait(200);
+    stub.holdDrop = false; stub.heldSends.splice(ph0).forEach((drop) => drop());
+    await until(async () => !!(await refusedLine()), 10000, 'the line').catch(() => {}); await wait(500);
+    const typed = { prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), line: await refusedLine() };
+    check('a lost answer while more was typed: the box holds its words, then what was typed, and the line says to look before sending again, never that it is safe', JSON.stringify(typed.prompt) === '["first words","more"]' && !SAFE.test(typed.line ?? '') && /look in the conversation/.test(typed.line ?? ''), typed);
+    await clearPrompt();
+
+    // 10. (rev63's probe) Two on their way: the first is taken and its answer lost, the second goes. The
+    // first comes back saying sending again is safe, and Enter then gets the first answer again.
+    await openOn(SP); await clearPrompt();
+    k0 = stub.keyed.length; s0 = stub.sent.length; ph0 = stub.heldSends.length; const tr0 = stub.replays; stub.holdDrop = true;
+    await typeSend('one'); await until(() => stub.heldSends.length > ph0, 8000, 'one on its way').catch(() => {}); await wait(200);
+    stub.holdDrop = false;
+    await typeSend('two'); await until(() => stub.sent.length > s0 + 1, 8000, 'two to go').catch(() => {}); await wait(800);
+    stub.heldSends.splice(ph0).forEach((drop) => drop());
+    await until(async () => !!(await refusedLine()), 10000, 'the line').catch(() => {}); await wait(500);
+    const both = { prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), line: await refusedLine() };
+    await enter();
+    await until(() => stub.replays > tr0, 8000, 'the replay').catch(() => {}); await wait(1500);
+    Object.assign(both, { turns: stub.sent.slice(s0).map((m) => m.content), replays: stub.replays - tr0, after: await promptText(), afterLine: await refusedLine() });
+    check('two on their way, the first taken with its answer lost: it comes back saying sending again is safe, and Enter gets its first answer again, with no second turn', JSON.stringify(both.prompt) === '["one"]' && SAFE.test(both.line ?? '') && JSON.stringify(both.turns) === '["one","two"]' && both.replays === 1 && both.after === '' && both.afterLine === null, both);
+    await clearPrompt();
+
+    // 11. Taken for sure, the key goes: the same words sent again on purpose run again, under a new key.
+    k0 = stub.keyed.length; s0 = stub.sent.length;
+    await typeSend('twice on purpose'); await until(() => stub.sent.length > s0, 8000, 'the first').catch(() => {}); await wait(800);
+    await typeSend('twice on purpose'); await until(() => stub.sent.length > s0 + 1, 8000, 'the second').catch(() => {}); await wait(800);
+    const twice = { keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), shown: await userBubbles('twice on purpose') };
+    check('a message taken for sure lets its key go: the same words sent again on purpose go again, under a new key, and show twice', twice.keys.length === 2 && twice.keys.every((k) => typeof k === 'string') && twice.keys[0] !== twice.keys[1] && JSON.stringify(twice.turns) === '["twice on purpose","twice on purpose"]' && twice.shown === 2, twice);
     await clearPrompt();
     stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
