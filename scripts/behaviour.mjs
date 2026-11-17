@@ -23,6 +23,7 @@ import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
 import { createOnce } from './lib/create-once.mjs';
 import { createLost } from './lib/create-lost.mjs';
+import { retryAdopt } from './lib/retry-adopt.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -738,6 +739,7 @@ else {
     check('a seeded id whose record is there, off the list, is passed over: Create takes the next, and that record is untouched', t.id === C && JSON.stringify(stub.prefs.get(`barkbot.bot.${O}`)) === JSON.stringify(orphan) && !t.writes.includes(`PUT barkbot.bot.${O}`), { ...t, orphan: stub.prefs.get(`barkbot.bot.${O}`) });
     rmSync(MINT, { force: true }); freshStore();
   }
+  await retryAdopt({ check, stub, ev, ids, freshStore, rec, HOST_ID });
   await createOnce({ check, ev, stub, freshStore, showing, alertLine, rec, session, ids, botPuts, HOST_ID, S1, KEY, MINT });
   // A bot already listed when today's bot has not moved in yet: today's bot still moves in.
   const OTHER = '9d2a3b4c-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
