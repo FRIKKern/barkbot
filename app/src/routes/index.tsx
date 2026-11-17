@@ -272,7 +272,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
     return sent
   }
   useEffect(() => {
-    if (waiting && convo.ready && !gaveUp.current && parkedMessage.current === waiting.done) {
+    if (waiting && convo.ready && !gaveUp.current) {
       setWaiting(null)
       sending.current = true
       let failed: string | null = null
