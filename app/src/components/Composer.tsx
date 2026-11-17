@@ -141,7 +141,6 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     try {
       await take(picked)
     } finally {
-      reading.current--
     }
   }
   const take = async (picked: File[]) => {
