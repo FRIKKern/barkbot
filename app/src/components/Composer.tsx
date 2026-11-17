@@ -122,7 +122,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
           continue
         }
         held.current++ // counted now: another read landing before the box is drawn again sees it
-        if (picture) setPictures((now) => [...now, {name: f.name, data, src: `data:${f.type};base64,${data}`}])
+        if (picture) setPictures([...pictures, {name: f.name, data, src: `data:${f.type};base64,${data}`}])
         else setFiles((now) => [...now, {name: f.name, size: fileSize(f.size), data}])
       }
     }
