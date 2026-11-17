@@ -186,18 +186,34 @@ export async function readBots(ids: string[], hosts: OwnHost[], listed: OwnSessi
 //    next change starts. A write has no time bound of its own (barkpark.ts).
 //  - WAIT_MS: a change waits at most 15 s for its turn, else it fails with BUSY and never runs, so
 //    nothing is written after its caller was told it was not.
+//  - HOLD_MS, the backstop (task-2ad4f1be48ff7f4d): a change holds its bot at most 40 s in all,
+//    longer than its reads (startChat's: three, 3 × 8 s) and its write (10 s). Past it the change
+//    fails with HELD and the next change starts, so a change that awaits something with no bound
+//    before its write cannot wedge its bot. The write a change is handed is its own: once the
+//    change has ended (it returned, it failed, or the backstop let its bot go) that write writes
+//    nothing (ENDED), and one still on its way is called off, so no write runs outside the queue.
 export const WRITE_MS = 10_000
 export const WAIT_MS = 15_000
+export const HOLD_MS = 40_000
 const SLOW = 'Barkpark did not answer the save within 10 s. Reload to see what was kept.'
 const BUSY = 'Another change to this bot is still being saved, so this one was not made. Try again in a moment.'
+const HELD = 'This change to the bot took over 40 s, so it was stopped and nothing more is written for it. Reload to see what was kept.'
+const ENDED = 'This change to the bot had already ended, so nothing was written.'
 const changing = new Map<string, Promise<void>>()
 /** `write` runs a change's write under WRITE_MS: its `signal` calls the write off at the bound. */
 export type Write = <W>(save: (signal: AbortSignal) => Promise<W>) => Promise<W>
-export const write: Write = (save) => {
+export const write: Write = (save) => bounded(save)
+function bounded<W>(save: (signal: AbortSignal) => Promise<W>, off?: AbortSignal): Promise<W> {
   const stop = new AbortController()
   const timer = setTimeout(() => stop.abort(), WRITE_MS)
-  const called = new Promise<never>((_, no) => stop.signal.addEventListener('abort', () => no(new Error(SLOW))))
-  return Promise.race([save(stop.signal), called]).finally(() => clearTimeout(timer))
+  const callOff = () => stop.abort()
+  off?.addEventListener('abort', callOff)
+  const called = new Promise<never>((_, no) => stop.signal.addEventListener('abort', () => no(new Error(off?.aborted ? ENDED : SLOW))))
+  called.catch(() => {}) // called off after the race settled: nobody waits on it then
+  return Promise.race([save(stop.signal), called]).finally(() => {
+    clearTimeout(timer)
+    off?.removeEventListener('abort', callOff)
+  })
 }
 export function oneAtATime<T>(id: string, change: (write: Write) => Promise<T>): Promise<T> {
   const before = changing.get(id) ?? Promise.resolve()
@@ -210,7 +226,15 @@ export function oneAtATime<T>(id: string, change: (write: Write) => Promise<T>):
   })
   const run = turn.then((mine) => {
     if (!mine) throw new Error(BUSY)
-    return change(write)
+    // This change's own write: refused once the change has ended; one on its way then is called off.
+    const over = new AbortController()
+    const own: Write = (save) => (over.signal.aborted ? Promise.reject(new Error(ENDED)) : bounded(save, over.signal))
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const held = new Promise<never>((_, no) => (timer = setTimeout(() => no(new Error(HELD)), HOLD_MS)))
+    return Promise.race([change(own), held]).finally(() => {
+      clearTimeout(timer)
+      over.abort()
+    })
   })
   // The next change waits for this one to end, or, if this one gave up, for the one it waited on.
   const after = turn.then((mine) => (mine ? run.then(() => undefined, () => undefined) : before))
