@@ -160,8 +160,9 @@ await new Promise((ok) => httpServer((req, res) => {
     if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const id = req.url.split('/').pop(); return stub.pictures.has(id) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(id) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/messages$/.test(req.url) && req.method === 'POST') {
       const m = JSON.parse(body);
-      // `holdSend`: Barkpark takes the message and does not answer until the rule lets it (503 then).
-      if (stub.holdSend) { stub.heldSends.push(() => json(503, { error: { code: 'unavailable', message: 'the stand-in gave up' } })); return; }
+      // `holdSend`: Barkpark takes the message and does not answer until the rule lets it: 503 then,
+      // or, when let go with `true`, it goes (202).
+      if (stub.holdSend) { stub.heldSends.push((ok) => (ok ? (stub.sent.push(m), stub.to.push(req.url.split('/')[4]), json(202, { accepted: true })) : json(503, { error: { code: 'unavailable', message: 'the stand-in gave up' } }))); return; }
       // `dropAnswer`: Barkpark takes the message, then the answer is lost (the socket drops).
       if (stub.dropAnswer) { stub.sent.push(m); stub.to.push(req.url.split('/')[4]); return void req.socket.destroy(); }
       // `afterTake` {status, body}: Barkpark takes the message, then answers that (a 500 from storing the
@@ -1865,6 +1866,62 @@ else {
     check('control: a send with no answer and nothing typed meanwhile: the box holds its words and the line says it may have been sent', JSON.stringify(lines(alone.prompt)) === JSON.stringify(['first words']) && /may have been sent/.test(alone.line ?? ''), alone);
     const both = await heldThenUnsure('first words', 'second');
     check('a send with no answer while more was typed: the box holds its words first, then what was typed meanwhile, and the line says it may have been sent', JSON.stringify(lines(both.prompt)) === JSON.stringify(['first words', 'second']) && /may have been sent/.test(both.line ?? ''), both);
+    // Two sends on their way at once, "three" typed after: both come back unsent, in send order or
+    // the other way round; the box reads them in the order they were sent, then what was typed since.
+    const SQ2 = SQ;
+    const twoHeld = async (order) => {
+      stub.hosts = host(true); stub.sessions = [session(SQ2)]; freshStore(); stub.opened = [];
+      await open(`${base}/`); await until(() => stub.opened.includes(SQ2), 15000, "the Main Bot's conversation to open").catch(() => {}); await wait(800);
+      await clearPrompt();
+      const h0 = stub.heldSends.length; stub.holdSend = true;
+      await typeSend('one'); await until(() => stub.heldSends.length > h0, 8000, 'the first message on its way').catch(() => {}); await wait(200);
+      await typeSend('two'); await until(() => stub.heldSends.length > h0 + 1, 8000, 'the second message on its way').catch(() => {}); await wait(200);
+      await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'three' }); await wait(200);
+      stub.holdSend = false; const held = stub.heldSends.splice(h0);
+      for (const n of order) { held[n](); await wait(700); }
+      await until(async () => !!(await refusedLine()), 8000, 'the line').catch(() => {}); await wait(500);
+      const out = { prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), held: held.length };
+      await clearPrompt(); return out;
+    };
+    const inOrder = await twoHeld([0, 1]);
+    check('two sends on their way at once, "three" typed after, both unsent, answered in send order: the box reads one, two, three', inOrder.held === 2 && JSON.stringify(inOrder.prompt) === JSON.stringify(['one', 'two', 'three']), inOrder);
+    const reversed = await twoHeld([1, 0]);
+    check('two sends on their way at once, "three" typed after, both unsent, answered the other way round: the box still reads one, two, three', reversed.held === 2 && JSON.stringify(reversed.prompt) === JSON.stringify(['one', 'two', 'three']), reversed);
+    // A send that goes while more was typed: only the typing stays in the box, with no line.
+    {
+      stub.hosts = host(true); stub.sessions = [session(SQ)]; freshStore(); stub.opened = [];
+      await open(`${base}/`); await until(() => stub.opened.includes(SQ), 15000, "the Main Bot's conversation to open").catch(() => {}); await wait(800);
+      await clearPrompt();
+      const h0 = stub.heldSends.length, s0 = stub.sent.length; stub.holdSend = true;
+      await typeSend('it goes'); await until(() => stub.heldSends.length > h0, 8000, 'the message on its way').catch(() => {}); await wait(200);
+      await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'still typing' }); await wait(200);
+      stub.holdSend = false; stub.heldSends.splice(h0).forEach((answer) => answer(true));
+      await until(() => stub.sent.length > s0, 8000, 'the message to go').catch(() => {}); await wait(1000);
+      const went = { prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), line: await refusedLine(), sent: stub.sent.slice(s0).map((m) => m.content) };
+      await clearPrompt();
+      check('a send that goes while more was typed: the box holds only what was typed meanwhile, and no line', JSON.stringify(went.sent) === JSON.stringify(['it goes']) && JSON.stringify(went.prompt) === JSON.stringify(['still typing']) && went.line === null, went);
+    }
+    // A picture attached while a send with a picture is on its way: both come back unsent, the sent
+    // one first, each once, with the words.
+    {
+      const picA = path('.cache', `unsent-a-${CHROME_PORT}.png`), picB = path('.cache', `unsent-b-${CHROME_PORT}.png`); writeFileSync(picA, PNG); writeFileSync(picB, PNG);
+      const pickPic = async (file) => { await page.send('DOM.enable'); const { root: r } = await page.send('DOM.getDocument'); const { nodeId: n } = await page.send('DOM.querySelector', { nodeId: r.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId: n, files: [file] }); };
+      const chips = () => ev(() => [...document.querySelectorAll('.composer-attachments [role=listitem]')].map((x) => x.getAttribute('aria-label')));
+      stub.hosts = host(true); stub.sessions = [session(SQ)]; freshStore(); stub.opened = [];
+      await open(`${base}/`); await until(() => stub.opened.includes(SQ), 15000, "the Main Bot's conversation to open").catch(() => {}); await wait(800);
+      await clearPrompt();
+      await pickPic(picA); await until(async () => (await chips()).length === 1, 5000, 'the first chip').catch(() => {});
+      const h0 = stub.heldSends.length; stub.holdSend = true;
+      await typeSend('with a picture'); await until(() => stub.heldSends.length > h0, 8000, 'the message on its way').catch(() => {}); await wait(200);
+      const between = await chips();
+      await pickPic(picB); await until(async () => (await chips()).length === 1, 5000, 'the second chip').catch(() => {});
+      stub.holdSend = false; stub.heldSends.splice(h0).forEach((answer) => answer());
+      await until(async () => !!(await refusedLine()), 8000, 'the line').catch(() => {}); await wait(500);
+      const pics = { between, chips: await chips(), prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')) };
+      rmSync(picA, { force: true }); rmSync(picB, { force: true });
+      check('a picture attached while a send with a picture is on its way, both unsent: the box holds the sent picture, then the new one, each once, and the words', pics.between.length === 0 && JSON.stringify(pics.chips) === JSON.stringify([`unsent-a-${CHROME_PORT}.png`, `unsent-b-${CHROME_PORT}.png`]) && JSON.stringify(pics.prompt) === JSON.stringify(['with a picture']), pics);
+      await clearPrompt();
+    }
     stub.sessions = []; freshStore();
   }
 }
