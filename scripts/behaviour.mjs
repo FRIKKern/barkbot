@@ -2226,6 +2226,42 @@ else {
     const twice = { keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), shown: await userBubbles('twice on purpose') };
     check('a message taken for sure lets its key go: the same words sent again on purpose go again, under a new key, and show twice', twice.keys.length === 2 && twice.keys.every((k) => typeof k === 'string') && twice.keys[0] !== twice.keys[1] && JSON.stringify(twice.turns) === '["twice on purpose","twice on purpose"]' && twice.shown === 2, twice);
     await clearPrompt();
+
+    // PROBE (rev63, not a rule to land): the box changes and comes back to exactly what was sent; the
+    // line is safe again, and Enter must then carry the SAME key: a replay, one turn, no new upload.
+    {
+      const SB6 = '00000000-0000-4000-8000-0000000002e6', SB7 = '00000000-0000-4000-8000-0000000002e7';
+      const openB = async (sid) => { stub.hosts = host(true); stub.sessions = [session(sid)]; freshStore(); stub.opened = []; await open(`${base}/`); await until(() => stub.opened.includes(sid), 15000, 'the conversation').catch(() => {}); await wait(800); await clearPrompt(); };
+      const attach = async (file) => { const { root: rr } = await page.send('DOM.getDocument'); const { nodeId: nn } = await page.send('DOM.querySelector', { nodeId: rr.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId: nn, files: [file] }); };
+      // a. words: " x" typed, then taken out again.
+      await openB(SB6);
+      k0 = stub.keyed.length; s0 = stub.sent.length; let rp0 = stub.replays;
+      const la = await lostOnce('back to same');
+      await ev(() => { const el = document.querySelector('.prompt'); el.focus(); const r = document.createRange(); r.selectNodeContents(el); r.collapse(false); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); });
+      await page.send('Input.insertText', { text: ' x' }); await wait(300);
+      const midA = await refusedLine();
+      await key('Backspace'); await key('Backspace'); await wait(300);
+      const backA = { prompt: await promptText(), line: await refusedLine() };
+      await enter(); await wait(3000);
+      const qa = { la, midA, backA, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => m.content), replays: stub.replays - rp0 };
+      check('PROBE back-to-same words: look while changed, safe again when back, and Enter carries the same key (a replay, one turn)', SAFE.test(la.line ?? '') && !SAFE.test(midA ?? '') && backA.prompt === 'back to same' && SAFE.test(backA.line ?? '') && qa.keys.length === 2 && qa.keys[0] === qa.keys[1] && qa.replays === 1 && JSON.stringify(qa.turns) === '["back to same"]', qa);
+      await clearPrompt();
+      // b. a picture: taken out, then the same file put back.
+      await openB(SB7);
+      const pb6 = path('.cache', `pb6-picture-${CHROME_PORT}.png`); writeFileSync(pb6, PNG);
+      await attach(pb6); await until(async () => (await chipCount()) === 1, 10000, 'the chip').catch(() => {});
+      k0 = stub.keyed.length; s0 = stub.sent.length; rp0 = stub.replays; const u0 = stub.uploads.length;
+      const lb = await lostOnce('same picture');
+      await ev(() => document.querySelector('.attach-pic-remove')?.click()); await wait(400);
+      const midB = { chips: await chipCount(), line: await refusedLine() };
+      await attach(pb6); await until(async () => (await chipCount()) === 1, 10000, 'the chip again').catch(() => {}); await wait(300);
+      const backB = { chips: await chipCount(), line: await refusedLine() };
+      await enter(); await wait(3000);
+      rmSync(pb6, { force: true });
+      const qb = { lb, midB, backB, keys: stub.keyed.slice(k0).map((x) => x.key), turns: stub.sent.slice(s0).map((m) => JSON.stringify(m)), replays: stub.replays - rp0, uploads: stub.uploads.length - u0 };
+      check('PROBE back-to-same picture: look while taken out, safe again with the same file back, and Enter carries the same key and id (a replay, one turn, one upload)', SAFE.test(lb.line ?? '') && midB.chips === 0 && !SAFE.test(midB.line ?? '') && backB.chips === 1 && SAFE.test(backB.line ?? '') && qb.keys.length === 2 && qb.keys[0] === qb.keys[1] && qb.replays === 1 && qb.turns.length === 1 && qb.uploads === 1, qb);
+      await clearPrompt();
+    }
     stub.sessions = []; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
   }
 }
