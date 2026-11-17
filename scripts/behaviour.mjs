@@ -576,9 +576,14 @@ else {
   s = await showing('Kept Name');
   check('a save whose list add failed leaves a record with no list entry and says so; the next load adds its id and keeps the record as it is now, never written over', left.header === 'Legacy Name' && /could not be saved/.test(left.alert ?? '') && left.record === 'Legacy Name' && left.ids.length === 0 && ids().join() === main && s.header === 'Kept Name' && stub.prefs.get(KEY)?.name === 'Kept Name' && since(w0).filter((w) => w.method === 'PUT').length === 0, { left, header: s.header, ids: ids(), writes: since(w0) });
 
-  stub.prefs.set('barkbot.bots', { ids: [main, main] });
+  // A made bot listed twice: Rail draws the Main Bot once whatever the list holds, so the twice-listed
+  // id must be a made bot's, or the rule would hold without the list's dedupe (rev63, mutant #176 on #171).
+  const TWICE = 'b1c2d3e4-5f6a-4b7c-8d9e-0f1a2b3c4d5e';
+  stub.prefs.set(`barkbot.bot.${TWICE}`, rec('Twice', HOST_ID, null));
+  stub.prefs.set('barkbot.bots', { ids: [main, TWICE, TWICE] });
   s = await showing('Kept Name');
-  check('an id twice in the list is one bot in the rail', s.tiles.filter((t) => t === 'Kept Name, Main Bot').length === 1, { tiles: s.tiles });
+  check('an id twice in the list is one bot in the rail: a made bot listed twice has one tile, next to the one Main Bot', s.tiles.filter((t) => t === 'Twice').length === 1 && s.tiles.filter((t) => t === 'Kept Name, Main Bot').length === 1, { tiles: s.tiles });
+  stub.prefs.delete(`barkbot.bot.${TWICE}`);
   const many = Array.from({ length: 60 }, (_, i) => `a0000000-0000-4000-8000-0000000000${i.toString(16).padStart(2, '0')}`);
   many.forEach((id, i) => stub.prefs.set(`barkbot.bot.${id}`, rec(`Bot ${i}`, HOST_ID, null)));
   stub.prefs.set('barkbot.bots', { ids: [main, ...many] });
@@ -595,6 +600,8 @@ else {
   stub.sessions = [session(S1)]; stub.rows = []; freshStore();
   await showing('BarkBot');
   const pinned = () => ev(() => [...document.querySelectorAll('.rail-list .rail-tile')].map((t) => t.getAttribute('aria-label')));
+  // The main slot: Create must leave the Main Bot there (task-b04631fa0d533e9a, rev63 on #171).
+  const mainSlot = () => ev(() => [...document.querySelectorAll('.rail-main .rail-tile')].map((t) => t.getAttribute('aria-label')));
   const dialog = () => ev(() => !!document.querySelector('.dialog.new-bot'));
   const openDialog = async () => { const at = await ev(() => { const r = document.querySelector('button[aria-label="New Bot"]').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }); await click(...at); await until(dialog, 5000, 'the New Bot dialog').catch(() => {}); };
   const press = async (label) => { const at = await ev((l) => { const b = [...document.querySelectorAll('.dialog.new-bot button')].find((x) => x.textContent.trim() === l || x.getAttribute('aria-label') === l); const r = b?.getBoundingClientRect(); return r ? [r.x + r.width / 2, r.y + r.height / 2] : null; }, label); if (at) await click(...at); };
@@ -634,16 +641,16 @@ else {
   stub.createDelay = 0;
   const pipId = await ev(() => new URLSearchParams(location.search).get('bot'));
   const made2 = stub.writes.slice(w2);
-  const railAfter = await pinned(), tileAt = await ev(() => window.__tileAt);
+  const railAfter = await pinned(), mainAfter = await mainSlot(), tileAt = await ev(() => window.__tileAt);
   const empty = await ev(() => document.querySelectorAll('.bubble').length === 0);
-  check('Create with a name adds one tile at the end of Pinned Bots and opens that bot\'s empty conversation', railAfter.length === railBefore.length + 1 && railAfter.at(-1) === 'Pip' && (await live()).header === 'Pip' && empty && !(await dialog()), { before: railBefore, after: railAfter, pipId });
+  check('Create with a name adds one tile at the end of Pinned Bots, keeps the Main Bot in the main slot, and opens that bot\'s empty conversation', railAfter.length === railBefore.length + 1 && railAfter.at(-1) === 'Pip' && JSON.stringify(mainAfter) === JSON.stringify(['BarkBot, Main Bot']) && (await live()).header === 'Pip' && empty && !(await dialog()), { before: railBefore, after: railAfter, mainAfter, pipId });
   check('control: that Create wrote one bot key and one add, and made no Barkpark conversation (its first message makes it)', made2.filter((w) => w.method === 'PUT' && w.key === `barkbot.bot.${pipId}`).length === 1 && made2.filter((w) => w.method === 'PATCH' && w.key === 'barkbot.bots').length === 1 && made2.length === 2 && stub.made.length === c1 && stub.prefs.get(`barkbot.bot.${pipId}`)?.session_id === null, { made2, made: stub.made.slice(c1) });
   check('Create reads Creating… while the writes are in flight, and the tile lands no later than the oracle\'s 1151 ms', label === 'Creating…' && typeof tileAt === 'number' && tileAt <= 1151, { label, tileAt, tileNet });
   const here = await ev(() => location.href);
   stub.opened = []; await open(here);
   await until(async () => (await live()).header === 'Pip', 15000, 'the reloaded page').catch(() => {}); await wait(500);
-  const again = await pinned();
-  check('a reload shows the tile and the bot, still with no conversation made', again.at(-1) === 'Pip' && (await live()).header === 'Pip' && stub.opened.length === 0 && stub.made.length === c1, { again, opened: stub.opened, here });
+  const again = await pinned(), mainAgain = await mainSlot();
+  check('a reload shows the tile and the bot, still with no conversation made, and the Main Bot in the main slot', again.at(-1) === 'Pip' && JSON.stringify(mainAgain) === JSON.stringify(['BarkBot, Main Bot']) && (await live()).header === 'Pip' && stub.opened.length === 0 && stub.made.length === c1, { again, mainAgain, opened: stub.opened, here });
   const pipMade0 = stub.made.length, pipSent0 = stub.sent.length;
   await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: 'hello pip' }); await key('Enter');
   await until(() => stub.sent.length > pipSent0, 10000, 'Pip\'s first message').catch(() => {});
