@@ -8,8 +8,10 @@ import {CREATE_UNSURE} from './create-unsure'
 import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, readListed, removeId, sessionOf, setBotField, trusted, validColour, validName, validShape, write, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
-/** A bot as the page gets it: its id and its name only (the record's pointers stay on the server). */
-export type ChatBot = {id: string; name: string}
+/** A bot as the page gets it: its id, its name, and `main` on the Main Bot (its id is made from its
+ *  computer's, mainBotId), which the rail draws alone in the main slot with the Main Bot badge, as the
+ *  gate scenes and Grok's rail do (task-b04631fa0d533e9a). The record's pointers stay on the server. */
+export type ChatBot = {id: string; name: string; main?: boolean}
 /** The bots in rail order, the open one (`botId`, `bot` its name), its computer and its conversation,
  *  a plain line when a preference could not be read or saved (`notice`), and each bot's conversation
  *  by bot id (`sessions`: only sessions checked as the caller's own, for Working and Unread per tile). */
@@ -168,7 +170,7 @@ export const loadChat = createServerFn({method: 'GET'})
   const home = hosts.find((h) => h.id === open.bot.host_id) ?? host
   // Each bot's conversation, for the fleet stream's Working and Unread per tile: only a session sessionOf opened.
   const byBot = Object.fromEntries(rail.flatMap((x) => (x.session.is === 'open' ? [[x.bot.id, x.session.session.id]] : [])))
-  return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice, sessions: byBot}
+  return {bots: rail.map(({bot}) => ({id: bot.id, name: bot.name, ...(bot.id === main.id && {main: true})})), botId: open.bot.id, bot: open.bot.name, host: home, sessionId: session?.id ?? null, startedAt: session?.inserted_at ?? null, notice, sessions: byBot}
 })
 
 // Each Create try's id: random. In dev only (vite build leaves it out), BARKBOT_TEST_MINT_FILE, set
