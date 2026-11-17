@@ -18,6 +18,7 @@ import { createHash } from 'node:crypto';
 import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
+import { railMain } from './lib/rail-main.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -806,6 +807,7 @@ else {
   check("Bea works while Ada is open: only Bea's tile says Working, then, with no focus, only Bea's says Unread activity", JSON.stringify(during) === JSON.stringify(['Ada', 'Bea, Working', 'BarkBot']) && JSON.stringify(after) === JSON.stringify(['Ada', 'Bea, Unread activity', 'BarkBot']) && (await live()).header === 'Ada', { during, after });
   await windowFocus(true);
   check('control: the window getting focus clears the dot', JSON.stringify(await labels()) === JSON.stringify(['Ada', 'Bea', 'BarkBot']), await labels());
+  await railMain({ check, ev, mainName: 'BarkBot', pinned: ['Ada', 'Bea'], open: 'Ada' });
   // A first message still opening its conversation, then a pick (task-f954370021fb60fb): the
   // message goes once, to the bot it was written to, and never to the bot picked.
   const CLEO = 'c3d4e5f6-a7b8-4c9d-8e0f-1a2b3c4d5e6f';
