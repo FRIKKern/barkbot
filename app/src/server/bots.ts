@@ -237,7 +237,7 @@ export async function putBot(bot: Bot, signal?: AbortSignal): Promise<void> {
 export async function setBotField(id: string, field: 'name' | 'session_id', item: string, signal?: AbortSignal): Promise<Record<string, unknown> | null> {
   signal?.throwIfAborted()
   const {value} = await bp<{value: Record<string, unknown> | null}>(prefs(botKey(id)), {method: 'PATCH', json: {op: 'set', field, item}, signal})
-  if (!value || (Object.keys(value).length === 1 && field in value)) {
+  if (!value || field in value) {
     await bp(prefs(botKey(id)), {method: 'DELETE'})
     return null
   }
