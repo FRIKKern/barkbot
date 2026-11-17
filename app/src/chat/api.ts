@@ -262,11 +262,10 @@ export const createBot = createServerFn({method: 'POST'})
     let ids = await listIds().catch(() => {
       throw new Error('your bots could not be read from Barkpark. Try again.')
     })
-    // A retry finishes the bot whose record write got no answer, under that same id: already listed,
-    // it is made; else it is used again if Create could still take it (a v4 id whose folder no listed
-    // bot works in). Only an id Create cannot take is replaced by a new one.
-    if (retry !== undefined && ids?.includes(retry)) return {id: retry}
     if (ids && ids.length >= READ_CAP) ids = await roomFor(ids)
+    // A retry finishes the bot whose record write got no answer, under that same id, if Create could
+    // still take it (a v4 id whose folder no listed bot works in); only an id it cannot take is
+    // replaced by a new one. (Its list add never ran: a write with no answer returns before it.)
     const again = retry !== undefined && freshId(ids ?? [], host.id, () => retry) === retry ? retry : null
     // A new id whose folder no listed bot works in; a few tries, then a plain refusal, nothing written.
     const id = again ?? freshId(ids ?? [], host.id, await minter())
