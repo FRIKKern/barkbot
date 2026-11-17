@@ -152,7 +152,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     // Nothing went (or it may have): the words and what waited with them come back, and the line says
     // why (if it is not said elsewhere). Words typed meanwhile stay, after them, as pictures and files do.
     say(why || null, {text, pictures: sent.pictures, files: sent.files})
-    setPictures((now) => back(now, sent.pictures, n))
+    setPictures((now) => back(now, sent.pictures, n).slice(0, MAX_ATTACHMENTS))
     setFiles((now) => back(now, sent.files, n))
     if (text) {
       const p = document.createElement('p')
