@@ -246,7 +246,7 @@ export function readListed(ids: string[]): Promise<Listed[]> {
     ids.map(async (id): Promise<Listed> => {
       if (!UUID.test(id)) return {id, is: 'unread'}
       const key = botKey(id)
-      const a = await bp<{key?: unknown; dataset?: unknown; value?: unknown} | null>(prefs(key)).catch(() => null)
+      const a = await bp<{key?: unknown; dataset?: unknown; value?: unknown} | null>(prefs(key)).catch(() => ({key, dataset, value: null}))
       if (!a || typeof a !== 'object' || a.key !== key || a.dataset !== dataset || !('value' in a)) return {id, is: 'unread'}
       return a.value === null ? {id, is: 'gone'} : {id, is: 'there', raw: a.value}
     }),
