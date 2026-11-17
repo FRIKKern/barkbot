@@ -10,8 +10,8 @@
 #   3. push the branch; open or update its pull request.
 set -eu
 SELF=$(git hash-object "$0")   # this run's own script, to notice a newer one after the rebase
-# README.md is NOT here: its timeline is generated but its prose is not, and a lane never
-# rewrites the timeline (only main does), so a README conflict is a real one.
+# README.md is NOT here: nothing generates it. Its News block is written by the daily news run
+# (docs/decisions/0009), never by a lane, so a README conflict is a real one.
 GEN='^(docs/PARITY\.md|docs/images/(roadmap|journeys|hero)\.svg)$'
 REC='^parity/gate-(a|b)/[^/]+\.json$'
 branch=$(git rev-parse --abbrev-ref HEAD)
@@ -50,7 +50,7 @@ node scripts/gate.mjs --show 0   # records the rebased tree; exits 1 if any stat
 if [ -f scripts/gate-b.mjs ]; then node scripts/gate-b.mjs --show 0; fi
 node scripts/behaviour.mjs   # what the frame does, rule by rule with controls; exits 1 if any rule fails
 npm run -s docs
-git checkout -q -- README.md   # the timeline is main's to refresh
+git checkout -q -- README.md   # README's News is the daily news run's to write, never a lane's
 if [ -n "$(git status --porcelain)" ]; then git add -A docs parity && git commit -q -m "Re-record the gates and regenerate docs after rebase"; fi
 node scripts/build-check.mjs   # a production build carries no test hook (BARKBOT_TEST_*); exits 1 if one does
 npm run -s check
