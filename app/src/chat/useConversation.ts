@@ -458,7 +458,6 @@ export function useConversation(sessionId: string | null, transport: Transport =
         let stored!: (ok: boolean) => void
         e.stored = new Promise((ok) => (stored = ok))
         unsent.set(sessionId, [...(unsent.get(sessionId) ?? []), e])
-        flying.current = {e, n}
         try {
           for (const o of outgoing) {
             if (!transport.upload) throw new Error('This conversation cannot take pictures or files')
