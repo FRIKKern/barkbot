@@ -39,17 +39,12 @@ export type ComposerStart = {draft?: string; pictures?: Picture[]; files?: Waiti
  *  was sent and the reason is already said elsewhere (the conversation's line): the draft comes back alone. */
 export type OnSend = (text: string, pictures: Picture[], files: WaitingFile[]) => Promise<string | null | void> | void
 
-/** `beside`: the line for words that come back beside others in the box (typed meanwhile, or
- *  another message's): Enter then sends other words than the ones the line is about. */
-export function Composer({placeholder, onSend, disabled, start, beside}: {placeholder: string; onSend?: OnSend; disabled?: boolean; start?: ComposerStart; beside?: (why: string) => string}) {
+export function Composer({placeholder, onSend, disabled, start}: {placeholder: string; onSend?: OnSend; disabled?: boolean; start?: ComposerStart}) {
   const box = useRef<HTMLDivElement>(null)
   const chooser = useRef<HTMLInputElement>(null)
   const [draft, setDraft] = useState(!!start?.draft)
   const [pictures, setPictures] = useState<Picture[]>(start?.pictures ?? [])
   const [files, setFiles] = useState<WaitingFile[]>(start?.files ?? [])
-  // What waits in the box as last drawn, for a send that answers later (submit's restore).
-  const inBox = useRef({pictures, files})
-  inBox.current = {pictures, files}
   const [refused, setRefused] = useState<string | null>(start?.line ?? null)
   // Each send's number. What comes back unsent goes after what came back from an earlier send and
   // before what came back from a later one, so two sends on their way at once read back in the order
@@ -118,8 +113,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     if (why === null || why === undefined) return
     // Nothing went (or it may have): the words and what waited with them come back, and the line says
     // why (if it is not said elsewhere). Words typed meanwhile stay, after them, as pictures and files do.
-    const others = !!el.innerText.trim() || inBox.current.pictures.length > 0 || inBox.current.files.length > 0
-    setRefused(why ? (others && beside ? beside(why) : why) : null)
+    setRefused(why || null)
     setPictures((now) => back(now, sent.pictures, n))
     setFiles((now) => back(now, sent.files, n))
     if (text) {
@@ -172,8 +166,6 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
             // An emptied box keeps a stray <br>: clear it so the placeholder comes back.
             if (!el.innerText.trim()) el.replaceChildren()
             setDraft(!!el.innerText.trim())
-            // Edited words are other words: a line that said sending them again is safe no longer holds.
-            if (beside) setRefused((r) => (r ? beside(r) : r))
           }}
           onPaste={(e) => {
             // A pasted picture or file is attached; pasted words go in as words.

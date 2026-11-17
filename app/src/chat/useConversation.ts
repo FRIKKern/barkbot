@@ -111,34 +111,19 @@ export const SAFE_AGAIN = 'sending it again is safe: it will not go twice.'
 /** Barkpark gave no answer of its own, and the message has its key: the words stay, and sending
  *  them again as they are either sends them or finds they already went. */
 export const NO_ANSWER_SAFE = `This message had no answer from Barkpark, so it may have been sent, but ${SAFE_AGAIN}`
-/** The line once the box holds other words than the ones it is about (typed meanwhile, another
- *  message's, or an edit): Enter then sends other words, under another key, so a resend is no
- *  longer known to be safe, and the line says to look first, as before keys. */
-export const besideOthers = (why: string) => why.replace(`it may have been sent, but ${SAFE_AGAIN}`, MAY_HAVE_GONE)
 export const CANNOT_TAKE_FILES = "The bot's computer cannot take this file yet, so nothing was sent. Update its chat host, or send the words alone."
 
-/** Each message whose fate is not known, per conversation, with its Idempotency-Key and what it
- *  named (task-188ff036d1c39132). The same words with the same pictures and files, sent again to the
- *  same conversation, reuse both: Barkpark binds the key to the request, so the stored ids must be
- *  the same ones, and it then answers the first answer again and runs nothing twice. Other words,
- *  or another conversation, get a new key. One entry per message, so two on their way at once each
- *  keep their own. Module-wide, so it outlives the page that sent it: words given back while on their
- *  way (Home's keepParked) are sent again from a new page. Barkpark keeps a key 24 h; one older than
- *  KEY_MS is not used again.
- *  Each send of an entry is an attempt with its own number. An entry goes when its LATEST attempt is
- *  answered for sure, unless that attempt's words were given back (then the box holds them, and a
- *  send of them must find the key). A refusal or failure always ends it: nothing ran, and a 4xx is
- *  remembered under its key. An answer to an earlier attempt never ends it: a later one has the box. */
-type Unsent = {content: string; sig: string; refs: AttachmentRef[]; images: string[]; files: {name: string; size: string}[]; key: string; at: number; latest: number; given: number; stored: Promise<boolean>}
-const unsent = new Map<string, Unsent[]>()
-const KEY_MS = 23 * 3600 * 1000
-let attempts = 0
+/** The last message of each conversation whose fate is not known, with its Idempotency-Key and what
+ *  it named (task-188ff036d1c39132). The same words with the same pictures and files, sent again to
+ *  the same conversation, reuse both: Barkpark binds the key to the request, so the stored ids must
+ *  be the same ones, and it then answers the first answer again and runs nothing twice. Any other
+ *  message, or another conversation, gets a new key. Module-wide, so it outlives the page that sent
+ *  it: words given back while on their way (Home's keepParked) are sent again from a new page.
+ *  It goes once a send of it is answered for sure: refused, failed, or taken where the page shows
+ *  it. One taken after its words were given back stays, so sending those words again replays. */
+type Unsent = {content: string; sig: string; refs: AttachmentRef[]; images: string[]; files: {name: string; size: string}[]; key: string; given?: boolean}
+const unsent = new Map<string, Unsent>()
 const sigOf = (outgoing: Outgoing[]) => JSON.stringify(outgoing.map((o) => [o.name, !!o.file, o.data]))
-const drop = (sessionId: string, e: Unsent) => {
-  const left = (unsent.get(sessionId) ?? []).filter((x) => x !== e)
-  if (left.length) unsent.set(sessionId, left)
-  else unsent.delete(sessionId)
-}
 
 const flat = (s: string) => s.replace(/\s+/g, '')
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -423,14 +408,14 @@ export function useConversation(sessionId: string | null, transport: Transport =
    *  A send Barkpark refused answers '': its reason is told as the conversation's line (or to `failed`), and
    *  the draft stays too. A send with no answer may have gone: it answers NO_ANSWER_SAFE (its key is kept, a
    *  resend runs at most once) or, after Barkpark's own 5xx (not remembered), NO_ANSWER; the draft stays. */
-  // The attempt on its way now (from before its uploads), so a page that gives its words back can say so.
-  const flying = useRef<{e: Unsent; n: number} | null>(null)
+  // The message on its way now, so a page that gives its words back can say so (giveBack).
+  const flying = useRef<Unsent | null>(null)
   const shown = useRef(bubbles)
   shown.current = bubbles
-  /** The words of the message on its way were given back to a box (Home's keepParked): if it is
+  /** The words of the message on its way were given back to a box (Home's keepParked): if it was
    *  taken, its key stays, so sending the same words again finds it went and runs nothing. */
   const giveBack = useCallback(() => {
-    if (flying.current) flying.current.e.given = flying.current.n
+    if (flying.current) flying.current.given = true
   }, [])
   const send = useCallback(
     // `failed`: a send that fails is told there, not shown as the conversation's error.
@@ -443,72 +428,53 @@ export function useConversation(sessionId: string | null, transport: Transport =
         return ''
       }
       let asked = false // the message itself is on its way: from here a lost answer may mean it went
-      const sig = sigOf(outgoing)
-      const n = ++attempts
-      // The same message whose fate is not known goes again as it went: same key, same stored ids.
-      const same = (e: Unsent) => e.content === content && e.sig === sig && Date.now() - e.at < KEY_MS
-      let mine = (unsent.get(sessionId) ?? []).find(same)
-      if (mine && !(await mine.stored)) mine = undefined // its pictures were never stored: a new message
-      let refused: string | null = null
-      if (mine) mine.latest = n
-      else {
-        // Each is stored for the conversation first; the message then names a picture by its id,
-        // a text file or PDF by its id and its name.
-        const e: Unsent = {content, sig, refs: [], images: [], files: [], key: crypto.randomUUID(), at: Date.now(), latest: n, given: 0, stored: Promise.resolve(true)}
-        let stored!: (ok: boolean) => void
-        e.stored = new Promise((ok) => (stored = ok))
-        unsent.set(sessionId, [...(unsent.get(sessionId) ?? []), e])
-        flying.current = {e, n}
-        try {
+      try {
+        // The same message whose fate is not known goes again as it went: same key, same stored ids.
+        const before = unsent.get(sessionId)
+        const sig = sigOf(outgoing)
+        let mine: Unsent
+        if (before && before.content === content && before.sig === sig) mine = before
+        else {
+          // Each is stored for the conversation first; the message then names a picture by its id,
+          // a text file or PDF by its id and its name.
+          const refs: AttachmentRef[] = []
+          const images: string[] = []
+          const files: {name: string; size: string}[] = []
           for (const o of outgoing) {
             if (!transport.upload) throw new Error('This conversation cannot take pictures or files')
             const r = await transport.upload(sessionId, o.data)
-            if ('refused' in r) {
-              refused = `${o.name} was not taken: ${r.refused}`
-              break
-            }
-            if (o.file && !isPicture(r.media_type)) e.refs.push({id: r.id, name: o.name}), e.files.push({name: o.name, size: fileSize(r.byte_size)})
-            else e.refs.push(r.id), e.images.push(r.id)
+            if ('refused' in r) return `${o.name} was not taken: ${r.refused}`
+            if (o.file && !isPicture(r.media_type)) refs.push({id: r.id, name: o.name}), files.push({name: o.name, size: fileSize(r.byte_size)})
+            else refs.push(r.id), images.push(r.id)
           }
-        } catch (err) {
-          drop(sessionId, e)
-          stored(false)
-          if (flying.current?.e === e) flying.current = null
-          return told(err instanceof Error ? err.message : String(err))
+          mine = {content, sig, refs, images, files, key: crypto.randomUUID()}
         }
-        stored(!refused)
-        if (refused) {
-          drop(sessionId, e)
-          if (flying.current?.e === e) flying.current = null
-          return refused
+        mine.given = false
+        unsent.set(sessionId, mine)
+        flying.current = mine
+        const done = () => {
+          if (unsent.get(sessionId) === mine) unsent.delete(sessionId)
         }
-        mine = e
-      }
-      const e = mine
-      flying.current = {e, n}
-      try {
         asked = true
-        const sent = (await transport.send(sessionId, content, e.refs.length ? e.refs : undefined, e.key)) as {refused?: string; failed?: string; unsure?: string; again?: 'safe' | 'look'; key?: string; accepted?: true; replay?: boolean} | undefined
-        if (flying.current?.e === e && flying.current.n === n) flying.current = null
+        const sent = (await transport.send(sessionId, content, mine.refs.length ? mine.refs : undefined, mine.key)) as {refused?: string; failed?: string; unsure?: string; again?: 'safe' | 'look'; key?: string; accepted?: true; replay?: boolean} | undefined
+        if (flying.current === mine) flying.current = null
         // A 422 idempotency_key_reused: the words went again under a new key, kept from here.
-        if (typeof sent?.key === 'string') e.key = sent.key
+        if (typeof sent?.key === 'string') mine.key = sent.key
         if (typeof sent?.unsure === 'string') return sent.again === 'safe' ? NO_ANSWER_SAFE : NO_ANSWER
-        // Answered for sure: a refusal or failure ends it; taken ends it only for its latest attempt
-        // whose words were not given back.
-        if (!sent?.accepted || (e.latest === n && e.given !== n)) drop(sessionId, e)
+        // Answered for sure. A refusal is remembered under its key (a 4xx), so the next send gets a new one.
+        if (!mine.given || !sent?.accepted) done()
         if (sent?.refused === 'chat_unsupported') return CANNOT_RUN_HERE
         if (sent?.refused) return CANNOT_TAKE_FILES
         if (typeof sent?.failed === 'string') return told(sent.failed)
         // A replay: it went before. The conversation may show it already (its stored row): not twice.
         const last = sent?.replay ? [...shown.current].reverse().find((b) => b.role === 'user') : undefined
         if (last && flat(last.text) === flat(content)) return null
-        land({role: 'user', text: content, ...(e.images.length ? {images: e.images} : {}), ...(e.files.length ? {files: e.files} : {})})
-      } catch (err) {
-        if (flying.current?.e === e && flying.current.n === n) flying.current = null
+        land({role: 'user', text: content, ...(mine.images.length ? {images: mine.images} : {}), ...(mine.files.length ? {files: mine.files} : {})})
+      } catch (e) {
         // The page's own call was lost on its way back: the message may have gone all the same, and
         // its key is kept, so sending it again is safe.
         if (asked) return NO_ANSWER_SAFE
-        return told(err instanceof Error ? err.message : String(err))
+        return told(e instanceof Error ? e.message : String(e))
       }
       return null
     },

@@ -4,7 +4,7 @@ import {Shell, useUnread} from '../components/Shell'
 import {Transcript} from '../components/Transcript'
 import {Composer, placeholderFor, type ComposerStart, type Picture, type WaitingFile} from '../components/Composer'
 import {computerOnline, createBot, loadChat, renameBot, startChat, type Chat} from '../chat/api'
-import {barkpark, besideOthers, SAFE_AGAIN, useConversation, type BotState, type Outgoing, type Transport} from '../chat/useConversation'
+import {barkpark, SAFE_AGAIN, useConversation, type BotState, type Outgoing, type Transport} from '../chat/useConversation'
 import {useFleet} from '../chat/useFleet'
 
 // The bot, live: its computer and conversation come from Barkpark (loadChat). No made-up data:
@@ -340,7 +340,7 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
           </div>
         )
       }
-      composer={<Composer placeholder={placeholderFor(name, convo.ask)} onSend={send} disabled={!chat.host || !!waiting || leaving} start={kept} beside={besideOthers} />}
+      composer={<Composer placeholder={placeholderFor(name, convo.ask)} onSend={send} disabled={!chat.host || !!waiting || leaving} start={kept} />}
     />
   )
 }
