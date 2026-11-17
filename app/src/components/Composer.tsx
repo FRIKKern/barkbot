@@ -208,7 +208,6 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
       p.textContent = text
       // Its send's number is kept off the page (task-fad2c995507a70a3): a mark on the paragraph rides a
       // copy and paste, and a paragraph pasted back with it would move where a later restore lands.
-      unsentFrom.current.set(p, n)
       if (!el.innerText.trim()) el.replaceChildren(p)
       else {
         const earlier = [...el.children].filter((c) => (unsentFrom.current.get(c) ?? Infinity) < n).at(-1)
