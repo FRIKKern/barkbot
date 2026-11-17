@@ -306,7 +306,7 @@ export const startChat = createServerFn({method: 'POST'})
         const now = bot && bot.host_id === data.hostId ? await sessionOf(bot) : null
         if (bot && now?.is === 'none') {
           // Its own field only: a rename at the same moment stays.
-          return (await write((signal) => setBotField(data.botId, 'session_id', s.id, signal))) !== null
+          return (await write((signal) => setBotField(data.botId, 'session_id', s.id, signal).catch(() => ({})))) !== null
         }
         return false
       })
