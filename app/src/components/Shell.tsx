@@ -124,7 +124,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
       }} onClose={() => setPanelOpen(false)} />
       <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} onCreateBot={onCreateBot} onChoose={(overlay, value) => {
         const key = voiceRows[overlay]
-        if (key) setVoice((v) => v && {...v, [key]: value})
+        if (key) setVoice((v) => v && {...v, voice: value})
       }} />
     </div>
   )
