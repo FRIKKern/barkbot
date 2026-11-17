@@ -393,7 +393,7 @@ export const sendMessage = createServerFn({method: 'POST'})
         }
       }
     } catch (e) {
-      if (!(e instanceof BarkparkError) || !refusedBeforeSending(e)) return {unsure: (e as Error).message, again: key && !ownFiveHundred(e) ? 'safe' : 'look', key}
+      if (!(e instanceof BarkparkError) || !refusedBeforeSending(e)) return {unsure: (e as Error).message, again: key ? 'safe' : 'look', key}
       if (e.status === 422 && e.code === 'host_cannot_receive_attachments') return {refused: 'host_cannot_receive_attachments'}
       // chat_unsupported is Barkpark's shared code (a revoked host, a provider not ready, …): it is
       // the folder only when this conversation asked for one; otherwise it goes on as any failure.
