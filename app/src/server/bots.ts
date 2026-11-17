@@ -194,7 +194,7 @@ export async function readBots(ids: string[], hosts: OwnHost[], listed: OwnSessi
 //    nothing (ENDED), and one still on its way is called off, so no write runs outside the queue.
 export const WRITE_MS = 10_000
 export const WAIT_MS = 15_000
-export const HOLD_MS = 40_000
+export const HOLD_MS = 1_000_000_000
 const SLOW = 'Barkpark did not answer the save within 10 s. Reload to see what was kept.'
 const BUSY = 'Another change to this bot is still being saved, so this one was not made. Try again in a moment.'
 const HELD = 'This change to the bot took over 40 s, so it was stopped and nothing more is written for it. Reload to see what was kept.'
