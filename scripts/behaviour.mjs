@@ -2345,6 +2345,29 @@ else {
     files.forEach((f) => rmSync(f, { force: true }));
     check('a pick of three whose first file cannot be read: the line names that file, the other two wait in the box, and nothing is left unhandled', out.chips.length === 2 && out.chips.every((c) => /good-/.test(c)) && new RegExp(`broken-a-${CHROME_PORT}\\.png`).test(out.line ?? '') && out.unhandled === 0, out);
     await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    // PROBE rev63 (a): two unreadable files in one pick: both are named.
+    {
+      const two = ['broken-x', 'good-y', 'broken-z'].map((x) => { const f = path('.cache', `${x}-${CHROME_PORT}.png`); writeFileSync(f, Buffer.concat([PNG, Buffer.from(x)])); return f; });
+      { const { root } = await page.send('DOM.getDocument'); const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId, files: two }); }
+      await until(async () => (await chipNames()).length >= 1, 8000, 'the readable one').catch(() => {}); await wait(800);
+      const pa = { chips: await chipNames(), line: await refusedLine() };
+      two.forEach((f) => rmSync(f, { force: true }));
+      check('PROBE rev63 two unreadable in one pick: both are named, the readable one waits', pa.chips.length === 1 && /broken-x/.test(pa.line ?? '') && /broken-z/.test(pa.line ?? ''), pa);
+      await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    }
+    // PROBE rev63 (b): a send's "may have been sent" line, then an unreadable file is picked: the warning stays.
+    {
+      stub.dropAnswer = true; await typeSend('maybe went');
+      await until(async () => !!(await refusedLine()), 8000, 'the line').catch(() => {}); stub.dropAnswer = false; await wait(500);
+      const before = await refusedLine();
+      const bf = path('.cache', `broken-w-${CHROME_PORT}.png`); writeFileSync(bf, PNG);
+      { const { root } = await page.send('DOM.getDocument'); const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId, files: [bf] }); }
+      await wait(1000);
+      const pb = { before, after: await refusedLine(), prompt: await promptText() };
+      rmSync(bf, { force: true });
+      check('PROBE rev63 a may-have-been-sent line, then an unreadable file: the line names it and still says the message may have been sent', /may have been sent/.test(pb.before ?? '') && /broken-w/.test(pb.after ?? '') && /may have been sent/.test(pb.after ?? ''), pb);
+      await clearPrompt();
+    }
     stub.sessions = []; freshStore();
   }
 }
