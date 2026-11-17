@@ -1399,7 +1399,7 @@ else {
     const cases = [
       ['unsure', () => { stub.prefs.set(KEYP, rec('Pia', HOST_ID, S_UNS)); stub.failShow.set(S_UNS, 503); }, (r) => r?.session_id === S_UNS],
       ['read fails', () => { stub.fail.set(`GET ${KEYP}`, 500); }, (r) => r?.session_id === null],
-      ['write fails', () => { stub.fail.set(`PUT ${KEYP}`, 500); }, (r) => r?.session_id === null],
+      ['write fails', () => { stub.fail.set(`PATCH ${KEYP}`, 500); }, (r) => r?.session_id === null],
       ['other computer', () => { stub.hosts = [...host(true), { id: H2, name: 'Other Mac', online: true, enrolled: true, revoked: false }]; stub.prefs.set(KEYP, rec('Pia', H2, null)); }, (r) => r?.host_id === H2 && r?.session_id === null],
       ['not own (bad record)', () => { stub.prefs.set(KEYP, { name: '', host_id: HOST_ID }); }, (r) => r?.name === ''],
       ['timed-out read', () => { stub.readDelay = 9000; }, (r) => r?.session_id === null],
@@ -1520,7 +1520,7 @@ else {
       stub.hosts = host(true); stub.sessions = []; freshStore(); stub.prefs.set('barkbot.bots', { ids: [KAI, LOU] });
       stub.prefs.set(KEYK, rec('Kai', HOST_ID, null)); stub.prefs.set(`barkbot.bot.${LOU}`, rec('Lou', HOST_ID, null));
       await open(`${base}/?bot=${KAI}`); await until(async () => (await live()).header === 'Kai', 15000, "Kai's page").catch(() => {}); await wait(500);
-      if (saveFails) stub.fail.set(`PUT ${KEYK}`, 500);
+      if (saveFails) stub.fail.set(`PATCH ${KEYK}`, 500);
       const s0 = stub.sent.length, t0 = stub.to.length, m0 = stub.made.length;
       stub.createDelay = 700;
       await typeSend(words); await wait(150); await clickTile('Lou');
