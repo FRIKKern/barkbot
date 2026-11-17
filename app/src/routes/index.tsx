@@ -324,7 +324,7 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
           </div>
         )
       }
-      composer={<Composer placeholder={placeholderFor(name, convo.ask)} onSend={send} disabled={!chat.host || !!waiting || leaving} start={kept} />}
+      composer={<Composer placeholder={placeholderFor(name, convo.ask)} onSend={send} disabled={!chat.host || opening || !!waiting || leaving} start={kept} />}
     />
   )
 }
