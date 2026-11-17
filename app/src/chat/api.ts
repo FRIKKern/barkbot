@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError, READ_MS} from '../server/barkpark'
 import {CREATE_UNSURE} from './create-unsure'
-import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, readListed, removeId, sessionOf, trusted, validColour, validName, validShape, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
+import {addId, botFolder, dropBot, freshId, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, readListed, removeId, sessionOf, setBotField, trusted, validColour, validName, validShape, write, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 export type Host = {id: string; name: string; online: boolean}
 /** A bot as the page gets it: its id and its name only (the record's pointers stay on the server). */
@@ -312,8 +312,8 @@ export const startChat = createServerFn({method: 'POST'})
         const bot = raw && trusted(data.botId, raw, await ownHosts())
         const now = bot && bot.host_id === data.hostId ? await sessionOf(bot) : null
         if (bot && now?.is === 'none') {
-          await write((signal) => putBot({...bot, session_id: s.id}, signal))
-          return true
+          // Its own field only: a rename at the same moment stays.
+          return (await write((signal) => setBotField(data.botId, 'session_id', s.id, signal))) !== null
         }
         return false
       })
@@ -408,19 +408,23 @@ export const answerQuestion = createServerFn({method: 'POST'})
 
 /** Saves the bot's new name. Details never sends an empty one (it puts the old name back); this
  *  refuses one anyway, so no path can save a blank bot. */
+const NOT_KEPT = 'This bot is not saved yet, so its name is not kept'
 export const renameBot = createServerFn({method: 'POST'})
   .validator((d: {id: string; name: unknown}) => {
     if (!validName(d.name)) throw new Error('A bot name is 1 to 200 characters')
     return {id: d.id, name: d.name}
   })
   .handler(async ({data}) => {
-    // The bot's own key, and only a record that is the caller's own: nothing else is written.
-    // One change at a time per bot (oneAtATime): a new conversation saved meanwhile stays.
-    return oneAtATime(data.id, async (write) => {
-      const raw = await readBot(data.id)
-      const bot = raw && trusted(data.id, raw, await ownHosts())
-      if (!bot || (await sessionOf(bot)).is === 'foreign') throw new Error('This bot is not saved yet, so its name is not kept')
-      await write((signal) => putBot({...bot, name: data.name}, signal))
-      return {name: data.name}
-    })
+    // The bot's own key, and only a record that is the caller's own: nothing else is written. The
+    // name is set on its own (setBotField, row-locked), so a conversation saved at the same moment
+    // stays, and a rename never waits on another change. The check reads first: in the gap before
+    // the set, the record can change (only the set's field is written, so nothing else is lost) or
+    // be removed (the set then makes a record of the name alone, which setBotField removes again;
+    // nothing in BarkBot removes a record a page has open: dropBot is Create's clean-up of its own
+    // new id). The write is bounded as a queued one is (WRITE_MS).
+    const raw = await readBot(data.id)
+    const bot = raw && trusted(data.id, raw, await ownHosts())
+    if (!bot || (await sessionOf(bot)).is === 'foreign') throw new Error(NOT_KEPT)
+    if (!(await write((signal) => setBotField(data.id, 'name', data.name, signal)))) throw new Error(NOT_KEPT)
+    return {name: data.name}
   })
