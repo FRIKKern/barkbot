@@ -233,7 +233,6 @@ function Home({chat, state, working, unread, onOpened, onPick, kept, onKeep}: Ho
       mine(NOT_OPENED)
       settle(NOT_OPENED)
     }
-    openTimer.current = setTimeout(bound, OPEN_MS)
     // Opened beside the wait, not before it: `sent` answers when OPEN_MS is over, even while
     // Barkpark has not answered this yet. The box stays usable while it opens: words sent again
     // after a give-back park on this same opening, with their own bound.
