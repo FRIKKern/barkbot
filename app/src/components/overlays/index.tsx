@@ -191,7 +191,7 @@ export function Overlay({name, scene, onOpenChange, onCreateBot}: {name?: string
       ?.closest('[role=menu], [role=listbox]')
       ?.querySelectorAll('[data-highlighted]')
       .forEach((r) => r.removeAttribute('data-highlighted'))
-    row.setAttribute('data-highlighted', '')
+    void row
   }
   const shown = held ? {name} : open
   const render = shown ? overlays[shown.name] : undefined
