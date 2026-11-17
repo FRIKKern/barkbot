@@ -27,6 +27,7 @@ const REASONS = {
   kind: ['is not a picture, a text file or a PDF', 'are not pictures, text files or PDFs'],
   big: ['is over 3 MB', 'are over 3 MB'],
   empty: ['is empty', 'are empty'],
+  unread: ['could not be read', 'could not be read'],
   name: ['has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most', 'have names that cannot be sent: no / or \\, no control characters, 255 bytes at most'],
 } as const
 type Reason = keyof typeof REASONS | 'four'
@@ -143,7 +144,15 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
       else if (full()) refuse('four', f.name)
       else if (!picture && !sendableName(f.name)) refuse('name', f.name)
       else {
-        const data = await base64(f)
+        // A read that fails (the file went, or cannot be opened) is said by name, with the pick's other
+        // refusals; the rest of the pick is still added (task-f50dffe109dfda73).
+        let data: string
+        try {
+          data = await base64(f)
+        } catch {
+          refuse('unread', f.name)
+          continue
+        }
         if (full()) {
           refuse('four', f.name)
           continue
