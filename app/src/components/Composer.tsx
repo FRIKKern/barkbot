@@ -136,7 +136,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   const add = async (picked: File[]) => {
     // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes, once
     // no pick is still being read.
-    if (!reading.current) unsay()
+    unsay()
     reading.current++
     try {
       await take(picked)
