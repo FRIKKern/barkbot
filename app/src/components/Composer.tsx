@@ -118,12 +118,12 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
       if (!picture && !FILE_TYPES.test(f.type)) setNote(`${f.name} is not a picture, a text file or a PDF`)
       else if (f.size > MAX_BYTES) setNote(`${f.name} is over 3 MB`)
       else if (!f.size) setNote(`${f.name} is empty`)
-      else if (full()) setNote(FOUR_AT_MOST)
+      else if (full()) say(FOUR_AT_MOST)
       else if (!picture && !sendableName(f.name)) setNote(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
       else {
         const data = await base64(f)
         if (full()) {
-          setNote(FOUR_AT_MOST)
+          say(FOUR_AT_MOST)
           continue
         }
         held.current++ // counted now: another read landing before the box is drawn again sees it
