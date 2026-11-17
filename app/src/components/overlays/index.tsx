@@ -159,7 +159,7 @@ export function Overlay({name, scene, onOpenChange, onCreateBot}: {name?: string
       const first =
         el.querySelector<HTMLElement>('[role=dialog]') && modal
           ? el.querySelector<HTMLElement>('[role=dialog]')
-          : (el.querySelector<HTMLElement>('[role=option][aria-selected=true]') ?? el.querySelector<HTMLElement>('[role=menu]'))
+          : (el.querySelector<HTMLElement>('[role=option]') ?? el.querySelector<HTMLElement>('[role=menu]'))
       first?.focus()
       return
     }
