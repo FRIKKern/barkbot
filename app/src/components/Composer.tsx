@@ -122,7 +122,6 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
         try {
           data = await base64(f)
         } catch {
-          say(`${f.name} could not be read`)
           continue
         }
         if (full()) {
