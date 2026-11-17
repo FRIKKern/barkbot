@@ -49,6 +49,8 @@ const flip = (sid, state) => { stub.stateBy.set(sid, state); stub.fleets.forEach
 const PREFS = '/w/default/p/default/v1/prefs/production/';
 // The bot store's writes, from stub.writes: a bot key's PUTs, the list's adds, and the legacy key.
 const botPuts = () => stub.writes.filter((w) => w.method === 'PUT' && w.key.startsWith('barkbot.bot.'));
+// The name a write to a bot's record writes, whole (PUT) or as one field (PATCH set), else undefined.
+const nameIn = (w) => (!w.key.startsWith('barkbot.bot.') ? undefined : w.method === 'PUT' ? w.body?.value?.name : w.method === 'PATCH' && w.body?.op === 'set' && w.body?.field === 'name' ? w.body.item : undefined);
 const listAdds = () => stub.writes.filter((w) => w.method === 'PATCH' && w.key === 'barkbot.bots' && w.body.op === 'add');
 const legacyWrites = () => stub.writes.filter((w) => w.key === 'barkbot.bot');
 // As Barkpark's sidebar shape (chat_controller.ex sidebar_json): the list carries no bot_folder.
@@ -77,20 +79,37 @@ await new Promise((ok) => httpServer((req, res) => {
       if (req.method === 'GET') { stub.reads++; stub.readKeys.push(key); const answer = () => (failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got()); return stub.readDelay ? setTimeout(answer, stub.readDelay) : answer(); }
       const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing });
       if (failing) return json(failing, { error: { code: 'internal', message: 'the stand-in fails this write' } });
-      // `holdPut` {key, field, max}: the first whole-record write to `key` that changes `field` waits
+      // A record write: a whole-record PUT, or a PATCH set of one top-level field (Barkpark's row-locked
+      // op, docs/contracts/user-prefs.md: a missing key is created with that one field; item null is 422).
+      const isSet = req.method === 'PATCH' && b.op === 'set';
+      if (isSet && (typeof b.field !== 'string' || !b.field || b.item === undefined || b.item === null)) return json(422, { error: { code: 'bad_request', message: 'set needs a field and a non-null item' } });
+      const record = req.method === 'PUT' || isSet;
+      const land = () => { if (req.method === 'PUT') stub.prefs.set(key, b.value); else stub.prefs.set(key, { ...(stub.prefs.get(key) ?? {}), [b.field]: b.item }); };
+      // Whether this write changes `field` of the record as it is now.
+      const changes = (field) => JSON.stringify(req.method === 'PUT' ? b.value?.[field] : b.field === field ? b.item : stub.prefs.get(key)?.[field]) !== JSON.stringify(stub.prefs.get(key)?.[field]);
+      // `holdPut` {key, field, max}: the first record write to `key` that changes `field` waits
       // until another write to `key` has landed (or `max` ms), then lands after it: two writers that
       // each read the record before either wrote.
-      // `hangPut`: every whole-record write to that key is taken and never answered, and never lands
+      // `hangPut`: every record write to that key is taken and never answered, and never lands
       // (a Barkpark that hangs on the write). Released by destroying stub.hung at the end of the rule.
-      if (req.method === 'PUT' && stub.hangPut === key) return void stub.hung.push(res);
+      // `lateWrite` {key, field, ms}: the first record write to `key` that changes `field` is taken and
+      // never answered, and Barkpark applies it `ms` later (a commit stuck behind a slow database).
+      // `goneBeforeWrite`: the record at that key is removed just before the first record write to it
+      // lands (removed after the writer read it).
+      if (record && stub.hangPut === key) return void stub.hung.push(res);
+      const lw = stub.lateWrite;
+      if (record && lw?.key === key && !lw.taken && changes(lw.field)) { lw.taken = true; stub.hung.push(res); return void setTimeout(() => { land(); lw.landed = true; }, lw.ms); }
+      if (record && stub.goneBeforeWrite === key) { stub.goneBeforeWrite = null; stub.prefs.delete(key); }
       const h = stub.holdPut;
-      if (req.method === 'PUT' && h?.key === key) {
-        if (!h.pending && !h.done && JSON.stringify(b.value?.[h.field]) !== JSON.stringify(stub.prefs.get(key)?.[h.field])) {
-          h.pending = () => { h.pending = null; h.done = true; clearTimeout(h.timer); stub.prefs.set(key, b.value); got(); };
+      if (record && h?.key === key) {
+        if (!h.pending && !h.done && changes(h.field)) {
+          h.pending = () => { h.pending = null; h.done = true; clearTimeout(h.timer); land(); got(); };
           h.timer = setTimeout(() => h.pending?.(), h.max); return;
         }
-        stub.prefs.set(key, b.value); got(); h.pending?.(); return;
+        land(); got(); h.pending?.(); return;
       }
+      // A set is held by `createDelay` as a PUT is (both are record writes).
+      if (isSet) { land(); return stub.createDelay ? setTimeout(got, stub.createDelay) : got(); }
       if (req.method === 'PUT') { stub.prefs.set(key, b.value); return stub.createDelay ? setTimeout(got, stub.createDelay) : got(); }
       if (req.method === 'DELETE') { stub.prefs.delete(key); return got(); }
       if (req.method === 'PATCH') {
@@ -390,7 +409,9 @@ else {
   const made = botPuts().length;
   precondition('the live page read the store, shows BarkBot, made one Main Bot record and wrote the legacy key zero times',
     stub.reads > reads && made === 1 && legacyWrites().length === 0 && s.value === 'BarkBot' && s.placeholder === 'Message BarkBot' && s.tiles.includes('BarkBot'), { reads: stub.reads, writes: stub.writes, other: stub.other, s });
-  const renames = () => botPuts().slice(made).map((w) => w.body.value);
+  // Every write of a name after the Main Bot's record was made: whole or as the one field.
+  const named0 = stub.writes.length;
+  const renames = () => stub.writes.slice(named0).filter((w) => nameIn(w) !== undefined).map((w) => ({ name: nameIn(w) }));
 
   await into(); await key('End'); await typeIn(' Two'); await key('Escape'); await wait(300);
   await into(); await clear(); await key('Enter'); await wait(300);
@@ -1406,7 +1427,7 @@ else {
     const atOnce = async (first, held) => {
       stub.hosts = host(true); stub.sessions = []; freshStore(); stub.prefs.set('barkbot.bots', { ids: [RIA] }); stub.prefs.set(KEYR, rec('Ria', HOST_ID, null));
       await open(`${base}/?bot=${RIA}`); await until(async () => (await live()).header === 'Ria', 15000, "Ria's page").catch(() => {}); await wait(500);
-      const m0 = stub.made.length;
+      const m0 = stub.made.length, w0 = stub.writes.length;
       stub.holdPut = { key: KEYR, field: held, max: 4000 };
       await ev(() => { window.__call = (which, botId, hostId) => import('/src/chat/api.ts').then((m) => (which === 'start' ? m.startChat({ data: { hostId, botId } }) : m.renameBot({ data: { id: botId, name: 'Ria Two' } }))).then((v) => ({ v }), (e) => ({ e: String(e?.message ?? e) })); });
       // The first call reads the record and its write is held; then the second runs to its end.
@@ -1415,16 +1436,19 @@ else {
       const heldSeen = !!stub.holdPut.pending;
       const second = await ev(([w, id, h]) => window.__call(w, id, h), [first === 'start' ? 'rename' : 'start', RIA, HOST_ID]);
       const firstOut = await ev(() => window.__first);
-      const out = { heldSeen, first: firstOut, second, made: stub.made.slice(m0), record: stub.prefs.get(KEYR) ?? null };
+      const ops = stub.writes.slice(w0).filter((x) => x.key === KEYR).map((x) => (x.method === 'PATCH' ? `${x.body?.op} ${x.body?.field}` : x.method)).sort();
+      const out = { heldSeen, ops, first: firstOut, second, made: stub.made.slice(m0), record: stub.prefs.get(KEYR) ?? null };
       stub.holdPut = null; return out;
     };
     const a = await atOnce('start', 'session_id');
-    check("a new chat's record write is held until a rename of the same bot has been written: the record ends with the new name and the new conversation", a.heldSeen && a.made.length === 1 && a.record?.name === 'Ria Two' && a.record?.session_id === a.made[0], a);
+    const twoSets = (x) => JSON.stringify(x.ops) === JSON.stringify(['set name', 'set session_id']);
+    check("a new chat's record write is held until a rename of the same bot has been written: two set ops, one per field, and the record ends with the new name and the new conversation", a.heldSeen && twoSets(a) && a.made.length === 1 && a.record?.name === 'Ria Two' && a.record?.session_id === a.made[0], a);
     const b = await atOnce('rename', 'name');
-    check("a rename's record write is held until a new chat of the same bot has been written: the record ends with the new name and the new conversation", b.heldSeen && b.made.length === 1 && b.record?.name === 'Ria Two' && b.record?.session_id === b.made[0], b);
-    // A write for Ria that Barkpark never answers holds her queue for at most 10 s (app/src/server/bots.ts
-    // WRITE_MS): the next change to Ria runs after it; a change to another bot is never held by Ria's.
-    // A change that waits past its own 15 s (WAIT_MS) fails with a plain line and never writes later.
+    check("a rename's record write is held until a new chat of the same bot has been written: two set ops, one per field, and the record ends with the new name and the new conversation", b.heldSeen && twoSets(b) && b.made.length === 1 && b.record?.name === 'Ria Two' && b.record?.session_id === b.made[0], b);
+    // A new chat's write for Ria that Barkpark never answers holds her queue for at most 10 s
+    // (app/src/server/bots.ts WRITE_MS): a new chat for another bot is never held by it, and a rename
+    // of Ria (a set of its own field, not queued) is not held by it either. A queued change that waits
+    // past its own 15 s (WAIT_MS) is given up, with nothing written later.
     const ZED = '3d4e5f6a-7b8c-4d9e-8f0a-1b2c3d4e5f6a', KEYZ = `barkbot.bot.${ZED}`;
     const hungStart = async () => {
       stub.hosts = host(true); stub.sessions = []; freshStore(); stub.prefs.set('barkbot.bots', { ids: [RIA, ZED] });
@@ -1442,22 +1466,45 @@ else {
     const zedRec = stub.prefs.get(KEYZ) ?? null;
     stub.hangPut = null; // Ria's next write is answered
     const ria = await Promise.race([ev(([id, h]) => window.__call('rename', id, h, 'Ria Two'), [RIA, HOST_ID]), wait(30000).then(() => 'still waiting after 30 s')]);
-    const first = await Promise.race([ev(() => window.__hung), wait(5000).then(() => 'still waiting')]);
+    // The hung change answers at its own bound (10 s from its write), not held by the rename.
+    const first = await Promise.race([ev(() => window.__hung), wait(15000).then(() => 'still waiting')]);
     const one = { hung: stub.hung.length, first, zed, zedRec, ria, record: stub.prefs.get(KEYR) ?? null };
     release();
-    check("a write for Ria that Barkpark never answers: a new chat for Zed is not held by it, and a rename of Ria runs after at most about 10 s and is saved; the hung change itself says it was not saved", one.hung === 1
+    check("a new chat's write for Ria that Barkpark never answers: a new chat for Zed is not held by it, a rename of Ria is not held by it and is saved, and the hung change itself says it was not saved", one.hung === 1
       && typeof zed === 'object' && zed.v?.kept === true && zed.ms < 5000 && zedRec?.session_id === zed.v.sessionId
-      && typeof ria === 'object' && ria.v?.name === 'Ria Two' && ria.ms < 13000 && one.record?.name === 'Ria Two'
+      && typeof ria === 'object' && ria.v?.name === 'Ria Two' && ria.ms < 5000 && one.record?.name === 'Ria Two'
       && typeof first === 'object' && first.v?.kept === false, one);
-    // Two of Ria's writes hang in a row: the third change gives up at its own bound and never writes.
+    // Two of Ria's new-chat writes hang in a row: a third new chat gives up at its own bound
+    // (not kept) and never writes.
     w0 = await hungStart();
-    await ev(([id, h]) => { window.__second = window.__call('rename', id, h, 'Ria Two'); }, [RIA, HOST_ID]);
-    const third = await Promise.race([ev(([id, h]) => window.__call('rename', id, h, 'Ria Three'), [RIA, HOST_ID]), wait(30000).then(() => 'still waiting after 30 s')]);
+    await ev(([id, h]) => { window.__second = window.__call('start', id, h); }, [RIA, HOST_ID]);
+    const third = await Promise.race([ev(([id, h]) => window.__call('start', id, h), [RIA, HOST_ID]), wait(30000).then(() => 'still waiting after 30 s')]);
     await wait(12000); // past the second change's bound: the third, given up, still writes nothing
-    const two = { third, puts: stub.writes.slice(w0).filter((x) => x.key === KEYR && x.method === 'PUT').map((x) => x.body?.value?.name), record: stub.prefs.get(KEYR) ?? null };
+    const two = { third, writes: stub.writes.slice(w0).filter((x) => x.key === KEYR).length, record: stub.prefs.get(KEYR) ?? null };
     release();
-    check("a change to Ria that waits behind two hung writes gives up at its own bound with a plain line, and is never written after (control: the two hung writes reached Barkpark)", typeof third === 'object' && !!third.e && /Try again/.test(third.e) && third.ms >= 14000 && third.ms < 18000
-      && JSON.stringify(two.puts) === JSON.stringify(['Ria', 'Ria Two']) && two.record?.name === 'Ria', two);
+    check("a new chat for Ria that waits behind two hung writes gives up at its own bound, not kept, and is never written after (control: the two hung writes reached Barkpark)", typeof third === 'object' && third.v?.kept === false && third.ms >= 14000 && third.ms < 18000
+      && two.writes === 2 && two.record?.name === 'Ria' && two.record?.session_id === null, two);
+    // A rename that Barkpark takes and does not answer is called off at 10 s; Barkpark applies it at
+    // 12 s. A new chat saved meanwhile keeps its conversation: the late write changes the name only.
+    w0 = await hungStart(); release();
+    stub.lateWrite = { key: KEYR, field: 'name', ms: 12000 };
+    await ev(([id, h]) => { window.__late = window.__call('rename', id, h, 'Ria Late'); }, [RIA, HOST_ID]);
+    await until(() => stub.lateWrite.taken, 8000, 'the rename to be taken').catch(() => {});
+    const started = await Promise.race([ev(([id, h]) => window.__call('start', id, h), [RIA, HOST_ID]), wait(20000).then(() => 'still waiting after 20 s')]);
+    const calledOff = await Promise.race([ev(() => window.__late), wait(15000).then(() => 'still waiting')]);
+    await until(() => !!stub.lateWrite.landed, 15000, 'the late rename to land').catch(() => {}); await wait(300);
+    const late = { taken: stub.lateWrite.taken, landed: !!stub.lateWrite.landed, started, calledOff, record: stub.prefs.get(KEYR) ?? null };
+    stub.lateWrite = null; release();
+    check("a rename called off at its bound that Barkpark applies late changes only the name: a new conversation saved after it stays", late.taken && late.landed && typeof calledOff === 'object' && !!calledOff.e
+      && typeof started === 'object' && started.v?.kept === true && late.record?.name === 'Ria Late' && late.record?.session_id === started.v.sessionId, late);
+    // The record is removed after a rename read it: the rename is not kept, and no record of the name
+    // alone is left behind (control: the name in it before was the whole record's).
+    await hungStart(); release();
+    stub.goneBeforeWrite = KEYR;
+    const gone = await ev(([id, h]) => window.__call('rename', id, h, 'Ria Gone'), [RIA, HOST_ID]);
+    const after = { gone, record: stub.prefs.has(KEYR) ? stub.prefs.get(KEYR) : 'no key' };
+    stub.goneBeforeWrite = null;
+    check("a rename whose record is removed after the rename read it: the page is told the name is not kept, and no half record is left", typeof gone === 'object' && /not kept/.test(gone.e ?? '') && after.record === 'no key', after);
     stub.sessions = []; freshStore();
   }
 
@@ -1528,7 +1575,7 @@ else {
     const RIA = '6a7b8c9d-0e1f-4a2b-8c3d-4e5f6a7b8c9d', SAM = '7b8c9d0e-1f2a-4b3c-9d4e-5f6a7b8c9d0e';
     const nameOf = (id) => stub.prefs.get(`barkbot.bot.${id}`)?.name;
     // Every write of the typed name, to any bot's record: "<id> <name>".
-    const zeds = (w0) => stub.writes.slice(w0).filter((w) => w.method === 'PUT' && /^barkbot\.bot\./.test(w.key) && w.body?.value?.name === 'Zed').map((w) => `${w.key.slice('barkbot.bot.'.length)} Zed`);
+    const zeds = (w0) => stub.writes.slice(w0).filter((w) => nameIn(w) === 'Zed').map((w) => `${w.key.slice('barkbot.bot.'.length)} Zed`);
     const field = () => ev(() => document.querySelector('.who-name')?.value ?? null);
     const typeZed = async () => {
       const at = await ev(() => { const r = document.querySelector('.who-name').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; });
@@ -1554,7 +1601,7 @@ else {
     // that, so the save path itself must write to no bot (review of #77, P2b).
     await openOn(RIA, 'Ria');
     w0 = stub.writes.length;
-    const progs = () => stub.writes.slice(w0).filter((w) => w.method === 'PUT' && /^barkbot\.bot\./.test(w.key) && w.body?.value?.name === 'Prog').map((w) => w.key.slice('barkbot.bot.'.length));
+    const progs = () => stub.writes.slice(w0).filter((w) => nameIn(w) === 'Prog').map((w) => w.key.slice('barkbot.bot.'.length));
     stub.readDelay = 4000; await clickTile('Sam'); await wait(300);
     const progMid = { header: (await live()).header, field: await field(), readOnly: await ev(() => document.querySelector('.who-name')?.readOnly ?? null) };
     await ev(() => { const f = document.querySelector('.who-name'); f.focus(); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(f, 'Prog'); f.dispatchEvent(new Event('input', { bubbles: true })); f.blur(); });
