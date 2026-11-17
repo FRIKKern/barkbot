@@ -142,7 +142,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
       if (n !== undefined) split = {was: new Set(el.children), n}
     }
     const after = () => {
-      if (split) for (const c of el.children) if (!split.was.has(c) && !unsentFrom.current.has(c)) unsentFrom.current.set(c, split.n)
+      if (split) for (const c of el.children) if (!split.was.has(c) && !unsentFrom.current.has(c)) unsentFrom.current.set(c, split.n + 1)
       split = null
     }
     el.addEventListener('beforeinput', before)
