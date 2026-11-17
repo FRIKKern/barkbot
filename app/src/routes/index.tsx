@@ -189,7 +189,6 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
   // A name is saved only to the bot it was typed for: `id` is the bot whose name the panel shows.
   // While a pick loads that is the picked bot, not this page's, and nothing is written.
   const rename = async (id: string, next: string) => {
-    if (id !== chat.botId) return
     setName(next)
     try {
       await renameBot({data: {id, name: next}})
