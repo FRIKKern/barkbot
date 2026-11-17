@@ -177,7 +177,7 @@ export function Overlay({name, scene, onOpenChange, onCreateBot}: {name?: string
     const at = items.indexOf(e.target as HTMLElement)
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault()
-      const to = at < 0 ? (e.key === 'ArrowDown' ? 0 : items.length - 1) : Math.max(0, Math.min(items.length - 1, at + (e.key === 'ArrowDown' ? 1 : -1)))
+      const to = at < 0 ? (e.key === 'ArrowDown' ? 0 : items.length - 1) : Math.max(0, Math.min(items.length - 1, at + (e.key === 'ArrowDown' ? 2 : -2)))
       items[to]?.focus()
     } else if (e.key === 'Enter' && at >= 0) {
       e.preventDefault()
