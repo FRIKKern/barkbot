@@ -70,7 +70,12 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // The box's words as a send takes them.
   const [words, setWords] = useState(start?.draft?.trim() ?? '')
   const read = (el: HTMLElement) => el.innerText.replace(/\n+$/, '').trim()
-  const shown = refused && about && beside && !holds(about, {text: words, pictures, files}) ? beside(refused) : refused
+  const said = refused && about && beside && !holds(about, {text: words, pictures, files}) ? beside(refused) : refused
+  // Why the last pick was not all taken (a file refused, four at most). It is said beside a send's
+  // line, never in its place: after a send with no answer that line is the only word that it may have
+  // gone (task-e1fc137f265fbe22).
+  const [note, setNote] = useState<string | null>(null)
+  const shown = note && said ? `${note}. ${said}` : note ?? said
   // Each send's number. What comes back unsent goes after what came back from an earlier send and
   // before what came back from a later one, so two sends on their way at once read back in the order
   // they were sent, whichever answer comes first; what was typed or attached since stays after them.
@@ -103,22 +108,22 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // refused here, with the reason, instead of failing after the send.
   const add = async (picked: File[]) => {
     // A send's line stays, and turns (the box changes); a refusal from an earlier pick goes.
-    if (!about) say(null)
+    setNote(null)
     // Each file is added when it is read, to what the box holds then, never to a copy taken before
     // (that would put back a picture that went meanwhile: task-9b801b838c6f4078). The four-at-most
     // limit is counted then too, so two reads at once cannot make five.
     const full = () => held.current >= MAX_ATTACHMENTS
     for (const f of picked) {
       const picture = PICTURE_TYPES.includes(f.type)
-      if (!picture && !FILE_TYPES.test(f.type)) say(`${f.name} is not a picture, a text file or a PDF`)
-      else if (f.size > MAX_BYTES) say(`${f.name} is over 3 MB`)
-      else if (!f.size) say(`${f.name} is empty`)
-      else if (full()) say(FOUR_AT_MOST)
-      else if (!picture && !sendableName(f.name)) say(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
+      if (!picture && !FILE_TYPES.test(f.type)) setNote(`${f.name} is not a picture, a text file or a PDF`)
+      else if (f.size > MAX_BYTES) setNote(`${f.name} is over 3 MB`)
+      else if (!f.size) setNote(`${f.name} is empty`)
+      else if (full()) setNote(FOUR_AT_MOST)
+      else if (!picture && !sendableName(f.name)) setNote(`${f.name} has a name that cannot be sent: no / or \\, no control characters, 255 bytes at most`)
       else {
         const data = await base64(f)
         if (full()) {
-          say(FOUR_AT_MOST)
+          setNote(FOUR_AT_MOST)
           continue
         }
         held.current++ // counted now: another read landing before the box is drawn again sees it
@@ -140,6 +145,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
     setFiles([])
     setWords('')
     say(null)
+    setNote(null)
     el.focus()
     const why = await onSend(text, sent.pictures, sent.files)
     if (why === null || why === undefined) return

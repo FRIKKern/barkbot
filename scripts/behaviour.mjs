@@ -2322,6 +2322,49 @@ else {
     await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
     stub.sessions = []; freshStore();
   }
+
+  // ── A pick's refusal is said beside a send's may-have-been-sent line, never in its place (task-e1fc137f265fbe22) ──
+  console.log('Behaviour · a file refused after a send had no answer (the live page, against the stand-in Barkpark)');
+  {
+    const SN = '00000000-0000-4000-8000-0000000003d1';
+    const chipNames = () => ev(() => [...document.querySelectorAll('.composer-attachments [role=listitem]')].map((x) => x.getAttribute('aria-label')));
+    const pick = async (files) => { const { root } = await page.send('DOM.getDocument'); const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId, files }); };
+    const SAFE = /may have been sent, but sending it again is safe/;
+    // Sent, its answer lost after Barkpark took it: the words (and pictures) come back with the safe line.
+    const lost = async (words) => {
+      const s0 = stub.sent.length; stub.dropAnswer = true; await typeSend(words);
+      await until(() => stub.sent.length > s0, 8000, 'the message to reach the stand-in').catch(() => {});
+      await until(async () => SAFE.test((await refusedLine()) ?? ''), 8000, 'the safe line').catch(() => {}); await wait(500);
+      stub.dropAnswer = false;
+      return refusedLine();
+    };
+    const openOn = async () => {
+      stub.hosts = host(true); stub.fleet = null; stub.rows = []; freshStore(); stub.sessions = [session(SN)]; stub.failShow.clear(); stub.opened = [];
+      await open(`${base}/`); await until(() => stub.opened.includes(SN), 15000, 'the conversation to open').catch(() => {}); await wait(800); await clearPrompt();
+    };
+    // 1. Words alone come back unsure; a picture over 3 MB is picked.
+    await openOn();
+    const zip = path('.cache', `refused-${CHROME_PORT}.png`); writeFileSync(zip, Buffer.concat([PNG, Buffer.alloc(3 * 1024 * 1024 + 1)]));
+    const before = await lost('did it go');
+    await pick([zip]); await wait(1000);
+    const kind = { before, line: await refusedLine(), prompt: await promptText(), chips: await chipNames() };
+    rmSync(zip, { force: true });
+    check('a send with no answer, then a picture over 3 MB is picked: the line says why the picture was not taken, and still says the message may have been sent and sending it again is safe', SAFE.test(kind.before ?? '') && /refused-\d+\.png is over 3 MB/.test(kind.line ?? '') && SAFE.test(kind.line ?? '') && kind.prompt === 'did it go' && kind.chips.length === 0, kind);
+    await clearPrompt();
+    // 2. Four pictures with words come back unsure; a fifth is picked.
+    await openOn();
+    const four = [0, 1, 2, 3].map((i) => { const f = path('.cache', `note-${i}-${CHROME_PORT}.png`); writeFileSync(f, Buffer.concat([PNG, Buffer.from(`n${i}`)])); return f; });
+    const fifth = path('.cache', `note-5-${CHROME_PORT}.png`); writeFileSync(fifth, Buffer.concat([PNG, Buffer.from('n5')]));
+    await pick(four); await until(async () => (await chipNames()).length === 4, 10000, 'four chips').catch(() => {});
+    const before4 = await lost('four of them');
+    await until(async () => (await chipNames()).length === 4, 8000, 'the four back').catch(() => {});
+    await pick([fifth]); await wait(1000);
+    const five = { before: before4, line: await refusedLine(), chips: await chipNames() };
+    [...four, fifth].forEach((f) => rmSync(f, { force: true }));
+    check('four pictures sent with no answer come back, then a fifth is picked: the line says a message takes four at most, and still says the message may have been sent and sending it again is safe', SAFE.test(five.before ?? '') && /four pictures and files at most/.test(five.line ?? '') && SAFE.test(five.line ?? '') && five.chips.length === 4, five);
+    await clearPrompt(); await ev(async () => { for (let i = 0; i < 6; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    stub.sessions = []; freshStore();
+  }
 }
 
 console.log('Behaviour · the bot-record queue on its own (the app\'s bots.ts in this Node process, task-2ad4f1be48ff7f4d)');
