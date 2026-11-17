@@ -207,7 +207,6 @@ export function Overlay({name, scene, onOpenChange, onCreateBot, onChoose}: {nam
         close: () => !held && close(true),
         choose: (value: string) => {
           onChoose?.(shown.name, value)
-          if (!held) close(true)
         },
         go: (n: string) => !held && setOpen((cur) => ({name: n, back: cur?.before ?? cur?.back})),
         create: onCreateBot,
