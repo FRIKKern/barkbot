@@ -2521,6 +2521,29 @@ else {
     await clearPrompt(); await ev(async () => { for (let i = 0; i < 10; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
     stub.sessions = []; freshStore();
   }
+
+  // ── A paste carrying an old send's mark does not move where unsent words come back (task-fad2c995507a70a3) ──
+  console.log('Behaviour · a marked paragraph pasted while a send is on its way (the live page, against the stand-in Barkpark)');
+  {
+    const SM = '00000000-0000-4000-8000-0000000003e1';
+    stub.hosts = host(true); stub.fleet = null; stub.rows = []; freshStore(); stub.sessions = [session(SM)]; stub.failShow.clear(); stub.opened = [];
+    await open(`${base}/`); await until(() => stub.opened.includes(SM), 15000, 'the conversation to open').catch(() => {}); await wait(800); await clearPrompt();
+    const lines = (t) => t.split('\n').map((x) => x.trim()).filter(Boolean);
+    const h0 = stub.heldSends.length; stub.holdSend = true;
+    await typeSend('first words');
+    await until(() => stub.heldSends.length > h0, 8000, 'the message on its way').catch(() => {}); await wait(200);
+    // A rich paste, as Chrome does it: the paragraph keeps the data-unsent its copy carried.
+    await ev(() => { document.querySelector('.prompt').focus(); document.execCommand('insertHTML', false, '<p data-unsent="0">pasted words</p>'); });
+    await wait(300);
+    const marked = await ev(() => document.querySelectorAll('.prompt [data-unsent]').length);
+    stub.holdSend = false; stub.heldSends.splice(h0).forEach((answer) => answer());
+    await until(async () => !!(await refusedLine()), 8000, 'the line').catch(() => {}); await wait(500);
+    const out = { marked, prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), line: await refusedLine() };
+    check('control: the pasted paragraph carries a data-unsent mark into the box', out.marked >= 1, out);
+    check('a paragraph carrying data-unsent pasted while a send is on its way, the send comes back unsent: its words come back first, before the pasted words', JSON.stringify(out.prompt) === JSON.stringify(['first words', 'pasted words']) && /may have been sent/.test(out.line ?? ''), out);
+    await clearPrompt();
+    stub.sessions = []; freshStore();
+  }
 }
 
 console.log('Behaviour · the bot-record queue on its own (the app\'s bots.ts in this Node process, task-2ad4f1be48ff7f4d)');
