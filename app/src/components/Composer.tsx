@@ -75,7 +75,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   // box can hold more than four (task-724aa2a5a9b5e5cf). None is dropped: the line says a message takes
   // four at most, still saying what it said before, and Enter sends nothing until some are taken out.
   const over = pictures.length + files.length > MAX_ATTACHMENTS
-  const shown = over ? (said && said !== FOUR_AT_MOST ? `${FOUR_AT_MOST}. ${said}` : FOUR_AT_MOST) : said
+  const shown = over ? FOUR_AT_MOST : said
   // Each send's number. What comes back unsent goes after what came back from an earlier send and
   // before what came back from a later one, so two sends on their way at once read back in the order
   // they were sent, whichever answer comes first; what was typed or attached since stays after them.
