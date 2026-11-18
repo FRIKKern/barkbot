@@ -292,7 +292,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
             if (files.length) { e.preventDefault(); void add(files) }
           }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
               e.preventDefault()
               submit()
             }
