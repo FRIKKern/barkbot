@@ -20,6 +20,7 @@ import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
 import { overlayKeys } from './lib/overlay-keys.mjs';
 import { cmdHints } from './lib/cmd-hints.mjs';
+import { newBotHides } from './lib/new-bot-hides.mjs';
 import { pickerPick } from './lib/picker-pick.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
@@ -440,6 +441,10 @@ await overlayKeys({ check, precondition, ev, open, base, click, wait, until, win
 // ── The rail's command-key hints (traces/2026-11-09-cmd-hints.json, task-22996e1edb3434d3) ──
 console.log("Behaviour · the rail's command-key hints (traces/2026-11-09-cmd-hints.json)");
 await cmdHints({ check, precondition, ev, open, base, wait, until, windowFocus, page });
+
+// ── New Bot hides the rest of the window (traces/2026-11-08-new-bot.json, task-1f469ccf6966e2fb) ──
+console.log('Behaviour · New Bot hides the rest of the window (traces/2026-11-08-new-bot.json)');
+await newBotHides({ check, precondition, ev, open, base, click, wait, until, windowFocus });
 
 // ── A pick in the Voice chat card's pickers changes its row (task-d2fde20bf4539af1, item N4) ──
 console.log("Behaviour · a picker's pick changes its row");

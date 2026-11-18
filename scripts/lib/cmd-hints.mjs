@@ -5,7 +5,8 @@
 // that moved, changed its look or never showed passed every gate.
 // The page is the oracle scene (/gate/oracle-turn-1040): the real Shell, two bots, Oracle open.
 // The oracle was read on a 2x screen (its traces' viewports say 2), and a 0.5 px border reads back
-// as 1 px on a 1x page, so the rule runs the page at 2x, the same size in CSS px, and puts it back.
+// as 1 px on a 1x page, so the rule runs the page at 2x (set once the page is up, and read back as
+// a precondition), the same size in CSS px, and puts it back.
 const TRACE = {
   hints: [
     { text: '⌘1', box: [41.3, 53, 26.5, 19] },
@@ -59,14 +60,18 @@ export async function cmdHints({ check, precondition, ev, open, base, wait, unti
   }));
   const active = () => ev(() => document.querySelector('.convo-head [role=heading]')?.textContent.trim() ?? null);
 
-  const size = await ev(() => [innerWidth, innerHeight]);
-  await page.send('Emulation.setDeviceMetricsOverride', { width: size[0], height: size[1], deviceScaleFactor: 2, mobile: false });
   try {
     await open(`${base}/gate/oracle-turn-1040`); await windowFocus(true);
     await until(async () => (await ev(() => document.querySelectorAll('.rail .rail-tile').length >= 2)), 15000, 'the oracle scene').catch(() => {});
+    // 2x after the page is up (a navigation can leave the page at the window's own ratio), then read
+    // back what the page sees, so a detail line says which ratio a border width was read at.
+    const size = await ev(() => [innerWidth, innerHeight]);
+    await page.send('Emulation.setDeviceMetricsOverride', { width: size[0], height: size[1], deviceScaleFactor: 2, mobile: false });
+    await wait(200);
+    const dpr = await ev(() => devicePixelRatio);
     const was = await active();
     const before = await hints();
-    precondition('the oracle scene is up, Oracle is open, and no hint shows', was === 'Oracle' && before.length === 0, { was, before });
+    precondition('the oracle scene is up at 2x, Oracle is open, and no hint shows', dpr === 2 && was === 'Oracle' && before.length === 0, { dpr, size, was, before });
 
     await meta('down');
     const held = await hints();
@@ -81,7 +86,7 @@ export async function cmdHints({ check, precondition, ev, open, base, wait, unti
       boxes, { held: held.map(({ text, box }) => ({ text, box })), want: TRACE.hints });
     const off = held.flatMap((h) => Object.entries(TRACE.look).filter(([k, v]) => h.look[k] !== v).map(([k, v]) => `${h.text} ${k}: ${h.look[k]} (trace ${v})`));
     check('Meta held: each hint has the recorded look (colour, font, background, radius, border, ring, padding, opacity)',
-      held.length === 2 && off.length === 0, off);
+      held.length === 2 && off.length === 0, { dpr: await ev(() => devicePixelRatio), borderTopWidth: held.map((h) => h.look.border.split(' ')[0]), off });
     check('Meta let go: the hints are gone, and Oracle is still the open bot (the trace: the active bot stayed Oracle)',
       after.length === 0 && heldActive === was && afterActive === was, { after, heldActive, afterActive });
   } finally {
