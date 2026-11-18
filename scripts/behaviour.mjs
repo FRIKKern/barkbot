@@ -20,9 +20,12 @@ import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
 import { overlayKeys } from './lib/overlay-keys.mjs';
 import { panelCurve } from './lib/panel-curve.mjs';
+import { pickerPick } from './lib/picker-pick.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
 import { createOnce } from './lib/create-once.mjs';
+import { createLost } from './lib/create-lost.mjs';
+import { retryAdopt } from './lib/retry-adopt.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -110,6 +113,8 @@ await new Promise((ok) => httpServer((req, res) => {
       // If-None-Match: * (user-prefs.md): a PUT writes only an unset key, else 412 and nothing written.
       if (req.method === 'PUT' && stub.madeBeforePut?.key === key) { stub.prefs.set(key, stub.madeBeforePut.value); stub.madeBeforePut = null; }
       if (req.method === 'PUT' && req.headers['if-none-match'] === '*' && stub.prefs.has(key)) return json(412, { error: { code: 'precondition_failed', message: 'the key already holds a value; If-None-Match: * creates only an unset key' } });
+      // `dropPut` 'after' | 'before': the next bot-record PUT's answer is lost (the socket drops), after it lands or before.
+      if (req.method === 'PUT' && stub.dropPut && key.startsWith('barkbot.bot.')) { const when = stub.dropPut; stub.dropPut = null; if (when === 'after') stub.prefs.set(key, b.value); return void req.socket.destroy(); }
       const h = stub.holdPut;
       if (record && h?.key === key) {
         if (!h.pending && !h.done && changes(h.field)) {
@@ -436,6 +441,10 @@ await overlayKeys({ check, precondition, ev, open, base, click, wait, until, win
 console.log("Behaviour · the details panel's close and open curve (traces/2026-11-08-feel-panel.json)");
 await panelCurve({ check, precondition, ev, open, base, click, wait, until, windowFocus });
 
+// ── A pick in the Voice chat card's pickers changes its row (task-d2fde20bf4539af1, item N4) ──
+console.log("Behaviour · a picker's pick changes its row");
+await pickerPick({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
+
 // ── Rename persists: the live page (/) saves the name to Barkpark (task-c3e0bc88ce28833d) ─────
 // Grok keeps a renamed bot's name across a restart. Ours saves it as a Barkpark pref on Enter or
 // a click away, and loadChat reads it back. Counted at the stand-in, so a write is a write.
@@ -696,6 +705,7 @@ else {
   check('a Create whose list add fails says so in the dialog, makes no Barkpark conversation, and leaves no record behind', /not made/.test(tc.line ?? '') && tc.open && tc.made.length === 0 && tc.keys === 0 && tc.writes.some((w) => w.method === 'DELETE'), tc);
   const odd = await ev(async (id) => { const m = await import('/src/chat/api.ts'); const out = []; for (const d of [{ name: 'Odd', shape: '<svg onload=x>' }, { name: 'Odd', colour: 'url(javascript:x)' }]) { try { await m.createBot({ data: d }); out.push('made'); } catch (e) { out.push(String(e?.message ?? e)); } } return out; });
   check('Create refuses a shape or colour that is not one of the dialog\'s own, and writes nothing', odd.length === 2 && odd.every((x) => x !== 'made') && ![...stub.prefs].some(([k, v]) => k.startsWith('barkbot.bot.') && v?.name === 'Odd'), { odd });
+  await createLost({ check, stub, ids, live, until, wait, key, openDialog, typeName, press, failLine, dialog });
   // A made bot's folder comes from its id: an id that gives none makes no conversation (never the
   // shared root in its place); upper-case hex is read as lower.
   const folderMade0 = stub.made.length;
@@ -739,6 +749,7 @@ else {
     check('a seeded id whose record is there, off the list, is passed over: Create takes the next, and that record is untouched', t.id === C && JSON.stringify(stub.prefs.get(`barkbot.bot.${O}`)) === JSON.stringify(orphan) && !t.writes.includes(`PUT barkbot.bot.${O}`), { ...t, orphan: stub.prefs.get(`barkbot.bot.${O}`) });
     rmSync(MINT, { force: true }); freshStore();
   }
+  await retryAdopt({ check, stub, ev, ids, freshStore, rec, HOST_ID });
   await createOnce({ check, ev, stub, freshStore, showing, alertLine, rec, session, ids, botPuts, HOST_ID, S1, KEY, MINT });
   // A bot already listed when today's bot has not moved in yet: today's bot still moves in.
   const OTHER = '9d2a3b4c-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
@@ -2484,6 +2495,13 @@ else {
     const Q = CHROME_PORT;
     check('a pick refuses a file and is still reading another when a second pick starts and is refused: the line names both refused pictures, then the late unreadable one too', order.firstSaid === `big-a-${Q}.png is over 3 MB` && order.bothBig === `big-a-${Q}.png and big-b2-${Q}.png are over 3 MB` && order.line === `big-a-${Q}.png and big-b2-${Q}.png are over 3 MB. lateb-a2-${Q}.png could not be read` && order.chips.length === 0, order);
     await clearPrompt();
+    // 8. The same file picked again while its first pick is still read: named once (task-efe912c50389b7a0).
+    const again = path('.cache', `lateb-again-${CHROME_PORT}.png`); writeFileSync(again, PNG);
+    await pick([again]); await wait(200); await pick([again]); await wait(2500); // both reads have failed
+    const repick = { line: await refusedLine(), chips: await chipNames() };
+    rmSync(again, { force: true });
+    check('the same unreadable file picked twice while the first pick is still read: the line names it once', repick.line === `lateb-again-${CHROME_PORT}.png could not be read` && repick.chips.length === 0, repick);
+    await clearPrompt();
     stub.sessions = []; freshStore();
   }
 
@@ -2524,6 +2542,52 @@ else {
     check('four sent, four added while it is on its way, the first comes back unsure: the box holds all eight, the line says a message takes four at most and that the first may have been sent, and Enter sends nothing', between.length === 0 && JSON.stringify(back.chips) === JSON.stringify([...firstNames, ...moreNames]) && /four pictures and files at most/.test(back.line ?? '') && /may have been sent/.test(back.line ?? '') && eight.sent === 0 && eight.keyed === 0 && eight.uploads === 0 && eight.held === 0 && eight.chips.length === 8 && eight.prompt === 'four pictures' && /four pictures and files at most/.test(eight.line ?? ''), out);
     check('then the four added meanwhile are taken out: the limit line goes, and Enter sends the first four with their words', JSON.stringify(four.chips) === JSON.stringify(firstNames) && !/four pictures and files at most/.test(four.line ?? '') && /may have been sent/.test(four.line ?? '') && JSON.stringify(went) === JSON.stringify([{ content: 'four pictures', n: 4 }]) && out.chipsEnd.length === 0, out);
     await clearPrompt(); await ev(async () => { for (let i = 0; i < 10; i++) { const b = document.querySelector('.attach-pic-remove'); if (!b) break; b.click(); await new Promise((r) => setTimeout(r, 50)); } });
+    stub.sessions = []; freshStore();
+  }
+
+  // ── A paste carrying an old send's mark does not move where unsent words come back (task-fad2c995507a70a3) ──
+  console.log('Behaviour · a marked paragraph pasted while a send is on its way (the live page, against the stand-in Barkpark)');
+  {
+    const SM = '00000000-0000-4000-8000-0000000003e1';
+    stub.hosts = host(true); stub.fleet = null; stub.rows = []; freshStore(); stub.sessions = [session(SM)]; stub.failShow.clear(); stub.opened = [];
+    await open(`${base}/`); await until(() => stub.opened.includes(SM), 15000, 'the conversation to open').catch(() => {}); await wait(800); await clearPrompt();
+    const lines = (t) => t.split('\n').map((x) => x.trim()).filter(Boolean);
+    const h0 = stub.heldSends.length; stub.holdSend = true;
+    await typeSend('first words');
+    await until(() => stub.heldSends.length > h0, 8000, 'the message on its way').catch(() => {}); await wait(200);
+    // A rich paste, as Chrome does it: the paragraph keeps the data-unsent its copy carried.
+    await ev(() => { document.querySelector('.prompt').focus(); document.execCommand('insertHTML', false, '<p data-unsent="0">pasted words</p>'); });
+    await wait(300);
+    const marked = await ev(() => document.querySelectorAll('.prompt [data-unsent]').length);
+    stub.holdSend = false; stub.heldSends.splice(h0).forEach((answer) => answer());
+    await until(async () => !!(await refusedLine()), 8000, 'the line').catch(() => {}); await wait(500);
+    const out = { marked, prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')), line: await refusedLine() };
+    check('control: the pasted paragraph carries a data-unsent mark into the box', out.marked >= 1, out);
+    check('a paragraph carrying data-unsent pasted while a send is on its way, the send comes back unsent: its words come back first, before the pasted words', JSON.stringify(out.prompt) === JSON.stringify(['first words', 'pasted words']) && /may have been sent/.test(out.line ?? ''), out);
+    await clearPrompt();
+    // Two sends on their way at once; the first comes back and is split in two (a new paragraph inside
+    // it, as Enter makes one); then the second comes back: it goes after both halves of the first.
+    {
+      await open(`${base}/`); await until(() => stub.opened.includes(SM), 15000, 'the conversation to open').catch(() => {}); await wait(800); await clearPrompt();
+      const g0 = stub.heldSends.length; stub.holdSend = true;
+      await typeSend('one two'); await until(() => stub.heldSends.length > g0, 8000, 'the first message on its way').catch(() => {}); await wait(200);
+      await typeSend('three'); await until(() => stub.heldSends.length > g0 + 1, 8000, 'the second message on its way').catch(() => {}); await wait(200);
+      stub.holdSend = false; const held = stub.heldSends.splice(g0);
+      held[0](); await until(async () => (await promptText()) === 'one two', 8000, 'the first words back').catch(() => {}); await wait(300);
+      // The caret after "one", then "x", a line break and "y" put in there (as a paste of two lines does).
+      await ev(() => {
+        const box = document.querySelector('.prompt'); box.focus();
+        const t = box.querySelector('p')?.firstChild; if (!t) return;
+        const r = document.createRange(); r.setStart(t, 3); r.collapse(true); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      });
+      await page.send('Input.insertText', { text: 'x\ny' }); await wait(200);
+      const splitOk = JSON.stringify(lines(await promptText())) === JSON.stringify(['onex', 'y two']);
+      held[1](); await until(async () => lines(await promptText()).length === 3, 8000, 'the second words back').catch(() => {}); await wait(500);
+      const split = { splitOk, prompt: lines(await ev(() => document.querySelector('.prompt')?.innerText ?? '')) };
+      check('control: the first send\'s words, back in the box, are split in two by the line put in (onex, y two)', split.splitOk === true, split);
+      check('two sends on their way at once; the first comes back and is split in two; then the second comes back: the box reads onex, y two, three', JSON.stringify(split.prompt) === JSON.stringify(['onex', 'y two', 'three']), split);
+      await clearPrompt();
+    }
     stub.sessions = []; freshStore();
   }
 }

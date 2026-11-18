@@ -7,7 +7,8 @@ import {languages, markedVoices, speeds, voices} from './data'
 
 const check = <Icon d="M3.5 8.5l3 3 6-7" />
 
-type Props = {picked?: string; onPick?: () => void}
+// `onPick` hears the option picked; the overlay host closes the picker and the panel's row takes it.
+type Props = {picked?: string; onPick?: (value: string) => void}
 
 function Picker({
   kind,
@@ -22,7 +23,7 @@ function Picker({
   options: string[]
   picked: string
   preview?: boolean
-  onPick?: () => void
+  onPick?: (value: string) => void
 }) {
   const [value, setValue] = useState(picked)
   return (
@@ -38,7 +39,7 @@ function Picker({
               className="option"
               onClick={() => {
                 setValue(o)
-                onPick?.()
+                onPick?.(o)
               }}
             >
               <span className="option-text">
