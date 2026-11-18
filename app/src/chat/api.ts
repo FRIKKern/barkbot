@@ -335,7 +335,7 @@ export const startChat = createServerFn({method: 'POST'})
         const raw = await readBot(data.botId)
         const bot = raw && trusted(data.botId, raw, await ownHosts())
         const now = bot && bot.host_id === data.hostId ? await sessionOf(bot) : null
-        if (bot && now?.is === 'none') {
+        if (bot && now !== null) {
           // Its own field only: a rename at the same moment stays.
           return (await write((signal) => setBotField(data.botId, 'session_id', s.id, signal))) !== null
         }
