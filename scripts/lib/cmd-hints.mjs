@@ -24,6 +24,7 @@ const TRACE = {
     // (read back as devicePixelRatio 2) this page's 0.5px border reads back 1px (run 44260547175),
     // so a width check here fails on the reading, not the hint. Style and colour are judged.
     border: 'solid rgba(245, 245, 245, 0.04)',
+    'border-width': '0.5px',
     'box-shadow': 'rgb(14, 14, 14) 0px 0px 0px 2px',
     padding: '1px 4px',
     opacity: '1',
@@ -56,6 +57,7 @@ export async function cmdHints({ check, precondition, ev, open, base, wait, unti
         'border-radius': cs.borderTopLeftRadius,
         border: `${cs.borderTopStyle} ${cs.borderTopColor}`,
         borderWidth: cs.borderTopWidth,
+        'border-width': cs.borderTopWidth,
         'box-shadow': cs.boxShadow,
         padding: `${cs.paddingTop} ${cs.paddingRight}`,
         opacity: cs.opacity,
