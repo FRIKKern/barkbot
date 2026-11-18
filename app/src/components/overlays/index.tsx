@@ -32,8 +32,9 @@ import {AvatarEditor, ConnectApps, Settings} from './Views'
 // first). A view opened from a menu's row gives focus back there on close: the keys trace's
 // Settings (account menu > Settings) gave it to Connect apps, focused before the menu opened.
 type Open = {name: string; picked?: string; trigger?: HTMLElement; back?: HTMLElement | null; before?: HTMLElement | null}
-/** Create in the New Bot dialog: makes the bot; the dialog closes once it is made. */
-export type CreateBot = (b: {name: string; shape: string; colour: string}) => Promise<void>
+/** Create in the New Bot dialog: makes the bot; the dialog closes once it is made. `retry`: the id of
+ *  a bot whose record write got no answer (CreateRetry), which this Create finishes. */
+export type CreateBot = (b: {name: string; shape: string; colour: string; retry?: string}) => Promise<void>
 /** A picker's pick: which picker (its overlay name) and the option picked. */
 export type Choose = (overlay: string, value: string) => void
 type Render = (o: {picked?: string; scene?: Scene; close: () => void; choose: (value: string) => void; go: (name: string) => void; create?: CreateBot}) => ReactNode
