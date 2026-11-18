@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 43,
- "pass": 43,
+ "cases": 44,
+ "pass": 44,
  "results": [
   {
    "key": "aside:Bots",
@@ -134,6 +134,10 @@
    "pass": true
   },
   {
+   "key": "time",
+   "pass": true
+  },
+  {
    "key": "card#1 parts",
    "pass": true
   },
@@ -182,7 +186,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-14T10:09:46.051Z",
+ "run": "2026-11-18T21:57:29.724Z",
  "inventory": {
   "id": "oracle-ask-choice",
   "controls": [
