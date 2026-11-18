@@ -75,6 +75,7 @@ await new Promise((ok) => httpServer((req, res) => {
     if (req.url.startsWith(PREFS)) {
       const key = decodeURIComponent(req.url.slice(PREFS.length)); const got = () => json(200, { key, dataset: 'production', value: stub.prefs.get(key) ?? null });
       const failing = stub.fail.get(`${req.method} ${key}`);
+      stub.trace?.push({ t: Date.now() - stub.t0, m: req.method, key: key.replace('barkbot.', ''), inm: req.headers['if-none-match'] ?? undefined });
       // `readAs` (key → how) answers one key's read oddly: 'hang' never answers (BarkBot's 8 s read
       // bound calls it off); 'otherKey' / 'otherDataset' answer 200 value:null for another key or
       // dataset; 'empty' answers 200 {} (no prefs answer at all). Hung reads go to stub.hung.
@@ -111,6 +112,7 @@ await new Promise((ok) => httpServer((req, res) => {
       // `madeBeforePut` {key, value}: another writer makes that record just before a PUT to it lands.
       // If-None-Match: * (user-prefs.md): a PUT writes only an unset key, else 412 and nothing written.
       if (req.method === 'PUT' && stub.madeBeforePut?.key === key) { stub.prefs.set(key, stub.madeBeforePut.value); stub.madeBeforePut = null; }
+      if (req.method === 'PUT' && req.headers['if-none-match'] === '*' && stub.prefs.has(key)) stub.trace?.push({ t: Date.now() - stub.t0, m: '412', key: key.replace('barkbot.', '') });
       if (req.method === 'PUT' && req.headers['if-none-match'] === '*' && stub.prefs.has(key)) return json(412, { error: { code: 'precondition_failed', message: 'the key already holds a value; If-None-Match: * creates only an unset key' } });
       // `dropPut` 'after' | 'before': the next bot-record PUT's answer is lost (the socket drops), after it lands or before.
       if (req.method === 'PUT' && stub.dropPut && key.startsWith('barkbot.bot.')) { const when = stub.dropPut; stub.dropPut = null; if (when === 'after') stub.prefs.set(key, b.value); return void req.socket.destroy(); }
@@ -1446,19 +1448,25 @@ else {
     const line = () => ev(() => document.querySelector('.chat-error')?.textContent ?? null);
     // Pia's page opens with no conversation; then `meanwhile` changes her record; then her first message.
     const firstMessage = async (words, meanwhile) => {
+      stub.trace?.push({ t: Date.now() - stub.t0, m: 'FRESH ' + words });
       stub.sessions = [session(OTHER_TAB)]; freshStore(); stub.prefs.set('barkbot.bots', { ids: [PIA] }); stub.prefs.set(KEYP, rec('Pia', HOST_ID, null));
       await open(`${base}/?bot=${PIA}`); await until(async () => (await live()).header === 'Pia', 15000, "Pia's page").catch(() => {}); await wait(500);
+      stub.trace?.push({ t: Date.now() - stub.t0, m: 'OPENED' });
       const before = await line();
       meanwhile(); const m0 = stub.made.length;
       await typeSend(words);
       await until(() => stub.made.length > m0, 8000, 'the new conversation').catch(() => {}); await wait(1500);
       return { before, line: await line(), made: stub.made.slice(m0), record: stub.prefs.get(KEYP) ?? null };
     };
+    stub.t0 = Date.now(); stub.trace = [];
+    const mouse = await ev(() => { const el = document.elementFromPoint(window.__mx ?? -1, window.__my ?? -1); return el ? el.className : null; });
     const ok = await firstMessage('hello pia', () => {});
     check("control: Pia's first message makes a conversation that is saved to her record, and no line", ok.before === null && ok.made.length === 1 && ok.record?.session_id === ok.made[0] && ok.line === null, ok);
     const taken = await firstMessage('hello again', () => stub.prefs.set(KEYP, rec('Pia', HOST_ID, OTHER_TAB)));
     check("another tab saved a conversation to Pia meanwhile: hers stays, and the page says in one line that this one was not saved to the bot", taken.before === null && taken.made.length === 1 && taken.record?.session_id === OTHER_TAB && NOT_KEPT.test(taken.line ?? ''), taken);
     const gone = await firstMessage('hello there', () => stub.prefs.delete(KEYP));
+    console.log('PIA-TRACE ' + JSON.stringify({ mouse, trace: stub.trace }));
+    stub.trace = null;
     check("Pia's record is gone meanwhile: nothing is written for her, and the page says in one line that this conversation was not saved to the bot", gone.before === null && gone.made.length === 1 && gone.record === null && NOT_KEPT.test(gone.line ?? ''), gone);
     // Every other way the new chat is not saved (from the review of #73): the line shows, the first
     // message goes once to the new conversation and the box empties, the next send goes there too with
