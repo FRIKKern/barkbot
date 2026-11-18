@@ -100,7 +100,7 @@ function IconTip({label, children}: {label: string; children: ReactNode}) {
 function useCommandHeld() {
   const [held, setHeld] = useState(false)
   useEffect(() => {
-    const down = (e: KeyboardEvent) => e.key === 'Meta' && setHeld(true)
+    const down = (e: KeyboardEvent) => e.key === 'Meta' && setHeld(false)
     const up = (e: KeyboardEvent) => e.key === 'Meta' && setHeld(false)
     const off = () => setHeld(false)
     window.addEventListener('keydown', down)
