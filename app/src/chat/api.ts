@@ -142,18 +142,14 @@ export const loadChat = createServerFn({method: 'GET'})
     } else {
       const there = await got(readBot(main.id), 'read the Main Bot')
       const kept = there.ok && there.v ? trusted(main.id, there.v, hosts) : null
-      // A whole Main Bot found in its key: kept as it is now (it may be renamed), its id added.
-      const keep = async (bot: Bot) => {
-        const session = await sessionOf(bot, sessions)
-        if (session.is !== 'foreign') {
-          rail = [...rail, {bot, session}]
-          if (!(await got(addId(bot.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
-        }
-      }
       if (!there.ok) notice = NOT_READ
       else if (kept) {
-        // Made by a load whose list add failed.
-        await keep(kept)
+        // Made by a load whose list add failed: keep it as it is now (it may be renamed), add its id.
+        const session = await sessionOf(kept, sessions)
+        if (session.is !== 'foreign') {
+          rail = [...rail, {bot: kept, session}]
+          if (!(await got(addId(kept.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
+        }
       } else if (!there.v) {
         // Nothing half-made: the id joins the list only after its record is whole.
         // Another tab or device may make it after the read above: Barkpark then refuses the write
@@ -162,14 +158,7 @@ export const loadChat = createServerFn({method: 'GET'})
         const failed = await putBot(moving.bot).then(() => null, (e: unknown) => e)
         if (failed) {
           if (!keyTaken(failed)) console.warn(`barkbot: could not save the Main Bot (${(failed as Error).message})`)
-          // Its key, derived from the computer, was made meanwhile: another load of this user doing
-          // the same move-in (another tab, or a load the server kept running). A whole Main Bot
-          // there now is this one: kept, with no line (task-cd587179698fa0d8). MAIN_TAKEN only
-          // when it cannot be read again or is not a whole Main Bot.
-          const now = keyTaken(failed) ? await got(readBot(main.id), 'read the Main Bot again') : null
-          const made = now?.ok && now.v ? trusted(main.id, now.v, hosts) : null
-          if (made) await keep(made)
-          else notice = keyTaken(failed) ? MAIN_TAKEN : NOT_SAVED
+          notice = keyTaken(failed) ? MAIN_TAKEN : NOT_SAVED
         } else {
           rail = [...rail, moving]
           if (!(await got(addId(main.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
