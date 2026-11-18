@@ -27,6 +27,7 @@ import { renameReach } from './lib/rename-reach.mjs';
 import { createOnce } from './lib/create-once.mjs';
 import { createLost } from './lib/create-lost.mjs';
 import { retryAdopt } from './lib/retry-adopt.mjs';
+import { shiftEnter } from './lib/shift-enter.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -2605,6 +2606,10 @@ else {
     }
     stub.sessions = []; freshStore();
   }
+
+  // ── Shift+Enter in Prompt (traces/2026-11-08-feel-shift.json, task-d0b878e32a2cd243, item T4) ──
+  console.log('Behaviour · Shift+Enter in Prompt (traces/2026-11-08-feel-shift.json, the live page)');
+  await shiftEnter({ check, precondition, ev, open, base, page, wait, until, stub, key, clearPrompt, host, session, freshStore });
 }
 
 console.log('Behaviour · the bot-record queue on its own (the app\'s bots.ts in this Node process, task-2ad4f1be48ff7f4d)');
