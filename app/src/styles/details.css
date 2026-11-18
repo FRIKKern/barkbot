@@ -4,7 +4,7 @@
   width: var(--panel); transition: width 300ms var(--ease-panel), visibility 0s; }
 /* Close and open: width 320 <-> 0 in 300 ms on cubic-bezier(.2,0,0,1) (traces/2026-11-08-feel-panel.json);
    the content keeps its 320 and is cut, and a closed panel is hidden once the width reaches 0. */
-.app[data-panel='closed'] .details { width: 0; visibility: hidden; transition: width 300ms var(--ease-panel), visibility 0s 300ms; }
+.app[data-panel='closed'] .details { width: 0; visibility: hidden; transition: width 300ms var(--ease-panel) 150ms, visibility 0s 450ms; }
 .details-head, .details-body { width: var(--panel); } /* its content reflows to the panel's width */
 .app[data-instant] .details { transition: none; }
 .details-head { height: 60px; flex: none; position: relative; }
