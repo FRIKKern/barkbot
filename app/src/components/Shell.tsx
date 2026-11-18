@@ -40,7 +40,7 @@ export type Scene = {
 // (measured on the oracle: 790 closed, 800 open; oracle-main-790, -800).
 const NARROW = '(max-width: 799.98px)'
 // Which Voice chat row each picker changes.
-const voiceRows: Record<string, keyof NonNullable<Scene['voice']>> = {'voice-picker': 'voice', 'speed-picker': 'speed', 'language-picker': 'language'}
+const voiceRows: Record<string, keyof NonNullable<Scene['voice']>> = {'speed-picker': 'speed', 'language-picker': 'language'}
 
 // `workingBots`: the ids of the bots whose run is in progress, from the chat stream (the same signal as the
 // transcript's working row; both flip at the same ms in traces say-hi, say-hi-2, storage).
