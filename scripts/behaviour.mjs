@@ -526,6 +526,16 @@ else {
   freshStore({ name: 'Legacy Name' });
   await Promise.all([fetch(`${base}/`).then((r) => r.text()), fetch(`${base}/`).then((r) => r.text())]);
   check('two page loads at once against an empty store leave one bot, the same id, not two', ids().length === 1 && botKeys().length === 1 && botKeys()[0] === `barkbot.bot.${ids()[0]}`, { ids: ids(), keys: botKeys() });
+  // Two loads at once doing the Main Bot's move-in (two tabs; task-cd587179698fa0d8): every read
+  // waits, so both read its key as unset and both write it; Barkpark refuses the second (412). That
+  // load reads the key again, finds a whole Main Bot of this computer and shows it, with no line.
+  freshStore({ name: 'Legacy Name' }); stub.readDelay = 300; const wPair = stub.writes.length;
+  // Fetched from here, not the page: Chrome's cache lock holds a second identical GET until the
+  // first ends, so two loadChat calls from one page never overlap (run 44374350336: one PUT).
+  const pair = await Promise.all([fetch(`${base}/`).then((r) => r.text()), fetch(`${base}/`).then((r) => r.text())]);
+  stub.readDelay = 0;
+  const both = { taken: pair.map((h) => /another tab or device/.test(h)), named: pair.map((h) => h.includes('Legacy Name')), ids: ids(), puts: stub.writes.slice(wPair).filter((w) => w.method === 'PUT').map((w) => w.key) };
+  check('two loads at once that both move the Main Bot in: one write is refused (412), and both pages show the Main Bot with no line; its id is listed once', both.puts.length === 2 && both.puts[0] === both.puts[1] && both.taken.every((t) => !t) && both.named.every(Boolean) && both.ids.length === 1 && `barkbot.bot.${both.ids[0]}` === both.puts[0], both);
   // A record is a claim: one naming a session not on its own computer, or a computer not the caller's, is dropped.
   const main = ids()[0]; const B = '7b0e1f2a-3c4d-4e5f-8a6b-7c8d9e0f1a2b', C = '8c1f2a3b-4d5e-4f6a-9b7c-8d9e0f1a2b3c';
   const rec = (name, host_id, session_id) => ({ name, host_id, session_id, created_at: '2026-11-15T09:00:00Z' });
