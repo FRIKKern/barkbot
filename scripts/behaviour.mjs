@@ -1456,19 +1456,28 @@ else {
     const KEYP = `barkbot.bot.${PIA}`, NOT_KEPT = /not saved to the bot/;
     const line = () => ev(() => document.querySelector('.chat-error')?.textContent ?? null);
     // Pia's page opens with no conversation; then `meanwhile` changes her record; then her first message.
+    // `main`: the Main Bot's key and record as the first case's load made them. Each later case
+    // starts with them listed, so its load writes no Main Bot: a load that moves the Main Bot in
+    // (app/src/chat/api.ts, the putBot after readBot(main.id)) can meet another load doing the same,
+    // and the one refused then shows MAIN_TAKEN before Pia's first message (task-eb43419486f89a63).
+    let main = null;
     const firstMessage = async (words, meanwhile) => {
-      stub.sessions = [session(OTHER_TAB)]; freshStore(); stub.prefs.set('barkbot.bots', { ids: [PIA] }); stub.prefs.set(KEYP, rec('Pia', HOST_ID, null));
+      stub.sessions = [session(OTHER_TAB)]; freshStore(); stub.prefs.set('barkbot.bots', { ids: main ? [PIA, main[0].slice('barkbot.bot.'.length)] : [PIA] }); stub.prefs.set(KEYP, rec('Pia', HOST_ID, null));
+      if (main) stub.prefs.set(...main);
+      const w0 = stub.writes.length;
       await open(`${base}/?bot=${PIA}`); await until(async () => (await live()).header === 'Pia', 15000, "Pia's page").catch(() => {}); await wait(500);
       const before = await line();
       meanwhile(); const m0 = stub.made.length;
       await typeSend(words);
       await until(() => stub.made.length > m0, 8000, 'the new conversation').catch(() => {}); await wait(1500);
-      return { before, line: await line(), made: stub.made.slice(m0), record: stub.prefs.get(KEYP) ?? null };
+      return { before, line: await line(), made: stub.made.slice(m0), record: stub.prefs.get(KEYP) ?? null, mainWrites: stub.writes.slice(w0).filter((x) => main && x.key === main[0]).length };
     };
     const ok = await firstMessage('hello pia', () => {});
+    main = [...stub.prefs].find(([k]) => k.startsWith('barkbot.bot.') && k !== KEYP) ?? null;
+    check("control: the first case's load made the Main Bot's record and listed it (the later cases start with it)", !!main && (stub.prefs.get('barkbot.bots')?.ids ?? []).includes(main[0].slice('barkbot.bot.'.length)), { main });
     check("control: Pia's first message makes a conversation that is saved to her record, and no line", ok.before === null && ok.made.length === 1 && ok.record?.session_id === ok.made[0] && ok.line === null, ok);
     const taken = await firstMessage('hello again', () => stub.prefs.set(KEYP, rec('Pia', HOST_ID, OTHER_TAB)));
-    check("another tab saved a conversation to Pia meanwhile: hers stays, and the page says in one line that this one was not saved to the bot", taken.before === null && taken.made.length === 1 && taken.record?.session_id === OTHER_TAB && NOT_KEPT.test(taken.line ?? ''), taken);
+    check("another tab saved a conversation to Pia meanwhile: hers stays, and the page says in one line that this one was not saved to the bot", taken.before === null && taken.mainWrites === 0 && taken.made.length === 1 && taken.record?.session_id === OTHER_TAB && NOT_KEPT.test(taken.line ?? ''), taken);
     const gone = await firstMessage('hello there', () => stub.prefs.delete(KEYP));
     check("Pia's record is gone meanwhile: nothing is written for her, and the page says in one line that this conversation was not saved to the bot", gone.before === null && gone.made.length === 1 && gone.record === null && NOT_KEPT.test(gone.line ?? ''), gone);
     // Every other way the new chat is not saved (from the review of #73): the line shows, the first
