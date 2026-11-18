@@ -4,9 +4,11 @@
 // Rail.tsx and rail.css build them from that trace, but until this rule nothing read it, so a hint
 // that moved, changed its look or never showed passed every gate.
 // The page is the oracle scene (/gate/oracle-turn-1040): the real Shell, two bots, Oracle open.
-// The oracle was read on a 2x screen (its traces' viewports say 2), and a 0.5 px border reads back
-// as 1 px on a 1x page, so the rule runs the page at 2x (set once the page is up, and read back as
-// a precondition), the same size in CSS px, and puts it back.
+// The oracle was read on a 2x screen (its traces' viewports say 2), and Chrome snaps a 0.5 px border
+// to 1 px on a 1x screen, so behaviour.mjs launches Chrome at 2x (--force-device-scale-factor=2).
+// A CDP device-metrics override is not enough: it changes what devicePixelRatio says, but borders
+// still snap at the screen's own ratio (#237 review, probe #248). The precondition asks the engine:
+// a 0.5 px border on a probe element must read back 0.5px.
 const TRACE = {
   hints: [
     { text: '⌘1', box: [41.3, 53, 26.5, 19] },
@@ -20,10 +22,7 @@ const TRACE = {
     'letter-spacing': '0.11px',
     'background-color': 'rgb(14, 14, 14)',
     'border-radius': '4px',
-    // The trace's border is 0.5px solid rgba(245, 245, 245, 0.04). Its width is not judged: at 2x
-    // (read back as devicePixelRatio 2) this page's 0.5px border reads back 1px (run 44260547175),
-    // so a width check here fails on the reading, not the hint. Style and colour are judged.
-    border: 'solid rgba(245, 245, 245, 0.04)',
+    border: '0.5px solid rgba(245, 245, 245, 0.04)',
     'box-shadow': 'rgb(14, 14, 14) 0px 0px 0px 2px',
     padding: '1px 4px',
     opacity: '1',
@@ -54,8 +53,7 @@ export async function cmdHints({ check, precondition, ev, open, base, wait, unti
         'letter-spacing': cs.letterSpacing,
         'background-color': cs.backgroundColor,
         'border-radius': cs.borderTopLeftRadius,
-        border: `${cs.borderTopStyle} ${cs.borderTopColor}`,
-        borderWidth: cs.borderTopWidth,
+        border: `${cs.borderTopWidth} ${cs.borderTopStyle} ${cs.borderTopColor}`,
         'box-shadow': cs.boxShadow,
         padding: `${cs.paddingTop} ${cs.paddingRight}`,
         opacity: cs.opacity,
@@ -64,36 +62,36 @@ export async function cmdHints({ check, precondition, ev, open, base, wait, unti
   }));
   const active = () => ev(() => document.querySelector('.convo-head [role=heading]')?.textContent.trim() ?? null);
 
-  try {
-    await open(`${base}/gate/oracle-turn-1040`); await windowFocus(true);
-    await until(async () => (await ev(() => document.querySelectorAll('.rail .rail-tile').length >= 2)), 15000, 'the oracle scene').catch(() => {});
-    // 2x after the page is up (a navigation can leave the page at the window's own ratio), then read
-    // back what the page sees, so a detail line says which ratio a border width was read at.
-    const size = await ev(() => [innerWidth, innerHeight]);
-    await page.send('Emulation.setDeviceMetricsOverride', { width: size[0], height: size[1], deviceScaleFactor: 2, mobile: false });
-    await wait(200);
-    const dpr = await ev(() => devicePixelRatio);
-    const was = await active();
-    const before = await hints();
-    precondition('the oracle scene is up at 2x, Oracle is open, and no hint shows', dpr === 2 && was === 'Oracle' && before.length === 0, { dpr, size, was, before });
+  // What the engine does with a 0.5 px border here: a probe element, read and removed.
+  const halfPx = () => ev(() => {
+    const d = document.createElement('div');
+    d.style.cssText = 'position:absolute;left:-10px;top:-10px;width:4px;height:4px;border-top:0.5px solid red';
+    document.body.append(d);
+    const w = getComputedStyle(d).borderTopWidth;
+    d.remove();
+    return w;
+  });
+  await open(`${base}/gate/oracle-turn-1040`); await windowFocus(true);
+  await until(async () => (await ev(() => document.querySelectorAll('.rail .rail-tile').length >= 2)), 15000, 'the oracle scene').catch(() => {});
+  const probe = await halfPx();
+  const was = await active();
+  const before = await hints();
+  precondition('the engine keeps a 0.5px border (a probe reads back 0.5px), the oracle scene is up, Oracle is open, and no hint shows', probe === '0.5px' && was === 'Oracle' && before.length === 0, { probe, was, before });
 
-    await meta('down');
-    const held = await hints();
-    const heldActive = await active();
-    await meta('up');
-    const after = await hints();
-    const afterActive = await active();
+  await meta('down');
+  const held = await hints();
+  const heldActive = await active();
+  await meta('up');
+  const after = await hints();
+  const afterActive = await active();
 
-    const near = (a, b) => a.every((v, i) => Math.abs(v - b[i]) <= TOL);
-    const boxes = held.length === 2 && TRACE.hints.every((t, i) => held[i]?.text === t.text && near(held[i].box, t.box));
-    check('Meta held (cmd-hints trace): the rail shows ⌘1 and ⌘2, each at its recorded box within 1 pt (control: no hint before)',
-      boxes, { held: held.map(({ text, box }) => ({ text, box })), want: TRACE.hints });
-    const off = held.flatMap((h) => Object.entries(TRACE.look).filter(([k, v]) => h.look[k] !== v).map(([k, v]) => `${h.text} ${k}: ${h.look[k]} (trace ${v})`));
-    check('Meta held: each hint has the recorded look (colour, font, background, radius, border style and colour, ring, padding, opacity)',
-      held.length === 2 && off.length === 0, { dpr: await ev(() => devicePixelRatio), borderTopWidth: held.map((h) => h.look.borderWidth), off });
-    check('Meta let go: the hints are gone, and Oracle is still the open bot (the trace: the active bot stayed Oracle)',
-      after.length === 0 && heldActive === was && afterActive === was, { after, heldActive, afterActive });
-  } finally {
-    await page.send('Emulation.clearDeviceMetricsOverride');
-  }
+  const near = (a, b) => a.every((v, i) => Math.abs(v - b[i]) <= TOL);
+  const boxes = held.length === 2 && TRACE.hints.every((t, i) => held[i]?.text === t.text && near(held[i].box, t.box));
+  check('Meta held (cmd-hints trace): the rail shows ⌘1 and ⌘2, each at its recorded box within 1 pt (control: no hint before)',
+    boxes, { held: held.map(({ text, box }) => ({ text, box })), want: TRACE.hints });
+  const off = held.flatMap((h) => Object.entries(TRACE.look).filter(([k, v]) => h.look[k] !== v).map(([k, v]) => `${h.text} ${k}: ${h.look[k]} (trace ${v})`));
+  check('Meta held: each hint has the recorded look (colour, font, background, radius, border, ring, padding, opacity)',
+    held.length === 2 && off.length === 0, off);
+  check('Meta let go: the hints are gone, and Oracle is still the open bot (the trace: the active bot stayed Oracle)',
+    after.length === 0 && heldActive === was && afterActive === was, { after, heldActive, afterActive });
 }

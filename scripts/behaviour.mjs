@@ -260,7 +260,8 @@ if (!base) {
   await until(async () => (await fetch(base)).status > 0, 90000, `the app on ${base}`);
 }
 mkdirSync(PROFILE, { recursive: true });
-kids.push(spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, '--window-size=1040,760', 'about:blank'], { stdio: 'ignore' }));
+// At 2x, as the oracle's screen: on a 1x screen Chrome snaps a 0.5 px border to 1 px (cmd-hints.mjs).
+kids.push(spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, '--window-size=1040,760', '--force-device-scale-factor=2', 'about:blank'], { stdio: 'ignore' }));
 await until(async () => (await fetch(`http://127.0.0.1:${CHROME_PORT}/json/version`)).ok, 30000, 'Chrome');
 const page = await connect(undefined, CHROME_PORT);
 const ev = (f, ...a) => page.evaluate(f, ...a);
