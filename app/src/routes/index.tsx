@@ -4,6 +4,7 @@ import {Shell, useUnread} from '../components/Shell'
 import {Transcript} from '../components/Transcript'
 import {Composer, placeholderFor, type ComposerStart, type Picture, type WaitingFile} from '../components/Composer'
 import {computerOnline, createBot, loadChat, renameBot, startChat, type Chat} from '../chat/api'
+import {CreateRetry} from '../chat/create-unsure'
 import {barkpark, besideOthers, SAFE_AGAIN, useConversation, type BotState, type Outgoing, type Transport} from '../chat/useConversation'
 import {useFleet} from '../chat/useFleet'
 
@@ -185,8 +186,11 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
   }, [])
   // Create in the New Bot dialog: the bot is made (its record, then its id in the list), and the
   // page opens it, with its empty conversation; the rail shows it at the end of the pinned bots.
-  const create = async (b: {name: string; shape: string; colour: string}) => {
-    const {id} = await createBot({data: b})
+  // A record write with no answer comes back as `retry`: the dialog keeps that id (CreateRetry).
+  const create = async (b: {name: string; shape: string; colour: string; retry?: string}) => {
+    const made = await createBot({data: b})
+    if ('retry' in made) throw new CreateRetry(made.retry)
+    const {id} = made
     if (parked.current) {
       keepParked()
       pendingPick.current = null

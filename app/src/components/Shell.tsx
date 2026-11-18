@@ -39,6 +39,8 @@ export type Scene = {
 // A window under 800 closes the details panel by itself, and widening it again leaves it closed
 // (measured on the oracle: 790 closed, 800 open; oracle-main-790, -800).
 const NARROW = '(max-width: 799.98px)'
+// Which Voice chat row each picker changes.
+const voiceRows: Record<string, keyof NonNullable<Scene['voice']>> = {'voice-picker': 'voice', 'speed-picker': 'speed', 'language-picker': 'language'}
 
 // `workingBots`: the ids of the bots whose run is in progress, from the chat stream (the same signal as the
 // transcript's working row; both flip at the same ms in traces say-hi, say-hi-2, storage).
@@ -46,6 +48,8 @@ const NARROW = '(max-width: 799.98px)'
 // (useUnread below).
 export function Shell({scene: start, transcript, composer, onPickBot, onRenameBot, onCreateBot, workingBots = [], unreadBots = [], picked: pageActive}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (id: string) => void; picked?: string; onRenameBot?: (id: string, name: string) => void; onCreateBot?: CreateBot; workingBots?: string[]; unreadBots?: string[]}) {
   const [panelOpen, setPanelOpen] = useState(start.panelOpen)
+  // The Voice chat card's values as the person picked them (a pick in its picker changes the row).
+  const [voice, setVoice] = useState(start.voice)
   const [picked, setPicked] = useState<string | undefined>(undefined)
   // The overlay that is up, whether the scene holds it or a click opened it (Overlay's
   // onOpenChange), so its trigger in the panel shows open (Pick's aria-expanded, the pencil).
@@ -64,7 +68,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
     return () => narrow.removeEventListener('change', onChange)
   }, [])
   // `picked` from the page, when it gives one, is the tile the rail shows as open (a pick it holds or takes back).
-  const scene: Scene = {...start, panelOpen, active: pageActive ?? picked ?? start.active}
+  const scene: Scene = {...start, panelOpen, voice, active: pageActive ?? picked ?? start.active}
   const talk = useMemo(() => (start.transcript ? fromScene(start.transcript.bubbles) : null), [start.transcript])
   const unread = useUnread(workingBots)
   const active = scene.active ?? ''
@@ -118,7 +122,10 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
         setNames((m) => ({...m, [active]: n}))
         onRenameBot?.(active, n)
       }} onClose={() => setPanelOpen(false)} />
-      <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} onCreateBot={onCreateBot} />
+      <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} onCreateBot={onCreateBot} onChoose={(overlay, value) => {
+        const key = voiceRows[overlay]
+        if (key) setVoice((v) => v && {...v, [key]: value})
+      }} />
     </div>
   )
 }

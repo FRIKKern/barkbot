@@ -8,7 +8,8 @@ import {useState} from 'react'
 import {Icon} from '../Composer'
 import {colours, shapeRows} from './data'
 import {fit} from '../parts'
-import {CREATE_UNSURE} from '../../chat/create-unsure'
+import {CREATE_UNSURE, CreateRetry} from '../../chat/create-unsure'
+import type {CreateBot} from '.'
 
 // Plain shapes in a 36 x 36 box, one per captured shape name.
 const shapes: Record<string, string> = {
@@ -35,24 +36,28 @@ export function Shape({name, size}: {name: string; size: number}) {
   )
 }
 
-export function NewBotDialog({onClose, onCreate}: {onClose?: () => void; onCreate?: (b: {name: string; shape: string; colour: string}) => Promise<void>}) {
+export function NewBotDialog({onClose, onCreate}: {onClose?: () => void; onCreate?: CreateBot}) {
   const [name, setName] = useState('')
   const [creating, setCreating] = useState(false)
   const [failed, setFailed] = useState<string | null>(null)
   // Barkpark did not say whether the bot was made: the line says so as it is, and Create stays off
   // while this dialog is open, so no second bot is made blind.
   const [unsure, setUnsure] = useState(false)
+  // A record write that got no answer may have saved the bot: its id, kept while this dialog is open
+  // so every later Create finishes that same bot and never leaves its record off the list.
+  const [retry, setRetry] = useState<string | undefined>()
   const create = async () => {
     if (!onCreate || creating || unsure || !name.trim()) return
     setCreating(true)
     setFailed(null)
     try {
-      await onCreate({name: name.trim(), shape, colour})
+      await onCreate({name: name.trim(), shape, colour, ...(retry && {retry})})
       onClose?.()
     } catch (e) {
       const why = (e as Error).message
+      if (e instanceof CreateRetry) setRetry(e.retry)
       if (why.includes(CREATE_UNSURE)) setUnsure(true)
-      setFailed(why.includes(CREATE_UNSURE) ? CREATE_UNSURE : `The bot was not made: ${why}`)
+      setFailed(e instanceof CreateRetry ? why : why.includes(CREATE_UNSURE) ? CREATE_UNSURE : `The bot was not made: ${why}`)
       setCreating(false)
     }
   }
