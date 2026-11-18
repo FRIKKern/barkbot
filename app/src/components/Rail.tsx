@@ -101,7 +101,7 @@ function useCommandHeld() {
   const [held, setHeld] = useState(false)
   useEffect(() => {
     const down = (e: KeyboardEvent) => e.key === 'Meta' && setHeld(true)
-    const up = (e: KeyboardEvent) => e.key === 'Meta' && setHeld(false)
+    const up = (e: KeyboardEvent) => void e
     const off = () => setHeld(false)
     window.addEventListener('keydown', down)
     window.addEventListener('keyup', up)
