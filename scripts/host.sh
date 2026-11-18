@@ -20,11 +20,19 @@ HAVE=$(cat "$STAMP" 2>/dev/null || true)
 if [ -n "$WANT" ] && { [ ! -x "$BIN" ] || [ "$HAVE" != "$WANT" ]; }; then
   TMP=$(mktemp -d "${TMPDIR:-/tmp}/barkbot-host.XXXXXX")
   trap 'rm -rf "$TMP"' EXIT
-  git -C "$SRC" archive "$WANT" go.mod go.sum cmd/barkpark-chat-host internal/chathost | tar -x -C "$TMP"
-  (cd "$TMP" && go build -o "$BIN" ./cmd/barkpark-chat-host)
-  printf '%s\n' "$WANT" > "$STAMP"
+  # All of internal/, not a list of packages: the host imports more of it over time
+  # (internal/textcut arrived in Barkpark b5ce2e033a), and a missed one fails the build.
+  # A failed build keeps the program that works, so a restart never takes the host down.
+  if git -C "$SRC" archive "$WANT" go.mod go.sum cmd/barkpark-chat-host internal | tar -x -C "$TMP" &&
+     (cd "$TMP" && go build -o "$BIN.next" ./cmd/barkpark-chat-host); then
+    mv "$BIN.next" "$BIN"
+    printf '%s\n' "$WANT" > "$STAMP"
+    echo "host: built the host program from Barkpark $WANT (was ${HAVE:-none})" >&2
+  else
+    rm -f "$BIN.next"
+    echo "host: could not build the host program from Barkpark $WANT; keeping the one built from ${HAVE:-none}" >&2
+  fi
   rm -rf "$TMP"; trap - EXIT
-  echo "host: built the host program from Barkpark $WANT (was ${HAVE:-none})" >&2
 fi
 [ -x "$BIN" ] || { echo "host: no host program at $BIN and nothing to build it from" >&2; exit 1; }
 echo "host: running the host program built from Barkpark $(cat "$STAMP" 2>/dev/null || echo unknown)" >&2
