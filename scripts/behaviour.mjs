@@ -19,6 +19,7 @@ import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
 import { overlayKeys } from './lib/overlay-keys.mjs';
+import { cmdHints } from './lib/cmd-hints.mjs';
 import { newBotHides } from './lib/new-bot-hides.mjs';
 import { pickerPick } from './lib/picker-pick.mjs';
 import { railMain } from './lib/rail-main.mjs';
@@ -259,7 +260,8 @@ if (!base) {
   await until(async () => (await fetch(base)).status > 0, 90000, `the app on ${base}`);
 }
 mkdirSync(PROFILE, { recursive: true });
-kids.push(spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, '--window-size=1040,760', 'about:blank'], { stdio: 'ignore' }));
+// At 2x, as the oracle's screen: on a 1x screen Chrome snaps a 0.5 px border to 1 px (cmd-hints.mjs).
+kids.push(spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, '--window-size=1040,760', '--force-device-scale-factor=2', 'about:blank'], { stdio: 'ignore' }));
 await until(async () => (await fetch(`http://127.0.0.1:${CHROME_PORT}/json/version`)).ok, 30000, 'Chrome');
 const page = await connect(undefined, CHROME_PORT);
 const ev = (f, ...a) => page.evaluate(f, ...a);
@@ -436,6 +438,10 @@ check('renaming the second Twin leaves the first tile\'s label as it was', tw.ti
 // ── The overlays' keys and focus (traces/2026-11-09-keys.json, task-4d9930cf48ab41fb) ──────────
 console.log("Behaviour · the overlays' keys and focus (traces/2026-11-09-keys.json)");
 await overlayKeys({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
+
+// ── The rail's command-key hints (traces/2026-11-09-cmd-hints.json, task-22996e1edb3434d3) ──
+console.log("Behaviour · the rail's command-key hints (traces/2026-11-09-cmd-hints.json)");
+await cmdHints({ check, precondition, ev, open, base, wait, until, windowFocus, page });
 
 // ── New Bot hides the rest of the window (traces/2026-11-08-new-bot.json, task-1f469ccf6966e2fb) ──
 console.log('Behaviour · New Bot hides the rest of the window (traces/2026-11-08-new-bot.json)');
