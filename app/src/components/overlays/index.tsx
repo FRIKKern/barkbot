@@ -154,7 +154,7 @@ export function Overlay({name, scene, onOpenChange, onCreateBot, onChoose}: {nam
     if (!modal || !app) return
     const rest = [...app.children].filter((c) => c !== layer.current)
     const inert = rest.filter((c) => !c.hasAttribute('inert'))
-    const hidden = rest.filter((c) => c.getAttribute('aria-hidden') !== 'true')
+    const hidden = rest.filter((c) => c.getAttribute('aria-hidden') !== 'true' && !c.matches('aside.details'))
     inert.forEach((c) => c.setAttribute('inert', ''))
     hidden.forEach((c) => c.setAttribute('aria-hidden', 'true'))
     return () => {
