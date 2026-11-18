@@ -167,7 +167,7 @@ export const loadChat = createServerFn({method: 'GET'})
           // there now is this one: kept, with no line (task-cd587179698fa0d8). MAIN_TAKEN only
           // when it cannot be read again or is not a whole Main Bot.
           const now = keyTaken(failed) ? await got(readBot(main.id), 'read the Main Bot again') : null
-          const made = now?.ok && now.v ? trusted(main.id, now.v, hosts) : null
+          const made = now?.ok && now.v ? trusted(main.id, {...now.v, host_id: host.id}, hosts) : null
           if (made) await keep(made)
           else notice = keyTaken(failed) ? MAIN_TAKEN : NOT_SAVED
         } else {
