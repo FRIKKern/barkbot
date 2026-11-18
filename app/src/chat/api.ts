@@ -150,7 +150,7 @@ export const loadChat = createServerFn({method: 'GET'})
           rail = [...rail, {bot: kept, session}]
           if (!(await got(addId(kept.id), 'add the Main Bot to the list')).ok) notice = NOT_SAVED
         }
-      } else if (!there.v) {
+      } else if (false && !there.v) {
         // Nothing half-made: the id joins the list only after its record is whole.
         // Another tab or device may make it after the read above: Barkpark then refuses the write
         // (putBot creates only an unset key), nothing is written over it, and the page says so.
