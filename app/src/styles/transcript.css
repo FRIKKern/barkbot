@@ -12,7 +12,7 @@
    the two word gaps take it back (word-spacing is not a captured key), as parts.tsx FIT does for
    fixed words. The word-spacing compensates for the stand-in font only: a font change revisits it. */
 .time-row { margin-bottom: 10px; display: flex; justify-content: center; }
-.time-row time { display: block; height: 28px; padding: 6px 0; box-sizing: border-box; font-size: 12px; line-height: 16px; letter-spacing: 0.12px; word-spacing: -1.75px; color: var(--ink-66); }
+.time-row time { display: block; height: 28px; padding: 6px 0; box-sizing: border-box; font-size: 12px; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-66); }
 .turn { padding: 2px 0; display: flex; }
 .turn-user { justify-content: flex-end; }
 .turn-change { padding-top: 14px; }
