@@ -1451,8 +1451,7 @@ else {
     // and the one refused then shows MAIN_TAKEN before Pia's first message (task-eb43419486f89a63).
     let main = null;
     const firstMessage = async (words, meanwhile) => {
-      stub.sessions = [session(OTHER_TAB)]; freshStore(); stub.prefs.set('barkbot.bots', { ids: main ? [PIA, main[0].slice('barkbot.bot.'.length)] : [PIA] }); stub.prefs.set(KEYP, rec('Pia', HOST_ID, null));
-      if (main) stub.prefs.set(...main);
+      stub.sessions = [session(OTHER_TAB)]; freshStore(); stub.prefs.set('barkbot.bots', { ids: [PIA] }); stub.prefs.set(KEYP, rec('Pia', HOST_ID, null));
       const w0 = stub.writes.length;
       await open(`${base}/?bot=${PIA}`); await until(async () => (await live()).header === 'Pia', 15000, "Pia's page").catch(() => {}); await wait(500);
       const before = await line();
