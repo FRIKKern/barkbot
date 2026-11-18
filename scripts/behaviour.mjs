@@ -19,6 +19,7 @@ import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
 import { overlayKeys } from './lib/overlay-keys.mjs';
+import { newBotHides } from './lib/new-bot-hides.mjs';
 import { pickerPick } from './lib/picker-pick.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
@@ -435,6 +436,10 @@ check('renaming the second Twin leaves the first tile\'s label as it was', tw.ti
 // ── The overlays' keys and focus (traces/2026-11-09-keys.json, task-4d9930cf48ab41fb) ──────────
 console.log("Behaviour · the overlays' keys and focus (traces/2026-11-09-keys.json)");
 await overlayKeys({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
+
+// ── New Bot hides the rest of the window (traces/2026-11-08-new-bot.json, task-1f469ccf6966e2fb) ──
+console.log('Behaviour · New Bot hides the rest of the window (traces/2026-11-08-new-bot.json)');
+await newBotHides({ check, precondition, ev, open, base, click, wait, until, windowFocus });
 
 // ── A pick in the Voice chat card's pickers changes its row (task-d2fde20bf4539af1, item N4) ──
 console.log("Behaviour · a picker's pick changes its row");
