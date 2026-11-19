@@ -1,22 +1,98 @@
 {
- "id": "oracle-hover-add-to-slack",
- "captured": "2026-11-09",
+ "id": "oracle-language-picker-end",
+ "captured": "2026-11-19",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 1,
- "pass": 1,
+ "cases": 16,
+ "pass": 0,
  "results": [
   {
-   "key": "control:Add to Slack",
-   "pass": true
+   "key": "span:Hindi",
+   "pass": false,
+   "why": "box off by 0,450,0,0"
+  },
+  {
+   "key": "span:Hungarian",
+   "pass": false,
+   "why": "box off by 0,450,0,0"
+  },
+  {
+   "key": "span:Indonesian",
+   "pass": false,
+   "why": "box off by 0,450,0,0"
+  },
+  {
+   "key": "span:Italian",
+   "pass": false,
+   "why": "box off by 0,450,0,0"
+  },
+  {
+   "key": "span:Japanese",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Korean",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Polish",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Portuguese (Brazil)",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Portuguese (Portugal)",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Russian",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Spanish (Mexico)",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Spanish (Spain)",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Swedish",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Thai",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Turkish",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Vietnamese",
+   "pass": false,
+   "why": "missing"
   }
  ],
- "run": "2026-11-09T07:19:33.538Z",
+ "run": "2026-11-19T20:24:46.604Z",
  "inventory": {
-  "id": "oracle-hover-add-to-slack",
+  "id": "oracle-language-picker-end",
   "controls": [
    {
     "name": "Bot tile",
@@ -99,11 +175,6 @@
     "ours": true
    },
    {
-    "name": "Add to Slack",
-    "item": "N3",
-    "ours": true
-   },
-   {
     "name": "Create a routine",
     "item": "N3",
     "ours": true
@@ -115,11 +186,6 @@
    },
    {
     "name": "Voice",
-    "item": "N4",
-    "ours": true
-   },
-   {
-    "name": "Speed",
     "item": "N4",
     "ours": true
    },

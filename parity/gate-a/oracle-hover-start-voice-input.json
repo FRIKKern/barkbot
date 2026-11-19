@@ -1,13 +1,13 @@
 {
  "id": "oracle-hover-start-voice-input",
- "captured": "2026-11-09",
+ "captured": "2026-11-19",
  "viewport": [
   1040,
   760,
   2
  ],
  "cases": 4,
- "pass": 4,
+ "pass": 2,
  "results": [
   {
    "key": "control:Start voice input",
@@ -19,14 +19,16 @@
   },
   {
    "key": "span:⌘",
-   "pass": true
+   "pass": false,
+   "why": "border-radius 3px ≠ 2px"
   },
   {
    "key": "span:D",
-   "pass": true
+   "pass": false,
+   "why": "border-radius 3px ≠ 2px"
   }
  ],
- "run": "2026-11-09T07:19:33.538Z",
+ "run": "2026-11-19T20:24:46.604Z",
  "inventory": {
   "id": "oracle-hover-start-voice-input",
   "controls": [
@@ -111,11 +113,6 @@
     "ours": true
    },
    {
-    "name": "Add to Slack",
-    "item": "N3",
-    "ours": true
-   },
-   {
     "name": "Create a routine",
     "item": "N3",
     "ours": true
@@ -127,11 +124,6 @@
    },
    {
     "name": "Voice",
-    "item": "N4",
-    "ours": true
-   },
-   {
-    "name": "Speed",
     "item": "N4",
     "ours": true
    },

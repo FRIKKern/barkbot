@@ -1,0 +1,426 @@
+{
+ "id": "oracle-voice-picker-end",
+ "captured": "2026-11-19",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 40,
+ "pass": 0,
+ "results": [
+  {
+   "key": "control:Naksh",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Naksh",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Warm & thoughtful",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Play the Naksh preview",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Orion",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Orion",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Rich & cinematic",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Play the Orion preview",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Perseus",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Perseus",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Strong & trusted",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Play the Perseus preview",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Rex",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Rex",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Confident & clear",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Play the Rex preview",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Rigel",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Rigel",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Crisp & composed",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Play the Rigel preview",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Sal",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Sal",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Smooth & balanced",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Play the Sal preview",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Sirius",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Sirius",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Clever & playful",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Play the Sirius preview",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Ursa",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Ursa",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Friendly & warm",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Play the Ursa preview",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Zagan",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Zagan",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Deep & dramatic",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Play the Zagan preview",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Zenith",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Zenith",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Sharp & focused",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Play the Zenith preview",
+   "pass": false,
+   "why": "missing"
+  }
+ ],
+ "run": "2026-11-19T20:24:46.604Z",
+ "inventory": {
+  "id": "oracle-voice-picker-end",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": true
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": true
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Close",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
+    "ours": true
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": true
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": true
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Speed",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Naksh",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Naksh preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Orion",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Orion preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Perseus",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Perseus preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Rex",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Rex preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Rigel",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Rigel preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Sal",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Sal preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Sirius",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Sirius preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Ursa",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Ursa preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Zagan",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Zagan preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Zenith",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Zenith preview",
+    "item": "N4",
+    "ours": false
+   }
+  ],
+  "missing": 20,
+  "untracked": []
+ }
+}
