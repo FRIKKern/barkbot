@@ -3,15 +3,17 @@
  "slice": "S2",
  "journey": null,
  "title": "Account menu: Weekly usage, Get Grok Bot for mobile, Support, Settings, Add account, Log out (oracle-account-menu); each row's target is its own item",
- "status": "done",
+ "status": "partial",
  "controls": [
   "Weekly usage",
   "Get Grok Bot for mobile",
   "Support",
   "Settings",
   "Add account",
-  "Log out"
+  "Log out",
+  "Upgrade plan",
+  "Done"
  ],
  "gate": "Gate A oracle-account-menu 82/82; keys traced (traces/2026-11-09-keys.json)",
- "evidence": "app/src/components/overlays/Menus.tsx AccountMenu, opens from the account button with the six rows in the oracle's order and look. Settings opens Settings (oracle-settings 108/108 and its tabs); every other row closes the menu, as its target is its own item. The usage % is redacted in the fixtures (O2), so the usage line is a placeholder of its length (data.ts) and the menu's width follows it, as on the oracle. Keys: on open the menu has focus, no row highlighted; arrows move focus and data-highlighted; Escape closes without choosing and returns focus. Not in the title, still open: the real weekly usage (no Barkpark source), and Enter on a highlighted row, which is assumed from the oracle's Radix-style markup, not observed."
+ "evidence": "app/src/components/overlays/Menus.tsx AccountMenu, opens from the account button with the six rows in the oracle's order and look. Settings opens Settings (oracle-settings 108/108 and its tabs); every other row closes the menu, as its target is its own item. The usage % is redacted in the fixtures (O2), so the usage line is a placeholder of its length (data.ts) and the menu's width follows it, as on the oracle. Keys: on open the menu has focus, no row highlighted; arrows move focus and data-highlighted; Escape closes without choosing and returns focus. Not in the title, still open: the real weekly usage (no Barkpark source), and Enter on a highlighted row, which is assumed from the oracle's Radix-style markup, not observed. 1.2.3 (decision 0010) adds Upgrade plan to the account menu, and Get Grok Bot for mobile now opens a dialog (oracle-get-mobile, its Done): not built."
 }

@@ -128,7 +128,7 @@ for (const state of states) {
       if (el) {
         const [x, y, bw, bh] = el.box;
         if (act.hoverRole) await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + bw / 2, y: y + Math.min(bh, 32) / 2 });
-        else for (let i = 0; i < 10; i++) await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + bw / 2, y: y + bh / 2, deltaX: 0, deltaY: 400 });
+        else for (let i = 0; i < 10; i++) await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + bw / 2, y: y + Math.min(bh, 120) / 2, deltaX: 0, deltaY: 400 }); // as the sweep does
         await wait(600);
       }
     }

@@ -1,13 +1,13 @@
 {
  "id": "oracle-main-1000",
- "captured": "2026-11-09",
+ "captured": "2026-11-19",
  "viewport": [
   1000,
   760,
   2
  ],
- "cases": 68,
- "pass": 68,
+ "cases": 42,
+ "pass": 26,
  "results": [
   {
    "key": "aside:Bots",
@@ -98,76 +98,69 @@
    "pass": true
   },
   {
-   "key": "control:Add to Slack",
-   "pass": true
-  },
-  {
-   "key": "span:Add to Slack",
-   "pass": true
-  },
-  {
    "key": "control:Create a routine",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,0,0"
   },
   {
    "key": "span:Create a routine",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,0.8,-0.5"
   },
   {
    "key": "span:Computer",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,-0.4,0"
   },
   {
    "key": "control:Bot's computer",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,0,0"
   },
   {
    "key": "bdi:Bot's computer",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,0,-0.5"
   },
   {
    "key": "bdi:Asleep",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,0.1,-0.5"
   },
   {
    "key": "span:Voice chat",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,0.2,0"
   },
   {
    "key": "span:Voice",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,-0.2,-0.5"
   },
   {
    "key": "control:Voice",
-   "pass": true
+   "pass": false,
+   "why": "box off by 25.2,36,-25.2,0"
   },
   {
-   "key": "span:Helix",
-   "pass": true
-  },
-  {
-   "key": "span:Speed",
-   "pass": true
-  },
-  {
-   "key": "control:Speed",
-   "pass": true
-  },
-  {
-   "key": "span:1x",
-   "pass": true
+   "key": "span:Helix 1.0x",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "span:Language",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,66.5,0.7,-0.5"
   },
   {
    "key": "control:Language",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.3,66,-0.3,0"
   },
   {
    "key": "span:Auto-detect",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.3,66.5,-0.3,-0.5"
   },
   {
    "key": "bubble:user#1 look",
@@ -186,103 +179,22 @@
    "pass": true
   },
   {
-   "key": "strong#1",
-   "pass": true
+   "key": "card#1 parts",
+   "pass": false,
+   "why": "box 6 ≠ 1; text(11) 1 ≠ 0; text(8) 1 ≠ 0; text(3) 1 ≠ 0"
   },
   {
-   "key": "strong#2",
-   "pass": true
+   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "pass": false,
+   "why": "box off by -20,110,20,0"
   },
   {
-   "key": "code#1",
-   "pass": true
-  },
-  {
-   "key": "code#2",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#2 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#2 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#2 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#2 place",
-   "pass": true
-  },
-  {
-   "key": "strong#3",
-   "pass": true
-  },
-  {
-   "key": "strong#4",
-   "pass": true
-  },
-  {
-   "key": "code#3",
-   "pass": true
-  },
-  {
-   "key": "code#4",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#3 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#3 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#3 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#3 place",
-   "pass": true
-  },
-  {
-   "key": "strong#5",
-   "pass": true
-  },
-  {
-   "key": "strong#6",
-   "pass": true
-  },
-  {
-   "key": "code#5",
-   "pass": true
-  },
-  {
-   "key": "code#6",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#4 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#4 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#4 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#4 place",
-   "pass": true
+   "key": "card#1 box#1",
+   "pass": false,
+   "why": "box off by -20,110,20,0"
   }
  ],
- "run": "2026-11-09T08:10:23.396Z",
+ "run": "2026-11-19T20:32:44.767Z",
  "inventory": {
   "id": "oracle-main-1000",
   "controls": [
@@ -367,11 +279,6 @@
     "ours": true
    },
    {
-    "name": "Add to Slack",
-    "item": "N3",
-    "ours": true
-   },
-   {
     "name": "Create a routine",
     "item": "N3",
     "ours": true
@@ -383,11 +290,6 @@
    },
    {
     "name": "Voice",
-    "item": "N4",
-    "ours": true
-   },
-   {
-    "name": "Speed",
     "item": "N4",
     "ours": true
    },

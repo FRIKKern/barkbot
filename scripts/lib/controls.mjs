@@ -12,14 +12,17 @@ const isControl = (e) => (CONTROL_TAGS.has(e.tag) || CONTROL_ROLES.has(e.role)) 
 
 // A control's name: its label, or its text, with two rules that make a name mean the same
 // thing on both sides: a bot's tile in the rail is a "Bot tile" (bot names are data), and a
-// picker is named by the label on its row ("Voice", not "Helix").
+// picker is named by the label on its row ("Voice", not "Helix"). A picker is a combobox, or an unlabelled
+// button that opens a list, menu or dialog (1.2.3's Voice row: a button reading "Helix 1.0x" that opens a dialog).
 export function controlName(els, e) {
-  if (e.role === 'combobox') {
+  const popupButton = e.tag === 'button' && e.popup && e.popup !== 'false' && !e.label;
+  if (e.role === 'combobox' || popupButton) {
     // The row's own label: plain text left of the picker, never text inside a control or an
     // open list, menu or dialog lying over the row.
     const overlay = (x) => [x, ...ancestors(els, x)].some((a) => isControl(a) || ['listbox', 'option', 'menu', 'menuitem', 'dialog'].includes(a.role));
     const row = els.filter((x) => x.text && !overlay(x) && x.box[0] < e.box[0] && Math.abs((x.box[1] + x.box[3] / 2) - (e.box[1] + e.box[3] / 2)) < 6);
-    return row.sort((a, b) => b.box[0] - a.box[0])[0]?.text ?? null;
+    const rowLabel = row.sort((a, b) => b.box[0] - a.box[0])[0]?.text ?? null;
+    if (e.role === 'combobox' || rowLabel) return rowLabel;
   }
   // A label's tail after a comma is a status, not the name: "Open account menu, new update available".
   const label = e.label?.split(', ')[0];

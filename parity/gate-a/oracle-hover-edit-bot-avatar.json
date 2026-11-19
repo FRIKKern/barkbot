@@ -1,6 +1,6 @@
 {
  "id": "oracle-hover-edit-bot-avatar",
- "captured": "2026-11-09",
+ "captured": "2026-11-19",
  "viewport": [
   1040,
   760,
@@ -14,7 +14,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:19:33.538Z",
+ "run": "2026-11-19T20:24:46.604Z",
  "inventory": {
   "id": "oracle-hover-edit-bot-avatar",
   "controls": [
@@ -99,11 +99,6 @@
     "ours": true
    },
    {
-    "name": "Add to Slack",
-    "item": "N3",
-    "ours": true
-   },
-   {
     "name": "Create a routine",
     "item": "N3",
     "ours": true
@@ -115,11 +110,6 @@
    },
    {
     "name": "Voice",
-    "item": "N4",
-    "ours": true
-   },
-   {
-    "name": "Speed",
     "item": "N4",
     "ours": true
    },
