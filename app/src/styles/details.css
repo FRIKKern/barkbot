@@ -37,7 +37,11 @@
 .thumb { width: 64px; height: 40px; border-radius: 8px; background: var(--wash-04); display: grid; place-items: center; }
 .pick { height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 3px 0 8px; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; }
 .pick-value { height: 24px; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 6px; border-radius: 8px; border: 1px solid var(--wash-04); letter-spacing: -0.08px; }
-.pick-value .icon { width: 10px; height: 10px; color: var(--ink-66); }
+.pick-value .icon { width: 10px; height: 10px; color: var(--ink-64); }
+/* 1.2.3: the chevron is full ink while its picker is open (i 230, oracle-voice-picker; i 244, -language-picker). */
+.pick-value[aria-expanded='true'] .icon { color: var(--ink); }
+/* The Voice row's words fill its line (span 942.5,483.5,55,18). */
+.pick-line { display: block; white-space: nowrap; }
 
 /* Library tab, empty (oracle-library: text 14/20 at 54% ink, 256 wide, centred, 16 in from the card). */
 /* On the Library tab the oracle's head block (face, name, tabs) stands 269.6 tall, 100.6 more than
@@ -53,7 +57,7 @@
 .library-empty p { margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.14px; color: var(--ink-54); }
 
 /* Hover (oracle-hover-*): rows, the computer card, pickers and the unselected tab wash 4%, the name 8%.
-   An open picker keeps the 4% wash (oracle-{voice,speed,language}-picker: only the open combobox). */
+   An open picker keeps the 4% wash (oracle-{voice,language}-picker: only the open one). */
 .row:hover, .computer:hover, .pick-value:hover, .pick-value[aria-expanded='true'], .tab:not([aria-selected='true']):hover { background: var(--wash-04); }
 .who-name:hover { background: var(--wash-08); }
 /* Suggested's Hide shows while the pointer is anywhere over the window (N3; button 979.5,236,38.5,24). */

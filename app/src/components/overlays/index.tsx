@@ -1,6 +1,6 @@
 // Overlays: menus, open pickers, dialogs. The overlays lane owns this folder; the frame mounts
 // whatever a scene names here (Scene.overlay), so neither lane edits the other's files.
-// Captured targets: oracle-composer-menu, oracle-account-menu, oracle-{voice,speed,language}-picker,
+// Captured targets: oracle-composer-menu, oracle-account-menu, oracle-{voice,language}-picker,
 // oracle-new-bot-dialog. Each is a fixed layer over the frame, placed by its anchor (styles/overlays.css).
 //
 // A scene that names an overlay holds it open (Gate A). Otherwise the overlay opens from its
@@ -14,6 +14,7 @@
 // Keys and focus, as traces/2026-11-09-keys.json measured them on the oracle:
 //   on open   a modal focuses the dialog itself (Create New Bot: its name field); a menu focuses
 //             the menu with no row highlighted; a picker focuses its picked option, highlighted
+//             (traced on 0.79.3's Speed list; 1.2.3's Voice dialog focuses its checked voice: ours)
 //   arrows    move focus and data-highlighted through the rows (no wrap)
 //   Escape    closes without choosing; focus goes back to what had it when the overlay opened
 //             (the trigger, when the trigger took focus on the click)
@@ -24,7 +25,8 @@
 import {useEffect, useRef, useState, type FocusEvent, type KeyboardEvent, type ReactNode} from 'react'
 import type {Scene} from '../Shell'
 import {AccountMenu, ComposerMenu} from './Menus'
-import {LanguagePicker, SpeedPicker, VoicePicker} from './Pickers'
+import {LanguagePicker} from './Pickers'
+import {VoiceDialog} from './VoiceDialog'
 import {NewBotDialog} from './NewBotDialog'
 import {AvatarEditor, ConnectApps, Settings} from './Views'
 
@@ -35,15 +37,17 @@ type Open = {name: string; picked?: string; trigger?: HTMLElement; back?: HTMLEl
 /** Create in the New Bot dialog: makes the bot; the dialog closes once it is made. `retry`: the id of
  *  a bot whose record write got no answer (CreateRetry), which this Create finishes. */
 export type CreateBot = (b: {name: string; shape: string; colour: string; retry?: string}) => Promise<void>
-/** A picker's pick: which picker (its overlay name) and the option picked. */
-export type Choose = (overlay: string, value: string) => void
-type Render = (o: {picked?: string; scene?: Scene; close: () => void; choose: (value: string) => void; go: (name: string) => void; create?: CreateBot}) => ReactNode
+/** A picker's pick: which picker (its overlay name; 'voice-speed' for the Voice dialog's slider) and the value. */
+export type Choose = (overlay: string, value: string | number) => void
+// `choose` picks and closes (a list); `change` hands a value on and leaves the overlay open (the Voice dialog).
+type Render = (o: {picked?: string; scene?: Scene; close: () => void; choose: (value: string) => void; change: (overlay: string, value: string | number) => void; go: (name: string) => void; create?: CreateBot}) => ReactNode
 
 const overlays: Record<string, Render> = {
   'composer-menu': ({close}) => <ComposerMenu onPick={close} />,
   'account-menu': ({close, go}) => <AccountMenu onPick={close} onSettings={() => go('settings')} />,
-  'voice-picker': ({picked, scene, choose}) => <VoicePicker picked={picked ?? scene?.voice?.voice} onPick={choose} />,
-  'speed-picker': ({picked, scene, choose}) => <SpeedPicker picked={picked ?? scene?.voice?.speed} onPick={choose} />,
+  'voice-picker': ({scene, change}) => (
+    <VoiceDialog picked={scene?.voice?.voice} speed={scene?.voice?.speed} onPick={(v) => change('voice-picker', v)} onSpeed={(n) => change('voice-speed', n)} />
+  ),
   'language-picker': ({picked, scene, choose}) => <LanguagePicker picked={picked ?? scene?.voice?.language} onPick={choose} />,
   'new-bot-dialog': ({close, create}) => <NewBotDialog onClose={close} onCreate={create} />,
   'connect-apps': ({close}) => <ConnectApps onClose={close} />,
@@ -58,9 +62,9 @@ const overlays: Record<string, Render> = {
 const modals = new Set(['new-bot-dialog', 'connect-apps', 'settings', 'settings-computer', 'settings-permissions', 'settings-updates'])
 const rows = '[role=menuitem], [role=option]'
 
+// A combobox opens its list by its label; 1.2.3's Voice row is a plain button that names the
+// overlay it opens (data-picker), as it has no label of its own.
 const pickers: Record<string, string> = {
-  Voice: 'voice-picker',
-  Speed: 'speed-picker',
   Language: 'language-picker',
 }
 
@@ -76,6 +80,7 @@ const triggers: Record<string, string> = {
 // status: "Open account menu, new update available").
 function triggered(el: Element | null): Open | null {
   const t = el?.closest<HTMLElement>('button, [role=combobox]')
+  if (t?.dataset.picker) return {name: t.dataset.picker, trigger: t}
   const label = t?.getAttribute('aria-label')?.split(', ')[0]
   if (!t || !label) return null
   if (t.getAttribute('role') === 'combobox' && pickers[label]) return {name: pickers[label], picked: t.textContent?.trim() || undefined, trigger: t}
@@ -173,7 +178,7 @@ export function Overlay({name, scene, onOpenChange, onCreateBot, onChoose}: {nam
       const first =
         el.querySelector<HTMLElement>('[role=dialog]') && modal
           ? el.querySelector<HTMLElement>('[role=dialog]')
-          : (el.querySelector<HTMLElement>('[role=option][aria-selected=true]') ?? el.querySelector<HTMLElement>('[role=menu]'))
+          : (el.querySelector<HTMLElement>('[role=option][aria-selected=true], [role=radio][aria-checked=true]') ?? el.querySelector<HTMLElement>('[role=menu]'))
       first?.focus()
       return
     }
@@ -220,6 +225,7 @@ export function Overlay({name, scene, onOpenChange, onCreateBot, onChoose}: {nam
           onChoose?.(shown.name, value)
           if (!held) close(true)
         },
+        change: (overlay: string, value: string | number) => onChoose?.(overlay, value),
         go: (n: string) => !held && setOpen((cur) => ({name: n, back: cur?.before ?? cur?.back})),
         create: onCreateBot,
       })}

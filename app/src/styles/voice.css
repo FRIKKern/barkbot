@@ -1,0 +1,46 @@
+/* The Voice dialog on Grok 1.2.3 (decision 0010). Every number is read from
+   fixtures/states/oracle-voice-picker.json and -end.json (1040 x 760 pt). */
+
+/* Its foot 4 pt above the Voice row's button (480.5 -> 476.5), right edges aligned (1016.5).
+   The layer (div 262) is clear with a 14 pt radius; the dialog (264) is the raised sheet. */
+.voice-picker { top: 476.5px; right: 23.5px; width: 300px; transform: translateY(-100%); background: none; border-radius: 14px; }
+.voice-dialog { padding: 6px; border-radius: 16px; background: var(--bg-raised); font-size: 14px; font-weight: 425; line-height: 20px; letter-spacing: 0.14px; }
+
+/* Speed: 288 x 40 (div 265), its row 4 down; label at +8, the slider 12 after it and 12 before
+   the value, which ends 16 in from the right. */
+.speed { height: 40px; padding: 4px 16px 0 8px; display: flex; align-items: center; gap: 12px; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; }
+.speed-label { flex: none; }
+/* The value: 40 wide, its characters set right (span 274) and each in a box of its own (1.0x: 275..282). */
+.speed-value { width: 40px; flex: none; display: flex; justify-content: flex-end; }
+.speed-value > span { display: flex; }
+.speed-value > span > span { display: block; height: 18px; }
+
+/* The slider (group 267): 20 high; the wash (269) and the blue fill up to the thumb's right edge
+   (270); the thumb (271) a 20 pt disc with a 2 pt ring round the range input (272, 16 x 16). */
+.slider { flex: 1; min-width: 0; height: 20px; }
+.slider-track { position: relative; height: 20px; touch-action: none; cursor: pointer; }
+.slider-wash { height: 20px; border-radius: 9999px; background: var(--wash-04); overflow: hidden; }
+.slider-fill { display: block; height: 20px; border-radius: 9999px; background: rgb(17 109 210); }
+.slider-thumb { position: absolute; top: 0; width: 20px; height: 20px; border: 2px solid transparent; border-radius: 9999px; background: var(--ink); }
+.slider-thumb input { appearance: none; display: block; width: 16px; height: 16px; margin: 0; border-radius: 9999px; background: rgb(59 59 59); color: rgb(255 255 255); outline: none; cursor: pointer; }
+.slider-thumb input::-webkit-slider-thumb { appearance: none; width: 0; height: 0; }
+.slider-thumb input::-moz-range-thumb { width: 0; height: 0; border: 0; }
+
+/* The voices (radiogroup 283): 288 x 268, 16.5 under the Speed row; two 140 x 84 cards to a row,
+   8 apart. It scrolls, its bar hidden, and ends flush with its last row (oracle-voice-picker-end). */
+.voice-grid { position: relative; height: 268px; margin-top: 16.5px; overflow-y: auto; scrollbar-width: none; display: grid; grid-template-columns: 140px 140px; grid-auto-rows: 84px; gap: 8px; }
+.voice-grid::-webkit-scrollbar { display: none; }
+.voice { position: relative; }
+/* A card: 1 pt rule at 10%, 12 radius; the name (14/18) and its line (12/16, 66%) sit at its foot,
+   12 in. The picked one washes 8% with a 22% rule. */
+.voice-card { width: 140px; height: 84px; padding: 12px; border: 1px solid var(--wash-10); border-radius: 12px; display: flex; flex-direction: column; justify-content: flex-end; text-align: left; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; }
+.voice-card[aria-checked='true'] { background: var(--wash-08); border-color: rgb(245 245 245 / 0.22); }
+.voice-name { display: block; font-size: 14px; line-height: 18px; letter-spacing: 0.14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.voice-line { display: block; min-height: 16px; font-size: 12px; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-66); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Over the card's top, 12 in (div 292, 116 x 24): the mark at its left, the preview button at its right. */
+.voice-top { position: absolute; left: 12px; top: 12px; width: 116px; height: 24px; display: flex; align-items: center; pointer-events: none; }
+.voice-top > * { pointer-events: auto; }
+.voice-mark { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--ink-66); }
+.play { margin-left: auto; width: 24px; height: 24px; border-radius: 9999px; background: var(--wash-04); color: var(--ink-64); display: grid; place-items: center; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; }
+.play > span { width: 18px; height: 18px; display: grid; place-items: center; }
+.play .icon { width: 14px; height: 14px; fill: currentColor; }
