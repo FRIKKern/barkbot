@@ -121,7 +121,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
         if (between) return
         setNames((m) => ({...m, [active]: n}))
         onRenameBot?.(active, n)
-      }} onClose={() => setPanelOpen(false)} />
+      }} onClose={() => { setTimeout(() => setPanelOpen(false), 250) }} />
       <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} onCreateBot={onCreateBot} onChoose={(overlay, value) => {
         const key = voiceRows[overlay]
         if (key) setVoice((v) => v && {...v, [key]: value})
