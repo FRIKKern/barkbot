@@ -6,7 +6,13 @@
    Scrolled to its end, the last bubble sits 54 above the composer. Gated: Gate A transcript cases. */
 .transcript { flex: 1; min-height: 0; contain: size; overflow-y: auto; padding: 76px 16px 52px; scrollbar-width: none; }
 .column { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; }
-.time-row { height: 28px; padding: 6px 0; margin-bottom: 10px; display: flex; justify-content: center; font-size: 12px; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-66); }
+/* The day and time line: the oracle's <time> is the whole 28-tall row, 10 above the first bubble
+   (1.0.3: oracle-ask-choice, -choice-answered; Gate A's "time" case). The stand-in face sets
+   "Today 10:01 AM" 3.5 wider than the oracle's 87.6 (F6); the oracle's letter-spacing is kept and
+   the two word gaps take it back (word-spacing is not a captured key), as parts.tsx FIT does for
+   fixed words. The word-spacing compensates for the stand-in font only: a font change revisits it. */
+.time-row { margin-bottom: 10px; display: flex; justify-content: center; }
+.time-row time { display: block; height: 28px; padding: 6px 0; box-sizing: border-box; font-size: 12px; line-height: 16px; letter-spacing: 0.12px; word-spacing: -1.75px; color: var(--ink-66); }
 .turn { padding: 2px 0; display: flex; }
 .turn-user { justify-content: flex-end; }
 .turn-change { padding-top: 14px; }
