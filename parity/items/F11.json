@@ -2,7 +2,7 @@
  "id": "F11",
  "slice": "S2",
  "journey": null,
- "title": "Connect Apps view: header with the connected count, Your plugins, Bot templates, category filters, Recommended for you with each app's Open and Connect (oracle-connect-apps). Look only: Connect and Open act outside the page and are their own items",
+ "title": "Connect Apps view: header with the connected count, Your plugins, Bot templates, category filters, Recommended for you and This Mac with each app's Open and Connect (oracle-connect-apps). Look only: Connect and Open act outside the page and are their own items",
  "status": "partial",
  "controls": [
   "Your plugins",
@@ -12,13 +12,12 @@
   "Productivity",
   "Communication",
   "Design",
-  "Code",
   "More",
   "View all",
   "/^Open (?!account menu$|conversation).+$/",
   "/^Connect( .+)?$/",
   "Mac"
  ],
- "gate": "Gate A oracle-connect-apps 100/100",
- "evidence": "app/src/components/overlays/Views.tsx (ConnectApps), styles/views.css; opens from Connect apps in the rail, Close and Escape close it, filters toggle. App logos are neutral tiles and the connected count a placeholder bar (O2, lengths only); Connect and Open act nowhere yet (0005). 1.2.3 (decision 0010) adds a Mac filter to Connect Apps: not built."
+ "gate": "Gate A oracle-connect-apps: every Connect Apps case passes on 1.2.3; the cases left are the details panel, its Voice row and the conversation's file card (other lanes)",
+ "evidence": "app/src/components/overlays/ConnectApps.tsx, styles/views.css; opens from Connect apps in the rail, Close dialog and Escape close it, filters toggle. 1.2.3 (decision 0010): filters All, Mac, Password Managers, Productivity, Communication, Design, More; Recommended for you (Browserless, incident.io, Turso, Lightrun, Knock, Google Drive); This Mac (Messages, Notes, Reminders, Calendar, Location with Open settings, Contacts), each with its line; Calendar's tile shows the day (the gate scene pins 2026-11-19, a Thursday). The capture had Calendar's and Contacts' Connect under way (a spinner, faded): the gate scene holds that look (Scene.apps.connecting); the live page shows none. App logos are tiles of the captured colour with no art, This Mac's glyphs are our own, and the connected count a placeholder bar (O2, lengths only). Connect, Open and Open settings act nowhere (0005). Below the fold on 1.2.3 only the Password Managers title is captured; its 1Password row is as 0.79.3 showed it."
 }

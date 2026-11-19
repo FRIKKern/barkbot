@@ -8,7 +8,7 @@
 import {useState} from 'react'
 import {Icon} from '../Composer'
 import {appCategories, appSections, labelledConnect, type App} from './data'
-import {APP, CATEGORY, SECTION, fit} from './fit'
+import {APP, CATEGORY, DAY, SECTION, fit} from './fit'
 
 const x = <Icon d="M4 4l8 8M12 4l-8 8" />
 const chevronDown = <Icon d="M4.5 6.5L8 10l3.5-3.5" />
@@ -27,7 +27,7 @@ function Day({today}: {today: Date}) {
   return (
     <span className="ca-day">
       <span>{today.toLocaleDateString('en-US', {weekday: 'short'})}</span>
-      <span>{today.getDate()}</span>
+      <span style={fit(DAY, String(today.getDate()))}>{today.getDate()}</span>
     </span>
   )
 }
@@ -65,7 +65,7 @@ function AppRow({app, mac, today, connecting}: {app: App; mac?: boolean; today: 
       <span className="ca-action">
         <button aria-label={labelledConnect.has(app.name) ? `Connect ${app.name}` : undefined} className={connecting ? 'ca-connect ca-busy' : 'ca-connect'}>
           <span>
-            <span style={fit(APP, action)}>
+            <span>
               {connecting && <span className="ca-spin" />}
               {action}
             </span>
