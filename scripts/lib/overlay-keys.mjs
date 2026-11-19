@@ -1,7 +1,8 @@
 // The overlays' keys and focus, as traces/2026-11-09-keys.json measured them on the oracle (task-
 // 4d9930cf48ab41fb): five overlays, each opened by a real click on its trigger, then real keys and
 // an outside click. On Grok 1.2.3 the Speed list is gone: its keys are checked on the Language list,
-// the same listbox, and the Voice dialog's Escape is ours (untraced). app/src/components/overlays/index.tsx implements them from that trace; until
+// the same listbox. The Voice dialog's focus on open is traced (2026-11-19-voice-picker.json); its
+// Escape is ours, as the other overlays'. app/src/components/overlays/index.tsx implements them from that trace; until
 // these rules nothing drove a key on an overlay, so a regression passed every gate.
 // The page is the oracle scene (/gate/oracle-turn-1040): the real Shell, overlays opened from
 // their triggers, nothing held open by the scene.
@@ -122,14 +123,13 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
   check('language picker (keys trace, on the same listbox): open focuses and highlights the picked option, Auto-detect; ArrowDown goes to English, then Arabic (Egypt); ArrowUp back to English; Escape closes it without choosing and gives focus back to the Language box, still Auto-detect (control: it read Auto-detect before)',
     lp.was === 'Auto-detect' && lp.open === 'option Auto-detect [highlighted] (overlay)' && lp.down === 'option English [highlighted] (overlay)' && lp.down2 === 'option Arabic (Egypt) [highlighted] (overlay)' && lp.up === 'option English [highlighted] (overlay)' && lp.escape === 'combobox Language' && lp.after === null && lp.value === 'Auto-detect', lp);
 
-  // The Voice dialog (1.2.3): untraced beyond its look. Ours: open focuses the checked voice, as a
-  // picker focuses its picked option; Escape closes it without choosing and gives focus back to the
-  // Voice button, which still reads Helix 1.0x.
+  // The Voice dialog (1.2.3): open focuses the checked voice (the voice-picker trace); Escape closes it
+  // without choosing and gives focus back to the Voice button, still Helix 1.0x (ours, as the other overlays).
   await fresh();
   const vWas = await value('Voice');
   await clickOn('button[data-picker="voice-picker"]');
   const vd = { was: vWas, shown: await shown(), open: await focused() };
   await press('Escape'); vd.escape = await focused(); vd.after = await shown(); vd.value = await value('Voice');
-  check('Voice dialog (ours, untraced): open focuses the checked voice, Helix; Escape closes it without choosing and gives focus back to the Voice button, still Helix 1.0x (control: it read Helix 1.0x and the dialog was up)',
+  check('Voice dialog (voice-picker trace): open focuses the checked voice, Helix; Escape (ours, untraced) closes it without choosing and gives focus back to the Voice button, still Helix 1.0x (control: it read Helix 1.0x and the dialog was up)',
     vd.was === 'Helix 1.0x' && vd.shown === 'voice-picker' && vd.open === 'radio Helix (overlay)' && vd.escape === 'button Helix 1.0x' && vd.after === null && vd.value === 'Helix 1.0x', vd);
 }

@@ -4,18 +4,19 @@
 // opens with the picked voice in its middle (Helix's row at 294.5, the grid's middle at 336.5).
 // Every number is read from that capture and oracle-voice-picker-end.
 //
-// A pick changes the row at once (the Voice row reads "<voice> <speed>"). Not captured, so ours:
-// whether a voice pick closes the dialog (here it stays open, as a radio group does), the slider's
-// step (data.ts SPEED), and the keys inside the dialog beyond Escape. The radios above Carina are left
-// out (data.ts): the grid scrolls the same way without them.
+// The voice-picker trace (fixtures/oracle-1.2.3/traces/2026-11-19-voice-picker.json): focus opens on
+// the chosen voice; a pick changes the row at once ("Helios 1.0x") and leaves the dialog open; the
+// slider is a range 0..15 in steps of 0.1x (data.ts SPEED). Not traced, so not built: keys inside the
+// dialog beyond Escape, the look of the slider's focus ring (the browser's own stands in), and the value's rolling digits (the old digit stays
+// at opacity 0, which no Gate A case can see).
 import {useLayoutEffect, useRef, useState, type PointerEvent} from 'react'
 import {Icon} from '../Composer'
 import {fit} from '../parts'
 import {SPEED, markedVoices, speedText, voices} from './data'
 
-// The thumb is 20 wide; its left runs 0 .. track - 20 as the speed runs min .. max.
+// The thumb is 20 wide; its left runs 0 .. track - 20 as the step runs 0 .. 15.
 const THUMB = 20
-const clamp = (n: number) => Math.min(SPEED.max, Math.max(SPEED.min, Math.round(n / SPEED.step) * SPEED.step))
+const clamp = (step: number) => Math.min(SPEED.max, Math.max(SPEED.min, Math.round(step)))
 
 type Props = {
   picked?: string
@@ -36,8 +37,8 @@ export function VoiceDialog({picked = 'Helix', speed: startSpeed = 1, onPick, on
     const card = g?.querySelector<HTMLElement>('[role=radio][aria-checked=true]')?.parentElement
     if (g && card) g.scrollTop = card.offsetTop - (g.clientHeight - card.offsetHeight) / 2
   }, [])
-  const setTo = (n: number) => {
-    const next = Math.round(clamp(n) * 10) / 10
+  const setTo = (step: number) => {
+    const next = SPEED.at(clamp(step))
     if (next === speed) return
     setSpeed(next)
     onSpeed?.(next)
@@ -49,7 +50,7 @@ export function VoiceDialog({picked = 'Helix', speed: startSpeed = 1, onPick, on
           <span className="speed-label" style={fit('Speed')}>
             Speed
           </span>
-          <Slider value={speed} onChange={setTo} />
+          <Slider speed={speed} onChange={setTo} />
           <span className="speed-value">
             <span>
               {[...speedText(speed)].map((c, i) => (
@@ -95,9 +96,11 @@ export function VoiceDialog({picked = 'Helix', speed: startSpeed = 1, onPick, on
 // The slider: a track (4% wash) filled in blue up to the thumb's right edge, and a 20 pt thumb with
 // a 2 pt ring holding the range input itself (input 16 x 16, labelled Speed). Keys go to the input
 // (arrows step it); a press or drag on the track moves the thumb under the pointer.
-function Slider({value, onChange}: {value: number; onChange: (n: number) => void}) {
+// `onChange` hears a step (0..15).
+function Slider({speed, onChange}: {speed: number; onChange: (step: number) => void}) {
   const track = useRef<HTMLDivElement>(null)
   const input = useRef<HTMLInputElement>(null)
+  const value = SPEED.step(speed)
   const frac = (value - SPEED.min) / (SPEED.max - SPEED.min)
   const at = (e: PointerEvent<HTMLDivElement>) => {
     const r = track.current?.getBoundingClientRect()
@@ -126,10 +129,10 @@ function Slider({value, onChange}: {value: number; onChange: (n: number) => void
             ref={input}
             type="range"
             aria-label="Speed"
-            aria-valuetext={speedText(value)}
+            aria-valuetext={speedText(speed)}
             min={SPEED.min}
             max={SPEED.max}
-            step={SPEED.step}
+            step={1}
             value={value}
             onChange={(e) => onChange(Number(e.target.value))}
           />

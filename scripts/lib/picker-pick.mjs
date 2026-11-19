@@ -4,8 +4,8 @@
 // captured pick, and the keys rule (overlay-keys.mjs) closes the pickers with Escape.
 // Grok 1.2.3 (decision 0010): two rows. Voice is a button reading "<voice> <speed>" ("Helix 1.0x")
 // that opens a dialog, the Speed slider over a grid of voices; Language is a list, as before.
-// Not captured, so ours: a voice pick leaves the dialog open (a radio group), and the slider's step
-// (0.1, one ArrowRight).
+// The voice-picker trace (fixtures/oracle-1.2.3/traces/2026-11-19-voice-picker.json): a voice pick
+// changes the row at once and leaves the dialog open; the slider's step is 0.1x (range 0..15, 5 = 1.0x).
 // The page is the oracle scene (/gate/oracle-turn-1040): the real Shell, the pickers opened from
 // their rows by a real click, an option picked by a real click, the slider moved by a real key.
 const VOICE = 'button[data-picker="voice-picker"]';
@@ -66,7 +66,7 @@ export async function pickerPick({ check, precondition, ev, open, base, click, w
   const again = await listed();
   await press('Escape', 27);
   const v = { opened: before.checked, inView: before.inView, speedAtOpen: before.speed, voice, picked, stepped, closed, reopened: { checked: again.checked, speed: again.speed }, now: await values() };
-  check(`Voice: the dialog opens with Helix checked and in view at 1.0x; picking ${voice} makes the row read "${voice} 1.0x" (the dialog stays open, ours); ArrowRight on Speed makes it "${voice} 1.1x" and the dialog 1.1x; reopened, it checks ${voice} at 1.1x; Language keeps Auto-detect (control: the row read Helix 1.0x before)`,
+  check(`Voice: the dialog opens with Helix checked and in view at 1.0x; picking ${voice} makes the row read "${voice} 1.0x" (the dialog stays open, as the voice-picker trace); ArrowRight on Speed makes it "${voice} 1.1x" and the dialog 1.1x; reopened, it checks ${voice} at 1.1x; Language keeps Auto-detect (control: the row read Helix 1.0x before)`,
     JSON.stringify(before.checked) === '["Helix"]' && before.inView && before.speed === '1.0x' && voice !== 'Helix' &&
     picked.shown === 'voice-picker' && picked.row === `${voice} 1.0x` && JSON.stringify(picked.checked) === JSON.stringify([voice]) &&
     stepped.row === `${voice} 1.1x` && stepped.speed === '1.1x' && closed &&

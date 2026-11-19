@@ -3,10 +3,13 @@
 // the rest came from a capture scrolled to the end.
 
 // The Voice dialog (Grok 1.2.3, decision 0010): a speed slider over a grid of voices, two to a row.
-// oracle-voice-picker and -end show 24 voices with their lines, Carina to Zenith. The capture also
-// holds two radios above Carina (y -73.5) whose words lie above the window: not captured, so not
-// here until a capture of the grid's top names them.
+// 28 voices, as the oracle lists them (fixtures/oracle-1.2.3/traces/2026-11-19-voice-picker.json,
+// opened.rows; oracle-voice-picker-start, -picker and -end show them on screen).
 export const voices: [name: string, line: string][] = [
+  ['Altair', 'Elegant & refined'],
+  ['Ara', 'Warm & friendly'],
+  ['Atlas', 'Firm & reassuring'],
+  ['Aurora', 'Serene & steady'],
   ['Carina', 'Soft & empathetic'],
   ['Castor', 'Easygoing & real'],
   ['Celeste', 'Caring & confident'],
@@ -35,9 +38,9 @@ export const voices: [name: string, line: string][] = [
 // Helix and Liora carry a 16 pt mark at the card's top left (img 734.5,310.5 and 734.5,494.5).
 export const markedVoices = new Set(['Helix', 'Liora'])
 
-// The Speed slider: the thumb at 1.0x stands a third along the track (46.3 of 139), so the range is
-// 0.5x to 2x. The value reads with one decimal ("1.0x"). The step is not captured; 0.1 is ours.
-export const SPEED = {min: 0.5, max: 2, step: 0.1}
+// The Speed slider (the voice-picker trace): a range input 0 to 15, step 1; 5 reads "1.0x" and 6
+// "1.1x" (its aria-valuetext too), so a step is 0.1x and the range 0.5x to 2.0x (the ends inferred).
+export const SPEED = {min: 0, max: 15, at: (step: number) => Math.round((0.5 + step * 0.1) * 10) / 10, step: (speed: number) => Math.round((speed - 0.5) * 10)}
 export const speedText = (speed: number) => `${speed.toFixed(1)}x`
 
 // oracle-language-picker and -end: 29 entries (scroll height 938 = 6 + 29 x 32 - 2 + 6).
