@@ -1,135 +1,127 @@
 {
- "id": "oracle-hover-speed",
- "captured": "2026-11-09",
+ "id": "oracle-focus-bot-name",
+ "captured": "2026-11-19",
  "viewport": [
   1040,
   760,
   2
  ],
  "cases": 1,
- "pass": 1,
+ "pass": 0,
+ "scene": false,
  "results": [
   {
-   "key": "control:Speed",
-   "pass": true
+   "key": "control:Bot name",
+   "pass": false,
+   "why": "no scene"
   }
  ],
- "run": "2026-11-09T07:19:33.538Z",
+ "run": "2026-11-19T20:24:46.604Z",
  "inventory": {
-  "id": "oracle-hover-speed",
+  "id": "oracle-focus-bot-name",
   "controls": [
    {
     "name": "Bot tile",
     "item": "F1",
-    "ours": true
+    "ours": false
    },
    {
     "name": "New Bot",
     "item": "F1",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Connect apps",
     "item": "F1",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Open account menu",
     "item": "F1",
-    "ours": true
+    "ours": false
    },
    {
     "name": "View conversation details",
     "item": "F2",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Share",
     "item": "F5",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Prompt",
     "item": "T4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Composer actions",
     "item": "T4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Start voice input",
     "item": "T4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Start voice chat",
     "item": "T4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Close",
     "item": "F3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Edit Bot avatar",
     "item": "F3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Bot name",
     "item": "F3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Activity",
     "item": "F3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Library",
     "item": "F3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Hide",
     "item": "N3",
-    "ours": true
-   },
-   {
-    "name": "Add to Slack",
-    "item": "N3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Create a routine",
     "item": "N3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Bot's computer",
     "item": "F4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Voice",
     "item": "N4",
-    "ours": true
-   },
-   {
-    "name": "Speed",
-    "item": "N4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Language",
     "item": "N4",
-    "ours": true
+    "ours": false
    }
   ],
-  "missing": 0,
+  "missing": 20,
   "untracked": []
  }
 }
