@@ -38,13 +38,15 @@ export const SETTINGS: Table = {
   'Always allow': '-0.172px', // 1.1 pt too wide
   'Route traffic through this computer': '0.164px', // 1.1 pt too wide
   "Update Bot's Computer": '0.109px', // 1.8 pt too wide
-  'Your computer is on the latest version': '0.127px', // 2.6 pt too wide
   "Reset Bot's Computer": '0.105px', // 1.8 pt too wide
   'Always Ask': '-0.06px', // 1.8 pt too wide
   'Allow without Asking': '0.005px', // 2.3 pt too wide
   'Add Rule': '0.045px', // 0.6 pt too wide (on 0.12px)
   'Grok Bot Updates': '0.008px', // 1.8 pt too wide
-  '0.79.3': '0.478px', // 1.7 pt too narrow
+  // 1.2.3 (decision 0010).
+  'Computer · Last opened 13 minutes ago': '0.133px', // 2.3 pt too wide
+  'Read Texts': '0.065px', // 1.3 pt too wide
+  '1.2.3': '0.075px', // 0.6 pt too wide
 }
 
 export const fit = (table: Table, word: string) => (table[word] ? {letterSpacing: table[word]} : undefined)
