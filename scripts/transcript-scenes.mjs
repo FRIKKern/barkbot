@@ -22,9 +22,19 @@ const corners = (r = '0px') => { const v = r.split(' '); return [v[0], v[1] ?? v
 const joinedAbove = (b) => corners(b.b.style['border-radius'])[b.role === 'user' ? 1 : 0] === '6px';
 // Bubbles and cards, top to bottom. When the first bubble on screen is joined to one scrolled out
 // of sight above it (oracle-file-waiting), a short bubble of the same speaker stands in for that one.
+// A bubble's row: the outermost article around it. Its overlap: how far the next row starts inside
+// it (the oracle's list places a row by an estimate: oracle-main-720's two-line message, 62 tall,
+// has the answer's row 40 below its top).
+const ancestorsOf = (els, e) => { const out = []; let p = e.parent; while (p !== undefined) { out.push(els[p]); p = els[p].parent; } return out; };
+const rowOf = (s, b) => ancestorsOf(s.elements, b.b).filter((a) => a.role === 'article').at(-1) ?? b.b;
+const overlapOf = (s, b) => {
+  const r = rowOf(s, b), next = s.elements.filter((e) => e.role === 'article' && e.parent === r.parent && e.box[1] > r.box[1]).sort((m, n) => m.box[1] - n.box[1])[0];
+  const o = next ? Math.round((r.box[1] + r.box[3] - next.box[1]) * 10) / 10 : 0;
+  return o > 0.5 ? o : 0;
+};
 const rows = (s) => {
   const bs = bubbles(s);
-  const b = transcriptOf(s).map((x, i) => ({ y: bs[i].y, x }));
+  const b = transcriptOf(s).map((x, i) => ({ y: bs[i].y, x: overlapOf(s, bs[i]) ? { ...x, overlap: overlapOf(s, bs[i]) } : x }));
   const c = cards(s).map((x) => ({ y: x.row.box[1], x: sceneCard(x) }));
   const out = [...b, ...c].sort((m, n) => m.y - n.y).map((r) => r.x);
   const first = [...bs].sort((m, n) => m.y - n.y)[0];
@@ -70,10 +80,12 @@ const at = (width) => {
   return base.rows.map((r) => {
     if (r.card === 'file') return { ...r, files };
     if (r.card) return r;
-    return { ...r, paras: r.paras.map(({ height, ...p }) => {
+    const { overlap, ...rest } = r;
+    const twin = same.find((b) => b.role === r.role && b.paras.some((q) => q.len === r.paras[0].len));
+    return { ...rest, paras: r.paras.map(({ height, ...p }) => {
       const h = same.find((b) => b.role === r.role && b.paras.some((q) => q.len === p.len))?.paras.find((q) => q.len === p.len)?.height;
       return h === undefined ? p : { ...p, height: h };
-    }) };
+    }), ...(twin?.overlap ? { overlap: twin.overlap } : {}) };
   });
 };
 const main = at(base.width);

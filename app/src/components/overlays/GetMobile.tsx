@@ -18,7 +18,10 @@ export function GetMobile({onClose}: {onClose?: () => void}) {
           <div className="mobile-code" role="img" aria-label="QR code that opens Grok Bot in your phone's app store" />
           <h2>Grok Bot on your phone</h2>
           <p>Scan with your camera to get the app</p>
-          <span className="mobile-note">Works on iPhone and Android</span>
+          {/* The stand-in face runs 3 pt wide on these 27 letters at 0.12px. */}
+          <span className="mobile-note" style={{letterSpacing: '0.009px'}}>
+            Works on iPhone and Android
+          </span>
         </div>
         <div className="mobile-foot">
           <button className="mobile-pill">

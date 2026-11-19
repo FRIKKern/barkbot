@@ -1,0 +1,386 @@
+{
+ "id": "oracle-get-mobile",
+ "captured": "2026-11-19",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 59,
+ "pass": 45,
+ "results": [
+  {
+   "key": "aside:Bots",
+   "pass": true
+  },
+  {
+   "key": "control:Bot tile",
+   "pass": true
+  },
+  {
+   "key": "control:Bot tile#2",
+   "pass": true
+  },
+  {
+   "key": "control:New Bot",
+   "pass": true
+  },
+  {
+   "key": "control:Connect apps",
+   "pass": true
+  },
+  {
+   "key": "control:Open account menu",
+   "pass": true
+  },
+  {
+   "key": "control:View conversation details",
+   "pass": true
+  },
+  {
+   "key": "span:Oracle",
+   "pass": true
+  },
+  {
+   "key": "control:Share",
+   "pass": true
+  },
+  {
+   "key": "span:Share",
+   "pass": true
+  },
+  {
+   "key": "control:Prompt",
+   "pass": true
+  },
+  {
+   "key": "control:Composer actions",
+   "pass": true
+  },
+  {
+   "key": "control:Start voice input",
+   "pass": true
+  },
+  {
+   "key": "control:Start voice chat",
+   "pass": true
+  },
+  {
+   "key": "aside:Conversation details",
+   "pass": true
+  },
+  {
+   "key": "control:Close",
+   "pass": true
+  },
+  {
+   "key": "control:Edit Bot avatar",
+   "pass": true
+  },
+  {
+   "key": "control:Bot name",
+   "pass": true
+  },
+  {
+   "key": "control:Activity",
+   "pass": true
+  },
+  {
+   "key": "control:Library",
+   "pass": true
+  },
+  {
+   "key": "span:Suggested",
+   "pass": true
+  },
+  {
+   "key": "control:Hide",
+   "pass": true
+  },
+  {
+   "key": "control:Create a routine",
+   "pass": false,
+   "why": "box off by 0,36,0,0"
+  },
+  {
+   "key": "span:Create a routine",
+   "pass": false,
+   "why": "box off by 0,36.5,0.8,-0.5"
+  },
+  {
+   "key": "span:Computer",
+   "pass": false,
+   "why": "box off by 0,36,-0.4,0"
+  },
+  {
+   "key": "control:Bot's computer",
+   "pass": false,
+   "why": "box off by 0,36,0,0"
+  },
+  {
+   "key": "bdi:Bot's computer",
+   "pass": false,
+   "why": "box off by 0,36.5,0,-0.5"
+  },
+  {
+   "key": "bdi:Asleep",
+   "pass": false,
+   "why": "box off by 0,36.5,0.1,-0.5"
+  },
+  {
+   "key": "span:Voice chat",
+   "pass": false,
+   "why": "box off by 0,36,0.2,0"
+  },
+  {
+   "key": "span:Voice",
+   "pass": false,
+   "why": "box off by 0,36.5,-0.2,-0.5"
+  },
+  {
+   "key": "control:Voice",
+   "pass": false,
+   "why": "box off by 25.2,36,-25.2,0"
+  },
+  {
+   "key": "span:Helix 1.0x",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Language",
+   "pass": false,
+   "why": "box off by 0,66.5,0.7,-0.5"
+  },
+  {
+   "key": "control:Language",
+   "pass": false,
+   "why": "box off by 0.3,66,-0.3,0"
+  },
+  {
+   "key": "span:Auto-detect",
+   "pass": false,
+   "why": "box off by 0.3,66.5,-0.3,-0.5"
+  },
+  {
+   "key": "control:Close dialog",
+   "pass": true
+  },
+  {
+   "key": "h2:Grok Bot on your phone",
+   "pass": true
+  },
+  {
+   "key": "p:Scan with your camera to get the app",
+   "pass": true
+  },
+  {
+   "key": "span:Works on iPhone and Android",
+   "pass": false,
+   "why": "box off by -1.5,0,3,0"
+  },
+  {
+   "key": "control:Open App Store",
+   "pass": true
+  },
+  {
+   "key": "span:Open App Store",
+   "pass": true
+  },
+  {
+   "key": "control:Done",
+   "pass": true
+  },
+  {
+   "key": "span:Done",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#1 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#1 place",
+   "pass": true
+  },
+  {
+   "key": "card#1 parts",
+   "pass": true
+  },
+  {
+   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "pass": true
+  },
+  {
+   "key": "card#1 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#1 box#2",
+   "pass": true
+  },
+  {
+   "key": "card#1 box#3",
+   "pass": true
+  },
+  {
+   "key": "card#1 box#4",
+   "pass": true
+  },
+  {
+   "key": "card#1 box#5",
+   "pass": true
+  },
+  {
+   "key": "card#1 box#6",
+   "pass": true
+  },
+  {
+   "key": "card#1 text(3)#1",
+   "pass": true
+  },
+  {
+   "key": "card#1 text(11)#1",
+   "pass": true
+  },
+  {
+   "key": "card#1 text(4)#1",
+   "pass": true
+  },
+  {
+   "key": "card#1 text(3)#2",
+   "pass": true
+  }
+ ],
+ "run": "2026-11-19T19:56:38.039Z",
+ "inventory": {
+  "id": "oracle-get-mobile",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": true
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": true
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": true
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": true
+   },
+   {
+    "name": "Close",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
+    "ours": true
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": true
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": true
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Close dialog",
+    "item": "N5",
+    "ours": true
+   },
+   {
+    "name": "Open App Store",
+    "item": "F11",
+    "ours": true
+   },
+   {
+    "name": "Done",
+    "item": "F8",
+    "ours": true
+   }
+  ],
+  "missing": 0,
+  "untracked": []
+ }
+}

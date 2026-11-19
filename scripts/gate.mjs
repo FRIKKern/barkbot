@@ -127,7 +127,7 @@ for (const state of states) {
       const at = { x: x + bw / 2, y: y + bh / 2, button: 'left', clickCount: 1 };
       for (const type of ['mouseMoved', 'mousePressed', 'mouseReleased']) await page.send('Input.dispatchMouseEvent', { type, ...at });
       await wait(400);
-      const focused = await page.evaluate(`document.activeElement?.getAttribute('aria-label')`);
+      const focused = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
       if (focused !== state.focus) throw new Error(`clicked "${state.focus}" but focus is on "${focused}"`);
     }
     // A capture taken with the pointer parked in the window: rest ours at the same point.
