@@ -24,6 +24,8 @@ export function collect() {
     const e = {
       i: els.length, tag: el.tagName.toLowerCase(), role: el.getAttribute('role') || undefined,
       label: el.getAttribute('aria-label')?.slice(0, 80) || undefined, dataRole: el.dataset.role || undefined,
+      // What a press opens (aria-haspopup): 1.2.3's Voice picker is a button that opens a dialog, named by its row.
+      popup: el.getAttribute('aria-haspopup') || undefined,
       box: [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10) / 10),
       parent: undefined, style,
       text: (sectionTitle || (ctl && !inBubble && own.length <= 40)) && own ? own : undefined,

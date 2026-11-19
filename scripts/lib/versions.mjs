@@ -1,24 +1,16 @@
 // Which oracle version the gated states come from, and the named exceptions to that rule.
 // Every captured state in fixtures/states comes from ONE oracle version (npm run check, rule 6b),
 // except the states listed here, each with its own version and the reason it may differ.
-// A state that is not on this list and has another version still fails. Decision: 0008.
+// A state that is not on this list and has another version still fails. Decisions: 0008, 0010.
 
-const AUTO_UPDATE = 'Owner decision 2026-11-14 (docs/decisions/0008): the oracle updated itself to 1.0.3; these cards did not exist to capture on 0.79.3, and BarkBot stays on the 0.79.3 baseline';
-
-export const EXCEPTIONS = [
-  { id: 'oracle-ask-choice', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
-  { id: 'oracle-choice-answered', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
-  { id: 'oracle-file-sent', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
-  { id: 'oracle-pictures-sent', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
-  { id: 'oracle-file-waiting', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
-  { id: 'oracle-pictures-waiting', version: 'GrokBot 1.0.3', reason: AUTO_UPDATE },
-];
+// None today: the six send-made card states were captured again on 1.2.3 once the owner allowed sends in the
+// Oracle bot (2026-11-19, decision 0010). An entry is { id, version: 'GrokBot x.y.z', reason }.
+export const EXCEPTIONS = [];
 
 export const exception = (id) => EXCEPTIONS.find((x) => x.id === id) ?? null;
 
-// In an excepted state, the parts the newer oracle rebuilt are not judged: the baseline's own
-// states judge them. 1.0.3 rebuilt the details panel (Voice and Speed in one picker, no Add to
-// Slack card), so its look there is not ours to match.
+// In an excepted state, the details panel is not judged: the baseline's own states judge it.
+// (0008 left it out because 1.0.3 rebuilt it; under 0010 the 1.2.3 states are the ones that judge it.)
 const NOT_JUDGED = ['Conversation details'];
 const ancestors = (els, e) => { const out = []; let p = e.parent; while (p !== undefined) { out.push(els[p]); p = els[p].parent; } return out; };
 

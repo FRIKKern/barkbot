@@ -25,7 +25,7 @@ const SETTLE = args.includes('--settle') ? Number(args[args.indexOf('--settle') 
 const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
 // The only controls the sweep may press. Anything else is refused, by name.
-const MAY_PRESS = new Set(['View conversation details', 'Library', 'Activity', 'Composer actions', 'Open account menu', 'New Bot', 'Voice', 'Speed', 'Language', 'Close', 'Connect apps', 'Edit Bot avatar', 'Settings', 'Get Grok Bot for mobile', 'Computer', 'Permissions', 'Updates']);
+const MAY_PRESS = new Set(['View conversation details', 'Library', 'Activity', 'Composer actions', 'Open account menu', 'New Bot', 'Voice', 'Language', 'Close', 'Connect apps', 'Edit Bot avatar', 'Settings', 'Get Grok Bot for mobile', 'Computer', 'Permissions', 'Updates']);
 // Names NEVER would refuse that only open a view: 'Connect apps' opens the list; each row's own Connect stays refused.
 const OPENS_ONLY = new Set(['Close', 'Connect apps']);
 const NEVER = /send|share|connect|approve|allow|create|add to|delete|remove|invite|upgrade|sign out|log out|wake|start voice/i;
@@ -51,9 +51,14 @@ const SWEEP = [
   ['oracle-library', 'details panel, Library tab', [{ press: 'Library' }], [{ press: 'Activity' }]],
   ['oracle-composer-menu', 'the composer actions menu', [{ press: 'Composer actions' }], [{ key: 'Escape' }]],
   ['oracle-account-menu', 'the account menu', [{ press: 'Open account menu' }], [{ key: 'Escape' }], { privateMenu: true }],
-  ['oracle-voice-picker', 'the Voice picker open', [{ press: 'Voice' }], [{ key: 'Escape' }]],
-  ['oracle-speed-picker', 'the Speed picker open', [{ press: 'Speed' }], [{ key: 'Escape' }]],
+  // 1.2.3: Voice opens one picker for the voice and its speed (the row reads "Helix 1.0x"); Speed has no row of its own.
+  ['oracle-voice-picker', 'the Voice picker open (voices and speed)', [{ press: 'Voice' }], [{ key: 'Escape' }]],
   ['oracle-language-picker', 'the Language picker open', [{ press: 'Language' }], [{ key: 'Escape' }]],
+  // Scrolled to the end by a wheel over the list (1.2.3 scrolls; 0.79.3 did not). A wheel moves nothing that is
+  // chosen, where End or an arrow key in a radio group would pick a voice. After a wheel, Escape can close the
+  // details panel too, so the close puts it back.
+  ['oracle-voice-picker-end', 'the Voice picker scrolled to its last voice', [{ press: 'Voice' }, { wheel: 'radiogroup' }], [{ key: 'Escape' }, { panelOpen: true }], { diff: true }],
+  ['oracle-language-picker-end', 'the Language picker scrolled to its last language', [{ press: 'Language' }, { wheel: 'listbox' }], [{ key: 'Escape' }, { panelOpen: true }], { diff: true }],
   ['oracle-new-bot-dialog', 'the Create New Bot dialog, empty', [{ press: 'New Bot' }], [{ key: 'Escape' }]],
   // The details panel's name field, clicked into (owner-approved rename test 2026-11-09): nothing is typed,
   // and Escape leaves it as it was (traces/2026-11-09-rename.json). `focus` tells Gate A what to focus on ours.
@@ -63,15 +68,17 @@ const SWEEP = [
 // Hover states: the pointer resting on one control of the main view (1040), nothing pressed.
 // A hover fixture keeps the whole screen, plus `pointer` (which control) and `changed` (the keys
 // whose box or look differ from the same screen with the pointer parked): Gate A scores only those.
-const HOVER = ['New Bot', 'Connect apps', 'Open account menu', 'View conversation details', 'Share', 'Composer actions', 'Start voice input', 'Start voice chat', 'Close', 'Edit Bot avatar', 'Bot name', 'Activity', 'Library', 'Add to Slack', 'Create a routine', "Bot's computer", 'Voice', 'Speed', 'Language', 'Prompt'];
+// 1.2.3 has no Add to Slack card and no Speed row. Its top bar shows no sidebar toggle on hover: 8 points over the
+// rail's top and the header were hovered on 2026-11-19 and nothing appeared but the computer card's own animation.
+const HOVER = ['New Bot', 'Connect apps', 'Open account menu', 'View conversation details', 'Share', 'Composer actions', 'Start voice input', 'Start voice chat', 'Close', 'Edit Bot avatar', 'Bot name', 'Activity', 'Library', 'Create a routine', "Bot's computer", 'Voice', 'Language', 'Prompt'];
 const slug = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 // Bot tile #2 is Oracle's. #1 is the owner's real bot and is never touched, not even hovered (O1).
 for (const [name, nth] of [...HOVER.map((n) => [n, 0]), ['Bot tile', 1]])
   SWEEP.push([`oracle-hover-${slug(name)}${name === 'Bot tile' ? `-${nth + 1}` : ''}`, `pointer over ${name}${name === 'Bot tile' ? ` #${nth + 1}` : ''}`, [{ hover: name, nth }], [{ park: true }], { keepPointer: true, diff: true, pointer: { over: name, nth } }]);
 // Overlay follow-ups. A recipe with { diff: true } keeps `changed`: the keys its LAST step changed.
 // Not here, on purpose: the account menu's first row opens a usage submenu with the owner's spend
-// (never captured, O2); the pickers did not scroll for a wheel over the listbox, and the composer
-// menu's first row and the Speed picker's first option show no hover to a pointer move: all need a better recipe before they are tried again.
+// (never captured, O2); the composer menu's first row showed no hover to a pointer move (0.79.3): it needs a
+// better recipe before it is tried again.
 SWEEP.push(
   // A typed name, never Create: Escape discards it.
   ['oracle-new-bot-named', 'Create New Bot with a name typed', [{ press: 'New Bot' }, { type: 'Test' }], [{ key: 'Escape' }], { diff: true }],
@@ -84,7 +91,7 @@ SWEEP.push(
   ['oracle-edit-avatar', 'the Bot avatar editor', [{ press: 'Edit Bot avatar' }], [{ key: 'Escape' }]],
   ['oracle-settings', 'Settings, from the account menu', [{ press: 'Open account menu' }, { press: 'Settings' }], [{ key: 'Escape' }], { privateMenu: true }],
   // Settings tabs, look only. Not Usage & Billing (the owner's spend) and not Vault (stored secrets): never captured (O2).
-  // Updates shows an Install button; it is looked at, never pressed (Grok stays on 0.79.2).
+  // Updates shows an Install button; it is looked at, never pressed.
   ...['Computer', 'Permissions', 'Updates'].map((tab) => [`oracle-settings-${tab.toLowerCase()}`, `Settings, ${tab} tab`, [{ press: 'Open account menu' }, { press: 'Settings' }, { press: tab }], [{ key: 'Escape' }], { privateMenu: true }]),
   ['oracle-get-mobile', 'Get Grok Bot for mobile, from the account menu', [{ press: 'Open account menu' }, { press: 'Get Grok Bot for mobile' }], [{ key: 'Escape' }], { privateMenu: true }],
 );
@@ -144,7 +151,8 @@ async function step(s) {
     execFileSync('open', ['-a', 'Grok Bot']);
     await page.send('Page.bringToFront');
     if (s.hoverRole) await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + w / 2, y: y + Math.min(h, 32) / 2 });
-    else for (let i = 0; i < 10; i++) { await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + w / 2, y: y + h / 2, deltaX: 0, deltaY: 400 }); await wait(80); }
+    // Near the list's top: a list taller than its scroller (1.2.3's Language, 938 in 360) has its middle off screen.
+    else for (let i = 0; i < 10; i++) { await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + w / 2, y: y + Math.min(h, 120) / 2, deltaX: 0, deltaY: 400 }); await wait(80); }
     return wait(SETTLE);
   }
   if (s.hover) {
