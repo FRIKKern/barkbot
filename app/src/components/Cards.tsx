@@ -128,7 +128,7 @@ export function FileName({name}: {name: string}) {
           <span className="file-base">{base}</span>
           {ext && <span className="file-ext">{ext}</span>}
         </bdi>
-        {number && ` ${number}`}
+        {number && `\u00a0${number}`}
       </span>
     </p>
   )
