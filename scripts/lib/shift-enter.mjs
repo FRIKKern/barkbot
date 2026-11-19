@@ -7,7 +7,7 @@
 // does send, once, and clears the box.
 // The key sequence and the measure are the oracle recipe's (scripts/oracle/feel.mjs): a real Shift
 // held around Enter, and the box read as chars, line breaks, blocks and height. The break count is
-// the trace's exactly (2: innerText reads a new line in a contenteditable as two), not just more.
+// the trace's exactly (2 for the one new line, as the oracle's box read), not just more.
 import { readFileSync } from 'node:fs';
 import { path } from './data.mjs';
 import { RECIPES } from '../oracle/recipes.mjs';
