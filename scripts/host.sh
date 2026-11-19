@@ -1,6 +1,6 @@
 #!/bin/sh
 # The bot's computer, phase 1: the owner's Mac (S1). One locked folder, ~/BarkBot/home.
-#   npm run host:enroll   paste the one-time token from Studio > Chat hosts (it is not echoed)
+#   npm run host:enroll   paste the one-time token from Studio > Chat hosts (not echoed; it reaches the host on stdin)
 #   npm run host          run the host; keep this terminal open while the bot works
 set -eu
 ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
@@ -38,9 +38,11 @@ fi
 echo "host: running the host program built from Barkpark $(cat "$STAMP" 2>/dev/null || echo unknown)" >&2
 case "${1:-run}" in
   enroll)
+    # The code goes to the host program on stdin (Barkpark #27644), never in its argv, where the
+    # process list would show it. Typed at a terminal it is not echoed; it can also be piped in.
     printf 'One-time enrollment token: '
-    stty -echo; read -r TOKEN; stty echo; printf '\n'
-    "$BIN" enroll --url "$URL" --token "$TOKEN" --root "$HOME_DIR" --state "$STATE"
+    if [ -t 0 ]; then stty -echo; read -r TOKEN; stty echo; printf '\n'; else read -r TOKEN; fi
+    printf '%s\n' "$TOKEN" | "$BIN" enroll --url "$URL" --root "$HOME_DIR" --state "$STATE"
     ;;
   run)
     exec "$BIN" run --state "$STATE"
