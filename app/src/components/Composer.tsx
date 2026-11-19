@@ -292,6 +292,12 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
             if (files.length) { e.preventDefault(); void add(files) }
           }}
           onKeyDown={(e) => {
+            if (e.key === 'Enter' && e.shiftKey) {
+              e.preventDefault()
+              document.execCommand('insertLineBreak')
+              document.execCommand('insertLineBreak')
+              return
+            }
             if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
               e.preventDefault()
               submit()
