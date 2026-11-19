@@ -1,0 +1,226 @@
+{
+ "recipe": "voice-picker",
+ "oracle_version": "1.2.3",
+ "recorded": "2026-11-19T20:51:45.167Z",
+ "bot": "Oracle",
+ "before": "Helix 1.0x",
+ "opened": {
+  "open": true,
+  "focus": {
+   "tag": "button",
+   "role": "radio",
+   "label": null,
+   "row": 10,
+   "name": "Helix"
+  },
+  "rows": [
+   {
+    "name": "Altair",
+    "description": "Elegant & refined",
+    "checked": "false"
+   },
+   {
+    "name": "Ara",
+    "description": "Warm & friendly",
+    "checked": "false"
+   },
+   {
+    "name": "Atlas",
+    "description": "Firm & reassuring",
+    "checked": "false"
+   },
+   {
+    "name": "Aurora",
+    "description": "Serene & steady",
+    "checked": "false"
+   },
+   {
+    "name": "Carina",
+    "description": "Soft & empathetic",
+    "checked": "false"
+   },
+   {
+    "name": "Castor",
+    "description": "Easygoing & real",
+    "checked": "false"
+   },
+   {
+    "name": "Celeste",
+    "description": "Caring & confident",
+    "checked": "false"
+   },
+   {
+    "name": "Cosmo",
+    "description": "Bright & curious",
+    "checked": "false"
+   },
+   {
+    "name": "Eve",
+    "description": "Energetic & upbeat",
+    "checked": "false"
+   },
+   {
+    "name": "Helios",
+    "description": "Upbeat & versatile",
+    "checked": "false"
+   },
+   {
+    "name": "Helix",
+    "description": "Bold & dynamic",
+    "checked": "true"
+   },
+   {
+    "name": "Iris",
+    "description": "Friendly & charming",
+    "checked": "false"
+   },
+   {
+    "name": "Kepler",
+    "description": "Witty & inventive",
+    "checked": "false"
+   },
+   {
+    "name": "Leo",
+    "description": "Strong & assured",
+    "checked": "false"
+   },
+   {
+    "name": "Liora",
+    "description": "Calm & grounded",
+    "checked": "false"
+   },
+   {
+    "name": "Lumen",
+    "description": "Warm & articulate",
+    "checked": "false"
+   },
+   {
+    "name": "Luna",
+    "description": "Gentle & patient",
+    "checked": "false"
+   },
+   {
+    "name": "Lux",
+    "description": "Quiet & wise",
+    "checked": "false"
+   },
+   {
+    "name": "Naksh",
+    "description": "Warm & thoughtful",
+    "checked": "false"
+   },
+   {
+    "name": "Orion",
+    "description": "Rich & cinematic",
+    "checked": "false"
+   },
+   {
+    "name": "Perseus",
+    "description": "Strong & trusted",
+    "checked": "false"
+   },
+   {
+    "name": "Rex",
+    "description": "Confident & clear",
+    "checked": "false"
+   },
+   {
+    "name": "Rigel",
+    "description": "Crisp & composed",
+    "checked": "false"
+   },
+   {
+    "name": "Sal",
+    "description": "Smooth & balanced",
+    "checked": "false"
+   },
+   {
+    "name": "Sirius",
+    "description": "Clever & playful",
+    "checked": "false"
+   },
+   {
+    "name": "Ursa",
+    "description": "Friendly & warm",
+    "checked": "false"
+   },
+   {
+    "name": "Zagan",
+    "description": "Deep & dramatic",
+    "checked": "false"
+   },
+   {
+    "name": "Zenith",
+    "description": "Sharp & focused",
+    "checked": "false"
+   }
+  ],
+  "scroll": {
+   "top": 368,
+   "height": 1280,
+   "view": 268
+  },
+  "slider": {
+   "type": "range",
+   "min": "0",
+   "max": "15",
+   "step": "1",
+   "value": "5",
+   "valuetext": "1.0x",
+   "shown": "1.0x",
+   "hidden": "",
+   "chars": 4
+  }
+ },
+ "sliderUp": {
+  "type": "range",
+  "min": "0",
+  "max": "15",
+  "step": "1",
+  "value": "6",
+  "valuetext": "1.1x",
+  "shown": "1.1x",
+  "hidden": "0",
+  "chars": 5,
+  "at100ms": "1.01x",
+  "row": "Helix 1.1x"
+ },
+ "sliderBack": {
+  "type": "range",
+  "min": "0",
+  "max": "15",
+  "step": "1",
+  "value": "5",
+  "valuetext": "1.0x",
+  "shown": "1.0x",
+  "hidden": "1",
+  "chars": 5,
+  "row": "Helix 1.0x"
+ },
+ "pick": {
+  "picked": "Helios",
+  "open": true,
+  "scroll": {
+   "top": 368,
+   "height": 1280,
+   "view": 268
+  },
+  "slider": {
+   "type": "range",
+   "min": "0",
+   "max": "15",
+   "step": "1",
+   "value": "5",
+   "valuetext": "1.0x",
+   "shown": "1.0x",
+   "hidden": "1",
+   "chars": 5
+  },
+  "row": "Helios 1.0x"
+ },
+ "pickBack": {
+  "open": true,
+  "row": "Helix 1.0x"
+ },
+ "after": "Helix 1.0x"
+}
