@@ -12,3 +12,7 @@ The six card states made by sends, captured again on 1.2.3 after the owner allow
 | `2026-11-19-choose-b` | `choose-b` | `oracle-choice-answered` |
 
 Four sends in all: the file, the pictures, the question, the answer B.
+
+## Second take, with the pointer parked (2026-11-19)
+
+Five of the states were captured again: oracle-file-waiting, oracle-file-sent, oracle-pictures-sent, oracle-ask-choice and oracle-choice-answered. `capture.mjs` now parks the pointer 8 pt in from the bottom-right corner and records `parked`, as the sweep does. Suggested's Hide shows only while the pointer is over the window, and Gate A now rests our pointer there too. The same four sends were made again, with the same recipes in the same order; the `-2` traces are that take. oracle-pictures-waiting keeps its first take, because its `pointer` already rests the pointer.

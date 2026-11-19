@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 66,
- "pass": 52,
+ "cases": 69,
+ "pass": 56,
  "results": [
   {
    "key": "aside:Bots",
@@ -95,8 +95,7 @@
   },
   {
    "key": "control:Hide",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Create a routine",
@@ -228,43 +227,11 @@
    "pass": true
   },
   {
+   "key": "card#1 control:Open oracle-note.txt#1",
+   "pass": true
+  },
+  {
    "key": "card#1 box#1",
-   "pass": true
-  },
-  {
-   "key": "card#1 control:Open image full screen#1",
-   "pass": true
-  },
-  {
-   "key": "card#1 img#1",
-   "pass": true
-  },
-  {
-   "key": "card#1 box#2",
-   "pass": true
-  },
-  {
-   "key": "card#1 control:Open image full screen#2",
-   "pass": true
-  },
-  {
-   "key": "card#1 img#2",
-   "pass": true
-  },
-  {
-   "key": "card#1 box#3",
-   "pass": true
-  },
-  {
-   "key": "card#1 control:Open the remaining 3 images full screen#1",
-   "pass": true
-  },
-  {
-   "key": "card#1 img#3",
-   "pass": true
-  },
-  {
-   "key": "card#1 text(2)#1",
    "pass": true
   },
   {
@@ -276,19 +243,63 @@
    "pass": true
   },
   {
-   "key": "card#2 text:Which tree do you prefer?#1",
+   "key": "card#2 control:Open image full screen#1",
    "pass": true
   },
   {
-   "key": "card#2 text:B#1",
+   "key": "card#2 img#1",
    "pass": true
   },
   {
-   "key": "card#2 text:Cedar#1",
+   "key": "card#2 box#2",
+   "pass": true
+  },
+  {
+   "key": "card#2 control:Open image full screen#2",
+   "pass": true
+  },
+  {
+   "key": "card#2 img#2",
+   "pass": true
+  },
+  {
+   "key": "card#2 box#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 control:Open the remaining 3 images full screen#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 img#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 text(2)#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 parts",
+   "pass": true
+  },
+  {
+   "key": "card#3 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Which tree do you prefer?#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:B#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Cedar#1",
    "pass": true
   }
  ],
- "run": "2026-11-19T20:32:44.767Z",
+ "run": "2026-11-19T22:40:53.533Z",
  "inventory": {
   "id": "oracle-choice-answered",
   "controls": [
@@ -370,7 +381,7 @@
    {
     "name": "Hide",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Create a routine",
@@ -393,7 +404,7 @@
     "ours": true
    }
   ],
-  "missing": 1,
+  "missing": 0,
   "untracked": []
  }
 }
