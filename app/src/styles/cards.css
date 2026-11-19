@@ -51,9 +51,10 @@
 .file-text { flex: 1; min-width: 0; height: 40px; display: flex; flex-direction: column; justify-content: center; gap: 1px; }
 .file-name { margin: 0; font-size: 14px; font-weight: 500; line-height: 20px; letter-spacing: 0.14px; }
 /* A name the oracle numbers (two files of one name: "oracle-note.txt (2)") shows its number after
-   the name, in the line's own text (oracle-main-1280: span 226 wide, text 3; its bdi 99.1). */
-.file-label { display: block; overflow: hidden; white-space: nowrap; }
-.file-name bdi { display: inline-flex; max-width: 100%; min-width: 0; vertical-align: top; }
+   the name, in the line's own text (oracle-main-1280: span 226 wide, text 3; its bdi 99.1). In a
+   narrow card the name gives way, never the number (oracle-main-720: name 51.2 of 92). */
+.file-label { display: flex; overflow: hidden; white-space: nowrap; }
+.file-name bdi { display: flex; min-width: 0; letter-spacing: 0.14px; }   /* the name keeps the line's tracking whatever its number's fit */
 .file-base { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .file-ext { flex: none; white-space: nowrap; letter-spacing: -0.2px; }   /* the stand-in face at 500 runs 1.5 wide on ".txt" (20.9): fitted on that one name */
 .file-size { margin: 0; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; color: var(--ink-66); }

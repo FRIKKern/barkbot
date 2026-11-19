@@ -7,380 +7,426 @@
   2
  ],
  "cases": 59,
- "pass": 45,
+ "pass": 0,
+ "scene": false,
  "results": [
   {
    "key": "aside:Bots",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Bot tile",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Bot tile#2",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:New Bot",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Connect apps",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Open account menu",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:View conversation details",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "span:Oracle",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Share",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "span:Share",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Prompt",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Composer actions",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Start voice input",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Start voice chat",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "aside:Conversation details",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Close",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Edit Bot avatar",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Bot name",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Activity",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Library",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "span:Suggested",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Hide",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Create a routine",
    "pass": false,
-   "why": "box off by 0,36,0,0"
+   "why": "no scene"
   },
   {
    "key": "span:Create a routine",
    "pass": false,
-   "why": "box off by 0,36.5,0.8,-0.5"
+   "why": "no scene"
   },
   {
    "key": "span:Computer",
    "pass": false,
-   "why": "box off by 0,36,-0.4,0"
+   "why": "no scene"
   },
   {
    "key": "control:Bot's computer",
    "pass": false,
-   "why": "box off by 0,36,0,0"
+   "why": "no scene"
   },
   {
    "key": "bdi:Bot's computer",
    "pass": false,
-   "why": "box off by 0,36.5,0,-0.5"
+   "why": "no scene"
   },
   {
    "key": "bdi:Asleep",
    "pass": false,
-   "why": "box off by 0,36.5,0.1,-0.5"
+   "why": "no scene"
   },
   {
    "key": "span:Voice chat",
    "pass": false,
-   "why": "box off by 0,36,0.2,0"
+   "why": "no scene"
   },
   {
    "key": "span:Voice",
    "pass": false,
-   "why": "box off by 0,36.5,-0.2,-0.5"
+   "why": "no scene"
   },
   {
    "key": "control:Voice",
    "pass": false,
-   "why": "box off by 25.2,36,-25.2,0"
+   "why": "no scene"
   },
   {
    "key": "span:Helix 1.0x",
    "pass": false,
-   "why": "missing"
+   "why": "no scene"
   },
   {
    "key": "span:Language",
    "pass": false,
-   "why": "box off by 0,66.5,0.7,-0.5"
+   "why": "no scene"
   },
   {
    "key": "control:Language",
    "pass": false,
-   "why": "box off by 0.3,66,-0.3,0"
+   "why": "no scene"
   },
   {
    "key": "span:Auto-detect",
    "pass": false,
-   "why": "box off by 0.3,66.5,-0.3,-0.5"
+   "why": "no scene"
   },
   {
    "key": "control:Close dialog",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "h2:Grok Bot on your phone",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "p:Scan with your camera to get the app",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "span:Works on iPhone and Android",
    "pass": false,
-   "why": "box off by -1.5,0,3,0"
+   "why": "no scene"
   },
   {
    "key": "control:Open App Store",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "span:Open App Store",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "control:Done",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "span:Done",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "bubble:user#1 look",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "bubble:user#1 place",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "bubble:assistant#1 look",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "bubble:assistant#1 place",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 parts",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 control:Open oracle-note.txt (2)#1",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 box#1",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 box#2",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 box#3",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 box#4",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 box#5",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 box#6",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 text(3)#1",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 text(11)#1",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 text(4)#1",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   },
   {
    "key": "card#1 text(3)#2",
-   "pass": true
+   "pass": false,
+   "why": "no scene"
   }
  ],
- "run": "2026-11-19T19:56:38.039Z",
+ "run": "2026-11-19T20:24:46.604Z",
  "inventory": {
   "id": "oracle-get-mobile",
   "controls": [
    {
     "name": "Bot tile",
     "item": "F1",
-    "ours": true
+    "ours": false
    },
    {
     "name": "New Bot",
     "item": "F1",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Connect apps",
     "item": "F1",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Open account menu",
     "item": "F1",
-    "ours": true
+    "ours": false
    },
    {
     "name": "View conversation details",
     "item": "F2",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Share",
     "item": "F5",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Prompt",
     "item": "T4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Composer actions",
     "item": "T4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Start voice input",
     "item": "T4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Start voice chat",
     "item": "T4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Close",
     "item": "F3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Edit Bot avatar",
     "item": "F3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Bot name",
     "item": "F3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Activity",
     "item": "F3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Library",
     "item": "F3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Hide",
     "item": "N3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Create a routine",
     "item": "N3",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Bot's computer",
     "item": "F4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Voice",
     "item": "N4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Language",
     "item": "N4",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Close dialog",
     "item": "N5",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Open App Store",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Done",
     "item": "F8",
-    "ours": true
+    "ours": false
    }
   ],
-  "missing": 0,
+  "missing": 23,
   "untracked": []
  }
 }

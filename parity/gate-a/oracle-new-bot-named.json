@@ -1,6 +1,6 @@
 {
  "id": "oracle-new-bot-named",
- "captured": "2026-11-09",
+ "captured": "2026-11-19",
  "viewport": [
   1040,
   760,
@@ -18,7 +18,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-09T07:55:41.977Z",
+ "run": "2026-11-19T20:24:46.604Z",
  "inventory": {
   "id": "oracle-new-bot-named",
   "controls": [
@@ -103,11 +103,6 @@
     "ours": true
    },
    {
-    "name": "Add to Slack",
-    "item": "N3",
-    "ours": true
-   },
-   {
     "name": "Create a routine",
     "item": "N3",
     "ours": true
@@ -119,11 +114,6 @@
    },
    {
     "name": "Voice",
-    "item": "N4",
-    "ours": true
-   },
-   {
-    "name": "Speed",
     "item": "N4",
     "ours": true
    },

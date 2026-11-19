@@ -115,6 +115,10 @@ export function PageMark() {
   )
 }
 
+// A number where the stand-in face runs off the oracle's: " (1)" is 1.8 wide over its 4 characters
+// (oracle-main-720: 19.9 after the name; " (2)" meets its 23.1 as it is).
+const NUMBER_FIT: Record<string, string> = {'(1)': '-0.31px'}
+
 /** The name, its kind kept apart so a long name loses its middle, not its ending (span 148 and 149);
  *  a number the oracle gives one of two files of the same name ("(2)") follows it. */
 export function FileName({name}: {name: string}) {
@@ -123,12 +127,12 @@ export function FileName({name}: {name: string}) {
   const [base, ext] = dot > 0 ? [stem.slice(0, dot), stem.slice(dot)] : [stem, '']
   return (
     <p className="file-name">
-      <span className="file-label">
+      <span className="file-label" style={number && NUMBER_FIT[number] ? {letterSpacing: NUMBER_FIT[number]} : undefined}>
         <bdi>
           <span className="file-base">{base}</span>
           {ext && <span className="file-ext">{ext}</span>}
         </bdi>
-        {number && ` ${number}`}
+        {number && `\u00a0${number}`}
       </span>
     </p>
   )

@@ -7,14 +7,15 @@
   2
  ],
  "cases": 1,
- "pass": 1,
+ "pass": 0,
  "results": [
   {
    "key": "span:Oracle#2",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,9,0.4,0"
   }
  ],
- "run": "2026-11-19T19:56:47.696Z",
+ "run": "2026-11-19T20:24:46.604Z",
  "inventory": {
   "id": "oracle-hover-bot-tile-2",
   "controls": [
