@@ -19,6 +19,7 @@ import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 import { queueProbe } from './lib/queue-probe.mjs';
 import { overlayKeys } from './lib/overlay-keys.mjs';
+import { panelCurve } from './lib/panel-curve.mjs';
 import { cmdHints } from './lib/cmd-hints.mjs';
 import { newBotHides } from './lib/new-bot-hides.mjs';
 import { pickerPick } from './lib/picker-pick.mjs';
@@ -451,6 +452,10 @@ check('renaming the second Twin leaves the first tile\'s label as it was', tw.ti
 // ── The overlays' keys and focus (traces/2026-11-09-keys.json, task-4d9930cf48ab41fb) ──────────
 console.log("Behaviour · the overlays' keys and focus (traces/2026-11-09-keys.json)");
 await overlayKeys({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
+
+// ── The details panel's close and open curve (traces/2026-11-08-feel-panel.json, task-aa111a74d3a95bb4) ──
+console.log("Behaviour · the details panel's close and open curve (traces/2026-11-08-feel-panel.json)");
+await panelCurve({ check, precondition, ev, open, base, click, wait, until, windowFocus });
 
 // ── The rail's command-key hints (traces/2026-11-09-cmd-hints.json, task-22996e1edb3434d3) ──
 console.log("Behaviour · the rail's command-key hints (traces/2026-11-09-cmd-hints.json)");
