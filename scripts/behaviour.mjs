@@ -86,7 +86,20 @@ await new Promise((ok) => httpServer((req, res) => {
       if (readAs === 'otherKey') return json(200, { key: 'barkbot.other', dataset: 'production', value: null });
       if (readAs === 'otherDataset') return json(200, { key, dataset: 'staging', value: null });
       if (readAs === 'empty') return json(200, {});
-      if (req.method === 'GET') { stub.reads++; stub.readKeys.push(key); const answer = () => (failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got()); return stub.readDelay ? setTimeout(answer, stub.readDelay) : answer(); }
+      if (req.method === 'GET') {
+        stub.reads++; stub.readKeys.push(key); const answer = () => (failing ? json(failing, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : got());
+        // `readBarrier` {key, n, ms}: the first n reads of `key` wait for each other, then all answer
+        // at once, so n loads each read it before any of them writes it. After `ms` with fewer than
+        // n, the waiting ones answer (`timedOut`). Later reads of it answer as usual.
+        const r = stub.readBarrier;
+        if (r?.key === key && r.held.length < r.n) {
+          r.held.push(answer);
+          if (r.held.length === r.n) { clearTimeout(r.timer); r.held.forEach((a) => a()); }
+          else if (r.held.length === 1) r.timer = setTimeout(() => { r.timedOut = true; r.n = r.held.length; r.held.forEach((a) => a()); }, r.ms);
+          return;
+        }
+        return stub.readDelay ? setTimeout(answer, stub.readDelay) : answer();
+      }
       const b = body ? JSON.parse(body) : {}; stub.writes.push({ method: req.method, key, body: b, failed: !!failing, inm: req.headers['if-none-match'] ?? null });
       if (failing) return json(failing, { error: { code: 'internal', message: 'the stand-in fails this write' } });
       // A record write: a whole-record PUT, or a PATCH set of one top-level field (Barkpark's row-locked
@@ -521,16 +534,22 @@ else {
   freshStore({ name: 'Legacy Name' });
   await Promise.all([fetch(`${base}/`).then((r) => r.text()), fetch(`${base}/`).then((r) => r.text())]);
   check('two page loads at once against an empty store leave one bot, the same id, not two', ids().length === 1 && botKeys().length === 1 && botKeys()[0] === `barkbot.bot.${ids()[0]}`, { ids: ids(), keys: botKeys() });
-  // Two loads at once doing the Main Bot's move-in (two tabs; task-cd587179698fa0d8): every read
-  // waits, so both read its key as unset and both write it; Barkpark refuses the second (412). That
-  // load reads the key again, finds a whole Main Bot of this computer and shows it, with no line.
-  freshStore({ name: 'Legacy Name' }); stub.readDelay = 300; const wPair = stub.writes.length;
-  // Fetched from here, not the page: Chrome's cache lock holds a second identical GET until the
-  // first ends, so two loadChat calls from one page never overlap (run 44374350336: one PUT).
+  // Two loads at once doing the Main Bot's move-in (two tabs; task-cd587179698fa0d8): the stand-in
+  // holds each one's read of its key until both have asked, so both read it as unset and both write
+  // it; Barkpark refuses the second (412). That load reads the key again, finds a whole Main Bot of
+  // this computer and shows it, with no line. A delay alone was not enough on a loaded runner
+  // (run 44427107528: one PUT).
+  const mainKey = `barkbot.bot.${ids()[0]}`; // the Main Bot the two loads above made: its id comes from the computer
+  freshStore({ name: 'Legacy Name' }); const wPair = stub.writes.length;
+  stub.readBarrier = { key: mainKey, n: 2, ms: 5000, held: [], timedOut: false };
+  // Fetched from here, not the page: two loadChat calls from one page ran one after the other
+  // (run 44374350336: one PUT), likely Chrome holding a second identical GET until the first ends.
   const pair = await Promise.all([fetch(`${base}/`).then((r) => r.text()), fetch(`${base}/`).then((r) => r.text())]);
-  stub.readDelay = 0;
+  const timedOut = stub.readBarrier.timedOut; stub.readBarrier = null;
   const both = { taken: pair.map((h) => /another tab or device/.test(h)), named: pair.map((h) => h.includes('Legacy Name')), ids: ids(), puts: stub.writes.slice(wPair).filter((w) => w.method === 'PUT').map((w) => w.key) };
-  check('two loads at once that both move the Main Bot in: one write is refused (412), and both pages show the Main Bot with no line; its id is listed once', both.puts.length === 2 && both.puts[0] === both.puts[1] && both.taken.every((t) => !t) && both.named.every(Boolean) && both.ids.length === 1 && `barkbot.bot.${both.ids[0]}` === both.puts[0], both);
+  // Without two PUTs to that key the race did not happen, and the rule below would say nothing.
+  if (both.puts.length < 2 || both.puts.some((k) => k !== mainKey)) check('precondition for the two-loads rule: the race did not happen (both loads must read the Main Bot\'s key before either writes it, so two PUTs to it)', false, { ...both, mainKey, timedOut });
+  else check('two loads at once that both move the Main Bot in: one write is refused (412), and both pages show the Main Bot with no line; its id is listed once', both.taken.every((t) => !t) && both.named.every(Boolean) && both.ids.length === 1 && `barkbot.bot.${both.ids[0]}` === mainKey, both);
   // A record is a claim: one naming a session not on its own computer, or a computer not the caller's, is dropped.
   const main = ids()[0]; const B = '7b0e1f2a-3c4d-4e5f-8a6b-7c8d9e0f1a2b', C = '8c1f2a3b-4d5e-4f6a-9b7c-8d9e0f1a2b3c';
   const rec = (name, host_id, session_id) => ({ name, host_id, session_id, created_at: '2026-11-15T09:00:00Z' });
