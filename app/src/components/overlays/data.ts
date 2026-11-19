@@ -3,15 +3,10 @@
 // the rest came from a capture scrolled to the end.
 
 // The Voice dialog (Grok 1.2.3, decision 0010): a speed slider over a grid of voices, two to a row.
-// oracle-voice-picker and -end show 24 voices with their lines, Carina to Zenith. A row of two sits
-// above Carina (radios at y -73.5, their words above the window, so not captured): Altair, Ara,
-// Atlas and Aurora head the 0.79.3 list, which ran Carina to Lumen in this same order. Their lines
-// were never on screen in 1.2.3, so they have none here.
+// oracle-voice-picker and -end show 24 voices with their lines, Carina to Zenith. The capture also
+// holds two radios above Carina (y -73.5) whose words lie above the window: not captured, so not
+// here until a capture of the grid's top names them.
 export const voices: [name: string, line: string][] = [
-  ['Altair', ''],
-  ['Ara', ''],
-  ['Atlas', ''],
-  ['Aurora', ''],
   ['Carina', 'Soft & empathetic'],
   ['Castor', 'Easygoing & real'],
   ['Celeste', 'Caring & confident'],

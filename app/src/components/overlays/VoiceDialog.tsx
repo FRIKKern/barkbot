@@ -6,7 +6,8 @@
 //
 // A pick changes the row at once (the Voice row reads "<voice> <speed>"). Not captured, so ours:
 // whether a voice pick closes the dialog (here it stays open, as a radio group does), the slider's
-// step (data.ts SPEED), and the keys inside the dialog beyond Escape.
+// step (data.ts SPEED), and the keys inside the dialog beyond Escape. The radios above Carina are left
+// out (data.ts): the grid scrolls the same way without them.
 import {useLayoutEffect, useRef, useState, type PointerEvent} from 'react'
 import {Icon} from '../Composer'
 import {fit} from '../parts'
