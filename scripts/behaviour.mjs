@@ -29,6 +29,7 @@ import { createOnce } from './lib/create-once.mjs';
 import { createLost } from './lib/create-lost.mjs';
 import { retryAdopt } from './lib/retry-adopt.mjs';
 import { shiftEnter } from './lib/shift-enter.mjs';
+import { quietStream } from './lib/quiet-stream.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -52,7 +53,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], quiet: false, quietOpened: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -185,7 +186,9 @@ await new Promise((ok) => httpServer((req, res) => {
       if (stub.deaf.has(req.url.split('/')[4])) { res.writeHead(503, { 'content-type': 'text/plain' }); return res.end('unavailable'); }
       // `slowNew`: a conversation made meanwhile opens its stream only when the rule takes its id out of stub.slow.
       const go = () => {
-        res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' }); res.write(': open\n\n');
+        res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });
+        // `quiet`: as Barkpark on a conversation with no rows, a session's stream sends its headers and no body.
+        if (stub.quiet && req.url !== '/v1/chat/events') { res.flushHeaders(); stub.quietOpened.push(req.url.split('/')[4]); } else res.write(': open\n\n');
         // As Barkpark: the stored rows first (a fresh page asks from 0), and the fleet's snapshot.
         if (req.url === '/v1/chat/events') {
           stub.fleetOpens++; stub.fleets.push(res); res.on('close', () => stub.fleets.splice(stub.fleets.indexOf(res), 1));
@@ -747,6 +750,7 @@ else {
   const odd = await ev(async (id) => { const m = await import('/src/chat/api.ts'); const out = []; for (const d of [{ name: 'Odd', shape: '<svg onload=x>' }, { name: 'Odd', colour: 'url(javascript:x)' }]) { try { await m.createBot({ data: d }); out.push('made'); } catch (e) { out.push(String(e?.message ?? e)); } } return out; });
   check('Create refuses a shape or colour that is not one of the dialog\'s own, and writes nothing', odd.length === 2 && odd.every((x) => x !== 'made') && ![...stub.prefs].some(([k, v]) => k.startsWith('barkbot.bot.') && v?.name === 'Odd'), { odd });
   await createLost({ check, stub, ids, live, until, wait, key, openDialog, typeName, press, failLine, dialog });
+  await quietStream({ check, stub, ev, page, live, until, wait, key, openDialog, typeName, press });
   // A made bot's folder comes from its id: an id that gives none makes no conversation (never the
   // shared root in its place); upper-case hex is read as lower.
   const folderMade0 = stub.made.length;
