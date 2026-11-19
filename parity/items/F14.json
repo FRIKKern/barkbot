@@ -7,15 +7,15 @@
  "controls": [
   "Route traffic through this computer",
   "Reset Bot's Computer",
-  "Auto-Review",
   "Add Rule to Always Ask",
   "Add Rule to Allow without Asking",
   "Automatic Updates",
   "Check for Updates",
   "Read Texts",
   "Send Texts",
-  "Update Bot's Computer"
+  "Update Bot's Computer",
+  "Approvals"
  ],
  "gate": "Gate A oracle-settings-computer 98/98, oracle-settings-permissions 93/93, oracle-settings-updates 93/93",
- "evidence": "app/src/components/overlays/Views.tsx (ComputerPage, PermissionsPage, UpdatesPage); the Settings tabs switch to them, click-tested headless. The device name (the owner's Mac) and every description are placeholders of the captured size (lengths only, O2). Look only: the switches toggle, Execution on this computer, Reset, Add Rule and Check for Updates do nothing yet (0005); Vault and Usage & Billing still show General (never captured). 1.2.3 (decision 0010) adds Read Texts, Send Texts and Update Bot's Computer to the Computer page: not built."
+ "evidence": "app/src/components/overlays/SettingsPages.tsx (ComputerPage, PermissionsPage, UpdatesPage), styles/settings.css; the Settings tabs switch to them. Matches Grok 1.2.3 (decision 0010) inside the dialog: Computer has Messages (Read Texts, Send Texts, off), Update Bot's Computer as a row with an Update button, and the device Last opened 13 minutes ago; Permissions has Approvals (Auto-review) and App permissions with Open apps; Updates reads version 1.2.3. The device name (the owner's Mac) is redacted in the captures and stays a placeholder of its length; every description is a placeholder of the captured size (lengths only, O2). Look only: the switches toggle; Execution on this computer, Approvals, Update, Reset, Add Rule, Open apps and Check for Updates do nothing (0005): nothing updates, installs or resets. Vault and Usage & Billing still show General (never captured)."
 }
