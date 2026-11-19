@@ -1,0 +1,1195 @@
+{
+ "id": "2026-11-19-file-waiting-2",
+ "recipe": "file",
+ "oracle_version": "1.2.3",
+ "bot": "Oracle",
+ "captured": "2026-11-19T22:31:41.366Z",
+ "engine": "electron",
+ "durationS": 7.165,
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "note": "times in ms from the gesture; samples are [eventIndex, t, opacity, transform, y]; scroll is [t, scrollTop, scrollHeight]",
+ "events": [
+  {
+   "t": 52,
+   "type": "remove",
+   "kind": "main",
+   "tag": "span"
+  },
+  {
+   "t": 52,
+   "type": "add",
+   "kind": "main",
+   "tag": "div",
+   "box": [
+    145,
+    699,
+    483,
+    56
+   ],
+   "textLength": 21
+  },
+  {
+   "t": 52,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-label",
+   "value": "Send message",
+   "tag": "button"
+  },
+  {
+   "t": 201.9,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 201.9,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  },
+  {
+   "t": 208.1,
+   "type": "add",
+   "kind": "bubble:user",
+   "tag": "div",
+   "role": "article",
+   "data": "index role rowKey",
+   "box": [
+    104,
+    -1141,
+    600,
+    328
+   ],
+   "textLength": 68
+  },
+  {
+   "t": 208.1,
+   "type": "remove",
+   "kind": "main",
+   "tag": "div"
+  },
+  {
+   "t": 208.1,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-busy",
+   "tag": "button"
+  },
+  {
+   "t": 208.1,
+   "type": "remove",
+   "kind": "main",
+   "tag": "div"
+  },
+  {
+   "t": 208.1,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-busy",
+   "tag": "button"
+  },
+  {
+   "t": 208.1,
+   "type": "remove",
+   "kind": "main",
+   "tag": "div"
+  },
+  {
+   "t": 208.1,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-busy",
+   "tag": "button"
+  },
+  {
+   "t": 216.2,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 216.2,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  },
+  {
+   "t": 220.3,
+   "type": "add",
+   "kind": "bubble:user",
+   "tag": "div",
+   "role": "article",
+   "data": "index role rowKey",
+   "box": [
+    104,
+    -1143,
+    600,
+    328
+   ],
+   "textLength": 68
+  },
+  {
+   "t": 220.3,
+   "type": "remove",
+   "kind": "main",
+   "tag": "div"
+  },
+  {
+   "t": 220.3,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-busy",
+   "tag": "button"
+  },
+  {
+   "t": 220.3,
+   "type": "remove",
+   "kind": "main",
+   "tag": "div"
+  },
+  {
+   "t": 220.3,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-busy",
+   "tag": "button"
+  },
+  {
+   "t": 220.3,
+   "type": "remove",
+   "kind": "main",
+   "tag": "div"
+  },
+  {
+   "t": 220.3,
+   "type": "attr",
+   "kind": "main",
+   "name": "aria-busy",
+   "tag": "button"
+  },
+  {
+   "t": 230,
+   "type": "remove",
+   "kind": "other",
+   "tag": "span"
+  },
+  {
+   "t": 230,
+   "type": "remove",
+   "kind": "bubble:user",
+   "tag": "div"
+  },
+  {
+   "t": 2574.6,
+   "type": "remove",
+   "kind": "main",
+   "tag": "br"
+  }
+ ],
+ "samples": [
+  [
+   1,
+   55.8,
+   1,
+   null,
+   699
+  ],
+  [
+   1,
+   59.4,
+   1,
+   null,
+   699
+  ],
+  [
+   1,
+   99.3,
+   1,
+   null,
+   690
+  ],
+  [
+   1,
+   112.4,
+   1,
+   null,
+   660
+  ],
+  [
+   1,
+   129.8,
+   1,
+   null,
+   647
+  ],
+  [
+   1,
+   145.2,
+   1,
+   null,
+   638
+  ],
+  [
+   1,
+   162.4,
+   1,
+   null,
+   631
+  ],
+  [
+   1,
+   179.5,
+   1,
+   null,
+   626
+  ],
+  [
+   1,
+   195.8,
+   1,
+   null,
+   623
+  ],
+  [
+   1,
+   215,
+   1,
+   null,
+   621
+  ],
+  [
+   5,
+   215,
+   1,
+   "matrix(1, 0, 0, 1, 0, 4586)",
+   -1141
+  ],
+  [
+   1,
+   228.7,
+   1,
+   null,
+   619
+  ],
+  [
+   14,
+   228.7,
+   1,
+   "matrix(1, 0, 0, 1, 0, 4586)",
+   -1143
+  ],
+  [
+   1,
+   243.9,
+   1,
+   null,
+   618
+  ],
+  [
+   1,
+   261.6,
+   1,
+   null,
+   618
+  ],
+  [
+   1,
+   278,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   291.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   310.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   325.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   342,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   359.1,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   375.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   392.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   407.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   425.6,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   442.1,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   458,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   475.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   492.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   508.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   525.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   542.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   558.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   575.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   592.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   608.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   624.7,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   642.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   658.4,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   675.6,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   692.3,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   708.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   725.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   741.3,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   758.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   775.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   792.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   808.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   825.6,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   842.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   858,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   875.6,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   892.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   908.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   925.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   942.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   958.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   975.6,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   992.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1008.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1025.1,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1042.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1058.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1075.6,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1092.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1108.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1125.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1142.3,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1158.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1175.5,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1192.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1208.3,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1225.7,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1242.3,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1258.3,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1274.8,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1292.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1308.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1325.6,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1341.8,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1358.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1374.8,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1392.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1408.8,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1424.9,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1442,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1466,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1475.2,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1492.1,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1508.8,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1525.6,
+   1,
+   null,
+   617
+  ],
+  [
+   1,
+   1542.2,
+   1,
+   null,
+   617
+  ]
+ ],
+ "scroll": [
+  [
+   19,
+   5642,
+   6402
+  ],
+  [
+   112.4,
+   5652,
+   6412
+  ],
+  [
+   129.8,
+   5686,
+   6445
+  ],
+  [
+   145.2,
+   5700,
+   6460
+  ],
+  [
+   162.4,
+   5711,
+   6470
+  ],
+  [
+   179.5,
+   5718,
+   6478
+  ],
+  [
+   195.8,
+   5724,
+   6483
+  ],
+  [
+   215,
+   5727,
+   6487
+  ],
+  [
+   228.7,
+   5730,
+   6490
+  ],
+  [
+   243.9,
+   5731,
+   6491
+  ],
+  [
+   261.6,
+   5732,
+   6492
+  ],
+  [
+   278,
+   5733,
+   6493
+  ],
+  [
+   310.5,
+   5734,
+   6494
+  ]
+ ],
+ "animations": [
+  {
+   "type": "CSSAnimation",
+   "name": "sand-12vywve-B",
+   "timing": {
+    "duration": 2400,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -43
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": 0,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -38
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": -800,
+    "easing": "linear"
+   },
+   "error": "Could not find object with given id",
+   "t": -35
+  },
+  {
+   "type": "CSSAnimation",
+   "name": "sand-6fenen-B",
+   "timing": {
+    "duration": 2400,
+    "delay": -1600,
+    "easing": "linear",
+    "iterations": "infinite",
+    "fill": "none"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "ease-out",
+     "transform": "translateY(0px) scale(0.6)",
+     "opacity": "0"
+    },
+    {
+     "offset": 0.25,
+     "easing": "ease-out",
+     "opacity": "1"
+    },
+    {
+     "offset": 1,
+     "easing": "ease-out",
+     "transform": "translateY(-12px) scale(1)",
+     "opacity": "0"
+    }
+   ],
+   "look": {
+    "color": "rgba(245, 245, 245, 0.54)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgba(245, 245, 245, 0.54)",
+    "transform-origin": "2.71875px 5.5px"
+   },
+   "target": null,
+   "t": -34
+  },
+  {
+   "type": "CSSTransition",
+   "name": "height",
+   "timing": {
+    "duration": 300,
+    "delay": 0,
+    "easing": "linear(0 0%, 0.01588 2%, 0.05618 4%, 0.11201 6%, 0.1768 8%, 0.2458 10%, 0.31562 12%, 0.38392 14%, 0.44914 16%, 0.51029 18%, 0.56683 20%, 0.61852 22%, 0.66534 24%, 0.70743 26%, 0.74501 28%, 0.77838 30%, 0.80788 32%, 0.83383 34%, 0.85658 36%, 0.87645 38%, 0.89376 40%, 0.92183 44%, 0.94282 48%, 0.95838 52%, 0.96984 56%, 0.97823 60%, 0.98435 64%, 0.98878 68%, 0.99198 72%, 0.99594 80%, 0.99829 90%, 1 100%)",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "linear",
+     "height": "44px"
+    },
+    {
+     "offset": 1,
+     "easing": "linear",
+     "height": "136px"
+    }
+   ],
+   "look": {
+    "color": "rgb(245, 245, 245)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(245, 245, 245)",
+    "transform-origin": "300px 22px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "div",
+    "data": "expanded",
+    "box": [
+     104,
+     700,
+     600,
+     44
+    ],
+    "textLength": 21
+   },
+   "t": 48
+  },
+  {
+   "type": "CSSTransition",
+   "name": "padding-left",
+   "timing": {
+    "duration": 300,
+    "delay": 0,
+    "easing": "linear(0 0%, 0.01588 2%, 0.05618 4%, 0.11201 6%, 0.1768 8%, 0.2458 10%, 0.31562 12%, 0.38392 14%, 0.44914 16%, 0.51029 18%, 0.56683 20%, 0.61852 22%, 0.66534 24%, 0.70743 26%, 0.74501 28%, 0.77838 30%, 0.80788 32%, 0.83383 34%, 0.85658 36%, 0.87645 38%, 0.89376 40%, 0.92183 44%, 0.94282 48%, 0.95838 52%, 0.96984 56%, 0.97823 60%, 0.98435 64%, 0.98878 68%, 0.99198 72%, 0.99594 80%, 0.99829 90%, 1 100%)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 109
+  },
+  {
+   "type": "CSSTransition",
+   "name": "padding-right",
+   "timing": {
+    "duration": 300,
+    "delay": 0,
+    "easing": "linear(0 0%, 0.01588 2%, 0.05618 4%, 0.11201 6%, 0.1768 8%, 0.2458 10%, 0.31562 12%, 0.38392 14%, 0.44914 16%, 0.51029 18%, 0.56683 20%, 0.61852 22%, 0.66534 24%, 0.70743 26%, 0.74501 28%, 0.77838 30%, 0.80788 32%, 0.83383 34%, 0.85658 36%, 0.87645 38%, 0.89376 40%, 0.92183 44%, 0.94282 48%, 0.95838 52%, 0.96984 56%, 0.97823 60%, 0.98435 64%, 0.98878 68%, 0.99198 72%, 0.99594 80%, 0.99829 90%, 1 100%)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 109
+  },
+  {
+   "type": "CSSTransition",
+   "name": "padding-top",
+   "timing": {
+    "duration": 300,
+    "delay": 0,
+    "easing": "linear(0 0%, 0.01588 2%, 0.05618 4%, 0.11201 6%, 0.1768 8%, 0.2458 10%, 0.31562 12%, 0.38392 14%, 0.44914 16%, 0.51029 18%, 0.56683 20%, 0.61852 22%, 0.66534 24%, 0.70743 26%, 0.74501 28%, 0.77838 30%, 0.80788 32%, 0.83383 34%, 0.85658 36%, 0.87645 38%, 0.89376 40%, 0.92183 44%, 0.94282 48%, 0.95838 52%, 0.96984 56%, 0.97823 60%, 0.98435 64%, 0.98878 68%, 0.99198 72%, 0.99594 80%, 0.99829 90%, 1 100%)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 110
+  },
+  {
+   "type": "CSSTransition",
+   "name": "padding-bottom",
+   "timing": {
+    "duration": 300,
+    "delay": 0,
+    "easing": "linear(0 0%, 0.01588 2%, 0.05618 4%, 0.11201 6%, 0.1768 8%, 0.2458 10%, 0.31562 12%, 0.38392 14%, 0.44914 16%, 0.51029 18%, 0.56683 20%, 0.61852 22%, 0.66534 24%, 0.70743 26%, 0.74501 28%, 0.77838 30%, 0.80788 32%, 0.83383 34%, 0.85658 36%, 0.87645 38%, 0.89376 40%, 0.92183 44%, 0.94282 48%, 0.95838 52%, 0.96984 56%, 0.97823 60%, 0.98435 64%, 0.98878 68%, 0.99198 72%, 0.99594 80%, 0.99829 90%, 1 100%)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 122
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 123
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 123
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-top-left-radius",
+   "timing": {
+    "duration": 300,
+    "delay": 0,
+    "easing": "linear(0 0%, 0.01588 2%, 0.05618 4%, 0.11201 6%, 0.1768 8%, 0.2458 10%, 0.31562 12%, 0.38392 14%, 0.44914 16%, 0.51029 18%, 0.56683 20%, 0.61852 22%, 0.66534 24%, 0.70743 26%, 0.74501 28%, 0.77838 30%, 0.80788 32%, 0.83383 34%, 0.85658 36%, 0.87645 38%, 0.89376 40%, 0.92183 44%, 0.94282 48%, 0.95838 52%, 0.96984 56%, 0.97823 60%, 0.98435 64%, 0.98878 68%, 0.99198 72%, 0.99594 80%, 0.99829 90%, 1 100%)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 123
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-top-right-radius",
+   "timing": {
+    "duration": 300,
+    "delay": 0,
+    "easing": "linear(0 0%, 0.01588 2%, 0.05618 4%, 0.11201 6%, 0.1768 8%, 0.2458 10%, 0.31562 12%, 0.38392 14%, 0.44914 16%, 0.51029 18%, 0.56683 20%, 0.61852 22%, 0.66534 24%, 0.70743 26%, 0.74501 28%, 0.77838 30%, 0.80788 32%, 0.83383 34%, 0.85658 36%, 0.87645 38%, 0.89376 40%, 0.92183 44%, 0.94282 48%, 0.95838 52%, 0.96984 56%, 0.97823 60%, 0.98435 64%, 0.98878 68%, 0.99198 72%, 0.99594 80%, 0.99829 90%, 1 100%)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 123
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-bottom-left-radius",
+   "timing": {
+    "duration": 300,
+    "delay": 0,
+    "easing": "linear(0 0%, 0.01588 2%, 0.05618 4%, 0.11201 6%, 0.1768 8%, 0.2458 10%, 0.31562 12%, 0.38392 14%, 0.44914 16%, 0.51029 18%, 0.56683 20%, 0.61852 22%, 0.66534 24%, 0.70743 26%, 0.74501 28%, 0.77838 30%, 0.80788 32%, 0.83383 34%, 0.85658 36%, 0.87645 38%, 0.89376 40%, 0.92183 44%, 0.94282 48%, 0.95838 52%, 0.96984 56%, 0.97823 60%, 0.98435 64%, 0.98878 68%, 0.99198 72%, 0.99594 80%, 0.99829 90%, 1 100%)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 124
+  },
+  {
+   "type": "CSSTransition",
+   "name": "border-bottom-right-radius",
+   "timing": {
+    "duration": 300,
+    "delay": 0,
+    "easing": "linear(0 0%, 0.01588 2%, 0.05618 4%, 0.11201 6%, 0.1768 8%, 0.2458 10%, 0.31562 12%, 0.38392 14%, 0.44914 16%, 0.51029 18%, 0.56683 20%, 0.61852 22%, 0.66534 24%, 0.70743 26%, 0.74501 28%, 0.77838 30%, 0.80788 32%, 0.83383 34%, 0.85658 36%, 0.87645 38%, 0.89376 40%, 0.92183 44%, 0.94282 48%, 0.95838 52%, 0.96984 56%, 0.97823 60%, 0.98435 64%, 0.98878 68%, 0.99198 72%, 0.99594 80%, 0.99829 90%, 1 100%)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 124
+  },
+  {
+   "type": "CSSTransition",
+   "name": "transform",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1
+   },
+   "error": "Could not find object with given id",
+   "t": 125
+  },
+  {
+   "type": "CSSTransition",
+   "name": "opacity",
+   "timing": {
+    "duration": 200,
+    "delay": 0,
+    "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "iterations": 1,
+    "fill": "backwards"
+   },
+   "keyframes": [
+    {
+     "offset": 0,
+     "easing": "linear",
+     "opacity": "1"
+    },
+    {
+     "offset": 1,
+     "easing": "linear",
+     "opacity": "0"
+    }
+   ],
+   "look": {
+    "color": "rgb(18, 18, 18)",
+    "background-clip": "border-box",
+    "-webkit-text-fill-color": "rgb(18, 18, 18)",
+    "transform-origin": "8px 8px"
+   },
+   "target": {
+    "kind": "main",
+    "tag": "i",
+    "data": "iconName size",
+    "box": [
+     677,
+     717,
+     9,
+     9
+    ]
+   },
+   "t": 125
+  }
+ ]
+}
