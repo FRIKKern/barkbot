@@ -8,6 +8,6 @@
   "Create a routine",
   "Hide"
  ],
- "gate": "Gate A (Grok 1.2.3): oracle-hover-create-a-routine 1/1; Hide measured against oracle-hover-add-to-slack on 0.79.3 (button 979.5,236,38.5,24), the same box in 1.2.3's states",
+ "gate": "Gate A on 1.2.3 (decision 0010), hosted CI run 44611689138: oracle-hover-create-a-routine 1/1. Hide: its box is 979.5,236,38.5,24 in 1.2.3's states, the same as 0.79.3's oracle-hover-add-to-slack, which ours was measured against to 0.2 pt",
  "evidence": "parts.tsx Section action + details.css: the Suggested card's one row and Hide, which shows while the pointer is over the window (:root:hover) and is hidden in every parked state. Grok 1.2.3 dropped Add to Slack (decision 0010), so the card is 36 pt shorter and the panel's lower rows moved up with it. Missing: what Create a routine opens, and what Hide does. Neither was captured (needs a look-only capture of each opened on the oracle, and of the card after Hide, which changes the oracle's state: the owner's), so neither is built; the row does nothing on a press."
 }
