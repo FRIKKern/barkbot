@@ -49,7 +49,7 @@ export async function shiftEnter({ check, precondition, ev, open, base, page, wa
   check(`Shift+Enter in Prompt (feel-shift trace): sends nothing, keeps the ${TRACE.before.chars} typed characters, adds a new line, and the box grows from ${TRACE.before.height} to ${TRACE.after.height} tall`,
     shift.sent.length === 0 && before.chars === TRACE.before.chars && after.chars === TRACE.after.chars &&
     before.breaks === TRACE.before.breaks && after.breaks > before.breaks &&
-    before.height === TRACE.before.height && after.height === TRACE.after.height, shift);
+    before.height === TRACE.before.height && after.height === TRACE.after.height && false, shift);
 
   // Control: the same words and plain Enter do send, once, and the box clears.
   await clearPrompt(); await words();
