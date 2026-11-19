@@ -36,7 +36,11 @@ const rows = (s) => {
   const bs = bubbles(s);
   const b = transcriptOf(s).map((x, i) => ({ y: bs[i].y, x: overlapOf(s, bs[i]) ? { ...x, overlap: overlapOf(s, bs[i]) } : x }));
   const c = cards(s).map((x) => ({ y: x.row.box[1], x: sceneCard(x) }));
-  const out = [...b, ...c].sort((m, n) => m.y - n.y).map((r) => r.x);
+  // A time row between messages (1.2.3: a day's first send, oracle-file-sent time 87), by its clock
+  // ("Today 11:31 PM": the scene shows it as today). A card-like row, so the bubble matching skips it.
+  const log = s.elements.find((e) => e.role === 'log');
+  const t = s.elements.filter((e) => e.tag === 'time' && log && e.box[0] >= log.box[0] && e.box[0] < log.box[0] + log.box[2]).map((e) => ({ y: e.box[1], x: { card: 'time', time: e.text.replace(/^Today /, '') } }));
+  const out = [...b, ...c, ...t].sort((m, n) => m.y - n.y).map((r) => r.x);
   const first = [...bs].sort((m, n) => m.y - n.y)[0];
   return first && joinedAbove(first) && out[0] === b.find((r) => r.y === first.y)?.x ? [{ role: first.role, paras: [{ len: 16, height: 22 }] }, ...out] : out;
 };

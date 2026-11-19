@@ -87,7 +87,8 @@ export const cardKeys = (state) => cardCases(state, null).map((c) => c.key);
  * text); answered, the one choice left and its letter. A file card: each file the message
  * carries (1.2.3 stacks two: oracle-main-1600), by the name its press opens and the length of
  * its size (0 when the size is off screen).
- * Picture tiles: how many pictures the message carries.
+ * Picture tiles: how many pictures the message carries. An answered card whose question is off
+ * screen has question null.
  */
 export function sceneCard({ parts }) {
   const texts = parts.filter((p) => p.kind.startsWith('text:')).map((p) => p.kind.slice(5));
@@ -98,7 +99,10 @@ export function sceneCard({ parts }) {
   }
   const opens = parts.flatMap((p, i) => (/^control:Open (.+)$/.test(p.kind) ? [i] : []));
   if (opens.length) return { card: 'file', files: opens.map((at, k) => sceneFile(parts.slice(at, opens[k + 1]))) };
-  const [question, ...rest] = texts;
+  // An answered card cut off at the top (oracle-pictures-sent, second take: section 71 from -46) shows
+  // its letter and label only; its question is off screen, so the scene has none to keep.
+  const cut = !parts.some((p) => p.kind.startsWith('control:')) && texts.length % 2 === 0;
+  const [question, ...rest] = cut ? [null, ...texts] : texts;
   // The rest come in pairs: a letter, then its label.
   const pairs = [];
   for (let i = 0; i + 1 < rest.length; i += 2) pairs.push({ letter: rest[i], label: rest[i + 1] });

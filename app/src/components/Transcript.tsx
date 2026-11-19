@@ -9,28 +9,24 @@ import {AnsweredCard, FileCard, PictureTiles, QuestionCard} from './Cards'
 export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; height?: number; marks?: {tag: 'strong' | 'code'; len: number}[]}[]; overlap?: number}
 /** A card in a gate scene (scripts/lib/cards.mjs sceneCard): a question waiting (choices) or answered. */
 export type SceneCard =
-  | {card: 'question'; question: string; choices?: string[]; answered?: {letter: string; label: string}}
+  | {card: 'question'; question: string | null; choices?: string[]; answered?: {letter: string; label: string}}
   | {card: 'file'; files: {name: string; size: number}[]}
   | {card: 'pictures'; count: number}
-/** A time row between messages (1.2.3: a day's first message after an earlier day's, oracle-file-sent time 78), at an ISO time. */
-export type SceneTime = {time: string}
-export type SceneRow = SceneBubble | SceneCard | SceneTime
+  /** A time row between messages (1.2.3: a day's first send, oracle-file-sent time 87), by the clock it reads ("11:31 PM", today). */
+  | {card: 'time'; time: string}
+export type SceneRow = SceneBubble | SceneCard
 
 /** A scene's conversation: its bubbles and answered cards, and the question still waiting (the last row), as the live page holds them. */
 export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null; times: Record<string, string>} {
   const last = rows.at(-1)
   const waiting = last && 'card' in last && last.card === 'question' && last.choices ? last : null
-  const ask: Ask | null = waiting ? {id: 'scene-ask', what: 'ask you something', detail: null, answering: null, questions: [{question: waiting.question, header: null, multi: false, options: (waiting.choices ?? []).map((label) => ({label, description: null}))}]} : null
+  const ask: Ask | null = waiting ? {id: 'scene-ask', what: 'ask you something', detail: null, answering: null, questions: [{question: waiting.question ?? '', header: null, multi: false, options: (waiting.choices ?? []).map((label) => ({label, description: null}))}]} : null
   // A file or picture card belongs to the message under it, as the live page holds it.
   // A time row goes above the next message, its files and pictures included.
   let carried: Pick<Bubble, 'files' | 'images'> = {}
   let time: string | null = null
   const times: Record<string, string> = {}
   const bubbles = (waiting ? rows.slice(0, -1) : rows).flatMap((r, i): Bubble[] => {
-    if ('time' in r) {
-      time = r.time
-      return []
-    }
     if (!('card' in r)) {
       const b = {...fromLengths([r])[0], key: `scene-${i}`, ...carried}
       carried = {}
@@ -38,11 +34,21 @@ export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null
       time = null
       return [b]
     }
+    if (r.card === 'time') time = todayAt(r.time)
     if (r.card === 'file') carried = {...carried, files: r.files.map((f) => ({name: f.name, size: filler(f.size)}))}
     if (r.card === 'pictures') carried = {...carried, images: Array.from({length: r.count}, (_, j) => `scene:${j}`)}
-    return r.card === 'question' && r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question, ...r.answered}}] : []
+    // A question off screen above (a card cut off at the top) gets placeholder words, one line.
+    return r.card === 'question' && r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question ?? filler(25), ...r.answered}}] : []
   })
   return {bubbles, ask, times}
+}
+
+// "11:31 PM" today, as an ISO time: a scene's time row reads "Today" wherever and whenever the gate runs.
+const todayAt = (clock: string) => {
+  const [, h, m, pm] = /^(\d+):(\d+) (AM|PM)$/.exec(clock) ?? [, '12', '0', 'PM']
+  const d = new Date()
+  d.setHours((Number(h) % 12) + (pm === 'PM' ? 12 : 0), Number(m), 0, 0)
+  return d.toISOString()
 }
 
 /** Placeholder words of the captured lengths, bold runs and code spans (one word, like a path) in their order. */
