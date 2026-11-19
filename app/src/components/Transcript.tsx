@@ -12,26 +12,37 @@ export type SceneCard =
   | {card: 'question'; question: string; choices?: string[]; answered?: {letter: string; label: string}}
   | {card: 'file'; files: {name: string; size: number}[]}
   | {card: 'pictures'; count: number}
-export type SceneRow = SceneBubble | SceneCard
+/** A time row between messages (1.2.3: a day's first message after an earlier day's, oracle-file-sent time 78), at an ISO time. */
+export type SceneTime = {time: string}
+export type SceneRow = SceneBubble | SceneCard | SceneTime
 
 /** A scene's conversation: its bubbles and answered cards, and the question still waiting (the last row), as the live page holds them. */
-export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null} {
+export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null; times: Record<string, string>} {
   const last = rows.at(-1)
   const waiting = last && 'card' in last && last.card === 'question' && last.choices ? last : null
   const ask: Ask | null = waiting ? {id: 'scene-ask', what: 'ask you something', detail: null, answering: null, questions: [{question: waiting.question, header: null, multi: false, options: (waiting.choices ?? []).map((label) => ({label, description: null}))}]} : null
   // A file or picture card belongs to the message under it, as the live page holds it.
+  // A time row goes above the next message, its files and pictures included.
   let carried: Pick<Bubble, 'files' | 'images'> = {}
+  let time: string | null = null
+  const times: Record<string, string> = {}
   const bubbles = (waiting ? rows.slice(0, -1) : rows).flatMap((r, i): Bubble[] => {
+    if ('time' in r) {
+      time = r.time
+      return []
+    }
     if (!('card' in r)) {
       const b = {...fromLengths([r])[0], key: `scene-${i}`, ...carried}
       carried = {}
+      if (time) times[b.key] = time
+      time = null
       return [b]
     }
     if (r.card === 'file') carried = {...carried, files: r.files.map((f) => ({name: f.name, size: filler(f.size)}))}
     if (r.card === 'pictures') carried = {...carried, images: Array.from({length: r.count}, (_, j) => `scene:${j}`)}
     return r.card === 'question' && r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question, ...r.answered}}] : []
   })
-  return {bubbles, ask}
+  return {bubbles, ask, times}
 }
 
 /** Placeholder words of the captured lengths, bold runs and code spans (one word, like a path) in their order. */
@@ -95,7 +106,8 @@ const timeOf = (iso: string) => {
 // `lift` (gate scenes): where the captured oracle state left its scroll. Above 0, the last row ends
 // that far above the transcript's end; below 0, the transcript is scrolled up that far from it
 // (gate/transcripts.ts lifts). The live page leaves it out: pinned to the end.
-export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose, lift = 0}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void; lift?: number}) {
+// `times` (gate scenes): a time row above a message, by the message's key (fromScene).
+export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose, lift = 0, times = {}}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void; lift?: number; times?: Record<string, string>}) {
   const box = useRef<HTMLDivElement>(null)
   const pinned = useRef(true)
   const below = Math.max(0, -lift)
@@ -135,10 +147,17 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
                 <AnsweredCard {...b.answered} />
               </div>
             )
-          const change = i > 0 && bubbles[i - 1].role !== b.role ? ' turn-change' : ''
+          const time = times[b.key]
+          // A time row parts the speakers itself: the row under it takes no extra space (oracle-file-sent article 79: 2 above).
+          const change = i > 0 && bubbles[i - 1].role !== b.role && !time ? ' turn-change' : ''
           const attached = hasAttachments(b)
           return (
             <Fragment key={b.key}>
+              {time && (
+                <div className="time-row time-later">
+                  <time dateTime={time}>{timeOf(time)}</time>
+                </div>
+              )}
               {/* What the message carries, in a row of its own above its bubble (oracle-file-sent 131, -pictures-sent 128). */}
               {attached && (
                 <div role="article" className={`turn turn-${b.role} turn-attached${change}`} data-role={b.role}>

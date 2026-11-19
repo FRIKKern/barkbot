@@ -1,7 +1,7 @@
 import {oracle} from './oracle'
 import {transcripts} from '../transcripts'
-import {todayAt} from './today'
 
-// fixtures/states/oracle-ask-choice.json (oracle 1.0.3, a version exception: scripts/lib/versions.mjs):
-// the bot's question waiting, three lettered choices; its time row on screen (captured 2026-11-14, 10:01 AM).
-export default {...oracle, transcript: {bubbles: transcripts['ask-choice'], time: todayAt(10, 1)}}
+// fixtures/states/oracle-ask-choice.json (1.2.3): the bot's question waiting, three lettered
+// choices, under the file and pictures sent before it. No time row on screen: the day's one sits
+// above the file, scrolled out of sight.
+export default {...oracle, transcript: {bubbles: transcripts['ask-choice']}}
