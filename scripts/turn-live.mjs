@@ -5,6 +5,8 @@
 //
 //   npm run turn:live            start the app and a headless Chrome, send one turn, reload, stop both
 //   npm run turn:live -- --url http://localhost:3000   use an app that is already running
+//   BARKBOT_HOST_NAME="BarkBot VM" BARKBOT_LIVE_DIR=vm npm run turn:live -- --bot <id>   another computer's bot;
+//                                   records go to parity/live/vm/ and name the computer (V1)
 //   npm run turn:live -- --approve  the bot asks leave (Q1): ask for a file with a made-up name, press Allow on each
 //                                   card, find the file in the bot's folder. Writes parity/live/approve.json.
 //   npm run turn:live -- --question the bot asks a question (Q2): press its second choice, and the bot must reply with
@@ -52,6 +54,8 @@ const QUESTION = args.includes('--question');
 const TOOL = args.includes('--tool');
 const MIDRELOAD = args.includes('--midreload');
 const REPLY_MS = Number(opt('reply-ms')) || 90000;
+// --bot <id>: open that bot (?bot=) instead of the first in the rail, e.g. the Main Bot of another computer (V1).
+const BOT = opt('bot');
 // A one-page PDF whose only text is `line`, made here (Helvetica, no fonts embedded): the xref
 // table holds each object's byte offset, so the file is valid as written.
 function onePagePdf(line) {
@@ -113,7 +117,7 @@ const seen = () => page.evaluate(() => {
   };
 });
 const open = async () => {
-  await page.send('Page.navigate', { url: `${base}/` });
+  await page.send('Page.navigate', { url: BOT ? `${base}/?bot=${encodeURIComponent(BOT)}` : `${base}/` });
   await until(async () => (await seen()).prompt, 30000, 'the conversation page');
   // And React has taken the page over: a file set on the chooser before that has no onChange to
   // reach (a cold dev server: --file timed out waiting for the chip, 2026-11-14).
@@ -147,7 +151,12 @@ const turn = async (text, { allow = false } = {}) => {
   return { before, after, ms: Date.now() - t0, allowed };
 };
 const commit = () => { try { return execFileSync('git', ['rev-parse', '--short=10', 'HEAD'], { cwd: path(), encoding: 'utf8' }).trim(); } catch { return null; } };
-const record = (file, r) => { mkdirSync(path('parity', 'live'), { recursive: true }); writeFileSync(path('parity', 'live', file), JSON.stringify({ ran: new Date().toISOString(), barkbot: commit(), ...r }, null, 1) + '\n'); };
+// The computer the app picks by name (app/src/chat/api.ts), recorded with each run. BARKBOT_LIVE_DIR
+// puts a run's records in parity/live/<dir>/, so a run on another computer (the VM, V1) keeps the
+// Mac's records as they are.
+const HOST = process.env.BARKBOT_HOST_NAME || 'BarkBot Mac';
+const LIVE = process.env.BARKBOT_LIVE_DIR ? ['parity', 'live', process.env.BARKBOT_LIVE_DIR] : ['parity', 'live'];
+const record = (file, r) => { mkdirSync(path(...LIVE), { recursive: true }); writeFileSync(path(...LIVE, file), JSON.stringify({ ran: new Date().toISOString(), barkbot: commit(), host: HOST, ...r }, null, 1) + '\n'); };
 const computer = () => page.evaluate(() => document.querySelector('.computer-state')?.textContent ?? null);
 
 try {
