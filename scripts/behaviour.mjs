@@ -53,7 +53,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], quiet: false, quietOpened: [], noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { bodies: [], quiet: false, quietOpened: [], quietBytes: new Map(), noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -187,14 +187,20 @@ await new Promise((ok) => httpServer((req, res) => {
       // `slowNew`: a conversation made meanwhile opens its stream only when the rule takes its id out of stub.slow.
       const go = () => {
         res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });
-        // `quiet`: as Barkpark on a conversation with no rows, a session's stream sends its headers and no body.
-        if (stub.quiet && req.url !== '/v1/chat/events') { res.flushHeaders(); stub.quietOpened.push(req.url.split('/')[4]); } else res.write(': open\n\n');
+        // `quiet`: as Barkpark on a conversation with no rows, a session's stream sends its headers and no
+        // body: no ': open', no rows. stub.quietBytes counts every body byte written to it after that.
+        const quiet = stub.quiet && req.url !== '/v1/chat/events';
+        if (quiet) {
+          const sid = req.url.split('/')[4], write = res.write.bind(res);
+          res.flushHeaders(); stub.quietOpened.push(sid); stub.quietBytes.set(sid, 0);
+          res.write = (chunk, ...rest) => { stub.quietBytes.set(sid, stub.quietBytes.get(sid) + Buffer.byteLength(chunk)); return write(chunk, ...rest); };
+        } else res.write(': open\n\n');
         // As Barkpark: the stored rows first (a fresh page asks from 0), and the fleet's snapshot.
         if (req.url === '/v1/chat/events') {
           stub.fleetOpens++; stub.fleets.push(res); res.on('close', () => stub.fleets.splice(stub.fleets.indexOf(res), 1));
           if (stub.fleet) res.write(`event: snapshot\ndata: ${JSON.stringify({ sessions: stub.sessions.map((x) => ({ session_id: x.id, agent_state: stub.stateBy.get(x.id) ?? stub.fleet })) })}\n\n`);
         }
-        else if (req.headers['last-event-id'] !== undefined) (stub.rowsBy.get(req.url.split('/')[4]) ?? stub.rows).forEach((r) => res.write(`id: ${r.seq}\nevent: message\ndata: ${JSON.stringify(r)}\n\n`));
+        else if (!quiet && req.headers['last-event-id'] !== undefined) (stub.rowsBy.get(req.url.split('/')[4]) ?? stub.rows).forEach((r) => res.write(`id: ${r.seq}\nevent: message\ndata: ${JSON.stringify(r)}\n\n`));
         if (req.url !== '/v1/chat/events') { stub.opened.push(req.url.split('/')[4]); stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
       };
       const sid = req.url.split('/')[4];
