@@ -107,6 +107,26 @@ export function transcriptCases(state, ours) {
       cases.push({ key: mk, pass: !why.length, why: why.join('; ') || undefined });
     });
   });
+  // The day and time line ("Today 10:01 AM" over the first bubble): its type, its words, its x,
+  // width and height, and how far it ends above the conversation's first row. Only a 1.0.3 card
+  // state captures one (oracle-ask-choice, -choice-answered: 10 above the first row in both); the
+  // transcript is pinned at its end, so its y moves with what is below it and is not judged on its
+  // own. Its words are a date, not the conversation's, so they are judged as they are.
+  const tt = state.elements.find((e) => e.tag === 'time');
+  if (tt) {
+    const mt = ours?.elements.find((e) => e.tag === 'time');
+    // The first row under the line: the first article that starts below it.
+    const below = (s, t) => s.elements.filter((e) => e.role === 'article' && e.box[1] >= t.box[1] + t.box[3] - TOL).sort((a, b) => a.box[1] - b.box[1])[0];
+    const tr = below(state, tt), mr = mt && below(ours, mt);
+    if (!mt) cases.push({ key: 'time', pass: false, why: 'missing' });
+    else {
+      const why = [...styleDiff(TEXT_KEYS, tt, mt, ''), ...['x', , 'width', 'height'].flatMap((k, i) => (k ? off(k, mt.box[i], tt.box[i]) : []))];
+      if (!mr) why.push('no row under it');
+      else why.push(...off('gap to the first row', mr.box[1] - (mt.box[1] + mt.box[3]), tr.box[1] - (tt.box[1] + tt.box[3])));
+      if (mt.text !== tt.text) why.push(`text "${mt.text}" ≠ "${tt.text}"`);
+      cases.push({ key: 'time', pass: !why.length, why: why.join('; ') || undefined });
+    }
+  }
   return cases;
 }
 
