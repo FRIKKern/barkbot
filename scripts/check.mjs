@@ -10,6 +10,7 @@ import { heroSvg } from './generate-hero.mjs';
 import { controls, claims } from './lib/controls.mjs';
 import { turnTraces } from './lib/turn-traces.mjs';
 import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
+import { guardBeforeSend } from './lib/host-guard.mjs';
 
 const fails = [];
 const ran = {};
@@ -147,8 +148,40 @@ for (const f of readdirSync(path('parity', 'gate-b')).filter((x) => x.endsWith('
   else if (!turns.judged.some((t) => t.id === id)) fail(`gate: parity/gate-b/${f} has no turn trace in traces/`);
 }
 
+// The live turn's check before a send fails closed (scripts/lib/host-guard.mjs, PR #288 review):
+// a stub page, so no live send. A hook that never ran, or bubbles with no conversation stream,
+// refuses; only an empty page defers to the check after the turn. The guard itself sends nothing.
+const SID = '00000000-0000-4000-8000-0000000002a8';
+const stub = (streams) => { const sent = []; return { sent, page: { evaluate: async () => streams, send: async (m) => { sent.push(m); } } }; };
+for (const [name, streams, bubbles, want] of [
+  ['hook missing, empty page', undefined, 0, 'refuse'],
+  ['hook missing, bubbles shown', undefined, 3, 'refuse'],
+  ['hook ran, no conversation stream, bubbles shown', [], 2, 'refuse'],
+  ['hook ran, only other streams, bubbles shown', ['http://localhost/api/other/events'], 1, 'refuse'],
+  ['hook ran, no stream, empty page (a new conversation)', [], 0, 'defer'],
+  ['hook ran, the conversation stream', [`http://localhost/api/chat/${SID}/events`], 2, 'sid'],
+]) {
+  rule('host guard', 1);
+  const s = stub(streams);
+  const g = await guardBeforeSend(s.page, bubbles);
+  const got = g.refuse ? 'refuse' : g.defer ? 'defer' : g.sid === SID ? 'sid' : JSON.stringify(g);
+  if (got !== want) fail(`host guard: ${name}: ${got}, not ${want}`);
+  if (s.sent.length) fail(`host guard: ${name}: the guard sent ${s.sent.length} CDP call(s)`);
+}
+// And turn-live runs it before each send: every Input.insertText has onHost({ before }) after the
+// settled() count it follows.
+{
+  const lines = read('scripts/turn-live.mjs').split('\n');
+  lines.forEach((l, i) => {
+    if (!l.includes("'Input.insertText'")) return;
+    rule('host guard', 1);
+    let j = i; while (j > 0 && !/= await settled\(\)/.test(lines[j])) j--;
+    if (!lines.slice(j, i).some((x) => x.includes('await onHost({ before })'))) fail(`host guard: scripts/turn-live.mjs:${i + 1} sends text with no onHost({ before }) since its settled() count`);
+  });
+}
+
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records']) {
+for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

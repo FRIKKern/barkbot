@@ -38,6 +38,7 @@ import { deflateSync } from 'node:zlib';
 import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
 import { barkparkLive } from './lib/barkpark-live.mjs';
+import { guardBeforeSend, sidOf } from './lib/host-guard.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -139,7 +140,7 @@ const turn = async (text, { allow = false } = {}) => {
   let allowed = 0;
   const before = await settled();
   if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
-  await onHost({ before: true }); // a conversation already open on another computer: nothing is sent
+  await onHost({ before }); // a conversation already open on another computer: nothing is sent
   const t0 = Date.now();
   await page.evaluate(() => document.querySelector('.prompt').focus());
   await page.send('Input.insertText', { text });
@@ -164,10 +165,20 @@ const HOST = process.env.BARKBOT_HOST_NAME || 'BarkBot Mac';
 // The turn's conversation runs on HOST, as Barkpark says (its execution_host_id), or nothing is
 // recorded: the app opens the first bot in the rail, which may be another computer's (V1, 2026-11-19).
 let live;
-const onHost = async ({ before = false } = {}) => {
-  const sid = (await page.evaluate(() => window.__streams ?? [])).map((u) => u.match(/\/api\/chat\/([0-9a-f-]{36})\/events/i)?.[1]).filter(Boolean).at(-1);
-  // Before a turn a new conversation has no stream yet (its first message makes it): checked after.
-  if (!sid) return before ? undefined : stopWith('could not tell which conversation the page used (no conversation stream opened)');
+// Before a send, pass the page's settled counts as `before`: the check fails closed
+// (scripts/lib/host-guard.mjs). Only a page with no bubbles, a new conversation whose first
+// message makes the stream, waits for the check after the turn.
+const onHost = async ({ before = null } = {}) => {
+  let sid;
+  if (before) {
+    const g = await guardBeforeSend(page, before.user + before.bot);
+    if (g.refuse) stopWith(`${g.refuse}; nothing was sent`);
+    if (g.defer) return;
+    sid = g.sid;
+  } else {
+    sid = sidOf(await page.evaluate(() => window.__streams));
+    if (!sid) stopWith('could not tell which conversation the page used (no conversation stream opened)');
+  }
   try { live ??= barkparkLive(); } catch (e) { stopWith(e.message); }
   const h = await live.hostOf(sid);
   if (h.name !== HOST) stopWith(`${before ? 'the open conversation is' : 'the turn went to a conversation'} on ${h.name ? `"${h.name}"` : 'a computer that is not one of yours'}, not "${HOST}" (pick its bot with --bot <id>)${before ? '; nothing was sent' : ''}`);
@@ -200,6 +211,7 @@ try {
     const pool = ['maple', 'cedar', 'birch', 'aspen', 'rowan', 'hazel', 'alder', 'elder'].sort(() => Math.random() - 0.5).slice(0, 3);
     const before = await settled();
     if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
+    await onHost({ before }); // as in turn(): nothing is sent to a conversation on another computer
     const t0 = Date.now();
     await page.evaluate(() => document.querySelector('.prompt').focus());
     await page.send('Input.insertText', { text: `Use your AskUserQuestion tool to ask me which tree I prefer: ${pool.join(', ')}. After I answer, reply with only the tree I chose.` });
@@ -213,6 +225,7 @@ try {
     await until(async () => { after = await seen(); said = await page.evaluate(() => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].at(-1)?.textContent ?? ''); return after.bot > before.bot && !after.working && !after.asking && said.length > 0; }, REPLY_MS, 'the bot to reply after the choice');
     const low = said.toLowerCase();
     if (!low.includes(want.toLowerCase()) || offered.some((o) => o !== want && low.includes(o.toLowerCase()))) stopWith('the bot\'s reply does not name the pressed choice alone: the answer did not reach it');
+    await onHost(); // the conversation the turn went to runs on HOST, or nothing is recorded
     record('question.json', { choices_offered: offered.length, pressed: 2, reply_names_the_choice: true, reply_ms: Date.now() - t0 });
     console.log(`Live question: ok · ${offered.length} choices offered · pressed B · the bot replied with that choice · ${((Date.now() - t0) / 1000).toFixed(1)} s`);
     process.exit(0);
@@ -315,6 +328,7 @@ try {
     const end = `END-${1000 + Math.floor(Math.random() * 9000)}`;
     const before = await settled();
     if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
+    await onHost({ before }); // as in turn(): nothing is sent to a conversation on another computer
     const t0 = Date.now();
     await page.evaluate(() => document.querySelector('.prompt').focus());
     await page.send('Input.insertText', { text: `Write about 400 words on how tides work, in plain paragraphs, no tools. Finish with a last line that says only ${end}` });
@@ -337,6 +351,7 @@ try {
     let again;
     await until(async () => { again = await settled(); return again.user === after.user && again.bot === after.bot; }, 20000, `one more reload to show ${after.user} + ${after.bot} bubbles again`);
     if (await ends() !== 1) stopWith('the reply shows more than once after one more reload');
+    await onHost(); // the conversation the turn went to runs on HOST, or nothing is recorded
     record('midreload.json', { reloaded_at_ms: reloadAt, finished_on_fresh_page: true, reply_ms: Date.now() - t0, bubbles_before: [before.user, before.bot], bubbles_after: [after.user, after.bot], after_second_reload: [again.user, again.bot] });
     console.log(`Live mid-reload: ok · reloaded ${(reloadAt / 1000).toFixed(1)} s in · the reply finished on the fresh page, once · the same after one more reload`);
     process.exit(0);
