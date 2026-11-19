@@ -1,32 +1,46 @@
 // The lists the overlays show, as captured (fixtures/states/oracle-*.json). Labels are UI text
 // and are kept 1:1 (0005). A list only partly on screen when captured holds what was on screen;
-// the rest needs a capture scrolled to the end (see the voice and language notes).
+// the rest came from a capture scrolled to the end.
 
-export const speeds = ['0.5x', '0.75x', '1x', '1.25x', '1.5x', '2x']
-
-// oracle-voice-picker: the list holds 28 voices (scroll height 1074 = 6 + 28 x 38 - 2 + 6); the
-// first 16 were on screen. Liora carries a 14 pt mark left of its preview button.
-export const voices = [
-  'Altair',
-  'Ara',
-  'Atlas',
-  'Aurora',
-  'Carina',
-  'Castor',
-  'Celeste',
-  'Cosmo',
-  'Eve',
-  'Helios',
-  'Helix',
-  'Iris',
-  'Kepler',
-  'Leo',
-  'Liora',
-  'Lumen',
+// The Voice dialog (Grok 1.2.3, decision 0010): a speed slider over a grid of voices, two to a row.
+// oracle-voice-picker and -end show 24 voices with their lines, Carina to Zenith. The capture also
+// holds two radios above Carina (y -73.5) whose words lie above the window: not captured, so not
+// here until a capture of the grid's top names them.
+export const voices: [name: string, line: string][] = [
+  ['Carina', 'Soft & empathetic'],
+  ['Castor', 'Easygoing & real'],
+  ['Celeste', 'Caring & confident'],
+  ['Cosmo', 'Bright & curious'],
+  ['Eve', 'Energetic & upbeat'],
+  ['Helios', 'Upbeat & versatile'],
+  ['Helix', 'Bold & dynamic'],
+  ['Iris', 'Friendly & charming'],
+  ['Kepler', 'Witty & inventive'],
+  ['Leo', 'Strong & assured'],
+  ['Liora', 'Calm & grounded'],
+  ['Lumen', 'Warm & articulate'],
+  ['Luna', 'Gentle & patient'],
+  ['Lux', 'Quiet & wise'],
+  ['Naksh', 'Warm & thoughtful'],
+  ['Orion', 'Rich & cinematic'],
+  ['Perseus', 'Strong & trusted'],
+  ['Rex', 'Confident & clear'],
+  ['Rigel', 'Crisp & composed'],
+  ['Sal', 'Smooth & balanced'],
+  ['Sirius', 'Clever & playful'],
+  ['Ursa', 'Friendly & warm'],
+  ['Zagan', 'Deep & dramatic'],
+  ['Zenith', 'Sharp & focused'],
 ]
-export const markedVoices = new Set(['Liora'])
+// Helix and Liora carry a 16 pt mark at the card's top left (img 734.5,310.5 and 734.5,494.5).
+export const markedVoices = new Set(['Helix', 'Liora'])
 
-// oracle-language-picker: 29 entries (scroll height 938 = 6 + 29 x 32 - 2 + 6); 17 were on screen.
+// The Speed slider: the thumb at 1.0x stands a third along the track (46.3 of 139), so the range is
+// 0.5x to 2x. The value reads with one decimal ("1.0x"). The step is not captured; 0.1 is ours.
+export const SPEED = {min: 0.5, max: 2, step: 0.1}
+export const speedText = (speed: number) => `${speed.toFixed(1)}x`
+
+// oracle-language-picker and -end: 29 entries (scroll height 938 = 6 + 29 x 32 - 2 + 6).
 export const languages = [
   'Auto-detect',
   'English',
@@ -45,6 +59,18 @@ export const languages = [
   'Hungarian',
   'Indonesian',
   'Italian',
+  'Japanese',
+  'Korean',
+  'Polish',
+  'Portuguese (Brazil)',
+  'Portuguese (Portugal)',
+  'Russian',
+  'Spanish (Mexico)',
+  'Spanish (Spain)',
+  'Swedish',
+  'Thai',
+  'Turkish',
+  'Vietnamese',
 ]
 
 // oracle-new-bot-dialog: 13 shapes in rows of 5, 5, 3; 11 colours in rows of 6, 5. The oracle

@@ -59,8 +59,8 @@ export const Route = createFileRoute('/')({
 const live: Transport = {...barkpark, fleet: undefined}
 
 // The Voice card's values until Barkpark has a voice setting: what the oracle's fresh bot shows
-// (fixtures/states: Helix, 1x, Auto-detect).
-const VOICE = {voice: 'Helix', speed: '1x', language: 'Auto-detect'}
+// (fixtures/states: Helix 1.0x, Auto-detect).
+const VOICE = {voice: 'Helix', speed: 1, language: 'Auto-detect'}
 
 // How long a pick waits for a first message still opening its conversation (Home's pick).
 const PICK_HOLD_MS = 6000
