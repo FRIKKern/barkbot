@@ -70,18 +70,43 @@ export const colours: [string, string][] = [
 ]
 
 // The account menu's usage line. The fixtures redact it (O2: a textLength of 7 only),
-// so this is a placeholder of that length; real usage replaces it when the menu is wired. The
-// menu's width follows this text.
+// so this is a placeholder of that length; real usage replaces it when the menu is wired.
 export const weeklyUsage = '–% used'
 
-// oracle-connect-apps: the filters and the sections on screen when captured. App names are
-// third-party product names: text only, never their logos (neutral tiles stand in). Only
-// 1Password's Connect carries its own label in the oracle; the others are named by their text.
-export const appCategories = ['All', 'Password Managers', 'Productivity', 'Communication', 'Design', 'Code']
-export const appSections: {title: string; viewAll: boolean; apps: string[]}[] = [
-  {title: 'Recommended for you', viewAll: true, apps: ['Datadog', 'Vercel', 'Supabase', 'Cloudflare', 'Sentry', 'Firebase']},
-  {title: 'Password Managers', viewAll: false, apps: ['1Password']},
-  {title: 'Productivity', viewAll: true, apps: ['Notion', 'Atlassian', 'Google Docs', 'Canva']},
+// oracle-connect-apps (1.2.3): the filters and the sections on screen when captured. App names are
+// third-party product names: text only, never their logos (a tile of the captured colour stands in).
+// This Mac's apps carry a line under the name, and Location's action is Open settings.
+export const appCategories = ['All', 'Mac', 'Password Managers', 'Productivity', 'Communication', 'Design']
+export type App = {name: string; tile?: string; desc?: string; action?: string}
+export type AppSection = {title: string; viewAll: boolean; mac?: boolean; apps: App[]}
+export const appSections: AppSection[] = [
+  {
+    title: 'Recommended for you',
+    viewAll: true,
+    apps: [
+      {name: 'Browserless', tile: 'rgb(13, 15, 18)'},
+      {name: 'incident.io', tile: 'rgb(243, 85, 51)'},
+      {name: 'Turso', tile: 'rgb(43, 44, 49)'},
+      {name: 'Lightrun', tile: 'rgb(27, 153, 248)'},
+      {name: 'Knock', tile: 'rgb(38, 38, 38)'},
+      {name: 'Google Drive', tile: 'rgb(255, 255, 255)'},
+    ],
+  },
+  {
+    title: 'This Mac',
+    viewAll: false,
+    mac: true,
+    apps: [
+      {name: 'Messages', desc: 'Read and reply to texts', tile: 'linear-gradient(rgb(76, 206, 109) 0%, rgb(48, 183, 82) 100%)'},
+      {name: 'Notes', desc: 'Find and save notes', tile: 'linear-gradient(rgb(255, 210, 31) 0%, rgb(235, 188, 0) 100%)'},
+      {name: 'Reminders', desc: 'Set and check reminders', tile: 'linear-gradient(rgb(255, 255, 255) 0%, rgb(235, 235, 235) 100%)'},
+      {name: 'Calendar', desc: 'See your day and add events', tile: 'linear-gradient(rgb(255, 255, 255) 0%, rgb(235, 235, 235) 100%)'},
+      {name: 'Location', desc: 'Find places near you', tile: 'linear-gradient(rgb(31, 138, 255) 0%, rgb(0, 112, 235) 100%)', action: 'Open settings'},
+      {name: 'Contacts', desc: 'Look up the people you ask about', tile: 'linear-gradient(rgb(184, 184, 187) 0%, rgb(160, 160, 164) 100%)'},
+    ],
+  },
+  // Below the fold on 1.2.3 (only this title is on screen); its row is as 0.79.3 showed it.
+  {title: 'Password Managers', viewAll: false, apps: [{name: '1Password', tile: 'rgb(48, 49, 54)'}]},
 ]
 export const labelledConnect = new Set(['1Password'])
 

@@ -26,7 +26,8 @@ import type {Scene} from '../Shell'
 import {AccountMenu, ComposerMenu} from './Menus'
 import {LanguagePicker, SpeedPicker, VoicePicker} from './Pickers'
 import {NewBotDialog} from './NewBotDialog'
-import {AvatarEditor, ConnectApps, Settings} from './Views'
+import {ConnectApps} from './ConnectApps'
+import {AvatarEditor, Settings} from './Views'
 
 // `before`: what had focus before the trigger was pressed (a click on a button moves focus to it
 // first). A view opened from a menu's row gives focus back there on close: the keys trace's
@@ -46,7 +47,7 @@ const overlays: Record<string, Render> = {
   'speed-picker': ({picked, scene, choose}) => <SpeedPicker picked={picked ?? scene?.voice?.speed} onPick={choose} />,
   'language-picker': ({picked, scene, choose}) => <LanguagePicker picked={picked ?? scene?.voice?.language} onPick={choose} />,
   'new-bot-dialog': ({close, create}) => <NewBotDialog onClose={close} onCreate={create} />,
-  'connect-apps': ({close}) => <ConnectApps onClose={close} />,
+  'connect-apps': ({close, scene}) => <ConnectApps onClose={close} today={scene?.apps?.today} connecting={scene?.apps?.connecting} />,
   'edit-avatar': () => <AvatarEditor />,
   settings: ({close}) => <Settings onClose={close} />,
   // A scene can open Settings on another page (oracle-settings-computer, ...); the tabs switch it.
