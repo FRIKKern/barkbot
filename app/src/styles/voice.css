@@ -11,7 +11,7 @@
 .speed { height: 40px; padding: 4px 16px 0 8px; display: flex; align-items: center; gap: 12px; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; }
 .speed-label { flex: none; }
 /* The value: 40 wide, its characters set right (span 274) and each in a box of its own (1.0x: 275..282). */
-.speed-value { width: 40px; flex: none; display: flex; justify-content: flex-end; }
+.speed-value { width: 40px; flex: none; display: flex; justify-content: flex-end; font-variant-numeric: tabular-nums; } /* "1" and "0" are both 8.5 wide */
 .speed-value > span { display: flex; }
 .speed-value > span > span { display: block; height: 18px; }
 
@@ -22,7 +22,7 @@
 .slider-wash { height: 20px; border-radius: 9999px; background: var(--wash-04); overflow: hidden; }
 .slider-fill { display: block; height: 20px; border-radius: 9999px; background: rgb(17 109 210); }
 .slider-thumb { position: absolute; top: 0; width: 20px; height: 20px; border: 2px solid transparent; border-radius: 9999px; background: var(--ink); }
-.slider-thumb input { appearance: none; display: block; width: 16px; height: 16px; margin: 0; border-radius: 9999px; background: rgb(59 59 59); color: rgb(255 255 255); outline: none; cursor: pointer; }
+.slider-thumb input { appearance: none; display: block; width: 16px; height: 16px; margin: 0; background: rgb(59 59 59); color: rgb(255 255 255); outline: none; cursor: pointer; }
 .slider-thumb input::-webkit-slider-thumb { appearance: none; width: 0; height: 0; }
 .slider-thumb input::-moz-range-thumb { width: 0; height: 0; border: 0; }
 

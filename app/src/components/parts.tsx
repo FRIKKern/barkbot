@@ -9,6 +9,7 @@ import {speedText} from './overlays/data'
 const FIT: Record<string, string> = {
   "Bot's computer": '0.081px', // 1.6 pt too wide at 0.195px
   Speed: '0.435px', // 1.2 pt too narrow at 0.195px (the Voice dialog's slider label)
+  'Helix 1.0x': '-0.27px', // 1.9 pt too wide at -0.08px (the Voice row, oracle-turn-1040)
   // Overlays (fixtures/states/oracle-account-menu.json, oracle-new-bot-dialog.json), 14/20.
   Cancel: '0.257px', // 0.7 pt too narrow at 0.14px
   Create: '0.207px', // 0.4 pt too narrow at 0.14px; with Cancel it moved Cancel 1.1 pt
