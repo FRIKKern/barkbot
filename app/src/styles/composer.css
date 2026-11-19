@@ -41,3 +41,6 @@
 /* Hover (oracle-hover-composer-actions, -start-voice-input, -start-voice-chat). */
 .round:hover { background: var(--wash-08); color: var(--ink); }
 .round.voice:hover { background: rgb(219 219 219); color: var(--bg); }
+
+/* MUTANT: the box stays at two lines */
+.prompt { max-height: 40px; overflow: hidden; }
