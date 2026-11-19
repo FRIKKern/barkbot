@@ -7,7 +7,7 @@
   2
  ],
  "cases": 88,
- "pass": 62,
+ "pass": 58,
  "results": [
   {
    "key": "aside:Bots",
@@ -216,11 +216,13 @@
   },
   {
    "key": "control:Close dialog",
-   "pass": true
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "h2:General",
-   "pass": true
+   "pass": false,
+   "why": "box off by -14,0,8,0"
   },
   {
    "key": "p:Unlock the ultimate AI subscription",
@@ -240,7 +242,8 @@
   },
   {
    "key": "control:Change profile photo",
-   "pass": true
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Copy email address",
@@ -304,11 +307,13 @@
   },
   {
    "key": "span:Send with ⌘↵",
-   "pass": true
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Send with ⌘↵",
-   "pass": true
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "bubble:user#1 look",
@@ -324,58 +329,57 @@
   },
   {
    "key": "bubble:assistant#1 place",
-   "pass": false,
-   "why": "width (filled) off by -391.7"
+   "pass": true
   },
   {
    "key": "card#1 parts",
    "pass": false,
-   "why": "missing"
+   "why": "text(3) 1 ≠ 2; text(4) 0 ≠ 1; text(8) 1 ≠ 0"
   },
   {
    "key": "card#1 control:Open oracle-note.txt (2)#1",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,66,0,0"
   },
   {
    "key": "card#1 box#1",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,66,0,0"
   },
   {
    "key": "card#1 box#2",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,66,0,0"
   },
   {
    "key": "card#1 box#3",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,66,0,0"
   },
   {
    "key": "card#1 box#4",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,66,0,0"
   },
   {
    "key": "card#1 box#5",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,66,0,0"
   },
   {
    "key": "card#1 box#6",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,66,0,0"
   },
   {
    "key": "card#1 text(3)#1",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,87,0,-2; color rgba(245, 245, 245, 0.66) ≠ rgb(245, 245, 245); font-size 13px ≠ 14px; font-weight 425 ≠ 500; line-height 18px ≠ 20px"
   },
   {
    "key": "card#1 text(11)#1",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,66,0.1,0"
   },
   {
    "key": "card#1 text(4)#1",
@@ -388,7 +392,7 @@
    "why": "missing"
   }
  ],
- "run": "2026-11-19T20:01:47.079Z",
+ "run": "2026-11-19T20:32:44.767Z",
  "inventory": {
   "id": "oracle-settings",
   "controls": [
@@ -525,7 +529,7 @@
    {
     "name": "Close dialog",
     "item": "N5",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Get started",
@@ -535,7 +539,7 @@
    {
     "name": "Change profile photo",
     "item": "F13",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Copy email address",
@@ -560,10 +564,10 @@
    {
     "name": "Send with ⌘↵",
     "item": "F13",
-    "ours": true
+    "ours": false
    }
   ],
-  "missing": 0,
+  "missing": 3,
   "untracked": []
  }
 }

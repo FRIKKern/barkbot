@@ -1,13 +1,13 @@
 {
  "id": "oracle-account-menu",
- "captured": "2026-11-09",
+ "captured": "2026-11-19",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 82,
- "pass": 82,
+ "cases": 65,
+ "pass": 26,
  "results": [
   {
    "key": "aside:Bots",
@@ -98,123 +98,146 @@
    "pass": true
   },
   {
-   "key": "control:Add to Slack",
-   "pass": true
-  },
-  {
-   "key": "span:Add to Slack",
-   "pass": true
-  },
-  {
    "key": "control:Create a routine",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,0,0"
   },
   {
    "key": "span:Create a routine",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,0.8,-0.5"
   },
   {
    "key": "span:Computer",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,-0.4,0"
   },
   {
    "key": "control:Bot's computer",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,0,0"
   },
   {
    "key": "bdi:Bot's computer",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,0,-0.5"
   },
   {
    "key": "bdi:Asleep",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,0.1,-0.5"
   },
   {
    "key": "span:Voice chat",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,0.2,0"
   },
   {
    "key": "span:Voice",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,-0.2,-0.5"
   },
   {
    "key": "control:Voice",
-   "pass": true
+   "pass": false,
+   "why": "box off by 25.2,36,-25.2,0"
   },
   {
-   "key": "span:Helix",
-   "pass": true
-  },
-  {
-   "key": "span:Speed",
-   "pass": true
-  },
-  {
-   "key": "control:Speed",
-   "pass": true
-  },
-  {
-   "key": "span:1x",
-   "pass": true
+   "key": "span:Helix 1.0x",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "span:Language",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,66.5,0.7,-0.5"
   },
   {
    "key": "control:Language",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.3,66,-0.3,0"
   },
   {
    "key": "span:Auto-detect",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.3,66.5,-0.3,-0.5"
   },
   {
    "key": "control:Weekly usage",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,44.5,15,0"
   },
   {
    "key": "span:Weekly usage",
-   "pass": true
+   "pass": false,
+   "why": "box off by 1,44.5,-11.7,0"
+  },
+  {
+   "key": "control:Upgrade plan",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Upgrade plan",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Get Grok Bot for mobile",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,0,15,0"
   },
   {
    "key": "span:Get Grok Bot for mobile",
-   "pass": true
+   "pass": false,
+   "why": "box off by 1,0,14,0"
   },
   {
    "key": "control:Support",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,0,15,0"
   },
   {
    "key": "span:Support",
-   "pass": true
+   "pass": false,
+   "why": "box off by 1,0,14,0"
   },
   {
    "key": "control:Settings",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,0,15,0"
   },
   {
    "key": "span:Settings",
-   "pass": true
+   "pass": false,
+   "why": "box off by 1,0,14,0"
   },
   {
    "key": "control:Add account",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,0,15,0"
   },
   {
    "key": "span:Add account",
-   "pass": true
+   "pass": false,
+   "why": "box off by 1,0,14,0"
   },
   {
    "key": "control:Log out",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,0,15,0"
   },
   {
    "key": "span:Log out",
+   "pass": false,
+   "why": "box off by 1,0,14,0"
+  },
+  {
+   "key": "bubble:user#1 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 place",
    "pass": true
   },
   {
@@ -226,119 +249,67 @@
    "pass": true
   },
   {
-   "key": "bubble:user#1 look",
-   "pass": true
+   "key": "card#1 parts",
+   "pass": false,
+   "why": "text(3) 1 ≠ 2; text(4) 0 ≠ 1; text(8) 1 ≠ 0"
   },
   {
-   "key": "bubble:user#1 place",
-   "pass": true
+   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "bubble:assistant#2 look",
-   "pass": true
+   "key": "card#1 box#1",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "bubble:assistant#2 place",
-   "pass": true
+   "key": "card#1 box#2",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "strong#1",
-   "pass": true
+   "key": "card#1 box#3",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "strong#2",
-   "pass": true
+   "key": "card#1 box#4",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "code#1",
-   "pass": true
+   "key": "card#1 box#5",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "code#2",
-   "pass": true
+   "key": "card#1 box#6",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "bubble:user#2 look",
-   "pass": true
+   "key": "card#1 text(3)#1",
+   "pass": false,
+   "why": "box off by 0,87,0,-2; color rgba(245, 245, 245, 0.66) ≠ rgb(245, 245, 245); font-size 13px ≠ 14px; font-weight 425 ≠ 500; line-height 18px ≠ 20px"
   },
   {
-   "key": "bubble:user#2 place",
-   "pass": true
+   "key": "card#1 text(11)#1",
+   "pass": false,
+   "why": "box off by 0,66,0.1,0"
   },
   {
-   "key": "bubble:assistant#3 look",
-   "pass": true
+   "key": "card#1 text(4)#1",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "bubble:assistant#3 place",
-   "pass": true
-  },
-  {
-   "key": "strong#3",
-   "pass": true
-  },
-  {
-   "key": "strong#4",
-   "pass": true
-  },
-  {
-   "key": "code#3",
-   "pass": true
-  },
-  {
-   "key": "code#4",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#3 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#3 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#4 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#4 place",
-   "pass": true
-  },
-  {
-   "key": "strong#5",
-   "pass": true
-  },
-  {
-   "key": "strong#6",
-   "pass": true
-  },
-  {
-   "key": "code#5",
-   "pass": true
-  },
-  {
-   "key": "code#6",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#4 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#4 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#5 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#5 place",
-   "pass": true
+   "key": "card#1 text(3)#2",
+   "pass": false,
+   "why": "missing"
   }
  ],
- "run": "2026-11-09T09:01:32.439Z",
+ "run": "2026-11-19T20:32:44.767Z",
  "inventory": {
   "id": "oracle-account-menu",
   "controls": [
@@ -423,11 +394,6 @@
     "ours": true
    },
    {
-    "name": "Add to Slack",
-    "item": "N3",
-    "ours": true
-   },
-   {
     "name": "Create a routine",
     "item": "N3",
     "ours": true
@@ -443,11 +409,6 @@
     "ours": true
    },
    {
-    "name": "Speed",
-    "item": "N4",
-    "ours": true
-   },
-   {
     "name": "Language",
     "item": "N4",
     "ours": true
@@ -456,6 +417,11 @@
     "name": "Weekly usage",
     "item": "F8",
     "ours": true
+   },
+   {
+    "name": "Upgrade plan",
+    "item": "F8",
+    "ours": false
    },
    {
     "name": "Get Grok Bot for mobile",
@@ -483,7 +449,7 @@
     "ours": true
    }
   ],
-  "missing": 0,
+  "missing": 1,
   "untracked": []
  }
 }
