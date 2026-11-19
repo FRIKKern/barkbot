@@ -7,14 +7,15 @@
   2
  ],
  "cases": 1,
- "pass": 1,
+ "pass": 0,
  "results": [
   {
    "key": "control:Language",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.3,66,-0.3,0"
   }
  ],
- "run": "2026-11-19T20:36:50.369Z",
+ "run": "2026-11-19T20:24:46.604Z",
  "inventory": {
   "id": "oracle-hover-language",
   "controls": [
