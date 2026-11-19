@@ -10,7 +10,7 @@ export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; heig
 /** A card in a gate scene (scripts/lib/cards.mjs sceneCard): a question waiting (choices) or answered. */
 export type SceneCard =
   | {card: 'question'; question: string; choices?: string[]; answered?: {letter: string; label: string}}
-  | {card: 'file'; name: string; size: number}
+  | {card: 'file'; files: {name: string; size: number}[]}
   | {card: 'pictures'; count: number}
 export type SceneRow = SceneBubble | SceneCard
 
@@ -27,7 +27,7 @@ export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null
       carried = {}
       return [b]
     }
-    if (r.card === 'file') carried = {...carried, files: [{name: r.name, size: filler(r.size)}]}
+    if (r.card === 'file') carried = {...carried, files: r.files.map((f) => ({name: f.name, size: filler(f.size)}))}
     if (r.card === 'pictures') carried = {...carried, images: Array.from({length: r.count}, (_, j) => `scene:${j}`)}
     return r.card === 'question' && r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question, ...r.answered}}] : []
   })
@@ -92,19 +92,24 @@ const timeOf = (iso: string) => {
   return `${today ? 'Today' : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} ${t}`
 }
 
-export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void}) {
+// `lift` (gate scenes): where the captured oracle state left its scroll. Above 0, the last row ends
+// that far above the transcript's end; below 0, the transcript is scrolled up that far from it
+// (gate/transcripts.ts lifts). The live page leaves it out: pinned to the end.
+export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose, lift = 0}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void; lift?: number}) {
   const box = useRef<HTMLDivElement>(null)
   const pinned = useRef(true)
+  const below = Math.max(0, -lift)
+  const pin = (el: HTMLDivElement) => (el.scrollTop = el.scrollHeight - el.clientHeight - below)
   useLayoutEffect(() => {
     const el = box.current
-    if (el && pinned.current) el.scrollTop = el.scrollHeight
+    if (el && pinned.current) pin(el)
   }, [bubbles, working, error, ask])
   // Pinned also when the words reflow (a font arrives, a panel opens or closes, the window resizes).
   useLayoutEffect(() => {
     const el = box.current
     if (!el || typeof ResizeObserver === 'undefined') return
     const ro = new ResizeObserver(() => {
-      if (pinned.current) el.scrollTop = el.scrollHeight
+      if (pinned.current) pin(el)
     })
     el.dataset.hydrated = '' // the server's HTML is not scrolled; Gate A measures after this
     ro.observe(el)
@@ -114,7 +119,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
   return (
     <div className="transcript" data-transcript="" ref={box} onScroll={(e) => {
       const el = e.currentTarget
-      pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 2
+      pinned.current = Math.abs(el.scrollHeight - el.scrollTop - el.clientHeight - below) < 2
     }}>
       <div className="column">
         {startedAt && (
@@ -137,7 +142,13 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
               {/* What the message carries, in a row of its own above its bubble (oracle-file-sent 131, -pictures-sent 128). */}
               {attached && (
                 <div role="article" className={`turn turn-${b.role} turn-attached${change}`} data-role={b.role}>
-                  {b.files?.map((f, j) => <FileCard key={j} {...f} />)}
+                  {b.files && b.files.length > 0 && (
+                    <div className="file-stack">
+                      {b.files.map((f, j) => (
+                        <FileCard key={j} {...f} />
+                      ))}
+                    </div>
+                  )}
                   {b.images && b.images.length > 0 && <PictureTiles ids={b.images} picture={picture} />}
                 </div>
               )}
@@ -189,6 +200,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
             </div>
           </div>
         )}
+        {lift > 0 && <div style={{height: lift, flex: 'none'}} aria-hidden="true" />}
         {error && (
           <p className="chat-error" role="alert">
             {error}

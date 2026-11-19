@@ -118,6 +118,18 @@ for (const state of states) {
       const hit = controls(await page.evaluate(collect)).filter((c) => c.name === state.pointer.over)[state.pointer.nth ?? 0];
       if (hit) { const [x, y, bw, bh] = hit.e.box; await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + bw / 2, y: y + bh / 2 }); await wait(400); }
     }
+    // A capture with a field clicked into (fixture `focus`, the sweep's focusClick): click into ours,
+    // the one text field by that name, and fail if focus is not there after.
+    if (state.focus) {
+      const hit = controls(await page.evaluate(collect)).filter((c) => c.name === state.focus && c.e.tag === 'input');
+      if (hit.length !== 1) throw new Error(`"${state.focus}": ${hit.length} text fields by that name on ours, need exactly 1`);
+      const [x, y, bw, bh] = hit[0].e.box;
+      const at = { x: x + bw / 2, y: y + bh / 2, button: 'left', clickCount: 1 };
+      for (const type of ['mouseMoved', 'mousePressed', 'mouseReleased']) await page.send('Input.dispatchMouseEvent', { type, ...at });
+      await wait(400);
+      const focused = await page.evaluate(`document.activeElement?.getAttribute('aria-label')`);
+      if (focused !== state.focus) throw new Error(`clicked "${state.focus}" but focus is on "${focused}"`);
+    }
     // A capture taken with the pointer parked in the window: rest ours at the same point.
     if (state.parked && !state.pointer) { await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: state.parked[0], y: state.parked[1] }); await wait(400); }
     // The capture's last step (fixture `act`), replayed on ours the same way.

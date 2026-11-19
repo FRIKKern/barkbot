@@ -38,15 +38,22 @@
    card 442-514, bubble 518; -pictures-sent: tiles 398-554, bubble 558); the bubble stays round. */
 .turn-attached { flex-wrap: wrap; gap: 6px; }
 
-/* A file: 300 x 72 on rgb 37, radius 22, a 0.5 ring (oracle-file-sent, section 136). 16 in: the
-   page mark (40), 10, the name and size (172, 14/20 at 500 over 13/18 in 66% ink, 1 apart, centred),
-   10, a 36 slot for its actions. */
-.file-card { width: 300px; border-radius: 22px; }
+/* A message's files stack, 6 apart, on its side of the row (oracle-main-1600: 72 tall, 78 apart). */
+.file-stack { flex: 1 1 100%; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.turn-assistant .file-stack { align-items: flex-start; }
+/* A file: half the column, 220 to 354 wide (1.2.3: 220 at a 392 column, 280 at 560, 300 at 600,
+   354 from 840), 72 tall on rgb 37, radius 22, a 0.5 ring (oracle-file-sent, section 136). 16 in:
+   the page mark (40), 10, the name and size (the rest: 172 at 300, 14/20 at 500 over 13/18 in 66%
+   ink, 1 apart, centred), 10, a 36 slot for its actions. */
+.file-card { width: clamp(220px, 50%, 354px); border-radius: 22px; }
 .file-box { border-radius: 22px; background-color: rgb(37, 37, 37); box-shadow: rgba(245, 245, 245, 0.12) 0 0 0 0.5px, rgba(245, 245, 245, 0) 0 1px 4px 0, rgba(245, 245, 245, 0) 0 6px 12px 0; }
 .file-body { height: 72px; padding: 16px; display: flex; align-items: center; gap: 10px; }
 .file-text { flex: 1; min-width: 0; height: 40px; display: flex; flex-direction: column; justify-content: center; gap: 1px; }
 .file-name { margin: 0; font-size: 14px; font-weight: 500; line-height: 20px; letter-spacing: 0.14px; }
-.file-name bdi { display: flex; min-width: 0; }
+/* A name the oracle numbers (two files of one name: "oracle-note.txt (2)") shows its number after
+   the name, in the line's own text (oracle-main-1280: span 226 wide, text 3; its bdi 99.1). */
+.file-label { display: block; overflow: hidden; white-space: nowrap; }
+.file-name bdi { display: inline-flex; max-width: 100%; min-width: 0; vertical-align: top; }
 .file-base { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .file-ext { flex: none; white-space: nowrap; letter-spacing: -0.2px; }   /* the stand-in face at 500 runs 1.5 wide on ".txt" (20.9): fitted on that one name */
 .file-size { margin: 0; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; color: var(--ink-66); }

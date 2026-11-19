@@ -25,8 +25,8 @@ export type Scene = {
   previews?: Record<string, string>
   /** An open menu, picker or dialog, by name (components/overlays). */
   overlay?: string
-  /** The conversation on screen, as lengths (gate/transcripts.ts); `time` shows its time row. */
-  transcript?: {bubbles: SceneRow[]; time?: string}
+  /** The conversation on screen, as lengths (gate/transcripts.ts); `time` shows its time row, `lift` where its scroll was left. */
+  transcript?: {bubbles: SceneRow[]; time?: string; lift?: number}
   /** The composer as captured: words typed, pictures or a file waiting (gate scenes). */
   composer?: ComposerStart
 }
@@ -36,9 +36,9 @@ export type Scene = {
 // Bots are known by id everywhere: picking, renames, Working and Unread. The name is the label.
 // `onPickBot` tells the page which bot (its id) is now active, so it can load that bot's conversation.
 // `onRenameBot` tells it a bot's id and new name (for a composer the page passes in, and for saving it).
-// A window under 800 closes the details panel by itself, and widening it again leaves it closed
-// (measured on the oracle: 790 closed, 800 open; oracle-main-790, -800).
-const NARROW = '(max-width: 799.98px)'
+// The details panel stays open however narrow the window: 1.2.3 holds the conversation column at
+// 424 and narrows the panel instead (208 at 720: oracle-main-720, -790). 0.79.3 closed it under 800.
+// No state was captured under 720.
 // Which Voice chat row each picker changes.
 const voiceRows: Record<string, keyof NonNullable<Scene['voice']>> = {'voice-picker': 'voice', 'speed-picker': 'speed', 'language-picker': 'language'}
 
@@ -54,19 +54,6 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
   // The overlay that is up, whether the scene holds it or a click opened it (Overlay's
   // onOpenChange), so its trigger in the panel shows open (Pick's aria-expanded, the pencil).
   const [opened, setOpened] = useState<string | null>(null)
-  // A page that opens already narrow shows the panel closed at once, without the 300 ms close.
-  const [instant, setInstant] = useState(false)
-  useEffect(() => {
-    const narrow = window.matchMedia(NARROW)
-    if (narrow.matches) {
-      setInstant(true)
-      setPanelOpen(false)
-      requestAnimationFrame(() => requestAnimationFrame(() => setInstant(false)))
-    }
-    const onChange = (e: MediaQueryListEvent) => e.matches && setPanelOpen(false)
-    narrow.addEventListener('change', onChange)
-    return () => narrow.removeEventListener('change', onChange)
-  }, [])
   // `picked` from the page, when it gives one, is the tile the rail shows as open (a pick it holds or takes back).
   const scene: Scene = {...start, panelOpen, voice, active: pageActive ?? picked ?? start.active}
   const talk = useMemo(() => (start.transcript ? fromScene(start.transcript.bubbles) : null), [start.transcript])
@@ -85,7 +72,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
     onPickBot?.(id)
   }
   return (
-    <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-instant={instant || undefined}>
+    <div className="app" data-panel={panelOpen ? 'open' : 'closed'}>
       <Rail scene={scene} onPick={pick} working={workingBots} unread={[...new Set([...unreadBots, ...unread])]} names={names} />
 
       {/* Focusable like the oracle's transcript (role=log, tabindex 0): a click on it takes focus,
@@ -109,7 +96,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
         </header>
         {transcript ??
           (talk ? (
-            <Transcript bot={shown} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} picture={scenePicture} />
+            <Transcript bot={shown} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} picture={scenePicture} lift={scene.transcript?.lift} />
           ) : (
             <div className="transcript" />
           ))}

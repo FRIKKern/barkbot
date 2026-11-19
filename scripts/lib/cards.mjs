@@ -84,8 +84,10 @@ export const cardKeys = (state) => cardCases(state, null).map((c) => c.key);
 /**
  * A card as a gate scene holds it (scripts/transcript-scenes.mjs): UI facts only, conversation
  * text as lengths (O2). A question card: its question and choices (labels the card shows as
- * text); answered, the one choice left and its letter. A file card: the name its press opens
- * and the length of its size. Picture tiles: how many pictures the message carries.
+ * text); answered, the one choice left and its letter. A file card: each file the message
+ * carries (1.2.3 stacks two: oracle-main-1600), by the name its press opens and the length of
+ * its size (0 when the size is off screen).
+ * Picture tiles: how many pictures the message carries.
  */
 export function sceneCard({ parts }) {
   const texts = parts.filter((p) => p.kind.startsWith('text:')).map((p) => p.kind.slice(5));
@@ -94,12 +96,19 @@ export function sceneCard({ parts }) {
     const rest = parts.map((p) => /^control:Open the remaining (\d+) images? full screen$/.exec(p.kind)?.[1]).find(Boolean);
     return { card: 'pictures', count: rest ? pics - 1 + Number(rest) : pics };
   }
-  const file = parts.map((p) => /^control:Open (.+)$/.exec(p.kind)?.[1]).find(Boolean);
-  if (file) return { card: 'file', name: file, size: parts.filter((p) => /^text\(\d+\)$/.test(p.kind)).map((p) => p.e.textLength).at(-1) ?? 0 };
+  const opens = parts.flatMap((p, i) => (/^control:Open (.+)$/.test(p.kind) ? [i] : []));
+  if (opens.length) return { card: 'file', files: opens.map((at, k) => sceneFile(parts.slice(at, opens[k + 1]))) };
   const [question, ...rest] = texts;
   // The rest come in pairs: a letter, then its label.
   const pairs = [];
   for (let i = 0; i + 1 < rest.length; i += 2) pairs.push({ letter: rest[i], label: rest[i + 1] });
   if (parts.some((p) => p.kind.startsWith('control:'))) return { card: 'question', question, choices: pairs.map((p) => p.label) };
   return { card: 'question', question, answered: pairs[0] };
+}
+
+// One file of a file card, from its press to the next: its name and the length of its size.
+// The page mark is the same four lines on every file captured (11, 24, 24, 11), so it is not kept.
+function sceneFile(parts) {
+  const name = /^control:Open (.+)$/.exec(parts[0].kind)[1];
+  return { name, size: parts.filter((p) => /^text\(\d+\)$/.test(p.kind)).map((p) => p.e.textLength).at(-1) ?? 0 };
 }

@@ -115,16 +115,21 @@ export function PageMark() {
   )
 }
 
-/** The name, its kind kept apart so a long name loses its middle, not its ending (span 148 and 149). */
+/** The name, its kind kept apart so a long name loses its middle, not its ending (span 148 and 149);
+ *  a number the oracle gives one of two files of the same name ("(2)") follows it. */
 export function FileName({name}: {name: string}) {
-  const dot = name.lastIndexOf('.')
-  const [base, ext] = dot > 0 ? [name.slice(0, dot), name.slice(dot)] : [name, '']
+  const [, stem, number] = /^(.*?)(?: (\(\d+\)))?$/.exec(name) ?? [name, name]
+  const dot = stem.lastIndexOf('.')
+  const [base, ext] = dot > 0 ? [stem.slice(0, dot), stem.slice(dot)] : [stem, '']
   return (
     <p className="file-name">
-      <bdi>
-        <span className="file-base">{base}</span>
-        {ext && <span className="file-ext">{ext}</span>}
-      </bdi>
+      <span className="file-label">
+        <bdi>
+          <span className="file-base">{base}</span>
+          {ext && <span className="file-ext">{ext}</span>}
+        </bdi>
+        {number && ` ${number}`}
+      </span>
     </p>
   )
 }
