@@ -1,13 +1,13 @@
 {
  "id": "oracle-library",
- "captured": "2026-11-08",
+ "captured": "2026-11-19",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 50,
- "pass": 50,
+ "cases": 36,
+ "pass": 24,
  "results": [
   {
    "key": "aside:Bots",
@@ -90,14 +90,6 @@
    "pass": true
   },
   {
-   "key": "bubble:assistant#1 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#1 place",
-   "pass": true
-  },
-  {
    "key": "bubble:user#1 look",
    "pass": true
   },
@@ -106,111 +98,75 @@
    "pass": true
   },
   {
-   "key": "bubble:assistant#2 look",
+   "key": "bubble:assistant#1 look",
    "pass": true
   },
   {
-   "key": "bubble:assistant#2 place",
+   "key": "bubble:assistant#1 place",
    "pass": true
   },
   {
-   "key": "strong#1",
-   "pass": true
+   "key": "card#1 parts",
+   "pass": false,
+   "why": "text(3) 1 ≠ 2; text(4) 0 ≠ 1; text(8) 1 ≠ 0"
   },
   {
-   "key": "strong#2",
-   "pass": true
+   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "code#1",
-   "pass": true
+   "key": "card#1 box#1",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "code#2",
-   "pass": true
+   "key": "card#1 box#2",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "bubble:user#2 look",
-   "pass": true
+   "key": "card#1 box#3",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "bubble:user#2 place",
-   "pass": true
+   "key": "card#1 box#4",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "bubble:assistant#3 look",
-   "pass": true
+   "key": "card#1 box#5",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "bubble:assistant#3 place",
-   "pass": true
+   "key": "card#1 box#6",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "strong#3",
-   "pass": true
+   "key": "card#1 text(3)#1",
+   "pass": false,
+   "why": "box off by 0,87,0,-2; color rgba(245, 245, 245, 0.66) ≠ rgb(245, 245, 245); font-size 13px ≠ 14px; font-weight 425 ≠ 500; line-height 18px ≠ 20px"
   },
   {
-   "key": "strong#4",
-   "pass": true
+   "key": "card#1 text(11)#1",
+   "pass": false,
+   "why": "box off by 0,66,0.1,0"
   },
   {
-   "key": "code#3",
-   "pass": true
+   "key": "card#1 text(4)#1",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "code#4",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#3 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#3 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#4 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#4 place",
-   "pass": true
-  },
-  {
-   "key": "strong#5",
-   "pass": true
-  },
-  {
-   "key": "strong#6",
-   "pass": true
-  },
-  {
-   "key": "code#5",
-   "pass": true
-  },
-  {
-   "key": "code#6",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#4 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#4 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#5 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#5 place",
-   "pass": true
+   "key": "card#1 text(3)#2",
+   "pass": false,
+   "why": "missing"
   }
  ],
- "run": "2026-11-09T08:24:42.558Z",
+ "run": "2026-11-19T20:32:44.767Z",
  "inventory": {
   "id": "oracle-library",
   "controls": [

@@ -1,13 +1,13 @@
 {
  "id": "oracle-connect-apps",
- "captured": "2026-11-09",
+ "captured": "2026-11-19",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 130,
- "pass": 130,
+ "cases": 121,
+ "pass": 45,
  "results": [
   {
    "key": "aside:Bots",
@@ -98,80 +98,74 @@
    "pass": true
   },
   {
-   "key": "control:Add to Slack",
-   "pass": true
-  },
-  {
-   "key": "span:Add to Slack",
-   "pass": true
-  },
-  {
    "key": "control:Create a routine",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,0,0"
   },
   {
    "key": "span:Create a routine",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,0.8,-0.5"
   },
   {
    "key": "span:Computer",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,-0.4,0"
   },
   {
    "key": "control:Bot's computer",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,0,0"
   },
   {
    "key": "bdi:Bot's computer",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,0,-0.5"
   },
   {
    "key": "bdi:Asleep",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,0.1,-0.5"
   },
   {
    "key": "span:Voice chat",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36,0.2,0"
   },
   {
    "key": "span:Voice",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,36.5,-0.2,-0.5"
   },
   {
    "key": "control:Voice",
-   "pass": true
+   "pass": false,
+   "why": "box off by 25.2,36,-25.2,0"
   },
   {
-   "key": "span:Helix",
-   "pass": true
-  },
-  {
-   "key": "span:Speed",
-   "pass": true
-  },
-  {
-   "key": "control:Speed",
-   "pass": true
-  },
-  {
-   "key": "span:1x",
-   "pass": true
+   "key": "span:Helix 1.0x",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "span:Language",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,66.5,0.7,-0.5"
   },
   {
    "key": "control:Language",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.3,66,-0.3,0"
   },
   {
    "key": "span:Auto-detect",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.3,66.5,-0.3,-0.5"
   },
   {
-   "key": "control:Close#2",
-   "pass": true
+   "key": "control:Close dialog",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "h2:Connect Apps",
@@ -190,28 +184,34 @@
    "pass": true
   },
   {
+   "key": "control:Mac",
+   "pass": false,
+   "why": "missing"
+  },
+  {
    "key": "control:Password Managers",
-   "pass": true
+   "pass": false,
+   "why": "box off by -54.5,0,0,0"
   },
   {
    "key": "control:Productivity",
-   "pass": true
+   "pass": false,
+   "why": "box off by -54.5,0,0,0"
   },
   {
    "key": "control:Communication",
-   "pass": true
+   "pass": false,
+   "why": "box off by -54.5,0,-0.1,0"
   },
   {
    "key": "control:Design",
-   "pass": true
-  },
-  {
-   "key": "control:Code",
-   "pass": true
+   "pass": false,
+   "why": "box off by -54.7,0,0.4,0"
   },
   {
    "key": "control:More",
-   "pass": true
+   "pass": false,
+   "why": "box off by 6.8,0,0,0"
   },
   {
    "key": "h3:Recommended for you",
@@ -222,12 +222,14 @@
    "pass": true
   },
   {
-   "key": "control:Open Datadog",
-   "pass": true
+   "key": "control:Open Browserless",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Datadog",
-   "pass": true
+   "key": "span:Browserless",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Connect",
@@ -238,12 +240,9 @@
    "pass": true
   },
   {
-   "key": "control:Open Vercel",
-   "pass": true
-  },
-  {
-   "key": "span:Vercel",
-   "pass": true
+   "key": "control:Open incident.io",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Connect#2",
@@ -254,12 +253,14 @@
    "pass": true
   },
   {
-   "key": "control:Open Supabase",
-   "pass": true
+   "key": "control:Open Turso",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Supabase",
-   "pass": true
+   "key": "span:Turso",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Connect#3",
@@ -270,12 +271,14 @@
    "pass": true
   },
   {
-   "key": "control:Open Cloudflare",
-   "pass": true
+   "key": "control:Open Lightrun",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Cloudflare",
-   "pass": true
+   "key": "span:Lightrun",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Connect#4",
@@ -286,12 +289,14 @@
    "pass": true
   },
   {
-   "key": "control:Open Sentry",
-   "pass": true
+   "key": "control:Open Knock",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Sentry",
-   "pass": true
+   "key": "span:Knock",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Connect#5",
@@ -302,12 +307,14 @@
    "pass": true
   },
   {
-   "key": "control:Open Firebase",
-   "pass": true
+   "key": "control:Open Google Drive",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Firebase",
-   "pass": true
+   "key": "span:Google Drive",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Connect#6",
@@ -318,95 +325,180 @@
    "pass": true
   },
   {
-   "key": "h3:Password Managers",
-   "pass": true
+   "key": "h3:This Mac",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "control:Open 1Password",
-   "pass": true
+   "key": "control:Open Messages",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:1Password",
-   "pass": true
+   "key": "span:Messages",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "control:Connect 1Password",
-   "pass": true
+   "key": "span:Read and reply to texts",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Connect#7",
+   "pass": false,
+   "why": "box off by 0,130,0,0"
   },
   {
    "key": "span:Connect#7",
    "pass": true
   },
   {
-   "key": "h3:Productivity",
-   "pass": true
+   "key": "control:Open Notes",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "control:View all#2",
-   "pass": true
+   "key": "span:Notes",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "control:Open Notion",
-   "pass": true
-  },
-  {
-   "key": "span:Notion",
-   "pass": true
-  },
-  {
-   "key": "control:Connect#7",
-   "pass": true
-  },
-  {
-   "key": "span:Connect#8",
-   "pass": true
-  },
-  {
-   "key": "control:Open Atlassian",
-   "pass": true
-  },
-  {
-   "key": "span:Atlassian",
-   "pass": true
+   "key": "span:Find and save notes",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Connect#8",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,130,0,0"
   },
   {
-   "key": "span:Connect#9",
-   "pass": true
+   "key": "span:Connect#8",
+   "pass": false,
+   "why": "box off by -433,131,-0.1,-2"
   },
   {
-   "key": "control:Open Google Docs",
-   "pass": true
+   "key": "control:Open Reminders",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Google Docs",
-   "pass": true
+   "key": "span:Reminders",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Set and check reminders",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Connect#9",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,130,0,0"
   },
   {
-   "key": "span:Connect#10",
-   "pass": true
+   "key": "span:Connect#9",
+   "pass": false,
+   "why": "box off by 433,65,-0.1,-2"
   },
   {
-   "key": "control:Open Canva",
-   "pass": true
+   "key": "control:Open Calendar",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Canva",
-   "pass": true
+   "key": "span:Thu",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:19",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Calendar",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:See your day and add events",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Connect#10",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,130,0,0"
+  },
+  {
+   "key": "span:Connect#10",
+   "pass": false,
+   "why": "box off by -423,131,-20.1,-2"
+  },
+  {
+   "key": "control:Open Location",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Location",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Find places near you",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Open settings",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Open settings",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Open Contacts",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Contacts",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Look up the people you ask about",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Connect#11",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "span:Connect#11",
+   "pass": false,
+   "why": "box off by 10,65,-20.1,-2"
+  },
+  {
+   "key": "h3:Password Managers",
+   "pass": false,
+   "why": "box off by 0,-262,0,0"
+  },
+  {
+   "key": "bubble:user#1 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 place",
    "pass": true
   },
   {
@@ -418,119 +510,67 @@
    "pass": true
   },
   {
-   "key": "bubble:user#1 look",
-   "pass": true
+   "key": "card#1 parts",
+   "pass": false,
+   "why": "text(3) 1 ≠ 2; text(4) 0 ≠ 1; text(8) 1 ≠ 0"
   },
   {
-   "key": "bubble:user#1 place",
-   "pass": true
+   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "bubble:assistant#2 look",
-   "pass": true
+   "key": "card#1 box#1",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "bubble:assistant#2 place",
-   "pass": true
+   "key": "card#1 box#2",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "strong#1",
-   "pass": true
+   "key": "card#1 box#3",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "strong#2",
-   "pass": true
+   "key": "card#1 box#4",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "code#1",
-   "pass": true
+   "key": "card#1 box#5",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "code#2",
-   "pass": true
+   "key": "card#1 box#6",
+   "pass": false,
+   "why": "box off by 0,66,0,0"
   },
   {
-   "key": "bubble:user#2 look",
-   "pass": true
+   "key": "card#1 text(3)#1",
+   "pass": false,
+   "why": "box off by 0,87,0,-2; color rgba(245, 245, 245, 0.66) ≠ rgb(245, 245, 245); font-size 13px ≠ 14px; font-weight 425 ≠ 500; line-height 18px ≠ 20px"
   },
   {
-   "key": "bubble:user#2 place",
-   "pass": true
+   "key": "card#1 text(11)#1",
+   "pass": false,
+   "why": "box off by 0,66,0.1,0"
   },
   {
-   "key": "bubble:assistant#3 look",
-   "pass": true
+   "key": "card#1 text(4)#1",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "bubble:assistant#3 place",
-   "pass": true
-  },
-  {
-   "key": "strong#3",
-   "pass": true
-  },
-  {
-   "key": "strong#4",
-   "pass": true
-  },
-  {
-   "key": "code#3",
-   "pass": true
-  },
-  {
-   "key": "code#4",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#3 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#3 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#4 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#4 place",
-   "pass": true
-  },
-  {
-   "key": "strong#5",
-   "pass": true
-  },
-  {
-   "key": "strong#6",
-   "pass": true
-  },
-  {
-   "key": "code#5",
-   "pass": true
-  },
-  {
-   "key": "code#6",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#4 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#4 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#5 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#5 place",
-   "pass": true
+   "key": "card#1 text(3)#2",
+   "pass": false,
+   "why": "missing"
   }
  ],
- "run": "2026-11-09T08:24:42.558Z",
+ "run": "2026-11-19T20:32:44.767Z",
  "inventory": {
   "id": "oracle-connect-apps",
   "controls": [
@@ -615,11 +655,6 @@
     "ours": true
    },
    {
-    "name": "Add to Slack",
-    "item": "N3",
-    "ours": true
-   },
-   {
     "name": "Create a routine",
     "item": "N3",
     "ours": true
@@ -635,14 +670,14 @@
     "ours": true
    },
    {
-    "name": "Speed",
+    "name": "Language",
     "item": "N4",
     "ours": true
    },
    {
-    "name": "Language",
-    "item": "N4",
-    "ours": true
+    "name": "Close dialog",
+    "item": "N5",
+    "ours": false
    },
    {
     "name": "Your plugins",
@@ -658,6 +693,11 @@
     "name": "All",
     "item": "F11",
     "ours": true
+   },
+   {
+    "name": "Mac",
+    "item": "F11",
+    "ours": false
    },
    {
     "name": "Password Managers",
@@ -680,11 +720,6 @@
     "ours": true
    },
    {
-    "name": "Code",
-    "item": "F11",
-    "ours": true
-   },
-   {
     "name": "More",
     "item": "F11",
     "ours": true
@@ -695,9 +730,9 @@
     "ours": true
    },
    {
-    "name": "Open Datadog",
+    "name": "Open Browserless",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Connect",
@@ -705,62 +740,67 @@
     "ours": true
    },
    {
-    "name": "Open Vercel",
+    "name": "Open incident.io",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Open Supabase",
+    "name": "Open Turso",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Open Cloudflare",
+    "name": "Open Lightrun",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Open Sentry",
+    "name": "Open Knock",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Open Firebase",
+    "name": "Open Google Drive",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Open 1Password",
+    "name": "Open Messages",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Connect 1Password",
+    "name": "Open Notes",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Open Notion",
+    "name": "Open Reminders",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Open Atlassian",
+    "name": "Open Calendar",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Open Google Docs",
+    "name": "Open Location",
     "item": "F11",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Open Canva",
+    "name": "Open settings",
     "item": "F11",
-    "ours": true
+    "ours": false
+   },
+   {
+    "name": "Open Contacts",
+    "item": "F11",
+    "ours": false
    }
   ],
-  "missing": 0,
+  "missing": 15,
   "untracked": []
  }
 }

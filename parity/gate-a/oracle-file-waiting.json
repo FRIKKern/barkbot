@@ -1,13 +1,13 @@
 {
  "id": "oracle-file-waiting",
- "captured": "2026-11-14",
+ "captured": "2026-11-19",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 47,
- "pass": 47,
+ "cases": 44,
+ "pass": 30,
  "results": [
   {
    "key": "aside:Bots",
@@ -86,20 +86,102 @@
    "pass": true
   },
   {
-   "key": "span:Oracle replied",
+   "key": "aside:Conversation details",
    "pass": true
   },
   {
-   "key": "bubble:assistant#1 look",
+   "key": "control:Close",
    "pass": true
   },
   {
-   "key": "bubble:assistant#1 place",
+   "key": "control:Edit Bot avatar",
    "pass": true
   },
   {
-   "key": "code#1",
+   "key": "control:Bot name",
    "pass": true
+  },
+  {
+   "key": "control:Activity",
+   "pass": true
+  },
+  {
+   "key": "control:Library",
+   "pass": true
+  },
+  {
+   "key": "span:Suggested",
+   "pass": true
+  },
+  {
+   "key": "control:Hide",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "control:Create a routine",
+   "pass": false,
+   "why": "box off by 0,36,0,0"
+  },
+  {
+   "key": "span:Create a routine",
+   "pass": false,
+   "why": "box off by 0,36.5,0.8,-0.5"
+  },
+  {
+   "key": "span:Computer",
+   "pass": false,
+   "why": "box off by 0,36,-0.4,0"
+  },
+  {
+   "key": "control:Bot's computer",
+   "pass": false,
+   "why": "box off by 0,36,0,0"
+  },
+  {
+   "key": "bdi:Bot's computer",
+   "pass": false,
+   "why": "box off by 0,36.5,0,-0.5"
+  },
+  {
+   "key": "bdi:Asleep",
+   "pass": false,
+   "why": "box off by 0,36.5,0.1,-0.5"
+  },
+  {
+   "key": "span:Voice chat",
+   "pass": false,
+   "why": "box off by 0,36,0.2,0"
+  },
+  {
+   "key": "span:Voice",
+   "pass": false,
+   "why": "box off by 0,36.5,-0.2,-0.5"
+  },
+  {
+   "key": "control:Voice",
+   "pass": false,
+   "why": "box off by 25.2,36,-25.2,0"
+  },
+  {
+   "key": "span:Helix 1.0x",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "span:Language",
+   "pass": false,
+   "why": "box off by 0,66.5,0.7,-0.5"
+  },
+  {
+   "key": "control:Language",
+   "pass": false,
+   "why": "box off by 0.3,66,-0.3,0"
+  },
+  {
+   "key": "span:Auto-detect",
+   "pass": false,
+   "why": "box off by 0.3,66.5,-0.3,-0.5"
   },
   {
    "key": "bubble:user#1 look",
@@ -110,95 +192,15 @@
    "pass": true
   },
   {
-   "key": "bubble:assistant#2 look",
+   "key": "bubble:assistant#1 look",
    "pass": true
   },
   {
-   "key": "bubble:assistant#2 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#2 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:user#2 place",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#3 look",
-   "pass": true
-  },
-  {
-   "key": "bubble:assistant#3 place",
-   "pass": true
-  },
-  {
-   "key": "card#1 parts",
-   "pass": true
-  },
-  {
-   "key": "card#1 box#1",
-   "pass": true
-  },
-  {
-   "key": "card#1 text:Which tree do you prefer?#1",
-   "pass": true
-  },
-  {
-   "key": "card#1 text:B#1",
-   "pass": true
-  },
-  {
-   "key": "card#1 text:Cedar#1",
-   "pass": true
-  },
-  {
-   "key": "card#2 parts",
-   "pass": true
-  },
-  {
-   "key": "card#2 box#1",
-   "pass": true
-  },
-  {
-   "key": "card#2 control:Open image full screen#1",
-   "pass": true
-  },
-  {
-   "key": "card#2 img#1",
-   "pass": true
-  },
-  {
-   "key": "card#2 box#2",
-   "pass": true
-  },
-  {
-   "key": "card#2 control:Open image full screen#2",
-   "pass": true
-  },
-  {
-   "key": "card#2 img#2",
-   "pass": true
-  },
-  {
-   "key": "card#2 box#3",
-   "pass": true
-  },
-  {
-   "key": "card#2 control:Open the remaining 3 images full screen#1",
-   "pass": true
-  },
-  {
-   "key": "card#2 img#3",
-   "pass": true
-  },
-  {
-   "key": "card#2 text(2)#1",
+   "key": "bubble:assistant#1 place",
    "pass": true
   }
  ],
- "run": "2026-11-14T10:20:04.582Z",
+ "run": "2026-11-19T20:32:44.767Z",
  "inventory": {
   "id": "oracle-file-waiting",
   "controls": [
@@ -256,9 +258,59 @@
     "name": "Send message",
     "item": "T4",
     "ours": true
+   },
+   {
+    "name": "Close",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": true
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": true
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": true
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": true
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": true
    }
   ],
-  "missing": 0,
+  "missing": 1,
   "untracked": []
  }
 }

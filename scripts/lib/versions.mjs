@@ -3,18 +3,9 @@
 // except the states listed here, each with its own version and the reason it may differ.
 // A state that is not on this list and has another version still fails. Decisions: 0008, 0010.
 
-// Owner decision 2026-11-19 (docs/decisions/0010): the baseline moved to 1.2.3. These six were captured on 1.0.3 after
-// sends to the Oracle bot; capturing them again on 1.2.3 needs new sends.
-const SENDS = "made by sends; awaiting the owner's send budget";
-
-export const EXCEPTIONS = [
-  { id: 'oracle-ask-choice', version: 'GrokBot 1.0.3', reason: SENDS },
-  { id: 'oracle-choice-answered', version: 'GrokBot 1.0.3', reason: SENDS },
-  { id: 'oracle-file-sent', version: 'GrokBot 1.0.3', reason: SENDS },
-  { id: 'oracle-pictures-sent', version: 'GrokBot 1.0.3', reason: SENDS },
-  { id: 'oracle-file-waiting', version: 'GrokBot 1.0.3', reason: SENDS },
-  { id: 'oracle-pictures-waiting', version: 'GrokBot 1.0.3', reason: SENDS },
-];
+// None today: the six send-made card states were captured again on 1.2.3 once the owner allowed sends in the
+// Oracle bot (2026-11-19, decision 0010). An entry is { id, version: 'GrokBot x.y.z', reason }.
+export const EXCEPTIONS = [];
 
 export const exception = (id) => EXCEPTIONS.find((x) => x.id === id) ?? null;
 

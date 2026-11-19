@@ -4,14 +4,15 @@
 //   node scripts/transcript-scenes.mjs --check  exit 1 if it is stale
 // main: the long conversation behind most states (from oracle-main-1280; the 1040 states show
 // the same messages). turn: the short one in oracle-turn-1040, its time row on screen. Each state
-// with a version exception (lib/versions.mjs) has a conversation of its own, its cards in place.
+// made by sends (OWN) has a conversation of its own, its cards in place.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { path } from './lib/data.mjs';
 import { transcriptOf, bubbles } from './lib/transcript.mjs';
 import { cards, sceneCard } from './lib/cards.mjs';
-import { EXCEPTIONS } from './lib/versions.mjs';
 
-const from = { main: 'oracle-main-1280', turn: 'oracle-turn-1040', ...Object.fromEntries(EXCEPTIONS.map((x) => [x.id.replace(/^oracle-/, ''), x.id])) };
+// Until 0010 these were the version exceptions; now they are on the baseline, but their conversations are still their own.
+const OWN = ['oracle-ask-choice', 'oracle-choice-answered', 'oracle-file-sent', 'oracle-pictures-sent', 'oracle-file-waiting', 'oracle-pictures-waiting'];
+const from = { main: 'oracle-main-1280', turn: 'oracle-turn-1040', ...Object.fromEntries(OWN.map((id) => [id.replace(/^oracle-/, ''), id])) };
 const state = (id) => JSON.parse(readFileSync(path('fixtures', 'states', `${id}.json`), 'utf8'));
 // A bubble's top corner on its own side closes to 6 when the bubble above is the same speaker's.
 const corners = (r = '0px') => { const v = r.split(' '); return [v[0], v[1] ?? v[0], v[2] ?? v[0], v[3] ?? v[1] ?? v[0]]; };

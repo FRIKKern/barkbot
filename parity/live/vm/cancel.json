@@ -1,0 +1,18 @@
+{
+ "ran": "2026-11-19T20:31:29.132Z",
+ "barkbot": "bc820af251",
+ "host": "BarkBot VM",
+ "message_chars": 98,
+ "text_chars_before_interrupt": 409,
+ "interrupt_to_end_ms": 640,
+ "end": {
+  "type": "turn_completed",
+  "terminal_state": "interrupted"
+ },
+ "text_chars_after_interrupt": 284,
+ "host_children": {
+  "idle": 0,
+  "while_replying": 1,
+  "after": 0
+ }
+}
