@@ -544,7 +544,7 @@ else {
   stub.readBarrier = { key: mainKey, n: 2, ms: 5000, held: [], timedOut: false };
   // Fetched from here, not the page: two loadChat calls from one page ran one after the other
   // (run 44374350336: one PUT), likely Chrome holding a second identical GET until the first ends.
-  const pair = await Promise.all([fetch(`${base}/`).then((r) => r.text()), fetch(`${base}/`).then((r) => r.text())]);
+  const pair = [await fetch(`${base}/`).then((r) => r.text()), await fetch(`${base}/`).then((r) => r.text())];
   const timedOut = stub.readBarrier.timedOut; stub.readBarrier = null;
   const both = { taken: pair.map((h) => /another tab or device/.test(h)), named: pair.map((h) => h.includes('Legacy Name')), ids: ids(), puts: stub.writes.slice(wPair).filter((w) => w.method === 'PUT').map((w) => w.key) };
   // Without two PUTs to that key the race did not happen, and the rule below would say nothing.
