@@ -37,6 +37,7 @@ import { join } from 'node:path';
 import { deflateSync } from 'node:zlib';
 import { connect } from './oracle/cdp.mjs';
 import { path } from './lib/data.mjs';
+import { barkparkLive } from './lib/barkpark-live.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -99,6 +100,9 @@ mkdirSync(PROFILE, { recursive: true });
 kids.push(spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', `--remote-debugging-port=${CHROME_PORT}`, `--user-data-dir=${PROFILE}`, '--window-size=1040,760', 'about:blank'], { stdio: 'ignore' }));
 await until(async () => (await fetch(`http://127.0.0.1:${CHROME_PORT}/json/version`)).ok, 30000, 'Chrome');
 const page = await connect(undefined, CHROME_PORT);
+// Each stream the page opens, by URL: /api/chat/<conversation>/events names the conversation a turn went to.
+await page.send('Page.enable'); // without it the script below never runs (probed 2026-11-19)
+await page.send('Page.addScriptToEvaluateOnNewDocument', { source: 'window.__streams = []; { const E = window.EventSource; window.EventSource = class extends E { constructor(u, o) { super(u, o); window.__streams.push(String(u)); } }; }' });
 
 // What the page shows, as counts: bubbles by speaker, the newest bot bubble's length, an error line.
 const seen = () => page.evaluate(() => {
@@ -135,6 +139,7 @@ const turn = async (text, { allow = false } = {}) => {
   let allowed = 0;
   const before = await settled();
   if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
+  await onHost({ before: true }); // a conversation already open on another computer: nothing is sent
   const t0 = Date.now();
   await page.evaluate(() => document.querySelector('.prompt').focus());
   await page.send('Input.insertText', { text });
@@ -148,6 +153,7 @@ const turn = async (text, { allow = false } = {}) => {
     after = await seen();
     return after.bot > before.bot && after.lastBot > 0 && !after.working && !after.asking;
   }, allow ? REPLY_MS * 2 : REPLY_MS, `a reply within ${REPLY_MS / 1000} s (is npm run host running?)`);
+  await onHost();
   return { before, after, ms: Date.now() - t0, allowed };
 };
 const commit = () => { try { return execFileSync('git', ['rev-parse', '--short=10', 'HEAD'], { cwd: path(), encoding: 'utf8' }).trim(); } catch { return null; } };
@@ -155,6 +161,17 @@ const commit = () => { try { return execFileSync('git', ['rev-parse', '--short=1
 // puts a run's records in parity/live/<dir>/, so a run on another computer (the VM, V1) keeps the
 // Mac's records as they are.
 const HOST = process.env.BARKBOT_HOST_NAME || 'BarkBot Mac';
+// The turn's conversation runs on HOST, as Barkpark says (its execution_host_id), or nothing is
+// recorded: the app opens the first bot in the rail, which may be another computer's (V1, 2026-11-19).
+let live;
+const onHost = async ({ before = false } = {}) => {
+  const sid = (await page.evaluate(() => window.__streams ?? [])).map((u) => u.match(/\/api\/chat\/([0-9a-f-]{36})\/events/i)?.[1]).filter(Boolean).at(-1);
+  // Before a turn a new conversation has no stream yet (its first message makes it): checked after.
+  if (!sid) return before ? undefined : stopWith('could not tell which conversation the page used (no conversation stream opened)');
+  try { live ??= barkparkLive(); } catch (e) { stopWith(e.message); }
+  const h = await live.hostOf(sid);
+  if (h.name !== HOST) stopWith(`${before ? 'the open conversation is' : 'the turn went to a conversation'} on ${h.name ? `"${h.name}"` : 'a computer that is not one of yours'}, not "${HOST}" (pick its bot with --bot <id>)${before ? '; nothing was sent' : ''}`);
+};
 const LIVE = process.env.BARKBOT_LIVE_DIR ? ['parity', 'live', process.env.BARKBOT_LIVE_DIR] : ['parity', 'live'];
 const record = (file, r) => { mkdirSync(path(...LIVE), { recursive: true }); writeFileSync(path(...LIVE, file), JSON.stringify({ ran: new Date().toISOString(), barkbot: commit(), host: HOST, ...r }, null, 1) + '\n'); };
 const computer = () => page.evaluate(() => document.querySelector('.computer-state')?.textContent ?? null);
