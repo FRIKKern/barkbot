@@ -6,7 +6,8 @@
 // only there can "sends nothing" be measured (stub.sent). The control: plain Enter on the same words
 // does send, once, and clears the box.
 // The key sequence and the measure are the oracle recipe's (scripts/oracle/feel.mjs): a real Shift
-// held around Enter, and the box read as chars, line breaks, blocks and height.
+// held around Enter, and the box read as chars, line breaks, blocks and height. The break count is
+// the trace's exactly (2 for the one new line, as the oracle's box read), not just more.
 import { readFileSync } from 'node:fs';
 import { path } from './data.mjs';
 import { RECIPES } from '../oracle/recipes.mjs';
@@ -46,9 +47,9 @@ export async function shiftEnter({ check, precondition, ev, open, base, page, wa
   await wait(500);
   const after = await draft();
   const shift = { trace: TRACE, before, after, sent: stub.sent.slice(s0).map((m) => m.content) };
-  check(`Shift+Enter in Prompt (feel-shift trace): sends nothing, keeps the ${TRACE.before.chars} typed characters, adds a new line, and the box grows from ${TRACE.before.height} to ${TRACE.after.height} tall`,
+  check(`Shift+Enter in Prompt (feel-shift trace): sends nothing, keeps the ${TRACE.before.chars} typed characters, reads ${TRACE.after.breaks} line breaks after the press as the oracle's box did, and the box grows from ${TRACE.before.height} to ${TRACE.after.height} tall`,
     shift.sent.length === 0 && before.chars === TRACE.before.chars && after.chars === TRACE.after.chars &&
-    before.breaks === TRACE.before.breaks && after.breaks > before.breaks &&
+    before.breaks === TRACE.before.breaks && after.breaks === TRACE.after.breaks &&
     before.height === TRACE.before.height && after.height === TRACE.after.height, shift);
 
   // Control: the same words and plain Enter do send, once, and the box clears.
