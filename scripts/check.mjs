@@ -148,35 +148,49 @@ for (const f of readdirSync(path('parity', 'gate-b')).filter((x) => x.endsWith('
   else if (!turns.judged.some((t) => t.id === id)) fail(`gate: parity/gate-b/${f} has no turn trace in traces/`);
 }
 
-// The live turn's check before a send fails closed (scripts/lib/host-guard.mjs, PR #288 review):
+// The live turn's check before a send fails closed (scripts/lib/host-guard.mjs, PR #288 reviews):
 // a stub page, so no live send. A hook that never ran, or bubbles with no conversation stream,
-// refuses; only an empty page defers to the check after the turn. The guard itself sends nothing.
-const SID = '00000000-0000-4000-8000-0000000002a8';
-const stub = (streams) => { const sent = []; return { sent, page: { evaluate: async () => streams, send: async (m) => { sent.push(m); } } }; };
-for (const [name, streams, bubbles, want] of [
-  ['hook missing, empty page', undefined, 0, 'refuse'],
-  ['hook missing, bubbles shown', undefined, 3, 'refuse'],
-  ['hook ran, no conversation stream, bubbles shown', [], 2, 'refuse'],
-  ['hook ran, only other streams, bubbles shown', ['http://localhost/api/other/events'], 1, 'refuse'],
-  ['hook ran, no stream, empty page (a new conversation)', [], 0, 'defer'],
-  ['hook ran, the conversation stream', [`http://localhost/api/chat/${SID}/events`], 2, 'sid'],
+// refuses. A page with no conversation yet goes only when it shows the --bot asked for on HOST's
+// computer. The guard itself sends nothing.
+const SID = '00000000-0000-4000-8000-0000000002a8', BOT = '00000000-0000-5000-8000-0000000002b0', VM = 'host-vm', MAC = 'host-mac';
+const stub = (seen) => { const sent = []; return { sent, page: { evaluate: async () => seen, send: async (m) => { sent.push(m); } } }; };
+const want = (bot, hostId) => ({ bot, hostId: async () => hostId });
+for (const [name, seen, bubbles, w, expect] of [
+  ['hook missing, empty page', { streams: undefined, bot: BOT, host: VM }, 0, want(BOT, VM), 'refuse'],
+  ['hook missing, bubbles shown', { streams: undefined, bot: BOT, host: VM }, 3, want(BOT, VM), 'refuse'],
+  ['hook ran, no conversation stream, bubbles shown', { streams: [], bot: BOT, host: VM }, 2, want(BOT, VM), 'refuse'],
+  ['hook ran, only other streams, bubbles shown', { streams: ['http://localhost/api/other/events'], bot: BOT, host: VM }, 1, want(BOT, VM), 'refuse'],
+  ['empty page, its bot on another computer', { streams: [], bot: BOT, host: MAC }, 0, want(BOT, VM), 'refuse'],
+  ['empty page, no --bot given', { streams: [], bot: BOT, host: VM }, 0, want(null, VM), 'refuse'],
+  ['empty page, another bot opened than --bot (rail[0])', { streams: [], bot: 'other-bot', host: VM }, 0, want(BOT, VM), 'refuse'],
+  ['empty page, the page shows no bot or computer', { streams: [], bot: null, host: null }, 0, want(BOT, VM), 'refuse'],
+  ['empty page, the computer named is not enrolled', { streams: [], bot: BOT, host: VM }, 0, want(BOT, null), 'refuse'],
+  ['empty page, --bot on the computer named', { streams: [], bot: BOT, host: VM }, 0, want(BOT, VM), 'fresh'],
+  ['hook ran, the conversation stream', { streams: [`http://localhost/api/chat/${SID}/events`], bot: BOT, host: MAC }, 2, want(BOT, VM), 'sid'],
 ]) {
   rule('host guard', 1);
-  const s = stub(streams);
-  const g = await guardBeforeSend(s.page, bubbles);
-  const got = g.refuse ? 'refuse' : g.defer ? 'defer' : g.sid === SID ? 'sid' : JSON.stringify(g);
-  if (got !== want) fail(`host guard: ${name}: ${got}, not ${want}`);
+  const s = stub(seen);
+  const g = await guardBeforeSend(s.page, bubbles, w);
+  const got = g.refuse ? 'refuse' : g.fresh ? 'fresh' : g.sid === SID ? 'sid' : JSON.stringify(g);
+  if (got !== expect) fail(`host guard: ${name}: ${got}, not ${expect}`);
   if (s.sent.length) fail(`host guard: ${name}: the guard sent ${s.sent.length} CDP call(s)`);
 }
-// And turn-live runs it before each send: every Input.insertText has onHost({ before }) after the
-// settled() count it follows.
+// And turn-live sends only through sendText, whose first step is onHost({ before }): every CDP
+// Input.* call, and every click but a .ask-allow / .ask-choice answer, is inside its body.
 {
   const lines = read('scripts/turn-live.mjs').split('\n');
+  const from = lines.findIndex((l) => /^const sendText = async \(text, before\) => \{$/.test(l));
+  const to = from < 0 ? -1 : lines.findIndex((l, i) => i > from && l === '};');
+  rule('host guard', 1);
+  if (from < 0 || to < 0) fail('host guard: scripts/turn-live.mjs has no `const sendText = async (text, before) => {` ... `};`');
+  else if (lines[from + 1].trim() !== 'await onHost({ before });') fail(`host guard: scripts/turn-live.mjs:${from + 2}: sendText does not start with await onHost({ before })`);
   lines.forEach((l, i) => {
-    if (!l.includes("'Input.insertText'")) return;
+    // A card answer: a line that picks a .ask-allow / .ask-choice and clicks once, nothing else.
+    const answer = /querySelector(All)?\('\.ask-(allow|choice)\b/.test(l) && (l.match(/\.(click|submit|requestSubmit)\(/g) ?? []).length === 1;
+    const act = /['"`]Input\.\w+/.test(l) || (!answer && /\.(click|submit|requestSubmit)\(/.test(l));
+    if (!act) return;
     rule('host guard', 1);
-    let j = i; while (j > 0 && !/= await settled\(\)/.test(lines[j])) j--;
-    if (!lines.slice(j, i).some((x) => x.includes('await onHost({ before })'))) fail(`host guard: scripts/turn-live.mjs:${i + 1} sends text with no onHost({ before }) since its settled() count`);
+    if (!(i > from && i < to)) fail(`host guard: scripts/turn-live.mjs:${i + 1} sends input outside sendText, so no check before the send guards it`);
   });
 }
 

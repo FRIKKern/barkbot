@@ -140,12 +140,7 @@ const turn = async (text, { allow = false } = {}) => {
   let allowed = 0;
   const before = await settled();
   if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
-  await onHost({ before }); // a conversation already open on another computer: nothing is sent
-  const t0 = Date.now();
-  await page.evaluate(() => document.querySelector('.prompt').focus());
-  await page.send('Input.insertText', { text });
-  await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
-  await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+  const t0 = await sendText(text, before);
   await until(async () => (await seen()).user === before.user + 1, 10000, 'our own message to show as a bubble');
   let after;
   await until(async () => {
@@ -165,15 +160,19 @@ const HOST = process.env.BARKBOT_HOST_NAME || 'BarkBot Mac';
 // The turn's conversation runs on HOST, as Barkpark says (its execution_host_id), or nothing is
 // recorded: the app opens the first bot in the rail, which may be another computer's (V1, 2026-11-19).
 let live;
+const hostIdOfHost = async () => {
+  try { live ??= barkparkLive(); } catch (e) { stopWith(e.message); }
+  return (await live.hosts()).find((h) => h.name === HOST && h.enrolled && !h.revoked)?.id ?? null;
+};
 // Before a send, pass the page's settled counts as `before`: the check fails closed
-// (scripts/lib/host-guard.mjs). Only a page with no bubbles, a new conversation whose first
-// message makes the stream, waits for the check after the turn.
+// (scripts/lib/host-guard.mjs). A page with no conversation yet goes only when it shows the --bot
+// asked for, on HOST's computer; the check after the turn then checks the conversation.
 const onHost = async ({ before = null } = {}) => {
   let sid;
   if (before) {
-    const g = await guardBeforeSend(page, before.user + before.bot);
+    const g = await guardBeforeSend(page, before.user + before.bot, { bot: BOT, hostId: hostIdOfHost });
     if (g.refuse) stopWith(`${g.refuse}; nothing was sent`);
-    if (g.defer) return;
+    if (g.fresh) return;
     sid = g.sid;
   } else {
     sid = sidOf(await page.evaluate(() => window.__streams));
@@ -182,6 +181,18 @@ const onHost = async ({ before = null } = {}) => {
   try { live ??= barkparkLive(); } catch (e) { stopWith(e.message); }
   const h = await live.hostOf(sid);
   if (h.name !== HOST) stopWith(`${before ? 'the open conversation is' : 'the turn went to a conversation'} on ${h.name ? `"${h.name}"` : 'a computer that is not one of yours'}, not "${HOST}" (pick its bot with --bot <id>)${before ? '; nothing was sent' : ''}`);
+};
+// The ONLY way this script sends a message: the check before the send, then the words and Enter.
+// npm run check holds every insertText, Enter key, mouse event and click (but the .ask-* card
+// answers) in this file to this function's body. Returns the time the words went in.
+const sendText = async (text, before) => {
+  await onHost({ before });
+  const t0 = Date.now();
+  await page.evaluate(() => document.querySelector('.prompt').focus());
+  await page.send('Input.insertText', { text });
+  await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
+  await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+  return t0;
 };
 const LIVE = process.env.BARKBOT_LIVE_DIR ? ['parity', 'live', process.env.BARKBOT_LIVE_DIR] : ['parity', 'live'];
 const record = (file, r) => { mkdirSync(path(...LIVE), { recursive: true }); writeFileSync(path(...LIVE, file), JSON.stringify({ ran: new Date().toISOString(), barkbot: commit(), host: HOST, ...r }, null, 1) + '\n'); };
@@ -211,21 +222,16 @@ try {
     const pool = ['maple', 'cedar', 'birch', 'aspen', 'rowan', 'hazel', 'alder', 'elder'].sort(() => Math.random() - 0.5).slice(0, 3);
     const before = await settled();
     if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
-    await onHost({ before }); // as in turn(): nothing is sent to a conversation on another computer
-    const t0 = Date.now();
-    await page.evaluate(() => document.querySelector('.prompt').focus());
-    await page.send('Input.insertText', { text: `Use your AskUserQuestion tool to ask me which tree I prefer: ${pool.join(', ')}. After I answer, reply with only the tree I chose.` });
-    await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
-    await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+    const t0 = await sendText(`Use your AskUserQuestion tool to ask me which tree I prefer: ${pool.join(', ')}. After I answer, reply with only the tree I chose.`, before);
     let offered = [];
     await until(async () => { offered = await page.evaluate(() => [...document.querySelectorAll('.ask-choice .ask-label')].map((x) => x.textContent)); return offered.length >= 2; }, REPLY_MS, 'the question card');
     const want = offered[1];
+    await onHost(); // before the choice is pressed: the card came over the conversation's stream, so it names it
     await page.evaluate(() => document.querySelectorAll('.ask-choice')[1].click());
     let after, said = '';
     await until(async () => { after = await seen(); said = await page.evaluate(() => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].at(-1)?.textContent ?? ''); return after.bot > before.bot && !after.working && !after.asking && said.length > 0; }, REPLY_MS, 'the bot to reply after the choice');
     const low = said.toLowerCase();
     if (!low.includes(want.toLowerCase()) || offered.some((o) => o !== want && low.includes(o.toLowerCase()))) stopWith('the bot\'s reply does not name the pressed choice alone: the answer did not reach it');
-    await onHost(); // the conversation the turn went to runs on HOST, or nothing is recorded
     record('question.json', { choices_offered: offered.length, pressed: 2, reply_names_the_choice: true, reply_ms: Date.now() - t0 });
     console.log(`Live question: ok · ${offered.length} choices offered · pressed B · the bot replied with that choice · ${((Date.now() - t0) / 1000).toFixed(1)} s`);
     process.exit(0);
@@ -328,12 +334,7 @@ try {
     const end = `END-${1000 + Math.floor(Math.random() * 9000)}`;
     const before = await settled();
     if (before.noComputer) stopWith('the bot has no computer enrolled (npm run host:enroll, then npm run host)');
-    await onHost({ before }); // as in turn(): nothing is sent to a conversation on another computer
-    const t0 = Date.now();
-    await page.evaluate(() => document.querySelector('.prompt').focus());
-    await page.send('Input.insertText', { text: `Write about 400 words on how tides work, in plain paragraphs, no tools. Finish with a last line that says only ${end}` });
-    await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
-    await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+    const t0 = await sendText(`Write about 400 words on how tides work, in plain paragraphs, no tools. Finish with a last line that says only ${end}`, before);
     await until(async () => { const s = await seen(); return s.user === before.user + 1 && s.working; }, REPLY_MS, 'the bot to start working');
     const done = () => page.evaluate((e) => [...document.querySelectorAll('.bubble[data-role="assistant"] .bubble-text')].some((x) => x.textContent.includes(e)), end);
     if (await done()) stopWith('the reply was already whole before the reload: nothing was tested');

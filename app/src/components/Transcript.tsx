@@ -92,7 +92,10 @@ const timeOf = (iso: string) => {
   return `${today ? 'Today' : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} ${t}`
 }
 
-export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void}) {
+// `of`: the live page's bot and the computer its next new conversation is made on (index.tsx's
+// chat.host.id, which startChat sends), as data-bot-id / data-host-id. scripts/turn-live.mjs reads
+// them before a first message, which no stream can check yet (V1).
+export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose, of}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void; of?: {botId: string; hostId: string}}) {
   const box = useRef<HTMLDivElement>(null)
   const pinned = useRef(true)
   useLayoutEffect(() => {
@@ -112,7 +115,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
     return () => ro.disconnect()
   }, [])
   return (
-    <div className="transcript" data-transcript="" ref={box} onScroll={(e) => {
+    <div className="transcript" data-transcript="" data-bot-id={of?.botId} data-host-id={of?.hostId} ref={box} onScroll={(e) => {
       const el = e.currentTarget
       pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 2
     }}>
