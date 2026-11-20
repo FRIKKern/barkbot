@@ -34,10 +34,10 @@ try {
   }
   // A shallow Barkpark clone, built at its origin/main: the stdin reader's commit (9df5f9e192) is
   // not in it, so nothing can say the build predates it, and enroll goes on.
-  {
+  try {
     const mac = join(tmp, 'mac-shallow'), git = (cwd, ...a) => execFileSync('git', a, { cwd, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf8' }).trim();
     mkdirSync(join(mac, 'scripts'), { recursive: true }); mkdirSync(join(mac, '.cache', 'bin'), { recursive: true }); mkdirSync(join(mac, 'home')); mkdirSync(join(mac, 'origin'));
-    git(join(mac, 'origin'), 'init', '-q');
+    git(join(mac, 'origin'), 'init', '-q', '-b', 'main'); // not the runner's default branch (master on CI)
     for (const m of ['one', 'two']) git(join(mac, 'origin'), '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', m);
     git(mac, 'clone', '-q', '--depth', '1', `file://${join(mac, 'origin')}`, 'barkpark');
     if (git(join(mac, 'barkpark'), 'rev-parse', '--is-shallow-repository') !== 'true') fails.push('host.sh enroll, shallow clone: the scratch clone is not shallow');
@@ -48,7 +48,7 @@ try {
       execFileSync('sh', [join(mac, 'scripts', 'host.sh'), 'enroll'], { input: `${CODE}\n`, env: { ...process.env, HOME: join(mac, 'home'), BARKPARK_SRC: join(mac, 'barkpark') }, stdio: ['pipe', 'ignore', 'pipe'] });
       judge('scripts/host.sh enroll, a shallow Barkpark clone', seen(join(mac, 'seen')));
     } catch (e) { fails.push(`scripts/host.sh enroll refuses a build in a shallow Barkpark clone: ${String(e.stderr ?? '').trim().split('\n').at(-1)}`); }
-  }
+  } catch (e) { fails.push(`host.sh enroll, shallow clone: could not set up the scratch clone: ${e.message.split('\n')[0]}`); }
 
   // The VM: the owner's step, with barkpark-chat-host and claude on PATH as stand-ins.
   const vm = join(tmp, 'vm');
