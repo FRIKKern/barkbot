@@ -7,15 +7,14 @@
   2
  ],
  "cases": 1,
- "pass": 0,
+ "pass": 1,
  "results": [
   {
    "key": "control:Create a routine",
-   "pass": false,
-   "why": "box off by 0,36,0,0"
+   "pass": true
   }
  ],
- "run": "2026-11-19T20:24:46.604Z",
+ "run": "2026-11-20T03:12:25.455Z",
  "inventory": {
   "id": "oracle-hover-create-a-routine",
   "controls": [
