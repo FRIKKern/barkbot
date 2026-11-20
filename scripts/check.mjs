@@ -11,6 +11,7 @@ import { controls, claims } from './lib/controls.mjs';
 import { turnTraces } from './lib/turn-traces.mjs';
 import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
 import { guardBeforeSend } from './lib/host-guard.mjs';
+import { sceneCard } from './lib/cards.mjs';
 
 const fails = [];
 const ran = {};
@@ -194,8 +195,23 @@ for (const [name, seen, bubbles, w, expect] of [
   });
 }
 
+// A question card as a gate scene keeps its choices however the card is cut (scripts/lib/cards.mjs
+// sceneCard, rev292): an answered card scrolled up so only its letter and label show is still
+// answered B Cedar, with no question, not a question "B".
+const card = (...kinds) => ({ parts: kinds.map((kind) => ({ kind, e: { textLength: 0 } })) });
+for (const [name, c, want] of [
+  ['an answered card, cut off above its choice', card('text:B', 'text:Cedar'), { card: 'question', question: null, answered: { letter: 'B', label: 'Cedar' } }],
+  ['an answered card, whole', card('text:Which tree do you prefer?', 'text:B', 'text:Cedar'), { card: 'question', question: 'Which tree do you prefer?', answered: { letter: 'B', label: 'Cedar' } }],
+  ['an open card, cut off above its first choice', card('control:A', 'text:A', 'text:Maple', 'control:B', 'text:B', 'text:Cedar'), { card: 'question', question: null, choices: ['Maple', 'Cedar'] }],
+  ['an open card', card('text:Which tree do you prefer?', 'control:A', 'text:A', 'text:Maple', 'control:B', 'text:B', 'text:Cedar'), { card: 'question', question: 'Which tree do you prefer?', choices: ['Maple', 'Cedar'] }],
+]) {
+  rule('scene cards', 1);
+  const got = JSON.stringify(sceneCard(c));
+  if (got !== JSON.stringify(want)) fail(`scene cards: ${name}: ${got}, not ${JSON.stringify(want)}`);
+}
+
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard']) {
+for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

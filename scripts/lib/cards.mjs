@@ -99,15 +99,18 @@ export function sceneCard({ parts }) {
   }
   const opens = parts.flatMap((p, i) => (/^control:Open (.+)$/.test(p.kind) ? [i] : []));
   if (opens.length) return { card: 'file', files: opens.map((at, k) => sceneFile(parts.slice(at, opens[k + 1]))) };
-  // An answered card cut off at the top (oracle-pictures-sent, second take: section 71 from -46) shows
-  // its letter and label only; its question is off screen, so the scene has none to keep.
-  const cut = !parts.some((p) => p.kind.startsWith('control:')) && texts.length % 2 === 0;
-  const [question, ...rest] = cut ? [null, ...texts] : texts;
-  // The rest come in pairs: a letter, then its label.
+  // The choices come last, in pairs: a letter, then its label. Counted from the end, so a card cut
+  // off at the top keeps them: an answered card shows its question above its one choice, and with
+  // the question off screen (oracle-pictures-sent, second take: section 71 from -46) only the
+  // letter and the label, B and Cedar (rev292). The question is the text above the pairs, or null.
+  const LETTER = /^[A-Z]$/;
+  let at = texts.length;
+  while (at >= 2 && LETTER.test(texts[at - 2]) && !LETTER.test(texts[at - 1])) at -= 2;
   const pairs = [];
-  for (let i = 0; i + 1 < rest.length; i += 2) pairs.push({ letter: rest[i], label: rest[i + 1] });
+  for (let i = at; i + 1 < texts.length; i += 2) pairs.push({ letter: texts[i], label: texts[i + 1] });
+  const question = at > 0 ? texts[0] : null;
   if (parts.some((p) => p.kind.startsWith('control:'))) return { card: 'question', question, choices: pairs.map((p) => p.label) };
-  return { card: 'question', question, answered: pairs[0] };
+  return { card: 'question', question, answered: pairs.at(-1) ?? null };
 }
 
 // One file of a file card, from its press to the next: its name and the length of its size.
