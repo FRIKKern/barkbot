@@ -23,12 +23,15 @@ const judge = (name, s) => {
 };
 try {
   // The Mac: a copy of host.sh with a host program already built, and no Barkpark checkout to build from.
-  const mac = join(tmp, 'mac');
-  mkdirSync(join(mac, 'scripts'), { recursive: true }); mkdirSync(join(mac, '.cache', 'bin'), { recursive: true }); mkdirSync(join(mac, 'home'));
-  copyFileSync(path('scripts', 'host.sh'), join(mac, 'scripts', 'host.sh'));
-  host(join(mac, '.cache', 'bin', 'barkpark-chat-host'), join(mac, 'seen'));
-  execFileSync('sh', [join(mac, 'scripts', 'host.sh'), 'enroll'], { input: `${CODE}\n`, env: { ...process.env, HOME: join(mac, 'home'), BARKPARK_SRC: join(mac, 'no-barkpark') }, stdio: ['pipe', 'ignore', 'ignore'] });
-  judge('scripts/host.sh enroll', seen(join(mac, 'seen')));
+  // Once with the code as a line, once as pbpaste gives it: no newline at the end.
+  for (const [name, input] of [['scripts/host.sh enroll', `${CODE}\n`], ['scripts/host.sh enroll, a code piped with no newline', CODE]]) {
+    const mac = join(tmp, `mac-${input.length}`);
+    mkdirSync(join(mac, 'scripts'), { recursive: true }); mkdirSync(join(mac, '.cache', 'bin'), { recursive: true }); mkdirSync(join(mac, 'home'));
+    copyFileSync(path('scripts', 'host.sh'), join(mac, 'scripts', 'host.sh'));
+    host(join(mac, '.cache', 'bin', 'barkpark-chat-host'), join(mac, 'seen'));
+    execFileSync('sh', [join(mac, 'scripts', 'host.sh'), 'enroll'], { input, env: { ...process.env, HOME: join(mac, 'home'), BARKPARK_SRC: join(mac, 'no-barkpark') }, stdio: ['pipe', 'ignore', 'ignore'] });
+    judge(name, seen(join(mac, 'seen')));
+  }
 
   // The VM: the owner's step, with barkpark-chat-host and claude on PATH as stand-ins.
   const vm = join(tmp, 'vm');
@@ -43,4 +46,4 @@ try {
   rmSync(tmp, { recursive: true, force: true });
 }
 if (fails.length) { console.error(fails.map((f) => `✗ ${f}`).join('\n')); process.exit(1); }
-console.log('host enroll: ok · the code reaches barkpark-chat-host on stdin, not argv · host.sh, barkbot-owner-setup');
+console.log('host enroll: ok · the code reaches barkpark-chat-host on stdin, not argv · host.sh (a line, and no newline), barkbot-owner-setup');
