@@ -39,6 +39,8 @@ export const transcripts: Record<string, SceneRow[]> = {
   "pictures-sent": [{"card":"question","question":null,"answered":{"letter":"B","label":"Cedar"}},{"role":"assistant","paras":[{"len":70,"height":44}]},{"card":"time","time":"11:31 PM"},{"card":"file","files":[{"name":"oracle-note.txt","size":3}]},{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]},{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]}],
   // oracle-pictures-waiting
   "pictures-waiting": [{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":110},{"len":303,"height":110}]},{"card":"time","time":"8:21 PM"},{"card":"file","files":[{"name":"oracle-note.txt","size":3}]},{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]}],
+  // oracle-voice-picker-start
+  "voice-picker-start": [{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]},{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]},{"role":"user","paras":[{"len":122,"height":44}]},{"card":"question","question":"Which tree do you prefer?","answered":{"letter":"B","label":"Cedar"}},{"role":"assistant","paras":[{"len":70,"height":44}]}],
 }
 
 // How far a state's last row ends above the transcript's end (+), or below it, scrolled up (-).

@@ -11,10 +11,9 @@
 // It records counts and times only, never a message's text (O2). Passing writes cancel.json in
 // parity/live/ (or parity/live/<BARKBOT_LIVE_DIR>/). Exits 1 if any step fails; then nothing is written.
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { path } from './lib/data.mjs';
+import { barkparkLive } from './lib/barkpark-live.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -26,17 +25,11 @@ const TEXT_MS = 90000, END_MS = 2000, SETTLE_MS = 3000;
 const stopWith = (why) => { console.error(`Live cancel: failed: ${why}`); process.exit(1); };
 if (!SESSION || !SSH) stopWith('needs --session <id> and --ssh <user@ip>');
 
-let bpConf = {};
-try { bpConf = JSON.parse(readFileSync(join(homedir(), '.config', 'barkpark', 'config.json'), 'utf8')); } catch {}
-const URL = (process.env.BARKPARK_URL || bpConf.server || '').replace(/\/$/, '');
-const TOKEN = process.env.BARKPARK_TOKEN || bpConf.token;
-if (!URL || !TOKEN) stopWith('no Barkpark login (bp login, or BARKPARK_URL and BARKPARK_TOKEN)');
-const call = async (p, init = {}) => {
-  const res = await fetch(URL + p, { ...init, headers: { authorization: `Bearer ${TOKEN}`, accept: 'application/json', ...(init.body ? { 'content-type': 'application/json' } : {}), ...init.headers } });
-  const text = await res.text();
-  if (!res.ok) stopWith(`${init.method || 'GET'} ${p.split('?')[0]} answered ${res.status}`);
-  return text ? JSON.parse(text) : null;
-};
+let bp;
+try { bp = barkparkLive(); } catch (e) { stopWith(e.message); }
+const call = (p, init) => bp.call(p, init).catch((e) => stopWith(e.message));
+// The conversation's stored user rows (role user), oldest first.
+const userRows = async () => ((await call(`/v1/chat/sessions/${encodeURIComponent(SESSION)}?since=0`)).messages ?? []).filter((m) => m.role === 'user');
 // The host program's children on the computer: claude runs as one while a turn is open.
 const children = () => {
   const remote = 'P=$(systemctl show -p MainPID --value barkbot-host); [ "$P" -gt 0 ] || exit 3; ps -o comm= --ppid "$P" | grep -c . || true';
@@ -44,16 +37,20 @@ const children = () => {
   return Number(out.trim());
 };
 
-const { hosts } = await call(`/w/${encodeURIComponent(process.env.BARKPARK_WORKSPACE || bpConf.workspace || 'default')}/v1/chat-hosts`);
+const hosts = await bp.hosts().catch((e) => stopWith(e.message));
 const host = hosts.find((h) => h.name === HOST && h.enrolled && !h.revoked);
 if (!host?.online) stopWith(`no online computer named ${HOST}`);
 const session = await call(`/v1/chat/sessions/${encodeURIComponent(SESSION)}?since=999999999`);
 if (session.execution_host_id !== host.id) stopWith(`that conversation is not on ${HOST}`);
+// The interrupt stops the conversation's running turn, whoever started it: refuse to start unless
+// nothing is running, and below, unless the turn that runs is the one this check sent.
+if (session.agent_state !== 'idle') stopWith(`that conversation is not idle (${session.agent_state ?? 'no agent_state'}): its running turn is not this check's to stop`);
+const users0 = (await userRows()).length;
 const idle = children();
 
 // The session's own stream, opened before the send and with no cursor, so only this turn's events arrive.
 const ac = new AbortController();
-const stream = await fetch(`${URL}/v1/chat/sessions/${encodeURIComponent(SESSION)}/events`, { headers: { authorization: `Bearer ${TOKEN}`, accept: 'text/event-stream' }, signal: ac.signal });
+const stream = await fetch(`${bp.url}/v1/chat/sessions/${encodeURIComponent(SESSION)}/events`, { headers: { authorization: `Bearer ${bp.token}`, accept: 'text/event-stream' }, signal: ac.signal });
 if (!stream.ok) stopWith(`the event stream answered ${stream.status}`);
 const seen = []; // [ms, event type]
 let textChars = 0, ended = null, onText, onEnd;
@@ -87,6 +84,13 @@ const timeout = (ms) => new Promise((ok) => setTimeout(() => ok('timeout'), ms))
 if (await Promise.race([textOnce, timeout(TEXT_MS)]) === 'timeout') stopWith(`no text within ${TEXT_MS / 1000} s (event kinds: ${[...new Set(seen.map((s) => s[1]))].join(', ')})`);
 await new Promise((ok) => setTimeout(ok, 1500)); // let the reply run a little
 const busy = children();
+// Ours to stop: a turn started since the send and none ended, and the conversation's newest user
+// row is this check's message, the only one added since it began.
+const starts = seen.filter((x) => x[1] === 'turn_started').length;
+const users = await userRows();
+const newest = users.at(-1);
+if (starts < 1 || ended) stopWith(`the running turn may not be ours: ${starts} turn_started since the send, ${ended ? 'and a turn already ended' : 'none ended'}`);
+if (users.length !== users0 + 1 || (newest?.content ?? newest?.source_markdown) !== MESSAGE) stopWith(`the running turn may not be ours: ${users.length - users0} user message(s) added since the check began, the newest ${newest ? 'not' : 'none'} this check's`);
 const textBefore = textChars, sentAt = Date.now();
 await call(`/v1/chat/sessions/${encodeURIComponent(SESSION)}/interrupt`, { method: 'POST', body: '{}' });
 if (await Promise.race([endOnce, timeout(END_MS)]) === 'timeout') stopWith(`the turn did not end within ${END_MS / 1000} s of the interrupt (events after: ${seen.filter((s) => s[0] >= sentAt - t0).map((s) => s[1]).join(', ')})`);
