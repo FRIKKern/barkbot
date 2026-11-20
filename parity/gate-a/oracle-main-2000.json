@@ -7,7 +7,7 @@
   2
  ],
  "cases": 37,
- "pass": 36,
+ "pass": 37,
  "results": [
   {
    "key": "aside:Bots",
@@ -155,11 +155,10 @@
   },
   {
    "key": "bubble:assistant#1 place",
-   "pass": false,
-   "why": "bottom off by 242"
+   "pass": true
   }
  ],
- "run": "2026-11-20T03:13:04.456Z",
+ "run": "2026-11-20T19:35:54.294Z",
  "inventory": {
   "id": "oracle-main-2000",
   "controls": [

@@ -7,7 +7,7 @@
   2
  ],
  "cases": 75,
- "pass": 47,
+ "pass": 74,
  "results": [
   {
    "key": "aside:Bots",
@@ -159,8 +159,7 @@
   },
   {
    "key": "bubble:assistant#1 place",
-   "pass": false,
-   "why": "top off by 16"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -168,8 +167,7 @@
   },
   {
    "key": "bubble:user#1 place",
-   "pass": false,
-   "why": "gap above off by -42"
+   "pass": true
   },
   {
    "key": "bubble:assistant#2 look",
@@ -201,33 +199,28 @@
   },
   {
    "key": "bubble:assistant#4 place",
-   "pass": false,
-   "why": "bottom off by -26"
+   "pass": true
   },
   {
    "key": "time",
    "pass": false,
-   "why": "missing"
+   "why": "width off by 1.8"
   },
   {
    "key": "card#1 parts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 box#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 text:B#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 text:Cedar#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#2 parts",
@@ -235,53 +228,43 @@
   },
   {
    "key": "card#2 control:Open oracle-note.txt#1",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#2 box#1",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#2 box#2",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#2 box#3",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#2 box#4",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#2 box#5",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#2 box#6",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#2 text(11)#1",
-   "pass": false,
-   "why": "box off by 0,-26,0.1,0"
+   "pass": true
   },
   {
    "key": "card#2 text(4)#1",
-   "pass": false,
-   "why": "box off by 0.1,-26,0.1,0"
+   "pass": true
   },
   {
    "key": "card#2 text(3)#1",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#3 parts",
@@ -289,56 +272,46 @@
   },
   {
    "key": "card#3 box#1",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#3 control:Open image full screen#1",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#3 img#1",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#3 box#2",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#3 control:Open image full screen#2",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#3 img#2",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#3 box#3",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#3 control:Open the remaining 3 images full screen#1",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#3 img#3",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   },
   {
    "key": "card#3 text(2)#1",
-   "pass": false,
-   "why": "box off by 0,-26,0,0"
+   "pass": true
   }
  ],
- "run": "2026-11-20T03:13:51.201Z",
+ "run": "2026-11-20T19:38:56.922Z",
  "inventory": {
   "id": "oracle-pictures-sent",
   "controls": [

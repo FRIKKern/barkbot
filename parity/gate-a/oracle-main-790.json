@@ -7,7 +7,7 @@
   2
  ],
  "cases": 59,
- "pass": 9,
+ "pass": 59,
  "results": [
   {
    "key": "aside:Bots",
@@ -35,23 +35,19 @@
   },
   {
    "key": "control:View conversation details",
-   "pass": false,
-   "why": "box off by 139,0,0.1,0"
+   "pass": true
   },
   {
    "key": "span:Oracle",
-   "pass": false,
-   "why": "box off by 139,0,0.1,0"
+   "pass": true
   },
   {
    "key": "control:Share",
-   "pass": false,
-   "why": "box off by 241.8,0,36.2,0"
+   "pass": true
   },
   {
    "key": "control:Prompt",
-   "pass": false,
-   "why": "box off by 0,0,278,0"
+   "pass": true
   },
   {
    "key": "control:Composer actions",
@@ -59,118 +55,95 @@
   },
   {
    "key": "control:Start voice input",
-   "pass": false,
-   "why": "box off by 278,0.5,0,0"
+   "pass": true
   },
   {
    "key": "control:Start voice chat",
-   "pass": false,
-   "why": "box off by 278,0.5,0,0"
+   "pass": true
   },
   {
    "key": "aside:Conversation details",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Close",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Edit Bot avatar",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Bot name",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Activity",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Library",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Suggested",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Hide",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Create a routine",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Create a routine",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Computer",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Bot's computer",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "bdi:Bot's computer",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "bdi:Asleep",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Voice chat",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Voice",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Voice",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Helix 1.0x",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Language",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Language",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Auto-detect",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -178,8 +151,7 @@
   },
   {
    "key": "bubble:user#1 place",
-   "pass": false,
-   "why": "right edge off by 278; width (filled) off by 90.4"
+   "pass": true
   },
   {
    "key": "bubble:assistant#1 look",
@@ -187,116 +159,94 @@
   },
   {
    "key": "bubble:assistant#1 place",
-   "pass": false,
-   "why": "gap above off by 22; width (filled) off by 226; bottom off by -374"
+   "pass": true
   },
   {
    "key": "card#1 parts",
-   "pass": false,
-   "why": "control:Open oracle-note.txt (1) 0 ≠ 1; box 6 ≠ 10; text(3) 1 ≠ 4; text(11) 1 ≠ 2; text(4) 0 ≠ 2; text(8) 1 ≠ 0"
+   "pass": true
   },
   {
    "key": "card#1 control:Open oracle-note.txt (1)#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 box#1",
-   "pass": false,
-   "why": "box off by 198,78,80,0"
+   "pass": true
   },
   {
    "key": "card#1 box#2",
-   "pass": false,
-   "why": "box off by 198,78,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#3",
-   "pass": false,
-   "why": "box off by 198,64,-13,0"
+   "pass": true
   },
   {
    "key": "card#1 box#4",
-   "pass": false,
-   "why": "box off by 198,64,13,0"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#1",
-   "pass": false,
-   "why": "box off by 198,99,80,-2; color rgba(245, 245, 245, 0.66) ≠ rgb(245, 245, 245); font-size 13px ≠ 14px; font-weight 425 ≠ 500; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "card#1 text(11)#1",
-   "pass": false,
-   "why": "box off by 198,78,27.2,0"
+   "pass": true
   },
   {
    "key": "card#1 text(4)#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#2",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 control:Open oracle-note.txt (2)#1",
-   "pass": false,
-   "why": "box off by 198,0,80,0"
+   "pass": true
   },
   {
    "key": "card#1 box#5",
-   "pass": false,
-   "why": "box off by 222,34,-196,-68; background-color rgba(245, 245, 245, 0.24) ≠ rgb(37, 37, 37); border-radius 2px ≠ 22px; box-shadow none ≠ rgba(245, 245, 245, 0.12) 0px 0px 0px 0.5px, rgba(245, 245, 245, 0) 0px 1px 4px 0px, rgba(245, 245, 245, 0) 0px 6px 12px 0px"
+   "pass": true
   },
   {
    "key": "card#1 box#6",
-   "pass": false,
-   "why": "box off by 202,25,-21,-36; background-color rgba(245, 245, 245, 0.24) ≠ rgb(52, 52, 52); border-radius 2px ≠ 6px; box-shadow none ≠ rgba(245, 245, 245, 0.16) 0px 0px 0px 0.5px, rgba(245, 245, 245, 0) 0px 2px 6px 0px"
+   "pass": true
   },
   {
    "key": "card#1 box#7",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 box#8",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 box#9",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 box#10",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#3",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 text(11)#2",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 text(4)#2",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#4",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   }
  ],
- "run": "2026-11-19T20:32:44.767Z",
+ "run": "2026-11-20T19:36:09.203Z",
  "inventory": {
   "id": "oracle-main-790",
   "controls": [
@@ -353,55 +303,55 @@
    {
     "name": "Close",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Edit Bot avatar",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Bot name",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Activity",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Library",
     "item": "F3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Hide",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Create a routine",
     "item": "N3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Bot's computer",
     "item": "F4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Voice",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Language",
     "item": "N4",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 10,
+  "missing": 0,
   "untracked": []
  }
 }
