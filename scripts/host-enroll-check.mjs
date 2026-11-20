@@ -23,12 +23,32 @@ const judge = (name, s) => {
 };
 try {
   // The Mac: a copy of host.sh with a host program already built, and no Barkpark checkout to build from.
-  const mac = join(tmp, 'mac');
-  mkdirSync(join(mac, 'scripts'), { recursive: true }); mkdirSync(join(mac, '.cache', 'bin'), { recursive: true }); mkdirSync(join(mac, 'home'));
-  copyFileSync(path('scripts', 'host.sh'), join(mac, 'scripts', 'host.sh'));
-  host(join(mac, '.cache', 'bin', 'barkpark-chat-host'), join(mac, 'seen'));
-  execFileSync('sh', [join(mac, 'scripts', 'host.sh'), 'enroll'], { input: `${CODE}\n`, env: { ...process.env, HOME: join(mac, 'home'), BARKPARK_SRC: join(mac, 'no-barkpark') }, stdio: ['pipe', 'ignore', 'ignore'] });
-  judge('scripts/host.sh enroll', seen(join(mac, 'seen')));
+  // Once with the code as a line, once as pbpaste gives it: no newline at the end.
+  for (const [name, input] of [['scripts/host.sh enroll', `${CODE}\n`], ['scripts/host.sh enroll, a code piped with no newline', CODE]]) {
+    const mac = join(tmp, `mac-${input.length}`);
+    mkdirSync(join(mac, 'scripts'), { recursive: true }); mkdirSync(join(mac, '.cache', 'bin'), { recursive: true }); mkdirSync(join(mac, 'home'));
+    copyFileSync(path('scripts', 'host.sh'), join(mac, 'scripts', 'host.sh'));
+    host(join(mac, '.cache', 'bin', 'barkpark-chat-host'), join(mac, 'seen'));
+    execFileSync('sh', [join(mac, 'scripts', 'host.sh'), 'enroll'], { input, env: { ...process.env, HOME: join(mac, 'home'), BARKPARK_SRC: join(mac, 'no-barkpark') }, stdio: ['pipe', 'ignore', 'ignore'] });
+    judge(name, seen(join(mac, 'seen')));
+  }
+  // A shallow Barkpark clone, built at its origin/main: the stdin reader's commit (9df5f9e192) is
+  // not in it, so nothing can say the build predates it, and enroll goes on.
+  try {
+    const mac = join(tmp, 'mac-shallow'), git = (cwd, ...a) => execFileSync('git', a, { cwd, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf8' }).trim();
+    mkdirSync(join(mac, 'scripts'), { recursive: true }); mkdirSync(join(mac, '.cache', 'bin'), { recursive: true }); mkdirSync(join(mac, 'home')); mkdirSync(join(mac, 'origin'));
+    git(join(mac, 'origin'), 'init', '-q', '-b', 'main'); // not the runner's default branch (master on CI)
+    for (const m of ['one', 'two']) git(join(mac, 'origin'), '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', m);
+    git(mac, 'clone', '-q', '--depth', '1', `file://${join(mac, 'origin')}`, 'barkpark');
+    if (git(join(mac, 'barkpark'), 'rev-parse', '--is-shallow-repository') !== 'true') fails.push('host.sh enroll, shallow clone: the scratch clone is not shallow');
+    copyFileSync(path('scripts', 'host.sh'), join(mac, 'scripts', 'host.sh'));
+    host(join(mac, '.cache', 'bin', 'barkpark-chat-host'), join(mac, 'seen'));
+    writeFileSync(join(mac, '.cache', 'bin', 'barkpark-chat-host.commit'), git(join(mac, 'barkpark'), 'rev-parse', '--short=10', 'origin/main') + '\n');
+    try {
+      execFileSync('sh', [join(mac, 'scripts', 'host.sh'), 'enroll'], { input: `${CODE}\n`, env: { ...process.env, HOME: join(mac, 'home'), BARKPARK_SRC: join(mac, 'barkpark') }, stdio: ['pipe', 'ignore', 'pipe'] });
+      judge('scripts/host.sh enroll, a shallow Barkpark clone', seen(join(mac, 'seen')));
+    } catch (e) { fails.push(`scripts/host.sh enroll refuses a build in a shallow Barkpark clone: ${String(e.stderr ?? '').trim().split('\n').at(-1)}`); }
+  } catch (e) { fails.push(`host.sh enroll, shallow clone: could not set up the scratch clone: ${e.message.split('\n')[0]}`); }
 
   // The VM: the owner's step, with barkpark-chat-host and claude on PATH as stand-ins.
   const vm = join(tmp, 'vm');
@@ -43,4 +63,4 @@ try {
   rmSync(tmp, { recursive: true, force: true });
 }
 if (fails.length) { console.error(fails.map((f) => `✗ ${f}`).join('\n')); process.exit(1); }
-console.log('host enroll: ok · the code reaches barkpark-chat-host on stdin, not argv · host.sh, barkbot-owner-setup');
+console.log('host enroll: ok · the code reaches barkpark-chat-host on stdin, not argv · host.sh (a line, no newline, a shallow Barkpark clone), barkbot-owner-setup');
