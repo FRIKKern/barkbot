@@ -3,6 +3,8 @@
 // Conversation text is stored as a length; UI labels as text (O2).
 // Usage: node scripts/oracle/capture.mjs <id> [--shot path.png] [--hover <control name> [--nth n]]
 // --hover rests the pointer on that control first and records it as the state's `pointer` (Gate A does the same on ours).
+// Without --hover the pointer is parked 8 pt in from the bottom-right corner and recorded as `parked`, as the sweep
+// does: some looks (the Suggested card's Hide) show only while the pointer is over the window, and Gate A rests ours there too.
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { connect } from './cdp.mjs';
@@ -29,12 +31,22 @@ if (hover) {
   await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + w / 2, y: y + h / 2 });
   await new Promise((ok) => setTimeout(ok, 600));
 }
+let parked = null;
+if (!hover) {
+  const [w, h] = await page.evaluate(() => [innerWidth, innerHeight]);
+  parked = [w - 8, h - 8];
+  execFileSync('open', ['-a', 'Grok Bot']);
+  await page.send('Page.bringToFront');
+  await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: parked[0], y: parked[1] });
+  await new Promise((ok) => setTimeout(ok, 400));
+}
 const state = await page.evaluate(collect);
 // The oracle's own version: a Grok update can move any number, so every capture names it (rule 6b).
 const version = await page.evaluate(() => navigator.userAgent.match(/(Grok[ \w]*)\/([\d.]+)/)?.slice(1).join(' ') ?? null);
 if (bot !== 'Oracle') console.error(`note: the open bot is "${bot}"; only Oracle states belong in fixtures`);
 const out = { id, captured: new Date().toISOString().slice(0, 10), engine: 'electron', version, bot, ...state };
 if (hover) out.pointer = { over: hover, nth };
+else out.parked = parked;
 mkdirSync(path('fixtures', 'states'), { recursive: true });
 writeFileSync(path('fixtures', 'states', `${id}.json`), JSON.stringify(out) + '\n');
 if (shotAt) {

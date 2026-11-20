@@ -1,6 +1,6 @@
 #!/bin/sh
 # The bot's computer, phase 1: the owner's Mac (S1). One locked folder, ~/BarkBot/home.
-#   npm run host:enroll   paste the one-time token from Studio > Chat hosts (it is not echoed)
+#   npm run host:enroll   paste the one-time token from Studio > Chat hosts (not echoed; it reaches the host on stdin)
 #   npm run host          run the host; keep this terminal open while the bot works
 set -eu
 ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
@@ -38,9 +38,36 @@ fi
 echo "host: running the host program built from Barkpark $(cat "$STAMP" 2>/dev/null || echo unknown)" >&2
 case "${1:-run}" in
   enroll)
+    # The code goes to the host program on stdin (Barkpark #27644), never in its argv, where the
+    # process list would show it. Typed at a terminal it is not echoed; it can also be piped in.
+    # A host program built before that reader (Barkpark 9df5f9e192) wants --token: it was built from
+    # a Barkpark checkout whose origin/main is older, so fetching is what moves it. Said before the
+    # code is asked for, so the code is not spent.
+    READER=9df5f9e192
+    if [ -n "$WANT" ] && [ -s "$STAMP" ]; then
+      BUILT=$(cat "$STAMP")
+      # Only when both commits are in the checkout: a shallow clone may hold neither, and says nothing.
+      if git -C "$SRC" cat-file -e "$READER^{commit}" 2>/dev/null && git -C "$SRC" cat-file -e "$BUILT^{commit}" 2>/dev/null &&
+         ! git -C "$SRC" merge-base --is-ancestor "$READER" "$BUILT" 2>/dev/null; then
+        echo "host: the host program was built from Barkpark $BUILT, which predates its stdin reader ($READER, #27644)." >&2
+        echo "host: fetch Barkpark (git -C \"$SRC\" fetch origin), then run npm run host:enroll again: it rebuilds first." >&2
+        exit 1
+      fi
+    fi
     printf 'One-time enrollment token: '
-    stty -echo; read -r TOKEN; stty echo; printf '\n'
-    "$BIN" enroll --url "$URL" --token "$TOKEN" --root "$HOME_DIR" --state "$STATE"
+    # read fails at the end of input with no newline (a code piped from pbpaste) but keeps what it read.
+    if [ -t 0 ]; then
+      trap 'stty echo; printf "\n"; exit 130' INT HUP TERM # Ctrl-C in the hidden read gives echo back
+      stty -echo; read -r TOKEN || [ -n "${TOKEN:-}" ] || TOKEN=; stty echo
+      trap - INT HUP TERM; printf '\n'
+    else
+      read -r TOKEN || [ -n "${TOKEN:-}" ] || TOKEN=
+    fi
+    [ -n "$TOKEN" ] || { echo "host: no enrollment code given" >&2; exit 1; }
+    if ! printf '%s\n' "$TOKEN" | "$BIN" enroll --url "$URL" --root "$HOME_DIR" --state "$STATE"; then
+      echo "host: enrollment failed. If it asked for --token, the host program predates Barkpark's stdin reader: git -C \"$SRC\" fetch origin, then npm run host:enroll again." >&2
+      exit 1
+    fi
     ;;
   run)
     exec "$BIN" run --state "$STATE"
