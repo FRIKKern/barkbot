@@ -23,6 +23,7 @@ import { panelCurve } from './lib/panel-curve.mjs';
 import { cmdHints } from './lib/cmd-hints.mjs';
 import { newBotHides } from './lib/new-bot-hides.mjs';
 import { pickerPick } from './lib/picker-pick.mjs';
+import { accountRows } from './lib/account-rows.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
 import { createOnce } from './lib/create-once.mjs';
@@ -478,6 +479,10 @@ await newBotHides({ check, precondition, ev, open, base, click, wait, until, win
 // ── A pick in the Voice chat card's pickers changes its row (task-d2fde20bf4539af1, item N4) ──
 console.log("Behaviour · a picker's pick changes its row");
 await pickerPick({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
+
+// ── The account menu's dialog rows: Get Grok Bot for mobile opens its dialog (item F8) ──
+console.log("Behaviour · the account menu's dialog rows (oracle-get-mobile)");
+await accountRows({ check, precondition, ev, open, base, click, wait, until, windowFocus });
 
 // ── Rename persists: the live page (/) saves the name to Barkpark (task-c3e0bc88ce28833d) ─────
 // Grok keeps a renamed bot's name across a restart. Ours saves it as a Barkpark pref on Enter or

@@ -48,8 +48,9 @@ export function ComposerMenu({onPick}: {onPick?: () => void}) {
 }
 
 // 1.2.3 (oracle-account-menu): three groups, Upgrade plan under Weekly usage, Support opens a
-// submenu (its trail is a chevron), 228 wide. The Upgrade plan glyph is a stand-in.
-export function AccountMenu({onPick, onSettings}: {onPick?: () => void; onSettings?: () => void}) {
+// submenu (its trail is a chevron), 228 wide. The Upgrade plan glyph is a stand-in. Settings and
+// Get Grok Bot for mobile open their dialogs (go); every other row closes the menu.
+export function AccountMenu({onPick, onSettings, onMobile}: {onPick?: () => void; onSettings?: () => void; onMobile?: () => void}) {
   return (
     <div role="presentation" className="pop menu-pop account-menu">
       <div role="menu" tabIndex={-1} aria-label="Account" className="menu">
@@ -70,7 +71,7 @@ export function AccountMenu({onPick, onSettings}: {onPick?: () => void; onSettin
           <Item
             icon={<Icon d="M5 2.5h6a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zM7 11.5h2" />}
             label="Get Grok Bot for mobile"
-            onPick={onPick}
+            onPick={onMobile ?? onPick}
           />
           <Item
             icon={<Icon d="M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM6.5 6.5a1.5 1.5 0 1 1 2 1.4c-.4.2-.5.5-.5.9M8 10.75v.25" />}

@@ -42,7 +42,7 @@ type Render = (o: {picked?: string; scene?: Scene; close: () => void; choose: (v
 
 const overlays: Record<string, Render> = {
   'composer-menu': ({close}) => <ComposerMenu onPick={close} />,
-  'account-menu': ({close, go}) => <AccountMenu onPick={close} onSettings={() => go('settings')} />,
+  'account-menu': ({close, go}) => <AccountMenu onPick={close} onSettings={() => go('settings')} onMobile={() => go('get-mobile')} />,
   'voice-picker': ({picked, scene, choose}) => <VoicePicker picked={picked ?? scene?.voice?.voice} onPick={choose} />,
   'speed-picker': ({picked, scene, choose}) => <SpeedPicker picked={picked ?? scene?.voice?.speed} onPick={choose} />,
   'language-picker': ({picked, scene, choose}) => <LanguagePicker picked={picked ?? scene?.voice?.language} onPick={choose} />,
