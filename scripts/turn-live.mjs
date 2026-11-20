@@ -183,8 +183,9 @@ const onHost = async ({ before = null } = {}) => {
   if (h.name !== HOST) stopWith(`${before ? 'the open conversation is' : 'the turn went to a conversation'} on ${h.name ? `"${h.name}"` : 'a computer that is not one of yours'}, not "${HOST}" (pick its bot with --bot <id>)${before ? '; nothing was sent' : ''}`);
 };
 // The ONLY way this script sends a message: the check before the send, then the words and Enter.
-// npm run check holds every insertText, Enter key, mouse event and click (but the .ask-* card
-// answers) in this file to this function's body. Returns the time the words went in.
+// npm run check holds every other door in this file to this function's body: CDP Input.* and
+// computed CDP names, DOM events, form submits, HTTP writes, live.call, and clicks on anything but
+// an .ask-* answer control itself. Returns the time the words went in.
 const sendText = async (text, before) => {
   await onHost({ before });
   const t0 = Date.now();
