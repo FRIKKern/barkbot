@@ -1,0 +1,487 @@
+{
+ "id": "oracle-voice-picker-start",
+ "captured": "2026-11-19",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 48,
+ "pass": 0,
+ "scene": false,
+ "results": [
+  {
+   "key": "control:Altair",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Altair",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Elegant & refined",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Altair preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Ara",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Ara",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Warm & friendly",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Ara preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Atlas",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Atlas",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Firm & reassuring",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Atlas preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Aurora",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Aurora",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Serene & steady",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Aurora preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Carina",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Carina",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Soft & empathetic",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Carina preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Castor",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Castor",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Easygoing & real",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Castor preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Celeste",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Celeste",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Caring & confident",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Celeste preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Cosmo",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Cosmo",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Bright & curious",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Cosmo preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Eve",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Eve",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Energetic & upbeat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Eve preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Helios",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Helios",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Upbeat & versatile",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Helios preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Helix",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Helix",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Bold & dynamic",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Helix preview",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Iris",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Iris",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Friendly & charming",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Play the Iris preview",
+   "pass": false,
+   "why": "no scene"
+  }
+ ],
+ "run": "2026-11-19T21:02:03.478Z",
+ "inventory": {
+  "id": "oracle-voice-picker-start",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": false
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": false
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Close",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": false
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Speed",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Altair",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Altair preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Ara",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Ara preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Atlas",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Atlas preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Aurora",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Aurora preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Carina",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Carina preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Castor",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Castor preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Celeste",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Celeste preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Cosmo",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Cosmo preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Eve",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Eve preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Helios",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Helios preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Helix",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Helix preview",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Iris",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Play the Iris preview",
+    "item": "N4",
+    "ours": false
+   }
+  ],
+  "missing": 45,
+  "untracked": []
+ }
+}
