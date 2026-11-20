@@ -1,6 +1,8 @@
 // The overlays' keys and focus, as traces/2026-11-09-keys.json measured them on the oracle (task-
 // 4d9930cf48ab41fb): five overlays, each opened by a real click on its trigger, then real keys and
-// an outside click. app/src/components/overlays/index.tsx implements them from that trace; until
+// an outside click. On Grok 1.2.3 the Speed list is gone: its keys are checked on the Language list,
+// the same listbox. The Voice dialog's focus on open is traced (2026-11-19-voice-picker.json); its
+// Escape is ours, as the other overlays'. app/src/components/overlays/index.tsx implements them from that trace; until
 // these rules nothing drove a key on an overlay, so a regression passed every gate.
 // The page is the oracle scene (/gate/oracle-turn-1040): the real Shell, overlays opened from
 // their triggers, nothing held open by the scene.
@@ -20,7 +22,7 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
     if (!a || a === document.body) return 'body';
     const role = a.getAttribute('role') || (a.tagName === 'INPUT' ? 'input' : a.tagName.toLowerCase());
     const by = a.getAttribute('aria-labelledby');
-    const own = (a.querySelector('.menu-label span') ?? a.querySelector('.option-text div') ?? a).textContent;
+    const own = (a.querySelector('.menu-label span') ?? a.querySelector('.option-text div') ?? a.querySelector('.voice-name') ?? a).textContent;
     const label = a.getAttribute('aria-label') || (by && document.getElementById(by)?.textContent.trim()) || own.trim();
     return `${role} ${label}${a.hasAttribute('data-highlighted') ? ' [highlighted]' : ''}${a.closest('.overlay') ? ' (overlay)' : ''}`;
   });
@@ -106,16 +108,28 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
   check('composer menu (keys trace): open puts focus on the menu with no row highlighted; ArrowDown focuses and highlights Attach files, then Teach a task; ArrowUp goes back to Attach files, the one row highlighted; Escape closes it and gives focus back to Composer actions',
     cm.open === 'menu Composer actions (overlay)' && cm.lit === 0 && cm.down === 'menuitem Attach files [highlighted] (overlay)' && cm.down2 === 'menuitem Teach a task [highlighted] (overlay)' && cm.up === 'menuitem Attach files [highlighted] (overlay)' && cm.litAfter === 1 && cm.escape === 'button Composer actions' && cm.after === null, cm);
 
-  // Speed picker: its picked option on open, highlighted; arrows walk; Escape picks nothing and goes back to the box.
+  // Language picker (Grok 1.2.3 has no Speed list; the keys trace measured these keys on 0.79.3's Speed
+  // list, and Language is the same listbox): its picked option on open, highlighted; arrows walk;
+  // Escape picks nothing and goes back to the box.
   await fresh();
-  const value = () => ev(() => document.querySelector('[role=combobox][aria-label="Speed"]')?.textContent.trim() ?? null);
-  const was = await value();
-  await clickOn('[role=combobox][aria-label="Speed"]');
-  const sp = { was, open: await focused() };
-  await press('ArrowDown'); sp.down = await focused();
-  await press('ArrowDown'); sp.down2 = await focused();
-  await press('ArrowUp'); sp.up = await focused();
-  await press('Escape'); sp.escape = await focused(); sp.after = await shown(); sp.value = await value();
-  check('speed picker (keys trace): open focuses and highlights the picked option, 1x; ArrowDown goes to 1.25x, then 1.5x; ArrowUp back to 1.25x; Escape closes it without choosing and gives focus back to the Speed box, still 1x (control: it read 1x before)',
-    sp.was === '1x' && sp.open === 'option 1x [highlighted] (overlay)' && sp.down === 'option 1.25x [highlighted] (overlay)' && sp.down2 === 'option 1.5x [highlighted] (overlay)' && sp.up === 'option 1.25x [highlighted] (overlay)' && sp.escape === 'combobox Speed' && sp.after === null && sp.value === '1x', sp);
+  const value = (row) => ev((r) => (r === 'Voice' ? document.querySelector('button[data-picker="voice-picker"]') : document.querySelector(`[role=combobox][aria-label="${r}"]`))?.textContent.trim() ?? null, row);
+  const was = await value('Language');
+  await clickOn('[role=combobox][aria-label="Language"]');
+  const lp = { was, open: await focused() };
+  await press('ArrowDown'); lp.down = await focused();
+  await press('ArrowDown'); lp.down2 = await focused();
+  await press('ArrowUp'); lp.up = await focused();
+  await press('Escape'); lp.escape = await focused(); lp.after = await shown(); lp.value = await value('Language');
+  check('language picker (keys trace, on the same listbox): open focuses and highlights the picked option, Auto-detect; ArrowDown goes to English, then Arabic (Egypt); ArrowUp back to English; Escape closes it without choosing and gives focus back to the Language box, still Auto-detect (control: it read Auto-detect before)',
+    lp.was === 'Auto-detect' && lp.open === 'option Auto-detect [highlighted] (overlay)' && lp.down === 'option English [highlighted] (overlay)' && lp.down2 === 'option Arabic (Egypt) [highlighted] (overlay)' && lp.up === 'option English [highlighted] (overlay)' && lp.escape === 'combobox Language' && lp.after === null && lp.value === 'Auto-detect', lp);
+
+  // The Voice dialog (1.2.3): open focuses the checked voice (the voice-picker trace); Escape closes it
+  // without choosing and gives focus back to the Voice button, still Helix 1.0x (ours, as the other overlays).
+  await fresh();
+  const vWas = await value('Voice');
+  await clickOn('button[data-picker="voice-picker"]');
+  const vd = { was: vWas, shown: await shown(), open: await focused() };
+  await press('Escape'); vd.escape = await focused(); vd.after = await shown(); vd.value = await value('Voice');
+  check('Voice dialog (voice-picker trace): open focuses the checked voice, Helix; Escape (ours, untraced) closes it without choosing and gives focus back to the Voice button, still Helix 1.0x (control: it read Helix 1.0x and the dialog was up)',
+    vd.was === 'Helix 1.0x' && vd.shown === 'voice-picker' && vd.open === 'radio Helix (overlay)' && vd.escape === 'button Helix 1.0x' && vd.after === null && vd.value === 'Helix 1.0x', vd);
 }

@@ -7,7 +7,7 @@
   2
  ],
  "cases": 70,
- "pass": 26,
+ "pass": 58,
  "results": [
   {
    "key": "aside:Bots",
@@ -99,163 +99,131 @@
   },
   {
    "key": "control:Create a routine",
-   "pass": false,
-   "why": "box off by 0,36,0,0"
+   "pass": true
   },
   {
    "key": "span:Create a routine",
-   "pass": false,
-   "why": "box off by 0,36.5,0.8,-0.5"
+   "pass": true
   },
   {
    "key": "span:Computer",
-   "pass": false,
-   "why": "box off by 0,36,-0.4,0"
+   "pass": true
   },
   {
    "key": "control:Bot's computer",
-   "pass": false,
-   "why": "box off by 0,36,0,0"
+   "pass": true
   },
   {
    "key": "bdi:Bot's computer",
-   "pass": false,
-   "why": "box off by 0,36.5,0,-0.5"
+   "pass": true
   },
   {
    "key": "bdi:Asleep",
-   "pass": false,
-   "why": "box off by 0,36.5,0.1,-0.5"
+   "pass": true
   },
   {
    "key": "span:Voice chat",
-   "pass": false,
-   "why": "box off by 0,36,0.2,0"
+   "pass": true
   },
   {
    "key": "span:Voice",
-   "pass": false,
-   "why": "box off by 0,36.5,-0.2,-0.5"
+   "pass": true
   },
   {
    "key": "control:Voice",
-   "pass": false,
-   "why": "box off by 25.2,36,-25.2,0"
+   "pass": true
   },
   {
    "key": "span:Helix 1.0x",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Language",
-   "pass": false,
-   "why": "box off by 0,66.5,0.7,-0.5"
+   "pass": true
   },
   {
    "key": "control:Language",
-   "pass": false,
-   "why": "box off by 0.3,66,-0.3,0"
+   "pass": true
   },
   {
    "key": "span:Auto-detect",
-   "pass": false,
-   "why": "box off by 0.3,66.5,-0.3,-0.5"
+   "pass": true
   },
   {
    "key": "span:Auto-detect#2",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:English",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Arabic (Egypt)",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Arabic (Saudi Arabia)",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Arabic (United Arab Emirates)",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Bengali",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Catalan",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Chinese (Simplified)",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Danish",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Dutch",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Finnish",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:French",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:German",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Hindi",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Hungarian",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Indonesian",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Italian",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "span:Japanese",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Korean",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -334,7 +302,7 @@
    "why": "missing"
   }
  ],
- "run": "2026-11-19T20:32:44.767Z",
+ "run": "2026-11-20T03:12:42.922Z",
  "inventory": {
   "id": "oracle-language-picker",
   "controls": [

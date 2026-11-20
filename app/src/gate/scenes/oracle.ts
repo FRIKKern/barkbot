@@ -9,7 +9,7 @@ export const oracle: Scene = {
   active: 'Oracle',
   panelOpen: true,
   computer: 'Asleep',
-  voice: {voice: 'Helix', speed: '1x', language: 'Auto-detect'},
+  voice: {voice: 'Helix', speed: 1, language: 'Auto-detect'},
   // The preview's line is the bot's last message: the fixture keeps only its length (185), so placeholder words.
   previews: {Oracle: filler(185)},
   // The conversation behind the baseline's states as oracle-turn-1040 shows it: a message carrying

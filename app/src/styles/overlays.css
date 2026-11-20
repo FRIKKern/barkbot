@@ -1,5 +1,5 @@
 /* Overlays: menus, pickers, the Create New Bot dialog. Every number is read from
-   fixtures/states/oracle-{composer-menu,account-menu,voice-picker,speed-picker,language-picker,new-bot-dialog}.json
+   fixtures/states/oracle-{composer-menu,account-menu,language-picker,new-bot-dialog}.json
    (1040 x 760 pt). Each overlay is a fixed layer; its anchor is named where it is placed. */
 
 .overlay { display: contents; }
@@ -33,28 +33,19 @@
 /* Its width follows its rows: the usage text sets it (oracle-account-menu, 0.79.3: 243 with a 7-character usage). */
 .account-menu { left: 17px; bottom: 66px; width: max-content; }
 
-/* ── Pickers: 4 pt above the row's button, right edges aligned (1016.5); 13/18 ── */
+/* ── Pickers: 4 pt above the row's button, right edges aligned (1016.5); 13/18. The Voice dialog: styles/voice.css ── */
 .picker { right: 23.5px; width: 200px; transform: translateY(-100%); font-size: 13px; font-weight: 425; line-height: 18px; letter-spacing: -0.08px; }
-.voice-picker { top: 512.5px; }    /* Voice button top 516.5 */
-.speed-picker { top: 542.5px; }    /* Speed button top 546.5 */
-.language-picker { top: 572.5px; right: 23.3px; width: 211.2px; } /* Language button top 576.5 */
+.language-picker { top: 506.5px; right: 23.3px; width: 211.2px; } /* Language button top 510.5 (1.2.3) */
 .picker-scroll { max-height: 360px; overflow-y: auto; scrollbar-width: none; border-radius: inherit; }
 .picker-scroll::-webkit-scrollbar { display: none; }
-/* A list that scrolls keeps a 7 pt gutter for its bar (listbox 193 of 200, 204.2 of 211.2). */
-.voice-picker .picker-scroll, .language-picker .picker-scroll { padding-right: 7px; }
+/* A list that scrolls keeps a 7 pt gutter for its bar (listbox 204.2 of 211.2). */
+.language-picker .picker-scroll { padding-right: 7px; }
 .listbox { padding: 6px 0; display: flex; flex-direction: column; gap: 2px; }
 .option { height: 30px; flex: none; display: flex; align-items: center; gap: 20px; padding: 0 14px; outline: none; }
-.voice-picker .option { height: 36px; }
 .option-text { flex: 1; min-width: 0; }
 .option-text > div, .option-text span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .option-check { width: 12px; height: 12px; flex: none; display: grid; place-items: center; color: var(--ink-90); }
 .option-check .icon { width: 12px; height: 12px; }
-.option-trail { flex: none; display: flex; align-items: center; gap: 4px; color: var(--ink-66); }
-.option-mark { width: 14px; height: 14px; display: grid; }
-.option-mark > span { border-radius: 50%; border: 1px solid currentColor; }
-.play { width: 24px; height: 24px; border-radius: 9999px; background: var(--wash-04); color: var(--ink-64); display: grid; place-items: center; }
-.play > span { width: 18px; height: 18px; display: grid; place-items: center; }
-.play .icon { width: 14px; height: 14px; fill: currentColor; }
 
 /* ── Create New Bot: 440 x 579 centred, 70% black scrim ── */
 .scrim { position: fixed; inset: 0; z-index: 30; background: rgb(0 0 0 / 0.698); }

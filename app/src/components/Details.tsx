@@ -1,9 +1,12 @@
 // The details panel (aside "Conversation details", 720..1040): the bot, its tabs, and the
 // Activity cards: Suggested, Computer, Voice chat. Library shows its empty state.
+// Grok 1.2.3 (decision 0010): Suggested holds Create a routine only (Add to Slack is gone), and
+// Voice chat has two rows: Voice, a button reading "<voice> <speed>" that opens the Voice dialog
+// with its Speed slider, and Language.
 import {useRef, useState} from 'react'
 import type {Scene} from './Shell'
 import {Icon} from './Composer'
-import {Face, Pick, Row, Section, fit} from './parts'
+import {Face, Pick, Row, Section, VoicePick, fit} from './parts'
 import {Tooltip, useHover} from './tips'
 
 // Always mounted: closing runs its width 320 -> 0 (styles/details.css), and a closed panel is
@@ -58,7 +61,6 @@ export function Details({scene, name, between, onRename, onClose}: {scene: Scene
         ) : (
           <div role="tabpanel" className="tabpanel">
             <Section title="Suggested" action={<button className="section-hide">Hide</button>}>
-              <Row icon={<Icon d="M3 3h4v4H3zM9 3h4v4H9zM3 9h4v4H3zM9 9h4v4H9z" />} label="Add to Slack" />
               <Row icon={<Icon d="M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 5v3l2 1.25" />} label="Create a routine" />
             </Section>
             {scene.computer !== undefined && (
@@ -82,8 +84,7 @@ export function Details({scene, name, between, onRename, onClose}: {scene: Scene
             )}
             {scene.voice && (
               <Section title="Voice chat">
-                <Pick label="Voice" value={scene.voice.voice} open={scene.overlay === 'voice-picker'} />
-                <Pick label="Speed" value={scene.voice.speed} open={scene.overlay === 'speed-picker'} />
+                <VoicePick voice={scene.voice.voice} speed={scene.voice.speed} open={scene.overlay === 'voice-picker'} />
                 <Pick label="Language" value={scene.voice.language} open={scene.overlay === 'language-picker'} />
               </Section>
             )}

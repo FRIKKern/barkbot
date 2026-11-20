@@ -7,7 +7,7 @@
   2
  ],
  "cases": 121,
- "pass": 26,
+ "pass": 109,
  "results": [
   {
    "key": "aside:Bots",
@@ -99,418 +99,335 @@
   },
   {
    "key": "control:Create a routine",
-   "pass": false,
-   "why": "box off by 0,36,0,0"
+   "pass": true
   },
   {
    "key": "span:Create a routine",
-   "pass": false,
-   "why": "box off by 0,36.5,0.8,-0.5"
+   "pass": true
   },
   {
    "key": "span:Computer",
-   "pass": false,
-   "why": "box off by 0,36,-0.4,0"
+   "pass": true
   },
   {
    "key": "control:Bot's computer",
-   "pass": false,
-   "why": "box off by 0,36,0,0"
+   "pass": true
   },
   {
    "key": "bdi:Bot's computer",
-   "pass": false,
-   "why": "box off by 0,36.5,0,-0.5"
+   "pass": true
   },
   {
    "key": "bdi:Asleep",
-   "pass": false,
-   "why": "box off by 0,36.5,0.1,-0.5"
+   "pass": true
   },
   {
    "key": "span:Voice chat",
-   "pass": false,
-   "why": "box off by 0,36,0.2,0"
+   "pass": true
   },
   {
    "key": "span:Voice",
-   "pass": false,
-   "why": "box off by 0,36.5,-0.2,-0.5"
+   "pass": true
   },
   {
    "key": "control:Voice",
-   "pass": false,
-   "why": "box off by 25.2,36,-25.2,0"
+   "pass": true
   },
   {
    "key": "span:Helix 1.0x",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Language",
-   "pass": false,
-   "why": "box off by 0,66.5,0.7,-0.5"
+   "pass": true
   },
   {
    "key": "control:Language",
-   "pass": false,
-   "why": "box off by 0.3,66,-0.3,0"
+   "pass": true
   },
   {
    "key": "span:Auto-detect",
-   "pass": false,
-   "why": "box off by 0.3,66.5,-0.3,-0.5"
+   "pass": true
   },
   {
    "key": "span:Speed",
-   "pass": false,
-   "why": "box off by 18,392,0,-3"
+   "pass": true
   },
   {
    "key": "control:Speed",
-   "pass": false,
-   "why": "box off by 147.2,386.5,21.5,8; background-color rgba(0, 0, 0, 0) ≠ rgb(59, 59, 59); color rgb(245, 245, 245) ≠ rgb(255, 255, 255); border-radius 8px ≠ 0px"
+   "pass": true
   },
   {
    "key": "span:1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:.",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:0",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:x",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Carina",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Carina",
-   "pass": false,
-   "why": "box off by 95,264,7,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Soft & empathetic",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Carina preview",
-   "pass": false,
-   "why": "box off by 145,286,0,0"
+   "pass": true
   },
   {
    "key": "control:Castor",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Castor",
-   "pass": false,
-   "why": "box off by -53,302,7,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Easygoing & real",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Castor preview",
-   "pass": false,
-   "why": "box off by -3,324,0,0"
+   "pass": true
   },
   {
    "key": "control:Celeste",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Celeste",
-   "pass": false,
-   "why": "box off by 95,248,7,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Caring & confident",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Celeste preview",
-   "pass": false,
-   "why": "box off by 145,270,0,0"
+   "pass": true
   },
   {
    "key": "control:Cosmo",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Cosmo",
-   "pass": false,
-   "why": "box off by -53,286,7,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Bright & curious",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Cosmo preview",
-   "pass": false,
-   "why": "box off by -3,308,0,0"
+   "pass": true
   },
   {
    "key": "control:Eve",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Eve",
-   "pass": false,
-   "why": "box off by 95,232,7,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Energetic & upbeat",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Eve preview",
-   "pass": false,
-   "why": "box off by 145,254,0,0"
+   "pass": true
   },
   {
    "key": "control:Helios",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Helios",
-   "pass": false,
-   "why": "box off by -53,270,7,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Upbeat & versatile",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Helios preview",
-   "pass": false,
-   "why": "box off by -3,292,0,0"
+   "pass": true
   },
   {
    "key": "control:Helix",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Helix",
-   "pass": false,
-   "why": "box off by 232.2,189.5,-84.2,-3; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Bold & dynamic",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Helix preview",
-   "pass": false,
-   "why": "box off by 129,238,0,0"
+   "pass": true
   },
   {
    "key": "control:Iris",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Iris",
-   "pass": false,
-   "why": "box off by -53,254,7,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Friendly & charming",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Iris preview",
-   "pass": false,
-   "why": "box off by -3,276,0,0"
+   "pass": true
   },
   {
    "key": "control:Kepler",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Kepler",
-   "pass": false,
-   "why": "box off by 95,200,7,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Witty & inventive",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Kepler preview",
-   "pass": false,
-   "why": "box off by 145,222,0,0"
+   "pass": true
   },
   {
    "key": "control:Leo",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Leo",
-   "pass": false,
-   "why": "box off by -53,238,7,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Strong & assured",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Leo preview",
-   "pass": false,
-   "why": "box off by -3,260,0,0"
+   "pass": true
   },
   {
    "key": "control:Liora",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Liora",
-   "pass": false,
-   "why": "box off by 95,184,-11,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Calm & grounded",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Liora preview",
-   "pass": false,
-   "why": "box off by 145,206,0,0"
+   "pass": true
   },
   {
    "key": "control:Lumen",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Lumen",
-   "pass": false,
-   "why": "box off by -53,222,7,0; font-size 13px ≠ 14px"
+   "pass": true
   },
   {
    "key": "span:Warm & articulate",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Lumen preview",
-   "pass": false,
-   "why": "box off by -3,244,0,0"
+   "pass": true
   },
   {
    "key": "control:Luna",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Luna",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Gentle & patient",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Luna preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Lux",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Lux",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Quiet & wise",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Lux preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Naksh",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Naksh",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Warm & thoughtful",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Naksh preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Orion",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Orion",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Rich & cinematic",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Orion preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -589,7 +506,7 @@
    "why": "missing"
   }
  ],
- "run": "2026-11-19T20:32:44.767Z",
+ "run": "2026-11-20T03:14:58.760Z",
  "inventory": {
   "id": "oracle-voice-picker",
   "controls": [
@@ -701,7 +618,7 @@
    {
     "name": "Carina",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Carina preview",
@@ -711,7 +628,7 @@
    {
     "name": "Castor",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Castor preview",
@@ -721,7 +638,7 @@
    {
     "name": "Celeste",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Celeste preview",
@@ -731,7 +648,7 @@
    {
     "name": "Cosmo",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Cosmo preview",
@@ -741,7 +658,7 @@
    {
     "name": "Eve",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Eve preview",
@@ -751,7 +668,7 @@
    {
     "name": "Helios",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Helios preview",
@@ -761,7 +678,7 @@
    {
     "name": "Helix",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Helix preview",
@@ -771,7 +688,7 @@
    {
     "name": "Iris",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Iris preview",
@@ -781,7 +698,7 @@
    {
     "name": "Kepler",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Kepler preview",
@@ -791,7 +708,7 @@
    {
     "name": "Leo",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Leo preview",
@@ -801,7 +718,7 @@
    {
     "name": "Liora",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Liora preview",
@@ -811,7 +728,7 @@
    {
     "name": "Lumen",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Lumen preview",
@@ -821,45 +738,45 @@
    {
     "name": "Luna",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Luna preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Lux",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Lux preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Naksh",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Naksh preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Orion",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Orion preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 20,
+  "missing": 0,
   "untracked": []
  }
 }
