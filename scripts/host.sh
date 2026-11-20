@@ -46,7 +46,9 @@ case "${1:-run}" in
     READER=9df5f9e192
     if [ -n "$WANT" ] && [ -s "$STAMP" ]; then
       BUILT=$(cat "$STAMP")
-      if git -C "$SRC" cat-file -e "$BUILT^{commit}" 2>/dev/null && ! git -C "$SRC" merge-base --is-ancestor "$READER" "$BUILT" 2>/dev/null; then
+      # Only when both commits are in the checkout: a shallow clone may hold neither, and says nothing.
+      if git -C "$SRC" cat-file -e "$READER^{commit}" 2>/dev/null && git -C "$SRC" cat-file -e "$BUILT^{commit}" 2>/dev/null &&
+         ! git -C "$SRC" merge-base --is-ancestor "$READER" "$BUILT" 2>/dev/null; then
         echo "host: the host program was built from Barkpark $BUILT, which predates its stdin reader ($READER, #27644)." >&2
         echo "host: fetch Barkpark (git -C \"$SRC\" fetch origin), then run npm run host:enroll again: it rebuilds first." >&2
         exit 1
