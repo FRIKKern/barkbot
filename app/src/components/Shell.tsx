@@ -19,7 +19,8 @@ export type Scene = {
   active?: string
   panelOpen: boolean
   computer?: string
-  voice?: {voice: string; speed: string; language: string}
+  /** The Voice chat card: the voice and its speed (one row on 1.2.3, "Helix 1.0x"), the language. */
+  voice?: {voice: string; speed: number; language: string}
   tab?: 'activity' | 'library'
   /** Each bot's last message by bot id, shown in its chat preview on hover. Placeholder text in scenes (O2). */
   previews?: Record<string, string>
@@ -39,8 +40,8 @@ export type Scene = {
 // A window under 800 closes the details panel by itself, and widening it again leaves it closed
 // (measured on the oracle: 790 closed, 800 open; oracle-main-790, -800).
 const NARROW = '(max-width: 799.98px)'
-// Which Voice chat row each picker changes.
-const voiceRows: Record<string, keyof NonNullable<Scene['voice']>> = {'voice-picker': 'voice', 'speed-picker': 'speed', 'language-picker': 'language'}
+// Which Voice chat value each picker changes (the Voice dialog's slider says 'voice-speed').
+const voiceRows: Record<string, keyof NonNullable<Scene['voice']>> = {'voice-picker': 'voice', 'voice-speed': 'speed', 'language-picker': 'language'}
 
 // `workingBots`: the ids of the bots whose run is in progress, from the chat stream (the same signal as the
 // transcript's working row; both flip at the same ms in traces say-hi, say-hi-2, storage).

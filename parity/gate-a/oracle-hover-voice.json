@@ -7,15 +7,14 @@
   2
  ],
  "cases": 1,
- "pass": 0,
+ "pass": 1,
  "results": [
   {
    "key": "control:Voice",
-   "pass": false,
-   "why": "box off by 25.2,36,-25.2,0"
+   "pass": true
   }
  ],
- "run": "2026-11-19T20:24:46.604Z",
+ "run": "2026-11-20T03:12:33.891Z",
  "inventory": {
   "id": "oracle-hover-voice",
   "controls": [

@@ -2,12 +2,12 @@
  "id": "N3",
  "slice": "S7",
  "journey": null,
- "title": "Suggested card: Create a routine; it opens 1:1 and stops before acting outside the page; its Hide button shows while the pointer is over the window (oracle-hover-create-a-routine)",
+ "title": "Suggested card: Create a routine (1.2.3 has no Add to Slack); it opens 1:1 and stops before acting outside the page; its Hide button shows while the pointer is over the window (oracle-hover-*)",
  "status": "partial",
  "controls": [
   "Create a routine",
   "Hide"
  ],
- "gate": "Gate A on 1.2.3 (decision 0010): oracle-hover-create-a-routine 0/1. Hide: in 1.2.3 its box is 979.5,236,38.5,24 in oracle-hover-create-a-routine, the same as 0.79.3's oracle-hover-add-to-slack, which ours was measured against to 0.2 pt; not re-measured on 1.2.3",
- "evidence": "parts.tsx Section action + details.css: the Suggested card's two rows and Hide, which shows while the pointer is over the window (:root:hover) and is hidden in every parked state. Missing: what Add to Slack and Create a routine open, and what Hide does. None was captured (needs a look-only capture of each opened on the oracle, and of the card after Hide, which changes the oracle's state: the owner's), so none is built; both rows do nothing on a press. 1.2.3 (decision 0010): Add to Slack is gone, so the card has one row, Create a routine; oracle-hover-add-to-slack is dropped. Ours still draws an Add to Slack row (app/src/components/Details.tsx): not removed yet."
+ "gate": "Gate A on 1.2.3 (decision 0010), hosted CI run 44611689138: oracle-hover-create-a-routine 1/1. Hide: its box is 979.5,236,38.5,24 in 1.2.3's states, the same as 0.79.3's oracle-hover-add-to-slack, which ours was measured against to 0.2 pt",
+ "evidence": "parts.tsx Section action + details.css: the Suggested card's one row and Hide, which shows while the pointer is over the window (:root:hover) and is hidden in every parked state. Grok 1.2.3 dropped Add to Slack (decision 0010), so the card is 36 pt shorter and the panel's lower rows moved up with it. Missing: what Create a routine opens, and what Hide does. Neither was captured (needs a look-only capture of each opened on the oracle, and of the card after Hide, which changes the oracle's state: the owner's), so neither is built; the row does nothing on a press."
 }
