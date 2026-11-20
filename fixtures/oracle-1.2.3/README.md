@@ -15,4 +15,4 @@ Four sends in all: the file, the pictures, the question, the answer B.
 
 ## The Voice picker's behaviour
 
-`2026-11-19-voice-picker` comes from `node scripts/oracle/voice-picker.mjs`, look-only except for two reversible steps in the Oracle bot: one slider step and one pick. Each was put back to Helix 1.0x and checked. It records where focus lands on open, every row's name and description, whether a pick closes the picker, and the speed slider (range, step, how a value prints). The state `oracle-voice-picker-start` (the list at its first voice) is in `fixtures/states/`.
+`2026-11-19-voice-picker` comes from `node scripts/oracle/voice-picker.mjs`, look-only except for two reversible steps in the Oracle bot: one slider step (up, then back) and two picks (Helios, the voice before Helix, then Helix again). Each was put back to Helix 1.0x and checked. It records where focus lands on open, every row's name and description, whether a pick closes the picker, and the speed slider (range, step, how a value prints). The state `oracle-voice-picker-start` (the list at its first voice) is in `fixtures/states/`.

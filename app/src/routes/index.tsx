@@ -334,7 +334,7 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
         leaving ? (
           <div className="transcript" />
         ) : chat.host ? (
-          <Transcript bot={name} startedAt={startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? failedLine ?? note ?? chat.notice ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} />
+          <Transcript bot={name} startedAt={startedAt} bubbles={convo.bubbles} working={convo.working} error={convo.error ?? failedLine ?? note ?? chat.notice ?? offline} picture={convo.picture} ask={convo.ask} onAnswer={convo.answer} onChoose={convo.choose} of={{botId: chat.botId, hostId: chat.host.id}} />
         ) : (
           <div className="transcript">
             <p className="chat-note">
