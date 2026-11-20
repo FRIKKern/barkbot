@@ -1,0 +1,21 @@
+#!/bin/bash
+# The owner's one step on the bot's VM (V1), installed as /usr/local/bin/barkbot-owner-setup and run
+# as barkbot: ssh -t barkbot@<vm> barkbot-owner-setup. It enrolls this computer (the one-time code from
+# Studio > Chat hosts, not echoed), then opens Claude Code so the owner signs in (/login).
+# The code goes to barkpark-chat-host on stdin (Barkpark #27644), never in its argv.
+set -u
+STATE="$HOME/.config/barkbot/chat-host.json"
+if [ -s "$STATE" ]; then
+  echo "This host is already enrolled."
+else
+  printf 'One-time enrollment code from Studio > Chat hosts (not shown): '
+  IFS= read -rs C; printf '\n'
+  printf '%s\n' "$C" | barkpark-chat-host enroll --url https://guerrilla.barkpark.cloud \
+    --root "$HOME/BarkBot/home" --state "$STATE"
+  rc=$?; unset C
+  [ $rc -eq 0 ] || { echo "Enrollment failed (exit $rc). Mint a new code and run this again."; exit $rc; }
+  chmod 600 "$STATE"
+fi
+echo
+echo "Now sign Claude in: type /login, finish it in your browser, then /exit."
+cd "$HOME/BarkBot/home" && exec claude

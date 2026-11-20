@@ -58,6 +58,8 @@ const SWEEP = [
   // chosen, where End or an arrow key in a radio group would pick a voice. After a wheel, Escape can close the
   // details panel too, so the close puts it back.
   ['oracle-voice-picker-end', 'the Voice picker scrolled to its last voice', [{ press: 'Voice' }, { wheel: 'radiogroup' }], [{ key: 'Escape' }, { panelOpen: true }], { diff: true }],
+  // Its first rows: it opens scrolled to the chosen voice, so the top is reached by a wheel up.
+  ['oracle-voice-picker-start', 'the Voice picker scrolled to its first voice', [{ press: 'Voice' }, { wheel: 'radiogroup', up: true }], [{ key: 'Escape' }, { panelOpen: true }], { diff: true }],
   ['oracle-language-picker-end', 'the Language picker scrolled to its last language', [{ press: 'Language' }, { wheel: 'listbox' }], [{ key: 'Escape' }, { panelOpen: true }], { diff: true }],
   ['oracle-new-bot-dialog', 'the Create New Bot dialog, empty', [{ press: 'New Bot' }], [{ key: 'Escape' }]],
   // The details panel's name field, clicked into (owner-approved rename test 2026-11-09): nothing is typed,
@@ -152,7 +154,7 @@ async function step(s) {
     await page.send('Page.bringToFront');
     if (s.hoverRole) await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + w / 2, y: y + Math.min(h, 32) / 2 });
     // Near the list's top: a list taller than its scroller (1.2.3's Language, 938 in 360) has its middle off screen.
-    else for (let i = 0; i < 10; i++) { await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + w / 2, y: y + Math.min(h, 120) / 2, deltaX: 0, deltaY: 400 }); await wait(80); }
+    else for (let i = 0; i < 10; i++) { await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + w / 2, y: y + Math.min(h, 120) / 2, deltaX: 0, deltaY: s.up ? -400 : 400 }); await wait(80); }
     return wait(SETTLE);
   }
   if (s.hover) {
@@ -237,7 +239,7 @@ for (const [id, what, open, close, opts = {}] of SWEEP) {
   if (only && id !== only) continue;
   if (ids && !ids.includes(id)) continue;
   if (only2 && !id.startsWith('oracle-hover-')) continue;
-  if (only3 && !/-(end|named|hover)$/.test(id)) continue;
+  if (only3 && !/-(start|end|named|hover)$/.test(id)) continue;
   if (only4 && !['oracle-connect-apps', 'oracle-edit-avatar', 'oracle-settings', 'oracle-get-mobile'].includes(id) && !id.startsWith('oracle-settings-')) continue;
   if (args.includes('--settings-tabs') && !id.startsWith('oracle-settings-')) continue;
   // diff recipes: capture the screen just before the last step, so `changed` names what it changed.
