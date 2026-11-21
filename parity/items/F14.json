@@ -16,6 +16,6 @@
   "Update Bot's Computer",
   "Approvals"
  ],
- "gate": "Gate A oracle-settings-computer 98/98, oracle-settings-permissions 93/93, oracle-settings-updates 93/93",
+ "gate": "Gate A on 1.2.3: oracle-settings-computer 82/82, oracle-settings-permissions 77/77, oracle-settings-updates 74/74 (0.79.3: 98/98, 93/93, 93/93)",
  "evidence": "app/src/components/overlays/SettingsPages.tsx (ComputerPage, PermissionsPage, UpdatesPage), styles/settings.css; the Settings tabs switch to them. Matches Grok 1.2.3 (decision 0010) inside the dialog: Computer has Messages (Read Texts, Send Texts, off), Update Bot's Computer as a row with an Update button, and the device Last opened 13 minutes ago; Permissions has Approvals (Auto-review) and App permissions with Open apps; Updates reads version 1.2.3. The device name (the owner's Mac) is redacted in the captures and stays a placeholder of its length; every description is a placeholder of the captured size (lengths only, O2). Look only: the switches toggle; Execution on this computer, Approvals, Update, Reset, Add Rule, Open apps and Check for Updates do nothing (0005): nothing updates, installs or resets. Vault and Usage & Billing still show General (never captured)."
 }

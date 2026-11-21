@@ -7,7 +7,7 @@
   2
  ],
  "cases": 82,
- "pass": 70,
+ "pass": 82,
  "results": [
   {
    "key": "aside:Bots",
@@ -203,13 +203,11 @@
   },
   {
    "key": "control:Close dialog",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h2:Computer",
-   "pass": false,
-   "why": "box off by -14,0,7.3,0"
+   "pass": true
   },
   {
    "key": "h3:Your computer",
@@ -237,53 +235,43 @@
   },
   {
    "key": "span:Computer · Last opened 13 minutes ago",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h3:Messages",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Read Texts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Read Texts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Send Texts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Send Texts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h3:Bot's computer",
-   "pass": false,
-   "why": "box off by 0,-184,0,0"
+   "pass": true
   },
   {
    "key": "span:Update Bot's Computer",
-   "pass": false,
-   "why": "box off by 0,-181.5,0,-0.5"
+   "pass": true
   },
   {
    "key": "control:Update Bot's Computer",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Update",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -350,7 +338,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-20T19:39:10.024Z",
+ "run": "2026-11-21T15:51:07.753Z",
  "inventory": {
   "id": "oracle-settings-computer",
   "controls": [
@@ -487,7 +475,7 @@
    {
     "name": "Close dialog",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Route traffic through this computer",
@@ -497,20 +485,20 @@
    {
     "name": "Read Texts",
     "item": "F14",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Send Texts",
     "item": "F14",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Update Bot's Computer",
     "item": "F14",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 4,
+  "missing": 0,
   "untracked": []
  }
 }
