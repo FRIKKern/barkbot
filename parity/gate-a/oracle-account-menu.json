@@ -7,7 +7,7 @@
   2
  ],
  "cases": 65,
- "pass": 51,
+ "pass": 65,
  "results": [
   {
    "key": "aside:Bots",
@@ -151,73 +151,59 @@
   },
   {
    "key": "control:Weekly usage",
-   "pass": false,
-   "why": "box off by 0,44.5,15,0"
+   "pass": true
   },
   {
    "key": "span:Weekly usage",
-   "pass": false,
-   "why": "box off by 1,44.5,-11.7,0"
+   "pass": true
   },
   {
    "key": "control:Upgrade plan",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Upgrade plan",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Get Grok Bot for mobile",
-   "pass": false,
-   "why": "box off by 0,0,15,0"
+   "pass": true
   },
   {
    "key": "span:Get Grok Bot for mobile",
-   "pass": false,
-   "why": "box off by 1,0,14,0"
+   "pass": true
   },
   {
    "key": "control:Support",
-   "pass": false,
-   "why": "box off by 0,0,15,0"
+   "pass": true
   },
   {
    "key": "span:Support",
-   "pass": false,
-   "why": "box off by 1,0,14,0"
+   "pass": true
   },
   {
    "key": "control:Settings",
-   "pass": false,
-   "why": "box off by 0,0,15,0"
+   "pass": true
   },
   {
    "key": "span:Settings",
-   "pass": false,
-   "why": "box off by 1,0,14,0"
+   "pass": true
   },
   {
    "key": "control:Add account",
-   "pass": false,
-   "why": "box off by 0,0,15,0"
+   "pass": true
   },
   {
    "key": "span:Add account",
-   "pass": false,
-   "why": "box off by 1,0,14,0"
+   "pass": true
   },
   {
    "key": "control:Log out",
-   "pass": false,
-   "why": "box off by 0,0,15,0"
+   "pass": true
   },
   {
    "key": "span:Log out",
-   "pass": false,
-   "why": "box off by 1,0,14,0"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -284,7 +270,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-20T18:59:38.557Z",
+ "run": "2026-11-21T14:15:37.074Z",
  "inventory": {
   "id": "oracle-account-menu",
   "controls": [
@@ -396,7 +382,7 @@
    {
     "name": "Upgrade plan",
     "item": "F8",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Get Grok Bot for mobile",
@@ -424,7 +410,7 @@
     "ours": true
    }
   ],
-  "missing": 1,
+  "missing": 0,
   "untracked": []
  }
 }

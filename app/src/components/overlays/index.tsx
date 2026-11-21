@@ -28,7 +28,8 @@ import {AccountMenu, ComposerMenu} from './Menus'
 import {LanguagePicker} from './Pickers'
 import {VoiceDialog} from './VoiceDialog'
 import {NewBotDialog} from './NewBotDialog'
-import {AvatarEditor, ConnectApps, Settings} from './Views'
+import {ConnectApps} from './ConnectApps'
+import {AvatarEditor, Settings} from './Views'
 import {GetMobile} from './GetMobile'
 
 // `before`: what had focus before the trigger was pressed (a click on a button moves focus to it
@@ -51,7 +52,7 @@ const overlays: Record<string, Render> = {
   ),
   'language-picker': ({picked, scene, choose}) => <LanguagePicker picked={picked ?? scene?.voice?.language} onPick={choose} />,
   'new-bot-dialog': ({close, create}) => <NewBotDialog onClose={close} onCreate={create} />,
-  'connect-apps': ({close}) => <ConnectApps onClose={close} />,
+  'connect-apps': ({close, scene}) => <ConnectApps onClose={close} today={scene?.apps?.today} />,
   'get-mobile': ({close}) => <GetMobile onClose={close} />,
   'edit-avatar': () => <AvatarEditor />,
   settings: ({close}) => <Settings onClose={close} />,

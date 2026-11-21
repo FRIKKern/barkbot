@@ -12,9 +12,10 @@
 
 /* ── Connect Apps ── */
 .connect-apps { background: var(--bg-raised); }
-.ca-close { width: 28px; height: 28px; color: var(--ink-64); }
-.ca-close > span { width: 20px; height: 20px; display: grid; place-items: center; }
-.ca-close .icon { width: 16px; height: 16px; }
+/* Close dialog (1.2.3): 32 at 14 pt from the top right, an 18 pt slot, a 14 pt cross, 18 pt lines. */
+.ca-close { top: 14px; right: 14px; width: 32px; height: 32px; color: var(--ink-64); line-height: 18px; }
+.ca-close > span { width: 18px; height: 18px; display: grid; place-items: center; }
+.ca-close .icon { width: 14px; height: 14px; }
 .ca-head { height: 48px; flex: none; }
 .ca-body { padding: 4px 32px 32px; }
 .ca-title { position: relative; height: 24px; }
@@ -50,12 +51,25 @@
 .ca-app { height: 64px; padding: 12px; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
 .ca-open { flex: 1; min-width: 0; height: 40px; display: flex; align-items: center; gap: 10px; border-radius: 6px; text-align: left; }
 .ca-tile { width: 40px; height: 40px; flex: none; border: 0.5px solid var(--wash-06); border-radius: 11px; background: rgb(59 59 59); }
+/* This Mac: square-cornered Open, a 9 pt tile with a white 24 pt glyph, the name over a line of 12/16. */
+.ca-open-mac { border-radius: 0; }
+.ca-tile-mac { border-color: rgb(20 20 20 / 0.05); border-radius: 9px; display: grid; place-items: center; color: rgb(255 255 255); }
+.ca-glyph { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.ca-open-mac .ca-name > span { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-open-mac .ca-name > .ca-desc { font-size: 12px; font-weight: 425; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-66); }
+/* Calendar's tile: the weekday over the date, centred. */
+.ca-day { display: flex; flex-direction: column; align-items: center; }
+.ca-day > span:first-child { font-size: 8px; font-weight: 600; line-height: 9.6px; color: rgb(255 59 48); }
+.ca-day > span:last-child { font-size: 19.2px; font-weight: 300; line-height: 21.6px; color: rgb(28 28 30); }
 .ca-name { flex: 1; min-width: 0; }
 .ca-name > span { display: block; }
 .ca-name > span > span { display: block; width: fit-content; max-width: 100%; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ca-connect { height: 26px; padding: 4px 10px; border: 1px solid transparent; border-radius: 13px; background: var(--wash-04); font-size: 12px; line-height: 16px; letter-spacing: 0.18px; }
-/* The label sits centred in a 74.9 pt slot, so Connect and its other states keep one width. */
-.ca-connect > span { display: block; width: 74.9px; text-align: center; }
+/* The label sits centred in a slot of at least 74.9 pt, so Connect and its other states keep one
+   width; a longer label (Location's Open settings) widens it. */
+.ca-connect > span { display: flex; justify-content: center; min-width: 74.9px; }
+.ca-connect > span > span { display: flex; align-items: center; gap: 6px; }
+/* Under way (Calendar, Contacts as captured): faded, a 14 pt ring of 2 pt turning before the word. */
 
 /* ── Avatar editor: under the avatar, centred on it ── */
 .avatar-editor { right: 11.5px; top: 138px; width: 297px; border: 0.5px solid var(--wash-06); font-size: 13px; letter-spacing: normal; }

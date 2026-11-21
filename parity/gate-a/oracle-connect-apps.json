@@ -7,7 +7,7 @@
   2
  ],
  "cases": 121,
- "pass": 70,
+ "pass": 118,
  "results": [
   {
    "key": "aside:Bots",
@@ -151,8 +151,7 @@
   },
   {
    "key": "control:Close dialog",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h2:Connect Apps",
@@ -172,33 +171,27 @@
   },
   {
    "key": "control:Mac",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Password Managers",
-   "pass": false,
-   "why": "box off by -54.5,0,0,0"
+   "pass": true
   },
   {
    "key": "control:Productivity",
-   "pass": false,
-   "why": "box off by -54.5,0,0,0"
+   "pass": true
   },
   {
    "key": "control:Communication",
-   "pass": false,
-   "why": "box off by -54.5,0,-0.1,0"
+   "pass": true
   },
   {
    "key": "control:Design",
-   "pass": false,
-   "why": "box off by -54.7,0,0.4,0"
+   "pass": true
   },
   {
    "key": "control:More",
-   "pass": false,
-   "why": "box off by 6.8,0,0,0"
+   "pass": true
   },
   {
    "key": "h3:Recommended for you",
@@ -210,13 +203,11 @@
   },
   {
    "key": "control:Open Browserless",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Browserless",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect",
@@ -228,8 +219,7 @@
   },
   {
    "key": "control:Open incident.io",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#2",
@@ -241,13 +231,11 @@
   },
   {
    "key": "control:Open Turso",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Turso",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#3",
@@ -259,13 +247,11 @@
   },
   {
    "key": "control:Open Lightrun",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Lightrun",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#4",
@@ -277,13 +263,11 @@
   },
   {
    "key": "control:Open Knock",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Knock",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#5",
@@ -295,13 +279,11 @@
   },
   {
    "key": "control:Open Google Drive",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Google Drive",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#6",
@@ -313,28 +295,23 @@
   },
   {
    "key": "h3:This Mac",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Open Messages",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Messages",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Read and reply to texts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#7",
-   "pass": false,
-   "why": "box off by 0,130,0,0"
+   "pass": true
   },
   {
    "key": "span:Connect#7",
@@ -342,143 +319,118 @@
   },
   {
    "key": "control:Open Notes",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Notes",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Find and save notes",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#8",
-   "pass": false,
-   "why": "box off by 0,130,0,0"
+   "pass": true
   },
   {
    "key": "span:Connect#8",
-   "pass": false,
-   "why": "box off by -433,131,-0.1,-2"
+   "pass": true
   },
   {
    "key": "control:Open Reminders",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Reminders",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Set and check reminders",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#9",
-   "pass": false,
-   "why": "box off by 0,130,0,0"
+   "pass": true
   },
   {
    "key": "span:Connect#9",
-   "pass": false,
-   "why": "box off by 433,65,-0.1,-2"
+   "pass": true
   },
   {
    "key": "control:Open Calendar",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Thu",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:19",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 2.4,0,-4.7,0"
   },
   {
    "key": "span:Calendar",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:See your day and add events",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#10",
-   "pass": false,
-   "why": "box off by 0,130,0,0"
+   "pass": true
   },
   {
    "key": "span:Connect#10",
    "pass": false,
-   "why": "box off by -423,131,-20.1,-2"
+   "why": "box off by 10,0,-20.1,0"
   },
   {
    "key": "control:Open Location",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Location",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Find places near you",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Open settings",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Open settings",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Open Contacts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Contacts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Look up the people you ask about",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#11",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Connect#11",
    "pass": false,
-   "why": "box off by 10,65,-20.1,-2"
+   "why": "box off by 10,0,-20.1,0"
   },
   {
    "key": "h3:Password Managers",
-   "pass": false,
-   "why": "box off by 0,-262,0,0"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -545,7 +497,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-20T19:07:20.737Z",
+ "run": "2026-11-21T14:17:56.578Z",
  "inventory": {
   "id": "oracle-connect-apps",
   "controls": [
@@ -652,7 +604,7 @@
    {
     "name": "Close dialog",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Your plugins",
@@ -672,7 +624,7 @@
    {
     "name": "Mac",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Password Managers",
@@ -707,7 +659,7 @@
    {
     "name": "Open Browserless",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Connect",
@@ -717,65 +669,65 @@
    {
     "name": "Open incident.io",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Turso",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Lightrun",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Knock",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Google Drive",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Messages",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Notes",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Reminders",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Calendar",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Location",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open settings",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Contacts",
     "item": "F11",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 15,
+  "missing": 0,
   "untracked": []
  }
 }
