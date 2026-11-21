@@ -7,7 +7,7 @@
   2
  ],
  "cases": 65,
- "pass": 39,
+ "pass": 51,
  "results": [
   {
    "key": "aside:Bots",
@@ -237,66 +237,54 @@
   },
   {
    "key": "card#1 parts",
-   "pass": false,
-   "why": "text(3) 1 ≠ 2; text(4) 0 ≠ 1; text(8) 1 ≠ 0"
+   "pass": true
   },
   {
    "key": "card#1 control:Open oracle-note.txt (2)#1",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#1",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#2",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#3",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#4",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#5",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#6",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#1",
-   "pass": false,
-   "why": "box off by 0,87,0,-2; color rgba(245, 245, 245, 0.66) ≠ rgb(245, 245, 245); font-size 13px ≠ 14px; font-weight 425 ≠ 500; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "card#1 text(11)#1",
-   "pass": false,
-   "why": "box off by 0,66,0.1,0"
+   "pass": true
   },
   {
    "key": "card#1 text(4)#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#2",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   }
  ],
- "run": "2026-11-20T02:58:27.745Z",
+ "run": "2026-11-20T18:59:38.557Z",
  "inventory": {
   "id": "oracle-account-menu",
   "controls": [

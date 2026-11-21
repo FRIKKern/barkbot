@@ -15,6 +15,8 @@ export type Bubble = {
   images?: string[]
   /** Gate scenes only: each paragraph's height on the oracle, kept whatever the placeholder words do. */
   heights?: number[]
+  /** Gate scenes only: how far the next row starts inside this one's row, as the oracle placed it (oracle-main-720: 22). */
+  overlap?: number
   /** Text files and PDFs sent with the message, by name and size: shown as a file card above its words. */
   files?: {name: string; size: string}[]
   /** A question the person answered, shown as its card in place of a bubble (gate scenes; the live page clears an ask once answered). */

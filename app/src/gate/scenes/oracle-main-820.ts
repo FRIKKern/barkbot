@@ -1,4 +1,4 @@
-import {oracle} from './oracle'
+import {conversationOf} from './oracle'
 
-// fixtures/states/oracle-main-820.json. The base scene: Shell's width rules do the rest.
-export default oracle
+// fixtures/states/oracle-main-820.json: the base scene, its conversation at this width. The panel narrows to 308.
+export default conversationOf('main-820')

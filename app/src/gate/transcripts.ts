@@ -3,20 +3,48 @@
 import type {SceneRow} from '../components/Transcript'
 
 export const transcripts: Record<string, SceneRow[]> = {
-  // oracle-main-1280
-  "main": [{"card":"file","name":"oracle-note.txt (2)","size":3},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
   // oracle-turn-1040
-  "turn": [{"card":"file","name":"oracle-note.txt (2)","size":3},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":110},{"len":303,"height":110}]}],
+  "main": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":110},{"len":303,"height":110}]}],
+  // oracle-main-1000
+  "main-1000": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":88},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":110},{"len":303,"height":132}]}],
+  // oracle-main-1280
+  "main-1280": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
+  // oracle-main-1600
+  "main-1600": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
+  // oracle-main-2000
+  "main-2000": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
+  // oracle-main-720
+  "main-720": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}]},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
+  // oracle-main-790
+  "main-790": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}]},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
+  // oracle-main-800
+  "main-800": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}]},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
+  // oracle-main-820
+  "main-820": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}]},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
+  // oracle-main-880
+  "main-880": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54}]},{"role":"assistant","paras":[{"len":185,"height":88},{"len":211,"height":110},{"len":270,"height":154},{"len":289,"height":154},{"len":303,"height":154}]}],
+  // oracle-main-980
+  "main-980": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":88},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":132},{"len":303,"height":132}]}],
+  // oracle-panel-closed
+  "panel-closed": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
   // oracle-ask-choice
   "ask-choice": [{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]},{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]},{"role":"user","paras":[{"len":122,"height":44}]},{"card":"question","question":"Which tree do you prefer?","choices":["Maple","Cedar","Birch"]}],
   // oracle-choice-answered
-  "choice-answered": [{"card":"file","name":"oracle-note.txt","size":0},{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]},{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]},{"role":"user","paras":[{"len":122,"height":44}]},{"card":"question","question":"Which tree do you prefer?","answered":{"letter":"B","label":"Cedar"}},{"role":"assistant","paras":[{"len":39,"height":22}]}],
+  "choice-answered": [{"card":"file","files":[{"name":"oracle-note.txt","size":0}]},{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]},{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]},{"role":"user","paras":[{"len":122,"height":44}]},{"card":"question","question":"Which tree do you prefer?","answered":{"letter":"B","label":"Cedar"}},{"role":"assistant","paras":[{"len":39,"height":22}]}],
   // oracle-file-sent
-  "file-sent": [{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]},{"role":"user","paras":[{"len":122,"height":44}]},{"card":"question","question":"Which tree do you prefer?","answered":{"letter":"B","label":"Cedar"}},{"role":"assistant","paras":[{"len":70,"height":44}]},{"card":"file","name":"oracle-note.txt","size":3},{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]}],
-  // oracle-pictures-sent
-  "pictures-sent": [{"card":"question","question":"B"},{"role":"assistant","paras":[{"len":70,"height":44}]},{"card":"file","name":"oracle-note.txt","size":3},{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]},{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]}],
+  "file-sent": [{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]},{"role":"user","paras":[{"len":122,"height":44}]},{"card":"question","question":"Which tree do you prefer?","answered":{"letter":"B","label":"Cedar"}},{"role":"assistant","paras":[{"len":70,"height":44}]},{"card":"file","files":[{"name":"oracle-note.txt","size":3}]},{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]}],
   // oracle-file-waiting
   "file-waiting": [{"role":"assistant","paras":[{"len":16,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]},{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]},{"role":"user","paras":[{"len":122,"height":44}]},{"card":"question","question":"Which tree do you prefer?","answered":{"letter":"B","label":"Cedar"}},{"role":"assistant","paras":[{"len":70,"height":44}]}],
+  // oracle-pictures-sent
+  "pictures-sent": [{"card":"question","question":null,"answered":{"letter":"B","label":"Cedar"}},{"role":"assistant","paras":[{"len":70,"height":44}]},{"card":"file","files":[{"name":"oracle-note.txt","size":3}]},{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]},{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]}],
   // oracle-pictures-waiting
-  "pictures-waiting": [{"role":"assistant","paras":[{"len":270,"height":110},{"len":289,"height":110},{"len":303,"height":110}]},{"card":"file","name":"oracle-note.txt","size":3},{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]}],
+  "pictures-waiting": [{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":110},{"len":303,"height":110}]},{"card":"file","files":[{"name":"oracle-note.txt","size":3}]},{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]}],
+  // oracle-voice-picker-start
+  "voice-picker-start": [{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]},{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]},{"role":"user","paras":[{"len":122,"height":44}]},{"card":"question","question":"Which tree do you prefer?","answered":{"letter":"B","label":"Cedar"}},{"role":"assistant","paras":[{"len":70,"height":44}]}],
+}
+
+// How far a state's last row ends above the transcript's end (+), or below it, scrolled up (-).
+export const lifts: Record<string, number> = {
+  "main-720": -374,
+  "main-790": -374,
 }

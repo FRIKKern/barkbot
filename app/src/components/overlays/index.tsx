@@ -29,6 +29,7 @@ import {LanguagePicker} from './Pickers'
 import {VoiceDialog} from './VoiceDialog'
 import {NewBotDialog} from './NewBotDialog'
 import {AvatarEditor, ConnectApps, Settings} from './Views'
+import {GetMobile} from './GetMobile'
 
 // `before`: what had focus before the trigger was pressed (a click on a button moves focus to it
 // first). A view opened from a menu's row gives focus back there on close: the keys trace's
@@ -44,13 +45,14 @@ type Render = (o: {picked?: string; scene?: Scene; close: () => void; choose: (v
 
 const overlays: Record<string, Render> = {
   'composer-menu': ({close}) => <ComposerMenu onPick={close} />,
-  'account-menu': ({close, go}) => <AccountMenu onPick={close} onSettings={() => go('settings')} />,
+  'account-menu': ({close, go}) => <AccountMenu onPick={close} onSettings={() => go('settings')} onMobile={() => go('get-mobile')} />,
   'voice-picker': ({scene, change}) => (
     <VoiceDialog picked={scene?.voice?.voice} speed={scene?.voice?.speed} onPick={(v) => change('voice-picker', v)} onSpeed={(n) => change('voice-speed', n)} />
   ),
   'language-picker': ({picked, scene, choose}) => <LanguagePicker picked={picked ?? scene?.voice?.language} onPick={choose} />,
   'new-bot-dialog': ({close, create}) => <NewBotDialog onClose={close} onCreate={create} />,
   'connect-apps': ({close}) => <ConnectApps onClose={close} />,
+  'get-mobile': ({close}) => <GetMobile onClose={close} />,
   'edit-avatar': () => <AvatarEditor />,
   settings: ({close}) => <Settings onClose={close} />,
   // A scene can open Settings on another page (oracle-settings-computer, ...); the tabs switch it.
@@ -59,7 +61,7 @@ const overlays: Record<string, Render> = {
   'settings-updates': ({close}) => <Settings page="Updates" onClose={close} />,
 }
 
-const modals = new Set(['new-bot-dialog', 'connect-apps', 'settings', 'settings-computer', 'settings-permissions', 'settings-updates'])
+const modals = new Set(['new-bot-dialog', 'connect-apps', 'get-mobile', 'settings', 'settings-computer', 'settings-permissions', 'settings-updates'])
 const rows = '[role=menuitem], [role=option]'
 
 // A combobox opens its list by its label; 1.2.3's Voice row is a plain button that names the
