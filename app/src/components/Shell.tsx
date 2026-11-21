@@ -97,7 +97,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
         </header>
         {transcript ??
           (talk ? (
-            <Transcript bot={shown} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} picture={scenePicture} lift={scene.transcript?.lift} times={talk.times} />
+            <Transcript bot={shown} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} picture={scenePicture} lift={scene.transcript?.lift} />
           ) : (
             <div className="transcript" />
           ))}

@@ -7,7 +7,7 @@
   2
  ],
  "cases": 62,
- "pass": 62,
+ "pass": 59,
  "results": [
   {
    "key": "aside:Bots",
@@ -183,7 +183,8 @@
   },
   {
    "key": "bubble:assistant#1 place",
-   "pass": true
+   "pass": false,
+   "why": "top off by 41.5"
   },
   {
    "key": "bubble:user#1 look",
@@ -191,7 +192,8 @@
   },
   {
    "key": "bubble:user#1 place",
-   "pass": true
+   "pass": false,
+   "why": "gap above off by -42"
   },
   {
    "key": "bubble:assistant#2 look",
@@ -211,7 +213,8 @@
   },
   {
    "key": "time",
-   "pass": true
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "card#1 parts",
@@ -258,7 +261,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-20T19:39:02.964Z",
+ "run": "2026-11-21T11:48:48.659Z",
  "inventory": {
   "id": "oracle-pictures-waiting",
   "controls": [
