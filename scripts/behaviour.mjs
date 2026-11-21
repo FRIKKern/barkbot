@@ -24,6 +24,7 @@ import { cmdHints } from './lib/cmd-hints.mjs';
 import { newBotHides } from './lib/new-bot-hides.mjs';
 import { pickerPick } from './lib/picker-pick.mjs';
 import { accountRows } from './lib/account-rows.mjs';
+import { avatarPencil } from './lib/avatar-pencil.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
 import { createOnce } from './lib/create-once.mjs';
@@ -483,6 +484,10 @@ await pickerPick({ check, precondition, ev, open, base, click, wait, until, wind
 // ── The account menu's dialog rows: Get Grok Bot for mobile opens its dialog (item F8) ──
 console.log("Behaviour · the account menu's dialog rows (oracle-get-mobile)");
 await accountRows({ check, precondition, ev, open, base, click, wait, until, windowFocus });
+
+// ── The avatar pencil stays lit while the avatar editor is open (oracle-edit-avatar) ──
+console.log('Behaviour · the avatar pencil follows the open editor (oracle-edit-avatar)');
+await avatarPencil({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
 
 // ── Rename persists: the live page (/) saves the name to Barkpark (task-c3e0bc88ce28833d) ─────
 // Grok keeps a renamed bot's name across a restart. Ours saves it as a Barkpark pref on Enter or

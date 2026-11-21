@@ -2,13 +2,14 @@
 // outside the page (0005): Open and Connect do nothing yet, Close and Escape close the view, the
 // filters toggle. The connected count is a length only in the fixture (O2), so a placeholder bar.
 //
-// `today` is the day the Calendar tile shows (the oracle's tile shows the current day); `connecting`
-// names the apps whose Connect shows its under-way look (a spinner, faded), as the capture had
-// Calendar and Contacts. A scene passes both (Scene.apps); the live page shows today and none.
+// `today` is the day the Calendar tile shows (the oracle's tile shows the current day): a scene
+// passes the captured day (Scene.apps), the live page shows today. The capture had Calendar's and
+// Contacts' Connect under way (a spinner, faded); ours draws no under-way look, since Connect does
+// nothing yet (0005) and a scene may only show what the live page can draw.
 import {useState} from 'react'
 import {Icon} from '../Composer'
 import {appCategories, appSections, labelledConnect, type App} from './data'
-import {APP, CATEGORY, DAY, SECTION, fit} from './fit'
+import {APP, CATEGORY, SECTION, fit} from './fit'
 
 const x = <Icon d="M4 4l8 8M12 4l-8 8" />
 const chevronDown = <Icon d="M4.5 6.5L8 10l3.5-3.5" />
@@ -27,12 +28,12 @@ function Day({today}: {today: Date}) {
   return (
     <span className="ca-day">
       <span>{today.toLocaleDateString('en-US', {weekday: 'short'})}</span>
-      <span style={fit(DAY, String(today.getDate()))}>{today.getDate()}</span>
+      <span>{today.getDate()}</span>
     </span>
   )
 }
 
-function AppRow({app, mac, today, connecting}: {app: App; mac?: boolean; today: Date; connecting: boolean}) {
+function AppRow({app, mac, today}: {app: App; mac?: boolean; today: Date}) {
   const action = app.action ?? 'Connect'
   return (
     <li className="ca-app">
@@ -63,10 +64,9 @@ function AppRow({app, mac, today, connecting}: {app: App; mac?: boolean; today: 
         </span>
       </button>
       <span className="ca-action">
-        <button aria-label={labelledConnect.has(app.name) ? `Connect ${app.name}` : undefined} className={connecting ? 'ca-connect ca-busy' : 'ca-connect'}>
+        <button aria-label={labelledConnect.has(app.name) ? `Connect ${app.name}` : undefined} className="ca-connect">
           <span>
             <span>
-              {connecting && <span className="ca-spin" />}
               {action}
             </span>
           </span>
@@ -76,7 +76,7 @@ function AppRow({app, mac, today, connecting}: {app: App; mac?: boolean; today: 
   )
 }
 
-export function ConnectApps({onClose, today, connecting = []}: {onClose?: () => void; today?: string; connecting?: string[]}) {
+export function ConnectApps({onClose, today}: {onClose?: () => void; today?: string}) {
   const [category, setCategory] = useState('All')
   const day = today ? new Date(`${today}T12:00:00`) : new Date()
   return (
@@ -140,7 +140,7 @@ export function ConnectApps({onClose, today, connecting = []}: {onClose?: () => 
                   </div>
                   <ul className="ca-grid">
                     {s.apps.map((a) => (
-                      <AppRow key={a.name} app={a} mac={s.mac} today={day} connecting={connecting.includes(a.name)} />
+                      <AppRow key={a.name} app={a} mac={s.mac} today={day} />
                     ))}
                   </ul>
                 </section>

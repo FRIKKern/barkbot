@@ -47,7 +47,7 @@ const overlays: Record<string, Render> = {
   'speed-picker': ({picked, scene, choose}) => <SpeedPicker picked={picked ?? scene?.voice?.speed} onPick={choose} />,
   'language-picker': ({picked, scene, choose}) => <LanguagePicker picked={picked ?? scene?.voice?.language} onPick={choose} />,
   'new-bot-dialog': ({close, create}) => <NewBotDialog onClose={close} onCreate={create} />,
-  'connect-apps': ({close, scene}) => <ConnectApps onClose={close} today={scene?.apps?.today} connecting={scene?.apps?.connecting} />,
+  'connect-apps': ({close, scene}) => <ConnectApps onClose={close} today={scene?.apps?.today} />,
   'edit-avatar': () => <AvatarEditor />,
   settings: ({close}) => <Settings onClose={close} />,
   // A scene can open Settings on another page (oracle-settings-computer, ...); the tabs switch it.

@@ -29,8 +29,8 @@ export type Scene = {
   transcript?: {bubbles: SceneRow[]; time?: string}
   /** The composer as captured: words typed, pictures or a file waiting (gate scenes). */
   composer?: ComposerStart
-  /** Connect Apps as captured: the day its Calendar tile shows, and the apps whose Connect is under way. */
-  apps?: {today: string; connecting: string[]}
+  /** Connect Apps as captured: the day its Calendar tile shows (the live page shows today). */
+  apps?: {today: string}
 }
 
 // The scene is where the page starts; what the person does from there (panel, tab, the bot they

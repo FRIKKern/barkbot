@@ -70,9 +70,6 @@
 .ca-connect > span { display: flex; justify-content: center; min-width: 74.9px; }
 .ca-connect > span > span { display: flex; align-items: center; gap: 6px; }
 /* Under way (Calendar, Contacts as captured): faded, a 14 pt ring of 2 pt turning before the word. */
-.ca-busy { opacity: 0.56; }
-.ca-spin { width: 14px; height: 14px; margin: -2px; box-sizing: content-box; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: ca-spin 0.8s linear infinite; }
-@keyframes ca-spin { to { transform: rotate(360deg); } }
 
 /* ── Avatar editor: under the avatar, centred on it ── */
 .avatar-editor { right: 11.5px; top: 138px; width: 297px; border: 0.5px solid var(--wash-06); font-size: 13px; letter-spacing: normal; }

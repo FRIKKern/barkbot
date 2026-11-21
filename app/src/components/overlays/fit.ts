@@ -16,8 +16,6 @@ export const APP: Table = {
 }
 // Section titles, 14/20 weight 500 on 0.14px.
 export const SECTION: Table = {'Recommended for you': '0.008px', 'This Mac': '-0.46px', 'Password Managers': '-0.16px'} // This Mac: 4.8 pt too wide
-// Calendar's date, 19.2/21.6 weight 300 on 0.195px: the stand-in face's light digits run narrow.
-export const DAY: Table = {'19': '2.545px'} // 4.7 pt too narrow
 // Category filters, 13/18 on 0.195px.
 export const CATEGORY: Table = {All: '0.028px', 'Password Managers': '0.118px', Productivity: '0.128px', More: '-0.28px'}
 // Settings words (oracle-settings).
