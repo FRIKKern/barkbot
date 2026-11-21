@@ -7,7 +7,7 @@
   2
  ],
  "cases": 88,
- "pass": 83,
+ "pass": 88,
  "results": [
   {
    "key": "aside:Bots",
@@ -203,13 +203,11 @@
   },
   {
    "key": "control:Close dialog",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h2:General",
-   "pass": false,
-   "why": "box off by -14,0,8,0"
+   "pass": true
   },
   {
    "key": "p:Unlock the ultimate AI subscription",
@@ -229,8 +227,7 @@
   },
   {
    "key": "control:Change profile photo",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Copy email address",
@@ -294,13 +291,11 @@
   },
   {
    "key": "span:Send with ⌘↵",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Send with ⌘↵",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -367,7 +362,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-20T19:40:13.068Z",
+ "run": "2026-11-21T15:50:59.408Z",
  "inventory": {
   "id": "oracle-settings",
   "controls": [
@@ -504,7 +499,7 @@
    {
     "name": "Close dialog",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Get started",
@@ -514,7 +509,7 @@
    {
     "name": "Change profile photo",
     "item": "F13",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Copy email address",
@@ -539,10 +534,10 @@
    {
     "name": "Send with ⌘↵",
     "item": "F13",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 3,
+  "missing": 0,
   "untracked": []
  }
 }

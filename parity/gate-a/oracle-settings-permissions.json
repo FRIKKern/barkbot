@@ -7,7 +7,7 @@
   2
  ],
  "cases": 77,
- "pass": 64,
+ "pass": 77,
  "results": [
   {
    "key": "aside:Bots",
@@ -203,68 +203,55 @@
   },
   {
    "key": "control:Close dialog",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h2:Permissions",
-   "pass": false,
-   "why": "box off by -14,0,7.6,0"
+   "pass": true
   },
   {
    "key": "span:Approvals",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Auto-review",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h3:Always Ask",
-   "pass": false,
-   "why": "box off by 0,-18,0,0"
+   "pass": true
   },
   {
    "key": "control:Add Rule to Always Ask",
-   "pass": false,
-   "why": "box off by 0,-18,0,0"
+   "pass": true
   },
   {
    "key": "span:Add Rule",
-   "pass": false,
-   "why": "box off by 0,-18,0,0"
+   "pass": true
   },
   {
    "key": "h3:Allow without Asking",
-   "pass": false,
-   "why": "box off by 0,-18,0,0"
+   "pass": true
   },
   {
    "key": "control:Add Rule to Allow without Asking",
-   "pass": false,
-   "why": "box off by 0,-18,0,0"
+   "pass": true
   },
   {
    "key": "span:Add Rule#2",
-   "pass": false,
-   "why": "box off by 0,-18,0,0"
+   "pass": true
   },
   {
    "key": "span:App permissions",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Open apps",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Open apps",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -331,7 +318,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-20T19:39:41.476Z",
+ "run": "2026-11-21T15:51:17.265Z",
  "inventory": {
   "id": "oracle-settings-permissions",
   "controls": [
@@ -468,7 +455,7 @@
    {
     "name": "Close dialog",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Add Rule to Always Ask",
@@ -483,10 +470,10 @@
    {
     "name": "Open apps",
     "item": "F11",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 2,
+  "missing": 0,
   "untracked": []
  }
 }
