@@ -32,6 +32,7 @@ import { retryAdopt } from './lib/retry-adopt.mjs';
 import { shiftEnter } from './lib/shift-enter.mjs';
 import { quietStream } from './lib/quiet-stream.mjs';
 import { settingsLive } from './lib/settings-live.mjs';
+import { timeRows } from './lib/time-rows.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -1266,6 +1267,7 @@ else {
   f = await box();
   check('a reload: the stored row shows its file card by name and size, once (control: the row with no attachments shows none)', f.bubbles === 2 && f.cards.length === 1 && f.cards[0][0] === 'Open note.txt' && f.cards[0][1] === `${NOTE.length}B`, { f });
   stub.rows = [];
+  await timeRows({ check, precondition, ev, open, base, until, wait, stub, page });
   [notePath, zipPath, binPath].forEach((x) => rmSync(x, { force: true }));
 
   // A reload in the middle of a reply: the fresh page hears only the rest of the turn (Barkpark
