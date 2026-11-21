@@ -9,9 +9,6 @@ export const oracle: Scene = {
   active: 'Oracle',
   panelOpen: true,
   computer: 'Asleep',
-  // Settings > Computer reads "Last opened 13 minutes ago" in the capture: the computer was last
-  // heard from 13 minutes before the scene opens, the same field the live page fills from Barkpark.
-  seen: new Date(Date.now() - 13 * 60_000).toISOString(),
   voice: {voice: 'Helix', speed: 1, language: 'Auto-detect'},
   // The preview's line is the bot's last message: the fixture keeps only its length (185), so placeholder words.
   previews: {Oracle: filler(185)},
@@ -19,6 +16,12 @@ export const oracle: Scene = {
   // two files, then the long answer, scrolled to its end (gate/transcripts.ts).
   transcript: {bubbles: transcripts.main},
 }
+
+/** Settings > Computer reads "Last opened 13 minutes ago" in the captures: the computer was last
+ *  heard from 13 minutes before the state was taken. A scene gets it as `seen`, the same field the
+ *  live page fills from Barkpark's last_seen_at, stamped when the scene is served (sceneFor): a time
+ *  taken when this module loads would be as old as the dev server by the time a page draws it. */
+export const seenAtCapture = (now = Date.now()) => new Date(now - 13 * 60_000).toISOString()
 
 /** The base scene with the conversation as one captured state shows it: its column's paragraph
  *  heights and where its scroll was left (transcripts and lifts by the state's id less "oracle-"; a
