@@ -260,7 +260,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
       const images = held.filter((a) => isPicture(a.media_type)).map((a) => a.id)
       const files = held.filter((a) => !isPicture(a.media_type)).map((a) => ({name: a.name || 'file', size: typeof a.byte_size === 'number' ? fileSize(a.byte_size) : ''}))
       if ((m.role === 'user' || m.role === 'assistant') && (m.source_markdown || held.length)) {
-        land({role: m.role, text: m.source_markdown ?? '', seq: m.seq, ...(typeof m.inserted_at === 'string' ? {at: m.inserted_at} : {}), ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
+        land({role: m.role, text: m.source_markdown ?? '', seq: m.seq, ...(typeof m.inserted_at === 'string' && Number.isFinite(Date.parse(m.inserted_at)) ? {at: m.inserted_at} : {}), ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
         // A row after a stored ask: that ask is over.
         return setAsk((a) => (a?.stored ? null : a))
       }
