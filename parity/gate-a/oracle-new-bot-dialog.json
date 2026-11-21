@@ -7,7 +7,7 @@
   2
  ],
  "cases": 82,
- "pass": 81,
+ "pass": 82,
  "results": [
   {
    "key": "aside:Bots",
@@ -151,8 +151,7 @@
   },
   {
    "key": "control:Close dialog",
-   "pass": false,
-   "why": "color rgba(245, 245, 245, 0.66) ≠ rgba(245, 245, 245, 0.64); line-height normal ≠ 18px"
+   "pass": true
   },
   {
    "key": "h2:Create New Bot",
@@ -339,7 +338,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-20T19:36:19.752Z",
+ "run": "2026-11-21T14:18:53.702Z",
  "inventory": {
   "id": "oracle-new-bot-dialog",
   "controls": [

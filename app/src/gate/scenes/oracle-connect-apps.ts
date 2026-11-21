@@ -1,4 +1,5 @@
 import {oracle} from './oracle'
 
 // fixtures/states/oracle-connect-apps.json: the main screen with the connect-apps view open over it.
-export default {...oracle, overlay: 'connect-apps'}
+// Captured on Thursday 2026-11-19 (with Calendar's and Contacts' Connect under way, a look ours does not draw).
+export default {...oracle, overlay: 'connect-apps', apps: {today: '2026-11-19'}}

@@ -67,7 +67,7 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
   check('New Bot (keys trace): open puts focus in its Bot name field; Tab goes to the first character shape; Escape closes it and gives focus back to New Bot; an outside click closes it and leaves focus on the page (control: it was open again before the click)',
     nb.open === 'input Bot name (overlay)' && nb.tab === 'button blob character shape (overlay)' && nb.escape === 'button New Bot' && nb.after === null && nb.again === 'new-bot-dialog' && nb.outside === 'body' && nb.afterOutside === null, nb);
 
-  // Connect apps: the dialog itself on open; Tab to Close; Escape back to Connect apps; outside to the page.
+  // Connect apps: the dialog itself on open; Tab to Close dialog; Escape back to Connect apps; outside to the page.
   await fresh();
   await clickOn('button[aria-label="Connect apps"]');
   const ca = { open: await focused() };
@@ -83,8 +83,9 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
   const st = { before, menu, open: await focused(), shown: await shown() };
   await press('Tab'); st.tab = await focused();
   await press('Escape'); st.escape = await focused(); st.after = await shown();
-  check('Connect apps (keys trace): open puts focus on the dialog itself; Tab goes to Close; Escape closes it and gives focus back to Connect apps',
-    ca.open === 'dialog Connect Apps (overlay)' && ca.tab === 'button Close (overlay)' && ca.escape === 'button Connect apps' && ca.after === null, ca);
+  // The trace (0.79.3) named the close button Close; 1.2.3 names it Close dialog (oracle-connect-apps).
+  check('Connect apps (keys trace): open puts focus on the dialog itself; Tab goes to Close dialog; Escape closes it and gives focus back to Connect apps',
+    ca.open === 'dialog Connect Apps (overlay)' && ca.tab === 'button Close dialog (overlay)' && ca.escape === 'button Connect apps' && ca.after === null, ca);
   check('Settings from the account menu (keys trace): open puts focus on the dialog itself; Tab goes to General; Escape closes it and gives focus back to what had it before the account menu opened, Connect apps (control: the account menu opened)',
     st.before === 'button Connect apps' && st.menu === 'account-menu' && st.shown === 'settings' && st.open === 'dialog Grok Bot settings (overlay)' && st.tab === 'button General (overlay)' && st.escape === 'button Connect apps' && st.after === null, st);
   // Outside clicks on the modals (the trace records one for each).
