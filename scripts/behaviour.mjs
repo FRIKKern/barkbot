@@ -24,6 +24,7 @@ import { cmdHints } from './lib/cmd-hints.mjs';
 import { newBotHides } from './lib/new-bot-hides.mjs';
 import { pickerPick } from './lib/picker-pick.mjs';
 import { avatarPencil } from './lib/avatar-pencil.mjs';
+import { popupOpens } from './lib/popup-opens.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
 import { createOnce } from './lib/create-once.mjs';
@@ -483,6 +484,10 @@ await pickerPick({ check, precondition, ev, open, base, click, wait, until, wind
 // ── The avatar pencil stays lit while the avatar editor is open (oracle-edit-avatar) ──
 console.log('Behaviour · the avatar pencil follows the open editor (oracle-edit-avatar)');
 await avatarPencil({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
+
+// ── A control that says it opens something opens it (aria-haspopup, task-b4c296c9fce46e06) ──
+console.log('Behaviour · every aria-haspopup control opens what it names');
+await popupOpens({ check, precondition, ev, open, base, click, wait, until });
 
 // ── Rename persists: the live page (/) saves the name to Barkpark (task-c3e0bc88ce28833d) ─────
 // Grok keeps a renamed bot's name across a restart. Ours saves it as a Barkpark pref on Enter or

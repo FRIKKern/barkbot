@@ -267,7 +267,7 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
         }}
       >
         {waiting && <Attachments pictures={pictures} files={files} onRemovePicture={(i) => setPictures((all) => all.filter((_, j) => j !== i))} onRemoveFile={(i) => setFiles((all) => all.filter((_, j) => j !== i))} />}
-        <Round label="Composer actions" area="act">
+        <Round label="Composer actions" area="act" popup="menu">
           <Icon d="M8 3v10M3 8h10" />
         </Round>
         <div
@@ -321,11 +321,11 @@ export function Composer({placeholder, onSend, disabled, start, beside}: {placeh
   )
 }
 
-function Round({label, area, tip, voice, onClick, children}: {label: string; area: string; tip?: ReactNode; voice?: boolean; onClick?: () => void; children: ReactNode}) {
+function Round({label, area, tip, voice, popup, onClick, children}: {label: string; area: string; tip?: ReactNode; voice?: boolean; popup?: 'menu'; onClick?: () => void; children: ReactNode}) {
   const h = useHover()
   return (
     <>
-      <button className={`round round-${area}${voice ? ' voice' : ''}`} aria-label={label} onMouseDown={(e) => e.preventDefault()} onClick={onClick} {...h.on}>
+      <button className={`round round-${area}${voice ? ' voice' : ''}`} aria-label={label} aria-haspopup={popup} onMouseDown={(e) => e.preventDefault()} onClick={onClick} {...h.on}>
         {children}
       </button>
       {tip && <Tooltip box={h.box}>{tip}</Tooltip>}
