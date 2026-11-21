@@ -108,7 +108,7 @@ const hasAttachments = (b?: Bubble) => !!b && ((b.images?.length ?? 0) > 0 || (b
 // "Today 8:21 PM" over the day's first send, 5 days after the one before). Sends under a minute
 // apart get none (the four sends of each 2026-11-19 take). So the gap is more than a minute and at
 // most 3 h 8 min; GAP_MS takes an hour, and a new day parts too.
-export const GAP_MS = 3600 * 1000
+export const GAP_MS = 3600 * 1000 // a bound, not a measure: the captures say only more than ~1 min and at most 3 h 8 min
 export const laterRow = (before: Bubble | undefined, b: Bubble): string | null => {
   if (!before?.at || !b.at) return null
   const [t0, t1] = [Date.parse(before.at), Date.parse(b.at)]
