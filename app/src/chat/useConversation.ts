@@ -21,6 +21,9 @@ export type Bubble = {
   files?: {name: string; size: string}[]
   /** A question the person answered, shown as its card in place of a bubble (gate scenes; the live page clears an ask once answered). */
   answered?: {question: string; letter: string; label: string}
+  /** When the message was written (ISO): Barkpark's inserted_at for a stored row, the page's clock for
+   *  one it shows before its row comes. The transcript draws a time row by it (Transcript.tsx laterRow). */
+  at?: string
 }
 /** The working line. `held`: the turn has started but the bot's state is not Working yet, so the
  *  row waits (the oracle's row comes with its rail's Working, not with the turn's start).
@@ -201,7 +204,10 @@ export function useConversation(sessionId: string | null, transport: Transport =
     if (leave.current) clearTimeout(leave.current), (leave.current = null)
     setWorking((w) => (w && !w.leaving && w.label !== 'Typing…' ? (w.ended ? {...w, ended: false} : w) : {label: '', leaving: false, first: fresh(w), held: held(w)}))
   }, [])
-  const land = useCallback((b: Omit<Bubble, 'key'>) => {
+  const land = useCallback((given: Omit<Bubble, 'key'>) => {
+    // A message the page shows before Barkpark's row comes is timed by the page's clock; the row's own time replaces it when it claims the bubble.
+    const b = given.at || given.seq !== undefined ? given : {...given, at: new Date().toISOString()}
+    const claim = (x: Bubble): Bubble => ({...x, seq: b.seq, ...(b.at ? {at: b.at} : {})})
     if (b.role === 'assistant' && typing.current !== null) cancelAnimationFrame(typing.current), (typing.current = null)
     setBubbles((all) => {
       // A history row (event: message, replayed on every connect) that matches what we already
@@ -215,13 +221,13 @@ export function useConversation(sessionId: string | null, transport: Transport =
         // A message of pictures alone has no words to claim by: it claims the live bubble with the same pictures.
         if (!want) {
           const same = (x: Bubble) => x.seq === undefined && !x.answered && x.role === b.role && !flat(x.text) && (x.images ?? []).join() === (b.images ?? []).join() && (x.files ?? []).map((f) => f.name).join() === (b.files ?? []).map((f) => f.name).join()
-          return all.some(same) ? all.map((x) => (same(x) && !all.slice(0, all.indexOf(x)).some(same) ? {...x, seq: b.seq} : x)) : [...all, {...b, key: `seq-${b.seq}`}]
+          return all.some(same) ? all.map((x) => (same(x) && !all.slice(0, all.indexOf(x)).some(same) ? claim(x) : x)) : [...all, {...b, key: `seq-${b.seq}`}]
         }
         for (let i = 0; i < all.length; i++) {
           let got = ''
           let j = i
           while (j < all.length && all[j].seq === undefined && !all[j].answered && all[j].role === b.role && got.length < want.length) got += flat(all[j++].text)
-          if (j > i && got === want) return all.map((x, k) => (k >= i && k < j ? {...x, seq: b.seq} : x))
+          if (j > i && got === want) return all.map((x, k) => (k >= i && k < j ? claim(x) : x))
         }
       }
       return [...all, {...b, key: b.seq !== undefined ? `seq-${b.seq}` : key()}]
@@ -248,13 +254,13 @@ export function useConversation(sessionId: string | null, transport: Transport =
     const es = new EventSource(transport.events(sessionId))
     es.onopen = () => setReady(true)
     const row = (e: Event) => {
-      const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string; metadata?: Frame; attachments?: {id: string; media_type?: string; byte_size?: number | null; name?: string}[]}
+      const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string; inserted_at?: string; metadata?: Frame; attachments?: {id: string; media_type?: string; byte_size?: number | null; name?: string}[]}
       // A stored row names its pictures by id, and its text files and PDFs by id, type, size and name.
       const held = (m.attachments ?? []).filter((a) => typeof a.id === 'string')
       const images = held.filter((a) => isPicture(a.media_type)).map((a) => a.id)
       const files = held.filter((a) => !isPicture(a.media_type)).map((a) => ({name: a.name || 'file', size: typeof a.byte_size === 'number' ? fileSize(a.byte_size) : ''}))
       if ((m.role === 'user' || m.role === 'assistant') && (m.source_markdown || held.length)) {
-        land({role: m.role, text: m.source_markdown ?? '', seq: m.seq, ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
+        land({role: m.role, text: m.source_markdown ?? '', seq: m.seq, ...(typeof m.inserted_at === 'string' ? {at: m.inserted_at} : {}), ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
         // A row after a stored ask: that ask is over.
         return setAsk((a) => (a?.stored ? null : a))
       }
@@ -563,7 +569,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
     const done = answered.current
     if (!done || ask?.id === done.id) return
     answered.current = null
-    if (done.cards.length) setBubbles((all) => [...all, ...done.cards.map((c, i): Bubble => ({key: `answered-${done.id}-${i}`, role: 'assistant', text: '', answered: c}))])
+    if (done.cards.length) setBubbles((all) => [...all, ...done.cards.map((c, i): Bubble => ({key: `answered-${done.id}-${i}`, role: 'assistant', text: '', answered: c, at: new Date().toISOString()}))])
   }, [ask])
 
   const picture = useCallback((id: string) => (sessionId && transport.picture ? transport.picture(sessionId, id) : null), [sessionId, transport])

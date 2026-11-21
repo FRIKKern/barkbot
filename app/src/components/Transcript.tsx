@@ -12,6 +12,8 @@ export type SceneCard =
   | {card: 'question'; question: string | null; choices?: string[]; answered?: {letter: string; label: string}}
   | {card: 'file'; files: {name: string; size: number}[]}
   | {card: 'pictures'; count: number}
+  /** The oracle's time row between messages, by the clock it reads ("11:31 PM", today): fromScene times the messages by it, and laterRow draws the row. */
+  | {card: 'time'; time: string}
 export type SceneRow = SceneBubble | SceneCard
 
 /** A scene's conversation: its bubbles and answered cards, and the question still waiting (the last row), as the live page holds them. */
@@ -21,18 +23,32 @@ export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null
   const ask: Ask | null = waiting ? {id: 'scene-ask', what: 'ask you something', detail: null, answering: null, questions: [{question: waiting.question ?? '', header: null, multi: false, options: (waiting.choices ?? []).map((label) => ({label, description: null}))}]} : null
   // A file or picture card belongs to the message under it, as the live page holds it.
   let carried: Pick<Bubble, 'files' | 'images'> = {}
+  // The messages are timed as the live page's are (Bubble.at): from a time row on, at its clock;
+  // before the scene's first one, a day earlier. laterRow then draws the row where the oracle has it.
+  const clocks = rows.flatMap((r) => ('card' in r && r.card === 'time' ? [todayAt(r.time)] : []))
+  let at = clocks.length ? new Date(Date.parse(clocks[0]) - DAY_MS).toISOString() : undefined
   const bubbles = (waiting ? rows.slice(0, -1) : rows).flatMap((r, i): Bubble[] => {
     if (!('card' in r)) {
-      const b = {...fromLengths([r])[0], key: `scene-${i}`, ...carried}
+      const b = {...fromLengths([r])[0], key: `scene-${i}`, ...carried, ...(at && {at})}
       carried = {}
       return [b]
     }
+    if (r.card === 'time') at = todayAt(r.time)
     if (r.card === 'file') carried = {...carried, files: r.files.map((f) => ({name: f.name, size: filler(f.size)}))}
     if (r.card === 'pictures') carried = {...carried, images: Array.from({length: r.count}, (_, j) => `scene:${j}`)}
     // A question off screen above (a card cut off at the top) gets placeholder words, one line.
-    return r.card === 'question' && r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question ?? filler(25), ...r.answered}}] : []
+    return r.card === 'question' && r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question ?? filler(25), ...r.answered}, ...(at && {at})}] : []
   })
   return {bubbles, ask}
+}
+
+const DAY_MS = 24 * 3600 * 1000
+// "11:31 PM" today, as an ISO time: a scene's time row reads "Today" wherever and whenever the gate runs.
+const todayAt = (clock: string) => {
+  const [, h, m, pm] = /^(\d+):(\d+) (AM|PM)$/.exec(clock) ?? [, '12', '0', 'PM']
+  const d = new Date()
+  d.setHours((Number(h) % 12) + (pm === 'PM' ? 12 : 0), Number(m), 0, 0)
+  return d.toISOString()
 }
 
 /** Placeholder words of the captured lengths, bold runs and code spans (one word, like a path) in their order. */
@@ -85,6 +101,19 @@ function Rich({text, heights}: {text: string; heights?: number[]}) {
 // parts them (oracle-choice-answered), and so do a message's tiles or file (its bubble is round: -pictures-sent 152).
 const joins = (a: Bubble | undefined, b: Bubble) => !!a && !a.answered && a.role === b.role
 const hasAttachments = (b?: Bubble) => !!b && ((b.images?.length ?? 0) > 0 || (b.files?.length ?? 0) > 0)
+
+// Grok 1.2.3 parts a conversation with a time row where a message comes a while after the one
+// before it, and reads that message's time (oracle-file-sent and -pictures-sent: "Today 11:31 PM"
+// over the file sent at 23:31:53 local, 3 h 8 min after the last answer at 20:23; -pictures-waiting:
+// "Today 8:21 PM" over the day's first send, 5 days after the one before). Sends under a minute
+// apart get none (the four sends of each 2026-11-19 take). So the gap is more than a minute and at
+// most 3 h 8 min; GAP_MS takes an hour, and a new day parts too.
+export const GAP_MS = 3600 * 1000
+export const laterRow = (before: Bubble | undefined, b: Bubble): string | null => {
+  if (!before?.at || !b.at) return null
+  const [t0, t1] = [Date.parse(before.at), Date.parse(b.at)]
+  return t1 - t0 >= GAP_MS || new Date(t0).toDateString() !== new Date(t1).toDateString() ? b.at : null
+}
 
 const timeOf = (iso: string) => {
   const d = new Date(iso)
@@ -139,10 +168,17 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
                 <AnsweredCard {...b.answered} />
               </div>
             )
-          const change = i > 0 && bubbles[i - 1].role !== b.role ? ' turn-change' : ''
+          const time = laterRow(bubbles.slice(0, i).filter((x) => x.at).at(-1), b)
+          // A time row parts the speakers itself: the row under it takes no extra space (oracle-file-sent article 79: 2 above).
+          const change = i > 0 && bubbles[i - 1].role !== b.role && !time ? ' turn-change' : ''
           const attached = hasAttachments(b)
           return (
             <Fragment key={b.key}>
+              {time && (
+                <div className="time-row time-later">
+                  <time dateTime={time}>{timeOf(time)}</time>
+                </div>
+              )}
               {/* What the message carries, in a row of its own above its bubble (oracle-file-sent 131, -pictures-sent 128). */}
               {attached && (
                 <div role="article" className={`turn turn-${b.role} turn-attached${change}`} data-role={b.role}>
