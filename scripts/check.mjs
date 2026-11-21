@@ -11,6 +11,7 @@ import { controls, claims } from './lib/controls.mjs';
 import { turnTraces } from './lib/turn-traces.mjs';
 import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
 import { guardBeforeSend } from './lib/host-guard.mjs';
+import { sceneCard } from './lib/cards.mjs';
 
 const fails = [];
 const ran = {};
@@ -175,8 +176,12 @@ for (const [name, seen, bubbles, w, expect] of [
   if (got !== expect) fail(`host guard: ${name}: ${got}, not ${expect}`);
   if (s.sent.length) fail(`host guard: ${name}: the guard sent ${s.sent.length} CDP call(s)`);
 }
-// And turn-live sends only through sendText, whose first step is onHost({ before }): every CDP
-// Input.* call, and every click but a .ask-allow / .ask-choice answer, is inside its body.
+// And turn-live sends only through sendText, whose first step is onHost({ before }). Outside its
+// body no line may send by any other door (rev288b, task-908564cd6e7e80a3): a CDP Input.* call, a
+// CDP method named by anything but a plain 'Domain.method' string, a DOM event (dispatchEvent),
+// a form submit, a fetch or Barkpark call that writes (POST, PUT, PATCH, DELETE; live.call), or a
+// click on anything but the answer control itself (.ask-allow / .ask-choice, as the element clicked).
+// A text rule cannot see every way to send; this one names the doors there are.
 {
   const lines = read('scripts/turn-live.mjs').split('\n');
   const from = lines.findIndex((l) => /^const sendText = async \(text, before\) => \{$/.test(l));
@@ -184,18 +189,53 @@ for (const [name, seen, bubbles, w, expect] of [
   rule('host guard', 1);
   if (from < 0 || to < 0) fail('host guard: scripts/turn-live.mjs has no `const sendText = async (text, before) => {` ... `};`');
   else if (lines[from + 1].trim() !== 'await onHost({ before });') fail(`host guard: scripts/turn-live.mjs:${from + 2}: sendText does not start with await onHost({ before })`);
+  const ANSWER = /^\.ask-(allow|choice)\b/;
+  // Every click on the line, and whether its element is the answer control: picked straight from
+  // the query (querySelector('.ask-choice')[1].click()), or a const set from that query on the line.
+  const clicksOk = (l) => {
+    const clicks = l.match(/\bclick\b/g)?.length ?? 0;
+    if (!clicks) return true;
+    const picked = new Set([...l.matchAll(/\bconst (\w+) = document\.querySelector\('([^']*)'\)/g)].filter((m) => ANSWER.test(m[2])).map((m) => m[1]));
+    let ok = 0;
+    for (const m of l.matchAll(/querySelector(?:All)?\('([^']*)'\)(?:\[\d+\])?\.click\(\)/g)) if (ANSWER.test(m[1])) ok++;
+    for (const m of l.matchAll(/(?<![\w.'")\]])(\w+)\.click\(\)/g)) if (picked.has(m[1])) ok++;
+    return ok === clicks;
+  };
+  const doors = [
+    ['a CDP Input.* call', (l) => /['"`]Input\./.test(l)],
+    ['a CDP method that is not a plain string', (l) => /\.send\(/.test(l) && !/\.send\(\s*'[A-Z][A-Za-z]*\.[A-Za-z]+'\s*[,)]/.test(l)],
+    ['a DOM event', (l) => /\bdispatchEvent\b/.test(l)],
+    ['a form submit', (l) => /\b(requestSubmit|submit)\b/.test(l)],
+    ['a write over HTTP', (l) => /\bmethod\s*:\s*['"`]?(POST|PUT|PATCH|DELETE)\b/i.test(l) || (/\bfetch\(/.test(l) && /\b(method|body)\b/.test(l))],
+    ['a Barkpark call', (l) => /\blive\.call\b|\.call\(\s*['"`]\//.test(l)],
+    ['a click on something but the answer control', (l) => !clicksOk(l)],
+  ];
   lines.forEach((l, i) => {
-    // A card answer: a line that picks a .ask-allow / .ask-choice and clicks once, nothing else.
-    const answer = /querySelector(All)?\('\.ask-(allow|choice)\b/.test(l) && (l.match(/\.(click|submit|requestSubmit)\(/g) ?? []).length === 1;
-    const act = /['"`]Input\.\w+/.test(l) || (!answer && /\.(click|submit|requestSubmit)\(/.test(l));
-    if (!act) return;
+    if (/^\s*\/\//.test(l)) return; // a comment line runs nothing
+    const hit = doors.find(([, t]) => t(l));
+    if (!hit) return;
     rule('host guard', 1);
-    if (!(i > from && i < to)) fail(`host guard: scripts/turn-live.mjs:${i + 1} sends input outside sendText, so no check before the send guards it`);
+    if (!(i > from && i < to)) fail(`host guard: scripts/turn-live.mjs:${i + 1} sends by ${hit[0]} outside sendText, so no check before the send guards it`);
   });
 }
 
+// A question card as a gate scene keeps its choices however the card is cut (scripts/lib/cards.mjs
+// sceneCard, rev292): an answered card scrolled up so only its letter and label show is still
+// answered B Cedar, with no question, not a question "B".
+const card = (...kinds) => ({ parts: kinds.map((kind) => ({ kind, e: { textLength: 0 } })) });
+for (const [name, c, want] of [
+  ['an answered card, cut off above its choice', card('text:B', 'text:Cedar'), { card: 'question', question: null, answered: { letter: 'B', label: 'Cedar' } }],
+  ['an answered card, whole', card('text:Which tree do you prefer?', 'text:B', 'text:Cedar'), { card: 'question', question: 'Which tree do you prefer?', answered: { letter: 'B', label: 'Cedar' } }],
+  ['an open card, cut off above its first choice', card('control:A', 'text:A', 'text:Maple', 'control:B', 'text:B', 'text:Cedar'), { card: 'question', question: null, choices: ['Maple', 'Cedar'] }],
+  ['an open card', card('text:Which tree do you prefer?', 'control:A', 'text:A', 'text:Maple', 'control:B', 'text:B', 'text:Cedar'), { card: 'question', question: 'Which tree do you prefer?', choices: ['Maple', 'Cedar'] }],
+]) {
+  rule('scene cards', 1);
+  const got = JSON.stringify(sceneCard(c));
+  if (got !== JSON.stringify(want)) fail(`scene cards: ${name}: ${got}, not ${JSON.stringify(want)}`);
+}
+
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard']) {
+for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

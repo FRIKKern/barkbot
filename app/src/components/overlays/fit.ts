@@ -5,23 +5,17 @@
 // a word can sit in more than one place, so each place has its own table.
 type Table = Record<string, string>
 
-// App names, 13/18 weight 500 on 0.195px (oracle-connect-apps).
+// App names, 13/18 weight 500 on 0.195px (oracle-connect-apps, 1.2.3).
 export const APP: Table = {
-  Datadog: '-0.091px',
-  Vercel: '-0.005px',
-  Supabase: '-0.03px',
-  Cloudflare: '-0.075px',
-  Sentry: '-0.072px',
-  Firebase: '-0.043px',
+  Browserless: '-0.105px', // 3.3 pt too wide
+  Turso: '-0.305px', // 2.5 pt too wide
+  Lightrun: '-0.18px', // 3 pt too wide
+  Knock: '-0.185px', // 1.9 pt too wide
+  'Google Drive': '-0.013px', // 2.5 pt too wide
   '1Password': '-0.205px',
-  Notion: '-0.072px',
-  Atlassian: '-0.149px',
-  Google: '0.013px',
-  Canva: '-0.065px',
-  'Google Docs': '0.013px',
 }
 // Section titles, 14/20 weight 500 on 0.14px.
-export const SECTION: Table = {'Recommended for you': '0.008px', 'Password Managers': '-0.16px', Productivity: '-0.26px'}
+export const SECTION: Table = {'Recommended for you': '0.008px', 'This Mac': '-0.46px', 'Password Managers': '-0.16px'} // This Mac: 4.8 pt too wide
 // Category filters, 13/18 on 0.195px.
 export const CATEGORY: Table = {All: '0.028px', 'Password Managers': '0.118px', Productivity: '0.128px', More: '-0.28px'}
 // Settings words (oracle-settings).

@@ -7,7 +7,7 @@
   2
  ],
  "cases": 65,
- "pass": 26,
+ "pass": 65,
  "results": [
   {
    "key": "aside:Bots",
@@ -99,138 +99,111 @@
   },
   {
    "key": "control:Create a routine",
-   "pass": false,
-   "why": "box off by 0,36,0,0"
+   "pass": true
   },
   {
    "key": "span:Create a routine",
-   "pass": false,
-   "why": "box off by 0,36.5,0.8,-0.5"
+   "pass": true
   },
   {
    "key": "span:Computer",
-   "pass": false,
-   "why": "box off by 0,36,-0.4,0"
+   "pass": true
   },
   {
    "key": "control:Bot's computer",
-   "pass": false,
-   "why": "box off by 0,36,0,0"
+   "pass": true
   },
   {
    "key": "bdi:Bot's computer",
-   "pass": false,
-   "why": "box off by 0,36.5,0,-0.5"
+   "pass": true
   },
   {
    "key": "bdi:Asleep",
-   "pass": false,
-   "why": "box off by 0,36.5,0.1,-0.5"
+   "pass": true
   },
   {
    "key": "span:Voice chat",
-   "pass": false,
-   "why": "box off by 0,36,0.2,0"
+   "pass": true
   },
   {
    "key": "span:Voice",
-   "pass": false,
-   "why": "box off by 0,36.5,-0.2,-0.5"
+   "pass": true
   },
   {
    "key": "control:Voice",
-   "pass": false,
-   "why": "box off by 25.2,36,-25.2,0"
+   "pass": true
   },
   {
    "key": "span:Helix 1.0x",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Language",
-   "pass": false,
-   "why": "box off by 0,66.5,0.7,-0.5"
+   "pass": true
   },
   {
    "key": "control:Language",
-   "pass": false,
-   "why": "box off by 0.3,66,-0.3,0"
+   "pass": true
   },
   {
    "key": "span:Auto-detect",
-   "pass": false,
-   "why": "box off by 0.3,66.5,-0.3,-0.5"
+   "pass": true
   },
   {
    "key": "control:Weekly usage",
-   "pass": false,
-   "why": "box off by 0,44.5,15,0"
+   "pass": true
   },
   {
    "key": "span:Weekly usage",
-   "pass": false,
-   "why": "box off by 1,44.5,-11.7,0"
+   "pass": true
   },
   {
    "key": "control:Upgrade plan",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Upgrade plan",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Get Grok Bot for mobile",
-   "pass": false,
-   "why": "box off by 0,0,15,0"
+   "pass": true
   },
   {
    "key": "span:Get Grok Bot for mobile",
-   "pass": false,
-   "why": "box off by 1,0,14,0"
+   "pass": true
   },
   {
    "key": "control:Support",
-   "pass": false,
-   "why": "box off by 0,0,15,0"
+   "pass": true
   },
   {
    "key": "span:Support",
-   "pass": false,
-   "why": "box off by 1,0,14,0"
+   "pass": true
   },
   {
    "key": "control:Settings",
-   "pass": false,
-   "why": "box off by 0,0,15,0"
+   "pass": true
   },
   {
    "key": "span:Settings",
-   "pass": false,
-   "why": "box off by 1,0,14,0"
+   "pass": true
   },
   {
    "key": "control:Add account",
-   "pass": false,
-   "why": "box off by 0,0,15,0"
+   "pass": true
   },
   {
    "key": "span:Add account",
-   "pass": false,
-   "why": "box off by 1,0,14,0"
+   "pass": true
   },
   {
    "key": "control:Log out",
-   "pass": false,
-   "why": "box off by 0,0,15,0"
+   "pass": true
   },
   {
    "key": "span:Log out",
-   "pass": false,
-   "why": "box off by 1,0,14,0"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -250,66 +223,54 @@
   },
   {
    "key": "card#1 parts",
-   "pass": false,
-   "why": "text(3) 1 ≠ 2; text(4) 0 ≠ 1; text(8) 1 ≠ 0"
+   "pass": true
   },
   {
    "key": "card#1 control:Open oracle-note.txt (2)#1",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#1",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#2",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#3",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#4",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#5",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#6",
-   "pass": false,
-   "why": "box off by 0,66,0,0"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#1",
-   "pass": false,
-   "why": "box off by 0,87,0,-2; color rgba(245, 245, 245, 0.66) ≠ rgb(245, 245, 245); font-size 13px ≠ 14px; font-weight 425 ≠ 500; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "card#1 text(11)#1",
-   "pass": false,
-   "why": "box off by 0,66,0.1,0"
+   "pass": true
   },
   {
    "key": "card#1 text(4)#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#2",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   }
  ],
- "run": "2026-11-19T20:32:44.767Z",
+ "run": "2026-11-21T14:15:37.074Z",
  "inventory": {
   "id": "oracle-account-menu",
   "controls": [
@@ -421,7 +382,7 @@
    {
     "name": "Upgrade plan",
     "item": "F8",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Get Grok Bot for mobile",
@@ -449,7 +410,7 @@
     "ours": true
    }
   ],
-  "missing": 1,
+  "missing": 0,
   "untracked": []
  }
 }

@@ -6,9 +6,9 @@ import type {ReactNode} from 'react'
 import {ATTACH_EVENT, Icon} from '../Composer'
 import {weeklyUsage} from './data'
 
-function Item({icon, label, trail, onPick}: {icon: ReactNode; label: string; trail?: ReactNode; onPick?: () => void}) {
+function Item({icon, label, trail, popup, onPick}: {icon: ReactNode; label: string; trail?: ReactNode; popup?: 'menu'; onPick?: () => void}) {
   return (
-    <div role="menuitem" tabIndex={-1} className="menu-item" onClick={onPick}>
+    <div role="menuitem" tabIndex={-1} aria-haspopup={popup} className="menu-item" onClick={onPick}>
       <span className="menu-icon">{icon}</span>
       <div className="menu-label">
         <span>{label}</span>
@@ -47,7 +47,10 @@ export function ComposerMenu({onPick}: {onPick?: () => void}) {
   )
 }
 
-export function AccountMenu({onPick, onSettings}: {onPick?: () => void; onSettings?: () => void}) {
+// 1.2.3 (oracle-account-menu): three groups, Upgrade plan under Weekly usage, Support opens a
+// submenu (its trail is a chevron), 228 wide. The Upgrade plan glyph is a stand-in. Settings and
+// Get Grok Bot for mobile open their dialogs (go); every other row closes the menu.
+export function AccountMenu({onPick, onSettings, onMobile}: {onPick?: () => void; onSettings?: () => void; onMobile?: () => void}) {
   return (
     <div role="presentation" className="pop menu-pop account-menu">
       <div role="menu" tabIndex={-1} aria-label="Account" className="menu">
@@ -58,27 +61,26 @@ export function AccountMenu({onPick, onSettings}: {onPick?: () => void; onSettin
             onPick={onPick}
             trail={
               <span className="menu-trail">
-                <span>
-                  <span>{weeklyUsage}</span>
-                </span>
-                {chevron}
+                <span className="menu-usage">{weeklyUsage}</span>
               </span>
             }
           />
+          <Item icon={<Icon d="M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 10.75v-5.5M5.75 7.5L8 5.25l2.25 2.25" />} label="Upgrade plan" onPick={onPick} />
+        </div>
+        <div role="group" className="menu-group">
           <Item
             icon={<Icon d="M5 2.5h6a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zM7 11.5h2" />}
             label="Get Grok Bot for mobile"
-            onPick={onPick}
+            onPick={onMobile ?? onPick}
           />
           <Item
             icon={<Icon d="M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM6.5 6.5a1.5 1.5 0 1 1 2 1.4c-.4.2-.5.5-.5.9M8 10.75v.25" />}
             label="Support"
+            popup="menu"
             onPick={onPick}
             trail={
               <span className="menu-trail">
-                <span>
-                  <Icon d="M6.5 3.5h-3v9h9v-3M9 3.5h3.5V7M12.5 3.5L7.5 8.5" />
-                </span>
+                <span>{chevron}</span>
               </span>
             }
           />

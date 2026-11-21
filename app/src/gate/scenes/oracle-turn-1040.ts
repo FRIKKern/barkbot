@@ -1,5 +1,4 @@
 import {oracle} from './oracle'
-import {transcripts} from '../transcripts'
 
-// The short conversation, from its time row (captured 2026-11-08 at 10:25 PM).
-export default {...oracle, transcript: {bubbles: transcripts.turn, time: '2026-11-08T22:25:00'}}
+// fixtures/states/oracle-turn-1040.json: the base scene (1.2.3 shows the conversation's end, no time row).
+export default oracle

@@ -1,0 +1,18 @@
+/* Get Grok Bot for mobile (fixtures/states/oracle-get-mobile.json, dialog 265): 320 x 401 centred on
+   the page ground, radius 14, no border. Close 32 round, 7 from the corner, its icon 14 in 64% ink. */
+.mobile { position: fixed; z-index: 31; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 320px; height: 401px; background: var(--bg); border-radius: 14px; font-size: 13px; line-height: normal; color: var(--ink); display: flex; flex-direction: column; }
+.mobile:focus { outline: none; }
+.mobile-close { position: absolute; top: 7px; right: 7px; width: 32px; height: 32px; border-radius: 9999px; display: grid; place-items: center; color: var(--ink-64); }
+.mobile-close > span { width: 18px; height: 18px; display: grid; place-items: center; }
+.mobile-close .icon { width: 14px; height: 14px; }
+/* The body: the 224 frame 24 down (white, radius 18, a 0.5 ring; 12 in, the 200 code), 19, the title
+   15/20 at 500, 8, the line 13/18 in 54% ink, 4, the note 12/16 in 54% ink: all centred. */
+.mobile-body { height: 333px; padding-top: 24px; display: flex; flex-direction: column; align-items: center; line-height: 18px; letter-spacing: -0.08px; }
+.mobile-code { width: 224px; height: 224px; flex: none; border-radius: 18px; background: rgb(255 255 255); box-shadow: rgb(245 245 245 / 0.06) 0 0 0 0.5px, rgb(245 245 245 / 0) 0 2px 8px 0; }
+.mobile-body h2 { margin: 19px 0 0; font-size: 15px; font-weight: 500; line-height: 20px; letter-spacing: 0.15px; }
+.mobile-body p { margin: 8px 0 0; color: var(--ink-54); line-height: 18px; letter-spacing: 0.195px; }
+.mobile-note { margin-top: 4px; color: var(--ink-54); font-size: 12px; line-height: 16px; letter-spacing: 0.12px; }
+/* The foot: 68 tall, two 142 x 30 pills 8 apart, 24 down and 14 in. */
+.mobile-foot { height: 68px; padding: 24px 14px 0; display: flex; gap: 8px; }
+.mobile-pill { width: 142px; height: 30px; border-radius: 9999px; display: grid; place-items: center; background: var(--wash-04); color: var(--ink); box-shadow: color(srgb 0.960784 0.960784 0.960784 / 0.15) 0 0 0 0.5px inset; }
+.mobile-pill.primary { background: var(--ink); color: rgb(18 18 18); box-shadow: color(srgb 0.0705882 0.0705882 0.0705882 / 0.15) 0 0 0 0.5px inset; }

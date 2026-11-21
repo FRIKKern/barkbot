@@ -7,7 +7,7 @@
   2
  ],
  "cases": 4,
- "pass": 2,
+ "pass": 4,
  "results": [
   {
    "key": "control:Start voice input",
@@ -19,16 +19,14 @@
   },
   {
    "key": "span:⌘",
-   "pass": false,
-   "why": "border-radius 3px ≠ 2px"
+   "pass": true
   },
   {
    "key": "span:D",
-   "pass": false,
-   "why": "border-radius 3px ≠ 2px"
+   "pass": true
   }
  ],
- "run": "2026-11-19T20:24:46.604Z",
+ "run": "2026-11-20T19:34:54.202Z",
  "inventory": {
   "id": "oracle-hover-start-voice-input",
   "controls": [
