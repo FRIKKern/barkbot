@@ -1,6 +1,7 @@
 // The avatar's pencil stays lit while the avatar editor is open (oracle-edit-avatar: the pencil
 // draws with the pointer away from the face). On the live page the editor opens by a click on
-// Edit Bot avatar, so the lit pencil must follow the open editor, not a scene's overlay.
+// Edit Bot avatar, so the lit pencil must follow the open editor, not only a scene's overlay
+// (Shell passes Details the overlay a click opened: `opened ?? scene.overlay`).
 // Control: with the pointer away and no editor, the pencil is not drawn.
 // The page is the oracle scene (/gate/oracle-turn-1040): the real Shell, the panel open.
 export async function avatarPencil({ check, precondition, ev, open, base, click, wait, until, windowFocus, page }) {
