@@ -7,7 +7,7 @@ import {useState} from 'react'
 import {Icon} from '../Composer'
 import {settingsSections} from './data'
 import {SETTINGS, fit} from './fit'
-import {Bar, GroupHead, PlainRow, Select, SettingRow, Switch, chevronDown, info, x} from './SettingsParts'
+import {Bar, GroupHead, PlainRow, Select, SettingRow, Switch, SwitchState, chevronDown, info, x} from './SettingsParts'
 import {pages} from './SettingsPages'
 
 const sectionIcons: Record<string, string> = {
@@ -111,8 +111,12 @@ function GeneralPage() {
   )
 }
 
-export function Settings({page = 'General', onClose}: {page?: string; onClose?: () => void}) {
+// `seen`: when Barkpark last heard from the bot's computer (Scene.seen), for the Computer page.
+export function Settings({page = 'General', seen, onClose}: {page?: string; seen?: string | null; onClose?: () => void}) {
   const [section, setSection] = useState(page)
+  // The switches' positions for the whole dialog, so a tab change keeps a flipped one (SwitchState).
+  const [flipped, setFlipped] = useState<Record<string, boolean>>({})
+  const flip = (label: string, on: boolean) => setFlipped((f) => ({...f, [label]: on}))
   const shown = pages[section] ? section : 'General'
   const Page = pages[section] ?? GeneralPage
   return (
@@ -140,7 +144,9 @@ export function Settings({page = 'General', onClose}: {page?: string; onClose?: 
             </header>
             <div className="view-scroll">
               <div className="set-body">
-                <Page />
+                <SwitchState.Provider value={{flipped, flip}}>
+                  <Page seen={seen} />
+                </SwitchState.Provider>
               </div>
             </div>
           </section>

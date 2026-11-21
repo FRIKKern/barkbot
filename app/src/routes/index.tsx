@@ -323,7 +323,7 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
   const computer = leaving ? '' : online ? 'Asleep' : 'Unreachable'
   return (
     <Shell
-      scene={{bots: chat.bots, active: chat.botId, panelOpen: true, computer, voice: VOICE}}
+      scene={{bots: chat.bots, active: chat.botId, panelOpen: true, computer, seen: chat.host?.lastSeenAt ?? null, voice: VOICE}}
       onRenameBot={rename}
       onCreateBot={create}
       onPickBot={pick}

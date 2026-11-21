@@ -31,6 +31,7 @@ import { createLost } from './lib/create-lost.mjs';
 import { retryAdopt } from './lib/retry-adopt.mjs';
 import { shiftEnter } from './lib/shift-enter.mjs';
 import { quietStream } from './lib/quiet-stream.mjs';
+import { settingsLive } from './lib/settings-live.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -1097,6 +1098,9 @@ else {
 
   // The bot asks leave before it acts (Barkpark's approval_requested, seen live 2026-11-13: plan
   // mode asks for its plan, then for each step). Nothing may be answered until the person presses.
+  console.log("Behaviour · Settings shows the live page's own computer and build (the live page, against the stand-in Barkpark)");
+  await settingsLive({ check, precondition, ev, open, base, click, wait, until, stub, host });
+
   console.log('Behaviour · the bot asks leave (the live page, against the stand-in Barkpark)');
   const SESSION = '00000000-0000-4000-8000-0000000000aa';
   stub.sessions = [{ id: SESSION, execution_target: 'registered_host', execution_host_id: host(true)[0].id, inserted_at: '2026-11-13T10:00:00Z', status: 'active' }];

@@ -40,7 +40,6 @@ export const SETTINGS: Table = {
   // 1.2.3 (decision 0010).
   'Computer · Last opened 13 minutes ago': '0.133px', // 2.3 pt too wide
   'Read Texts': '0.065px', // 1.3 pt too wide
-  '1.2.3': '0.075px', // 0.6 pt too wide
 }
 
 export const fit = (table: Table, word: string) => (table[word] ? {letterSpacing: table[word]} : undefined)

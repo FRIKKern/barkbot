@@ -9,6 +9,9 @@ export const oracle: Scene = {
   active: 'Oracle',
   panelOpen: true,
   computer: 'Asleep',
+  // Settings > Computer reads "Last opened 13 minutes ago" in the capture: the computer was last
+  // heard from 13 minutes before the scene opens, the same field the live page fills from Barkpark.
+  seen: new Date(Date.now() - 13 * 60_000).toISOString(),
   voice: {voice: 'Helix', speed: 1, language: 'Auto-detect'},
   // The preview's line is the bot's last message: the fixture keeps only its length (185), so placeholder words.
   previews: {Oracle: filler(185)},
