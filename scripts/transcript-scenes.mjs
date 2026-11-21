@@ -22,19 +22,12 @@ const corners = (r = '0px') => { const v = r.split(' '); return [v[0], v[1] ?? v
 const joinedAbove = (b) => corners(b.b.style['border-radius'])[b.role === 'user' ? 1 : 0] === '6px';
 // Bubbles and cards, top to bottom. When the first bubble on screen is joined to one scrolled out
 // of sight above it (oracle-file-waiting), a short bubble of the same speaker stands in for that one.
-// A bubble's row: the outermost article around it. Its overlap: how far the next row starts inside
-// it (the oracle's list places a row by an estimate: oracle-main-720's two-line message, 62 tall,
-// has the answer's row 40 below its top).
-const ancestorsOf = (els, e) => { const out = []; let p = e.parent; while (p !== undefined) { out.push(els[p]); p = els[p].parent; } return out; };
-const rowOf = (s, b) => ancestorsOf(s.elements, b.b).filter((a) => a.role === 'article').at(-1) ?? b.b;
-const overlapOf = (s, b) => {
-  const r = rowOf(s, b), next = s.elements.filter((e) => e.role === 'article' && e.parent === r.parent && e.box[1] > r.box[1]).sort((m, n) => m.box[1] - n.box[1])[0];
-  const o = next ? Math.round((r.box[1] + r.box[3] - next.box[1]) * 10) / 10 : 0;
-  return o > 0.5 ? o : 0;
-};
+// A scene keeps only what our app can show (lead's ruling on rev295): not the oracle's row overlap
+// (its list places a row by an estimate: oracle-main-720's two-line message, 62 tall, has the
+// answer's row 40 below its top), which our list never draws.
 const rows = (s) => {
   const bs = bubbles(s);
-  const b = transcriptOf(s).map((x, i) => ({ y: bs[i].y, x: overlapOf(s, bs[i]) ? { ...x, overlap: overlapOf(s, bs[i]) } : x }));
+  const b = transcriptOf(s).map((x, i) => ({ y: bs[i].y, x }));
   const c = cards(s).map((x) => ({ y: x.row.box[1], x: sceneCard(x) }));
   // A time row between messages (1.2.3: a day's first send, oracle-file-sent time 87), by its clock
   // ("Today 11:31 PM": the scene shows it as today). A card-like row, so the bubble matching skips it.
@@ -55,7 +48,9 @@ const content = (s) => {
 };
 // The lift: how far the last row ends above that end (+) or below it (-, scrolled up). The
 // oracle keeps its scroll offset when the window is resized, so a width capture is not always
-// pinned (oracle-main-1280: 66 above; oracle-main-720: 374 below, off screen).
+// pinned (oracle-main-1280: 66 above; oracle-main-720: 374 below, off screen). Only a lift below
+// is kept: a reader can scroll our transcript up that far, but our list pinned to its end never
+// leaves the last row above it, so a lift above would be a spacer only the gate draws.
 const liftOf = (s) => {
   const c = content(s);
   const kids = c ? s.elements.filter((e) => e.parent === c.i) : [];
@@ -84,21 +79,19 @@ const at = (width) => {
   return base.rows.map((r) => {
     if (r.card === 'file') return { ...r, files };
     if (r.card) return r;
-    const { overlap, ...rest } = r;
-    const twin = same.find((b) => b.role === r.role && b.paras.some((q) => q.len === r.paras[0].len));
-    return { ...rest, paras: r.paras.map(({ height, ...p }) => {
+    return { ...r, paras: r.paras.map(({ height, ...p }) => {
       const h = same.find((b) => b.role === r.role && b.paras.some((q) => q.len === p.len))?.paras.find((q) => q.len === p.len)?.height;
       return h === undefined ? p : { ...p, height: h };
-    }), ...(twin?.overlap ? { overlap: twin.overlap } : {}) };
+    }) };
   });
 };
 const main = at(base.width);
 const entries = [['main', BASE, main]];
 const lifts = [];
 for (const s of shown) {
-  const conv = at(s.width);
-  if (JSON.stringify(conv) !== JSON.stringify(main) || s.lift) entries.push([short(s.id), s.id, conv]);
-  if (s.lift) lifts.push([short(s.id), s.lift]);
+  const conv = at(s.width), lift = s.lift < 0 ? s.lift : 0;
+  if (JSON.stringify(conv) !== JSON.stringify(main) || lift) entries.push([short(s.id), s.id, conv]);
+  if (lift) lifts.push([short(s.id), lift]);
 }
 // In a state of its own, a bubble that is one of main's with paragraphs scrolled off above (only
 // its last ones on screen: oracle-file-sent shows 4 of the answer's 5) is main's whole bubble, its
@@ -109,8 +102,7 @@ const whole = (s) => {
     if (r.card || !r.paras.length) return r;
     const m = mains.find((x) => x.role === r.role && r.paras.length < x.paras.length && r.paras.every((p) => x.paras.some((q) => q.len === p.len)));
     if (!m) return r;
-    const { overlap, ...rest } = m;
-    return { ...rest, paras: m.paras.map((q) => r.paras.find((p) => p.len === q.len) ?? q), ...(r.overlap ? { overlap: r.overlap } : {}) };
+    return { ...m, paras: m.paras.map((q) => r.paras.find((p) => p.len === q.len) ?? q) };
   });
 };
 for (const s of own) entries.push([short(s.id), s.id, whole(s)]);

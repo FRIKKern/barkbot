@@ -14,13 +14,13 @@ export const transcripts: Record<string, SceneRow[]> = {
   // oracle-main-2000
   "main-2000": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
   // oracle-main-720
-  "main-720": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}],"overlap":22},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
+  "main-720": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}]},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
   // oracle-main-790
-  "main-790": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}],"overlap":22},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
+  "main-790": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}]},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
   // oracle-main-800
-  "main-800": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}],"overlap":22},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
+  "main-800": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}]},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
   // oracle-main-820
-  "main-820": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}],"overlap":22},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
+  "main-820": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}]},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
   // oracle-main-880
   "main-880": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54}]},{"role":"assistant","paras":[{"len":185,"height":88},{"len":211,"height":110},{"len":270,"height":154},{"len":289,"height":154},{"len":303,"height":154}]}],
   // oracle-main-980
@@ -45,8 +45,6 @@ export const transcripts: Record<string, SceneRow[]> = {
 
 // How far a state's last row ends above the transcript's end (+), or below it, scrolled up (-).
 export const lifts: Record<string, number> = {
-  "main-1280": 66,
-  "main-2000": 242,
   "main-720": -374,
   "main-790": -374,
 }

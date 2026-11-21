@@ -132,4 +132,17 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
   await press('Escape'); vd.escape = await focused(); vd.after = await shown(); vd.value = await value('Voice');
   check('Voice dialog (voice-picker trace): open focuses the checked voice, Helix; Escape (ours, untraced) closes it without choosing and gives focus back to the Voice button, still Helix 1.0x (control: it read Helix 1.0x and the dialog was up)',
     vd.was === 'Helix 1.0x' && vd.shown === 'voice-picker' && vd.open === 'radio Helix (overlay)' && vd.escape === 'button Helix 1.0x' && vd.after === null && vd.value === 'Helix 1.0x', vd);
+
+  // Get mobile (account menu > Get Grok Bot for mobile, as Settings): the row opens the dialog (rev295:
+  // it only closed the menu, so the dialog was reachable in a gate scene alone); Escape closes it and
+  // gives focus back to the account menu's button, which had it when the menu opened.
+  await fresh();
+  await clickOn('button[aria-label^="Open account menu"]');
+  const gmMenu = await shown();
+  await ev(() => [...document.querySelectorAll('.overlay [role=menuitem]')].find((r) => r.textContent.trim().startsWith('Get Grok Bot for mobile'))?.setAttribute('data-test-mobile', ''));
+  const gmRow = await clickOn('.overlay [data-test-mobile]');
+  const gm = { menu: gmMenu, row: gmRow, shown: await shown(), open: await focused() };
+  await press('Escape'); gm.escape = await focused(); gm.after = await shown();
+  check('Get mobile from the account menu: its row opens the Get mobile dialog, focus inside it; Escape closes it and gives focus back to the account menu\'s button (control: the account menu opened and the row was there)',
+    gm.menu === 'account-menu' && gm.row && gm.shown === 'get-mobile' && gm.open.endsWith('(overlay)') && gm.escape.startsWith('button Open account menu') && gm.after === null, gm);
 }

@@ -45,7 +45,7 @@ type Render = (o: {picked?: string; scene?: Scene; close: () => void; choose: (v
 
 const overlays: Record<string, Render> = {
   'composer-menu': ({close}) => <ComposerMenu onPick={close} />,
-  'account-menu': ({close, go}) => <AccountMenu onPick={close} onSettings={() => go('settings')} />,
+  'account-menu': ({close, go}) => <AccountMenu onPick={close} onSettings={() => go('settings')} onMobile={() => go('get-mobile')} />,
   'voice-picker': ({scene, change}) => (
     <VoiceDialog picked={scene?.voice?.voice} speed={scene?.voice?.speed} onPick={(v) => change('voice-picker', v)} onSpeed={(n) => change('voice-speed', n)} />
   ),
