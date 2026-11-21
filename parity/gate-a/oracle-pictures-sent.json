@@ -7,7 +7,7 @@
   2
  ],
  "cases": 75,
- "pass": 68,
+ "pass": 74,
  "results": [
   {
    "key": "aside:Bots",
@@ -159,8 +159,7 @@
   },
   {
    "key": "bubble:assistant#1 place",
-   "pass": false,
-   "why": "top off by 42"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -168,8 +167,7 @@
   },
   {
    "key": "bubble:user#1 place",
-   "pass": false,
-   "why": "gap above off by -42"
+   "pass": true
   },
   {
    "key": "bubble:assistant#2 look",
@@ -206,27 +204,23 @@
   {
    "key": "time",
    "pass": false,
-   "why": "missing"
+   "why": "width off by 1.8"
   },
   {
    "key": "card#1 parts",
-   "pass": false,
-   "why": "text:lorem ipsum dolor sit ame 1 ≠ 0"
+   "pass": true
   },
   {
    "key": "card#1 box#1",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 text:B#1",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 text:Cedar#1",
-   "pass": false,
-   "why": "box off by 0,41,-0.4,0"
+   "pass": true
   },
   {
    "key": "card#2 parts",
@@ -317,7 +311,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-21T11:48:43.525Z",
+ "run": "2026-11-21T17:08:33.671Z",
  "inventory": {
   "id": "oracle-pictures-sent",
   "controls": [

@@ -7,7 +7,7 @@
   2
  ],
  "cases": 78,
- "pass": 61,
+ "pass": 76,
  "results": [
   {
    "key": "aside:Bots",
@@ -159,8 +159,7 @@
   },
   {
    "key": "bubble:user#1 place",
-   "pass": false,
-   "why": "top off by 41"
+   "pass": true
   },
   {
    "key": "bubble:assistant#1 look",
@@ -192,8 +191,7 @@
   },
   {
    "key": "bubble:user#3 place",
-   "pass": false,
-   "why": "gap above off by -42"
+   "pass": true
   },
   {
    "key": "bubble:assistant#3 look",
@@ -214,7 +212,7 @@
   {
    "key": "time",
    "pass": false,
-   "why": "missing"
+   "why": "width off by 1.8"
   },
   {
    "key": "card#1 parts",
@@ -222,53 +220,43 @@
   },
   {
    "key": "card#1 box#1",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 control:Open image full screen#1",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 img#1",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#2",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 control:Open image full screen#2",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 img#2",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#3",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 control:Open the remaining 3 images full screen#1",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 img#3",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#1 text(2)#1",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#2 parts",
@@ -276,23 +264,20 @@
   },
   {
    "key": "card#2 box#1",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#2 text:Which tree do you prefer?#1",
    "pass": false,
-   "why": "box off by 0,41,0.1,-0.5"
+   "why": "box off by 0,-1,0.1,-0.5"
   },
   {
    "key": "card#2 text:B#1",
-   "pass": false,
-   "why": "box off by 0,41,0,0"
+   "pass": true
   },
   {
    "key": "card#2 text:Cedar#1",
-   "pass": false,
-   "why": "box off by 0,41,-0.4,0"
+   "pass": true
   },
   {
    "key": "card#3 parts",
@@ -339,7 +324,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-21T11:47:56.849Z",
+ "run": "2026-11-21T17:05:46.863Z",
  "inventory": {
   "id": "oracle-file-sent",
   "controls": [
