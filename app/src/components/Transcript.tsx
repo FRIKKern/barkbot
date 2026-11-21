@@ -6,11 +6,11 @@ import {filler} from '../chat/turn'
 import {AnsweredCard, FileCard, PictureTiles, QuestionCard} from './Cards'
 
 /** A message as lengths only (O2): what a gate scene holds (gate/transcripts.ts). */
-export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; height?: number; marks?: {tag: 'strong' | 'code'; len: number}[]}[]}
+export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; height?: number; marks?: {tag: 'strong' | 'code'; len: number}[]}[]; overlap?: number}
 /** A card in a gate scene (scripts/lib/cards.mjs sceneCard): a question waiting (choices) or answered. */
 export type SceneCard =
-  | {card: 'question'; question: string; choices?: string[]; answered?: {letter: string; label: string}}
-  | {card: 'file'; name: string; size: number}
+  | {card: 'question'; question: string | null; choices?: string[]; answered?: {letter: string; label: string}}
+  | {card: 'file'; files: {name: string; size: number}[]}
   | {card: 'pictures'; count: number}
 export type SceneRow = SceneBubble | SceneCard
 
@@ -18,7 +18,7 @@ export type SceneRow = SceneBubble | SceneCard
 export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null} {
   const last = rows.at(-1)
   const waiting = last && 'card' in last && last.card === 'question' && last.choices ? last : null
-  const ask: Ask | null = waiting ? {id: 'scene-ask', what: 'ask you something', detail: null, answering: null, questions: [{question: waiting.question, header: null, multi: false, options: (waiting.choices ?? []).map((label) => ({label, description: null}))}]} : null
+  const ask: Ask | null = waiting ? {id: 'scene-ask', what: 'ask you something', detail: null, answering: null, questions: [{question: waiting.question ?? '', header: null, multi: false, options: (waiting.choices ?? []).map((label) => ({label, description: null}))}]} : null
   // A file or picture card belongs to the message under it, as the live page holds it.
   let carried: Pick<Bubble, 'files' | 'images'> = {}
   const bubbles = (waiting ? rows.slice(0, -1) : rows).flatMap((r, i): Bubble[] => {
@@ -27,9 +27,10 @@ export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null
       carried = {}
       return [b]
     }
-    if (r.card === 'file') carried = {...carried, files: [{name: r.name, size: filler(r.size)}]}
+    if (r.card === 'file') carried = {...carried, files: r.files.map((f) => ({name: f.name, size: filler(f.size)}))}
     if (r.card === 'pictures') carried = {...carried, images: Array.from({length: r.count}, (_, j) => `scene:${j}`)}
-    return r.card === 'question' && r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question, ...r.answered}}] : []
+    // A question off screen above (a card cut off at the top) gets placeholder words, one line.
+    return r.card === 'question' && r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question ?? filler(25), ...r.answered}}] : []
   })
   return {bubbles, ask}
 }
@@ -46,7 +47,7 @@ export function fromLengths(list: SceneBubble[]): Bubble[] {
     })
     return out + words(rest, marks.length > 0, false)
   }
-  return list.map((b, i) => ({key: `scene-${i}`, role: b.role, text: b.paras.map(para).join('\n\n'), heights: b.paras.map((p) => p.height ?? 0)}))
+  return list.map((b, i) => ({key: `scene-${i}`, role: b.role, text: b.paras.map(para).join('\n\n'), heights: b.paras.map((p) => p.height ?? 0), ...(b.overlap ? {overlap: b.overlap} : {})}))
 }
 // n characters of words, with a space where it meets a mark before or after it.
 const words = (n: number, before: boolean, after: boolean) => {
@@ -92,22 +93,27 @@ const timeOf = (iso: string) => {
   return `${today ? 'Today' : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} ${t}`
 }
 
+// `lift` (gate scenes): where the captured oracle state left its scroll. Above 0, the last row ends
+// that far above the transcript's end; below 0, the transcript is scrolled up that far from it
+// (gate/transcripts.ts lifts). The live page leaves it out: pinned to the end.
 // `of`: the live page's bot and the computer its next new conversation is made on (index.tsx's
 // chat.host.id, which startChat sends), as data-bot-id / data-host-id. scripts/turn-live.mjs reads
 // them before a first message, which no stream can check yet (V1).
-export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose, of}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void; of?: {botId: string; hostId: string}}) {
+export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose, lift = 0, of}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void; lift?: number; of?: {botId: string; hostId: string}}) {
   const box = useRef<HTMLDivElement>(null)
   const pinned = useRef(true)
+  const below = Math.max(0, -lift)
+  const pin = (el: HTMLDivElement) => (el.scrollTop = el.scrollHeight - el.clientHeight - below)
   useLayoutEffect(() => {
     const el = box.current
-    if (el && pinned.current) el.scrollTop = el.scrollHeight
+    if (el && pinned.current) pin(el)
   }, [bubbles, working, error, ask])
   // Pinned also when the words reflow (a font arrives, a panel opens or closes, the window resizes).
   useLayoutEffect(() => {
     const el = box.current
     if (!el || typeof ResizeObserver === 'undefined') return
     const ro = new ResizeObserver(() => {
-      if (pinned.current) el.scrollTop = el.scrollHeight
+      if (pinned.current) pin(el)
     })
     el.dataset.hydrated = '' // the server's HTML is not scrolled; Gate A measures after this
     ro.observe(el)
@@ -117,7 +123,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
   return (
     <div className="transcript" data-transcript="" data-bot-id={of?.botId} data-host-id={of?.hostId} ref={box} onScroll={(e) => {
       const el = e.currentTarget
-      pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 2
+      pinned.current = Math.abs(el.scrollHeight - el.scrollTop - el.clientHeight - below) < 2
     }}>
       <div className="column">
         {startedAt && (
@@ -140,12 +146,18 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
               {/* What the message carries, in a row of its own above its bubble (oracle-file-sent 131, -pictures-sent 128). */}
               {attached && (
                 <div role="article" className={`turn turn-${b.role} turn-attached${change}`} data-role={b.role}>
-                  {b.files?.map((f, j) => <FileCard key={j} {...f} />)}
+                  {b.files && b.files.length > 0 && (
+                    <div className="file-stack">
+                      {b.files.map((f, j) => (
+                        <FileCard key={j} {...f} />
+                      ))}
+                    </div>
+                  )}
                   {b.images && b.images.length > 0 && <PictureTiles ids={b.images} picture={picture} />}
                 </div>
               )}
               {(b.text || !attached) && (
-                <div role="article" className={`turn turn-${b.role}${attached ? '' : change}${joins(bubbles[i - 1], b) && !attached ? ' group-prev' : ''}${joins(bubbles[i + 1], b) && !hasAttachments(bubbles[i + 1]) ? ' group-next' : ''}`}>
+                <div role="article" className={`turn turn-${b.role}${attached ? '' : change}${joins(bubbles[i - 1], b) && !attached ? ' group-prev' : ''}${joins(bubbles[i + 1], b) && !hasAttachments(bubbles[i + 1]) ? ' group-next' : ''}`} style={b.overlap ? {marginBottom: -b.overlap} : undefined}>
                   <div role="article" className={`bubble bubble-${b.role}`} data-role={b.role}>
                     <span className="sr-only">{b.role === 'user' ? 'You' : bot}</span>
                     <div className="bubble-text">
@@ -192,6 +204,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
             </div>
           </div>
         )}
+        {lift > 0 && <div style={{height: lift, flex: 'none'}} aria-hidden="true" />}
         {error && (
           <p className="chat-error" role="alert">
             {error}

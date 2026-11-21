@@ -3,8 +3,9 @@
 //
 //   tooltip   24 high, 12/16 type on the raised ground, radius 6, 8 from its control, centred on it,
 //             kept 8 inside the window (Connect apps: x 8, not centred)
-//   preview   260 x 60 card, 8 right of the bot's tile and 3 above it: face 16, name 13/500, one
-//             line of the bot's last message at 66% ink
+//   preview   260 wide, 8 right of the bot's tile and centred on it: face 16, name 13/500, the bot's
+//             last message at 66% ink, two lines at most (1.2.3, oracle-hover-bot-tile-2: 78 tall,
+//             12 above the tile; 0.79.3 showed one line, 60 tall, 3 above)
 import {useLayoutEffect, useRef, useState, type ReactNode} from 'react'
 import {createPortal} from 'react-dom'
 
@@ -62,7 +63,7 @@ export function Keys({keys}: {keys: string[]}) {
 export function Preview({box, name, line}: {box: Box | null; name: string; line: string}) {
   if (!box) return null
   return createPortal(
-    <div className="preview-wrap" role="presentation" style={{left: box.right + 8, top: box.top - 3}}>
+    <div className="preview-wrap" role="presentation" style={{left: box.right + 8, top: (box.top + box.bottom) / 2}}>
       <div className="preview" role="dialog" aria-label={`${name} chat preview`}>
         <div className="preview-body">
           <div className="preview-head">

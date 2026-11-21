@@ -1,14 +1,15 @@
 // Small pieces shared by the panes. The bot's face is a plain stand-in (O2), never the oracle's art.
 import type {ReactNode} from 'react'
 import {Icon} from './Composer'
+import {speedText} from './overlays/data'
 
 // Words where the stand-in face (SF Pro, item F6) runs more than Gate A's 1 pt off the oracle's
 // face carry their own tracking, so the box matches. Width gap measured in
 // fixtures/states/oracle-turn-1040.json, divided over the word's characters.
 const FIT: Record<string, string> = {
   "Bot's computer": '0.081px', // 1.6 pt too wide at 0.195px
-  Speed: '0.435px', // 1.2 pt too narrow at 0.195px
-  '1x': '-0.68px', // 1.2 pt too wide at -0.08px
+  Speed: '0.435px', // 1.2 pt too narrow at 0.195px (the Voice dialog's slider label)
+  'Helix 1.0x': '-0.27px', // 1.9 pt too wide at -0.08px (the Voice row, oracle-turn-1040)
   // Overlays (fixtures/states/oracle-account-menu.json, oracle-new-bot-dialog.json), 14/20.
   Cancel: '0.257px', // 0.7 pt too narrow at 0.14px
   Create: '0.207px', // 0.4 pt too narrow at 0.14px; with Cancel it moved Cancel 1.1 pt
@@ -54,6 +55,25 @@ export function Pick({label, value, open = false}: {label: string; value: string
       <button role="combobox" aria-expanded={open} aria-label={label} className="pick-value">
         <span className="pick-text">
           <span style={fit(value)}>{value}</span>
+        </span>
+        <Icon d="M4.5 6.5L8 10l3.5-3.5" />
+      </button>
+    </li>
+  )
+}
+
+// The Voice row on 1.2.3: a plain button (no label of its own, so named by its row) reading the
+// voice and its speed, "Helix 1.0x", that opens the Voice dialog (overlays/VoiceDialog.tsx).
+export function VoicePick({voice, speed, open = false}: {voice: string; speed: number; open?: boolean}) {
+  const value = `${voice} ${speedText(speed)}`
+  return (
+    <li className="pick">
+      <span className="pick-label">
+        <span>Voice</span>
+      </span>
+      <button aria-haspopup="dialog" aria-expanded={open} data-picker="voice-picker" className="pick-value">
+        <span className="pick-line" style={fit(value)}>
+          {value}
         </span>
         <Icon d="M4.5 6.5L8 10l3.5-3.5" />
       </button>

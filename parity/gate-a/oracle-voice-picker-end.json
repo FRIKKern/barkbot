@@ -7,210 +7,170 @@
   2
  ],
  "cases": 40,
- "pass": 0,
+ "pass": 40,
  "results": [
   {
    "key": "control:Naksh",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Naksh",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Warm & thoughtful",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Naksh preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Orion",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Orion",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Rich & cinematic",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Orion preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Perseus",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Perseus",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Strong & trusted",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Perseus preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Rex",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Rex",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Confident & clear",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Rex preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Rigel",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Rigel",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Crisp & composed",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Rigel preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Sal",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Sal",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Smooth & balanced",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Sal preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Sirius",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Sirius",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Clever & playful",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Sirius preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Ursa",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Ursa",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Friendly & warm",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Ursa preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Zagan",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Zagan",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Deep & dramatic",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Zagan preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Zenith",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Zenith",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Sharp & focused",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Zenith preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   }
  ],
- "run": "2026-11-19T20:24:46.604Z",
+ "run": "2026-11-20T03:14:47.634Z",
  "inventory": {
   "id": "oracle-voice-picker-end",
   "controls": [
@@ -322,105 +282,105 @@
    {
     "name": "Naksh",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Naksh preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Orion",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Orion preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Perseus",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Perseus preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Rex",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Rex preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Rigel",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Rigel preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Sal",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Sal preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Sirius",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Sirius preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Ursa",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Ursa preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Zagan",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Zagan preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Zenith",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Zenith preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 20,
+  "missing": 0,
   "untracked": []
  }
 }
