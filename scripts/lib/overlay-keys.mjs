@@ -98,6 +98,30 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
   const caAt = await outside(); const caOut = { again: caAgain, at: caAt, focus: await focused(), after: await shown() };
   check('Connect apps (keys trace): an outside click closes it and leaves focus on the page (control: it was open before the click)', caOut.again === 'connect-apps' && caOut.focus === 'body' && caOut.after === null, caOut);
 
+  // Settings' pages on the live page: account menu > Settings, then a real click on each tab. The
+  // scenes oracle-settings-computer, -permissions and -updates open Settings on those tabs
+  // (overlays/index.tsx); this is the live path to the same states, so a scene feeds only what the
+  // live page draws. Each page is named by its heading, its tab's aria-current and one row only it has.
+  await fresh();
+  const marks = ['Unlock the ultimate AI subscription', 'Read Texts', 'Approvals', 'Automatic Updates'];
+  const pageOf = () => ev((m) => {
+    const d = document.querySelector('.overlay [role=dialog]');
+    const body = d?.querySelector('.set-body')?.textContent ?? '';
+    return { head: d?.querySelector('.set-head h2')?.textContent ?? null, tab: d?.querySelector('.set-tab[aria-current=page]')?.textContent.trim() ?? null, rows: m.filter((r) => body.includes(r)) };
+  }, marks);
+  await clickOn('button[aria-label^="Open account menu"]');
+  await ev(() => [...document.querySelectorAll('.overlay [role=menuitem]')].find((r) => r.textContent.trim().startsWith('Settings'))?.setAttribute('data-test-settings', ''));
+  await clickOn('.overlay [data-test-settings]');
+  const tabs = { shown: await shown(), General: await pageOf() };
+  for (const t of ['Computer', 'Permissions', 'Updates']) {
+    await ev((name) => [...document.querySelectorAll('.overlay .set-tab')].find((b) => b.textContent.trim() === name)?.setAttribute('data-test-tab', name), t);
+    await clickOn(`.overlay [data-test-tab="${t}"]`);
+    tabs[t] = await pageOf();
+  }
+  const isPage = (p, name, row) => p.head === name && p.tab === name && p.rows.length === 1 && p.rows[0] === row;
+  check('Settings pages on the live page: account menu > Settings opens General; a click on Computer, Permissions and Updates shows that page (its heading, its tab current, its own row and no other page\'s), the states the oracle-settings-* scenes open on (control: General first)',
+    tabs.shown === 'settings' && isPage(tabs.General, 'General', marks[0]) && isPage(tabs.Computer, 'Computer', marks[1]) && isPage(tabs.Permissions, 'Permissions', marks[2]) && isPage(tabs.Updates, 'Updates', marks[3]), tabs);
+
   // Composer menu: the menu itself on open, no row highlighted; arrows walk the rows; Escape back to its button.
   await fresh();
   await clickOn('button[aria-label="Composer actions"]');

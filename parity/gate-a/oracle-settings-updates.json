@@ -7,7 +7,7 @@
   2
  ],
  "cases": 74,
- "pass": 69,
+ "pass": 74,
  "results": [
   {
    "key": "aside:Bots",
@@ -203,13 +203,11 @@
   },
   {
    "key": "control:Close dialog",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h2:Updates",
-   "pass": false,
-   "why": "box off by -14,0,8.3,0"
+   "pass": true
   },
   {
    "key": "h3:Grok Bot Updates",
@@ -225,18 +223,15 @@
   },
   {
    "key": "span:Version",
-   "pass": false,
-   "why": "box off by 0,0,12.1,0"
+   "pass": true
   },
   {
    "key": "bdi:1.2.3",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:You're up to date",
-   "pass": false,
-   "why": "box off by 0,0,11.6,0"
+   "pass": true
   },
   {
    "key": "control:Check for Updates",
@@ -311,7 +306,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-20T19:39:48.716Z",
+ "run": "2026-11-21T15:51:36.747Z",
  "inventory": {
   "id": "oracle-settings-updates",
   "controls": [
@@ -448,7 +443,7 @@
    {
     "name": "Close dialog",
     "item": "N5",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Automatic Updates",
@@ -461,7 +456,7 @@
     "ours": true
    }
   ],
-  "missing": 1,
+  "missing": 0,
   "untracked": []
  }
 }
