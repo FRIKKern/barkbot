@@ -16,7 +16,7 @@ const SHOWN_MS = 5000; // a layer or popup that is not up in this long is not co
 
 export async function popupOpens({ check, precondition, ev, open, base, click, key, until }) {
   const t0 = Date.now();
-  const { routes, unrouted } = overlayRoutes();
+  const { routes, unrouted } = await overlayRoutes();
   precondition('the overlay registry (app/src/components/overlays/index.tsx) lists layers', routes.length + unrouted.length > 0, { routes, unrouted });
   check('every layer in the overlay registry has a way in from the live page (a trigger, a picker, a data-picker button, a row that goes to it, or a page tab)', unrouted.length === 0, { unrouted });
 
@@ -25,7 +25,8 @@ export async function popupOpens({ check, precondition, ev, open, base, click, k
     const t = Date.now();
     loads++;
     await open(`${base}/gate/oracle-turn-1040`);
-    await until(async () => !!(await ev(() => document.querySelector('button[aria-label^="Open account menu"]'))), 15000, 'the oracle scene').catch(() => {});
+    // !! inside the page: a DOM node cannot come back by value, so returning one throws every poll.
+    await until(() => ev(() => !!document.querySelector('button[aria-label^="Open account menu"]')), 15000, 'the oracle scene').catch(() => {});
     loadMs += Date.now() - t;
   };
   // The centre of the first visible element matching sel whose name is key (null: any), scrolled into view.

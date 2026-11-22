@@ -12,7 +12,12 @@
 //              <Settings page="Computer">: settings, then its Computer tab)
 // Each step says what it presses and how the rule knows it worked: `opens` (a visible
 // .overlay[data-overlay=...]) or `current` (the pressed tab is the current page).
+// The registry's keys come from a parse of the file (vite's parseAst, as the app's own build reads
+// it), not a pattern: an entry in any shape (a reference, a method, any indent) is a layer, and a
+// key that is not a plain name (a spread, a computed key) is named as having no way in.
 import { readFileSync, readdirSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 import { path } from './data.mjs';
 
 const OVERLAYS = path('app', 'src', 'components', 'overlays');
@@ -31,14 +36,32 @@ const block = (src, name) => {
 // 'Label': 'overlay' pairs of a flat string map.
 const pairs = (text) => Object.fromEntries([...(text ?? '').matchAll(/^\s*'?([^':\n]+?)'?\s*:\s*'([\w-]+)'/gm)].map((m) => [m[1], m[2]]));
 
-export function overlayRoutes({ index = readFileSync(`${OVERLAYS}/index.tsx`, 'utf8'), sources = null } = {}) {
+// The `overlays` object's properties, each with its key and its source text, from the parsed file.
+async function registry(src) {
+  const vite = await import(pathToFileURL(createRequire(path('app', 'package.json')).resolve('vite')).href);
+  const ast = vite.parseAst(src, { lang: 'tsx' });
+  const find = (n) => {
+    if (!n || typeof n !== 'object') return null;
+    if (n.type === 'VariableDeclarator' && n.id?.name === 'overlays') return n;
+    for (const v of Object.values(n)) for (const x of Array.isArray(v) ? v : [v]) { const f = find(x); if (f) return f; }
+    return null;
+  };
+  const obj = find(ast)?.init;
+  if (obj?.type !== 'ObjectExpression') return null;
+  return obj.properties.map((p) => {
+    const name = p.type === 'Property' && !p.computed ? (p.key.type === 'Identifier' ? p.key.name : typeof p.key.value === 'string' ? p.key.value : null) : null;
+    return { name, text: src.slice(p.start, p.end) };
+  });
+}
+
+export async function overlayRoutes({ index = readFileSync(`${OVERLAYS}/index.tsx`, 'utf8'), sources = null } = {}) {
   const files = sources ?? readdirSync(OVERLAYS).filter((f) => f.endsWith('.tsx')).map((f) => readFileSync(`${OVERLAYS}/${f}`, 'utf8'))
     .concat(readdirSync(path('app', 'src', 'components')).filter((f) => f.endsWith('.tsx')).map((f) => readFileSync(path('app', 'src', 'components', f), 'utf8')));
-  const reg = block(index, 'overlays');
-  if (!reg) return { routes: [], unrouted: ['(no `overlays` registry found in overlays/index.tsx)'] };
-  // Each entry: its key, and its text up to the next key.
-  const keys = [...reg.matchAll(/^\s{2}'?([\w-]+)'?\s*:\s*\(/gm)];
-  const entries = keys.map((m, i) => ({ name: m[1], text: reg.slice(m.index, keys[i + 1]?.index ?? reg.length) }));
+  let props;
+  try { props = await registry(index); } catch (e) { return { routes: [], unrouted: [`(overlays/index.tsx does not parse: ${e.message.split('\n')[0]})`] }; }
+  if (!props) return { routes: [], unrouted: ['(no `overlays` object found in overlays/index.tsx)'] };
+  const odd = props.filter((p) => p.name === null).map((p) => `(a key that is not a plain name: ${p.text.slice(0, 40)})`);
+  const entries = props.filter((p) => p.name !== null);
   const triggers = pairs(block(index, 'triggers'));
   const pickers = pairs(block(index, 'pickers'));
   const component = (e) => e.text.match(/=>\s*\(?\s*<(\w+)/)?.[1] ?? null;
@@ -75,7 +98,7 @@ export function overlayRoutes({ index = readFileSync(`${OVERLAYS}/index.tsx`, 'u
     memo.set(name, r);
     return r;
   };
-  const routes = [], unrouted = [];
+  const routes = [], unrouted = [...odd];
   for (const e of entries) {
     const r = route(e.name);
     if (r) routes.push({ overlay: e.name, ...r });
