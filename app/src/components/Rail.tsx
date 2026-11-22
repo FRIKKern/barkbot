@@ -56,7 +56,7 @@ export function Rail({scene, onPick, working = [], unread = [], names = {}}: {sc
           </IconTip>
         </div>
         <div className="rail-account">
-          <button className="rail-tile rail-me" aria-label="Open account menu">
+          <button className="rail-tile rail-me" aria-label="Open account menu" aria-haspopup="menu">
             <span className="me" />
           </button>
         </div>
