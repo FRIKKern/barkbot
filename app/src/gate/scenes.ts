@@ -12,10 +12,11 @@ export const scenes: Record<string, Scene> = Object.fromEntries(
 
 // A hover state is the main view with the pointer on one control: same scene as oracle-turn-1040
 // (the gate moves the pointer itself).
-// A follow-up state (-end, -named, -hover) is its overlay's scene; the gate replays the last step.
+// A follow-up state (-start, -end, -named, -hover) is its overlay's scene; the gate replays the last
+// step (oracle-voice-picker-start: the voice grid wheeled up to its top, as a person scrolls it).
 // Every captured state was taken on the same computer, last heard from 13 minutes before (seenAtCapture),
 // stamped now so the time is the capture's whenever the page is drawn.
 export const sceneFor = (id: string): Scene | undefined => {
-  const s = scenes[id] ?? scenes[id.replace(/-(end|named|hover)$/, '')] ?? (id.startsWith('oracle-hover-') ? scenes['oracle-turn-1040'] : undefined)
+  const s = scenes[id] ?? scenes[id.replace(/-(start|end|named|hover)$/, '')] ?? (id.startsWith('oracle-hover-') ? scenes['oracle-turn-1040'] : undefined)
   return s && {...s, seen: seenAtCapture()}
 }
