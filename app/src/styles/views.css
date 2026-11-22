@@ -68,8 +68,7 @@
 /* The label sits centred in a slot of at least 74.9 pt, so Connect and its other states keep one
    width; a longer label (Location's Open settings) widens it. */
 .ca-connect > span { display: flex; justify-content: center; min-width: 74.9px; }
-.ca-connect > span > span { display: flex; align-items: center; gap: 6px; }
-/* Under way (Calendar, Contacts as captured): faded, a 14 pt ring of 2 pt turning before the word. */
+.ca-connect > span > span { display: flex; align-items: center; }
 
 /* ── Avatar editor: under the avatar, centred on it ── */
 .avatar-editor { right: 11.5px; top: 138px; width: 297px; border: 0.5px solid var(--wash-06); font-size: 13px; letter-spacing: normal; }
