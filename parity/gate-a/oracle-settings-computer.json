@@ -7,7 +7,7 @@
   2
  ],
  "cases": 82,
- "pass": 82,
+ "pass": 81,
  "results": [
   {
    "key": "aside:Bots",
@@ -235,7 +235,8 @@
   },
   {
    "key": "span:Computer · Last opened 13 minutes ago",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,0,2.3,0"
   },
   {
    "key": "h3:Messages",
@@ -338,7 +339,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-21T15:51:07.753Z",
+ "run": "2026-11-22T08:06:43.301Z",
  "inventory": {
   "id": "oracle-settings-computer",
   "controls": [
