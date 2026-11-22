@@ -33,5 +33,27 @@ export async function timeRows({ check, precondition, ev, open, base, until, wai
   const mine = r.indexOf('user hello again');
   check('a message sent now, after a gap: a time row right above it, "Today" at its time',
     mine > 0 && /^time \S+ Today \d+:\d\d [AP]M$/.test(r[mine - 1]) && r.filter((x) => x.startsWith('time')).length === 2, { r });
+  // A stored row whose inserted_at is not a time: the page takes no time from it, so no row and no
+  // "Invalid Date" (rev297). The row before it has a real time.
+  stub.rows = [at(1, 'user', 'a real time', '2026-11-15T10:00:00Z'), at(2, 'user', 'no time', 'garbage')];
+  await open(`${base}/`);
+  await until(async () => (await rows()).filter((x) => !x.startsWith('time')).length >= 2, 30000, 'the stored rows').catch(() => {});
+  r = await rows();
+  const said = await ev(() => document.querySelector('.transcript')?.textContent ?? '');
+  precondition('the live page shows the two stored rows', JSON.stringify(r.filter((x) => !x.startsWith('time'))) === '["user a real time","user no time"]', { r });
+  check('a stored row with inserted_at "garbage": no time row and no "Invalid Date"', !r.some((x) => x.startsWith('time')) && !said.includes('Invalid Date'), { r });
+  // A conversation whose own inserted_at is not a time (the session's: the page's startedAt): no top
+  // time row and no "Invalid Date" anywhere on the page (rev301). Control: the same page with the
+  // session's real time draws its top row.
+  const top = () => ev(() => ({ top: [...document.querySelectorAll('.transcript .column > .time-row:not(.time-later)')].map((e) => e.textContent.trim()), invalid: document.body.innerText.includes('Invalid Date') }));
+  const kept = stub.sessions;
+  const shown = async () => { await open(`${base}/`); await until(async () => (await rows()).includes('user one row'), 30000, 'the stored row').catch(() => {}); return { r: await rows(), ...(await top()) }; };
+  stub.rows = [at(1, 'user', 'one row', '2026-11-15T10:00:00Z')];
+  const real = await shown();
+  stub.sessions = kept.map((x) => ({ ...x, inserted_at: 'garbage' }));
+  const bad = await shown();
+  stub.sessions = kept;
+  precondition('the live page shows the stored row, with and without a readable session time', real.r.includes('user one row') && bad.r.includes('user one row'), { real, bad });
+  check('a session with inserted_at "garbage": no top time row and no "Invalid Date" on the page (control: its real time draws one top row)', real.top.length === 1 && !real.invalid && bad.top.length === 0 && !bad.invalid, { real, bad });
   stub.rows = [];
 }
