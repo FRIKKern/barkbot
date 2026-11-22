@@ -490,7 +490,7 @@ await avatarPencil({ check, precondition, ev, open, base, click, wait, until, wi
 
 // ── A control that says it opens something opens it (aria-haspopup, task-b4c296c9fce46e06) ──
 console.log('Behaviour · every aria-haspopup control opens what it names');
-await popupOpens({ check, precondition, ev, open, base, click, wait, until });
+await popupOpens({ check, precondition, ev, open, base, click, key, wait, until });
 
 // ── Rename persists: the live page (/) saves the name to Barkpark (task-c3e0bc88ce28833d) ─────
 // Grok keeps a renamed bot's name across a restart. Ours saves it as a Barkpark pref on Enter or
