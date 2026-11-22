@@ -7,7 +7,7 @@
   2
  ],
  "cases": 66,
- "pass": 52,
+ "pass": 66,
  "results": [
   {
    "key": "aside:Bots",
@@ -215,53 +215,43 @@
   },
   {
    "key": "card#1 box#1",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#1 control:Open image full screen#1",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#1 img#1",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#2",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#1 control:Open image full screen#2",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#1 img#2",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#1 box#3",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#1 control:Open the remaining 3 images full screen#1",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#1 img#3",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#1 text(2)#1",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#2 parts",
@@ -269,26 +259,22 @@
   },
   {
    "key": "card#2 box#1",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#2 text:Which tree do you prefer?#1",
-   "pass": false,
-   "why": "box off by 0,-1.5,0.1,-0.5"
+   "pass": true
   },
   {
    "key": "card#2 text:B#1",
-   "pass": false,
-   "why": "box off by 0,-1.5,0,0"
+   "pass": true
   },
   {
    "key": "card#2 text:Cedar#1",
-   "pass": false,
-   "why": "box off by 0,-1.5,-0.4,0"
+   "pass": true
   }
  ],
- "run": "2026-11-20T03:12:06.429Z",
+ "run": "2026-11-22T18:36:05.369Z",
  "inventory": {
   "id": "oracle-file-waiting",
   "controls": [
