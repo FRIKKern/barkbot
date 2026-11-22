@@ -38,7 +38,6 @@ export const SETTINGS: Table = {
   'Add Rule': '0.045px', // 0.6 pt too wide (on 0.12px)
   'Grok Bot Updates': '0.008px', // 1.8 pt too wide
   // 1.2.3 (decision 0010).
-  'Computer · Last opened 13 minutes ago': '0.133px', // 2.3 pt too wide
   'Read Texts': '0.065px', // 1.3 pt too wide
 }
 

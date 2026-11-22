@@ -33,6 +33,7 @@ import { retryAdopt } from './lib/retry-adopt.mjs';
 import { shiftEnter } from './lib/shift-enter.mjs';
 import { quietStream } from './lib/quiet-stream.mjs';
 import { settingsLive } from './lib/settings-live.mjs';
+import { PINNED_VERSION } from './lib/pinned-version.mjs';
 import { timeRows } from './lib/time-rows.mjs';
 
 const args = process.argv.slice(2);
@@ -283,7 +284,7 @@ await new Promise((ok) => httpServer((req, res) => {
 let base = opt('url');
 if (!base) {
   base = `http://localhost:${APP_PORT}`;
-  const env = { ...process.env, BARKPARK_URL: `http://127.0.0.1:${STUB_PORT}`, BARKPARK_TOKEN: 'stand-in', BARKPARK_WORKSPACE: 'default', BARKPARK_PROJECT: 'default', BARKPARK_DATASET: 'production', BARKBOT_NAME: 'BarkBot', BARKBOT_TEST_MINT_FILE: MINT };
+  const env = { ...process.env, BARKPARK_URL: `http://127.0.0.1:${STUB_PORT}`, BARKPARK_TOKEN: 'stand-in', BARKPARK_WORKSPACE: 'default', BARKPARK_PROJECT: 'default', BARKPARK_DATASET: 'production', BARKBOT_NAME: 'BarkBot', BARKBOT_TEST_MINT_FILE: MINT, BARKBOT_VERSION: PINNED_VERSION };
   kids.push(spawn('pnpm', ['-s', 'dev', '--port', String(APP_PORT), '--strictPort'], { cwd: path('app'), stdio: 'ignore', env }));
   await until(async () => (await fetch(base)).status > 0, 90000, `the app on ${base}`);
 }
@@ -1484,7 +1485,7 @@ else {
     check("control: the computer named BARKBOT_HOST_NAME stops, Ola's does not: from Asleep with no alert, after 11 s still Asleep and no alert", back.state === 'Asleep' && back.alert === null && namedOff.state === 'Asleep' && namedOff.alert === null, namedOff);
     // The answer is only ever about one of the caller's own enrolled, unrevoked computers.
     stub.hosts = two(true, true);
-    const asked = await ev(async ([ids]) => { const m = await import('/src/chat/api.ts'); const out = []; for (const hostId of ids) { try { out.push(await m.computerOnline({ data: { hostId } })); } catch (e) { out.push('threw: ' + e.message); } } return out; }, [[OTHER, GONE, '00000000-0000-4000-8000-0000000000ff']]);
+    const asked = await ev(async ([ids]) => { const m = await import('/src/chat/api.ts'); const out = []; for (const hostId of ids) { try { out.push((await m.computerOnline({ data: { hostId } })).online); } catch (e) { out.push('threw: ' + e.message); } } return out; }, [[OTHER, GONE, '00000000-0000-4000-8000-0000000000ff']]);
     check('asked about a revoked computer that is on, or one not the caller\'s, the answer is "not reachable" (control: the open bot\'s own computer is reachable)', JSON.stringify(asked) === JSON.stringify([true, false, false]), { asked });
     // A pick across computers: while the picked bot loads, the panel already shows its name, so it must
     // not show the state of the computer it is leaving. The page records every name and state pair it

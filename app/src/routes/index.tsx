@@ -307,14 +307,17 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
     }
   }, [waiting, convo.ready, convo.send])
 
-  // The computer can stop and come back while the page is open: ask again every few seconds.
+  // The computer can stop and come back while the page is open: ask again every few seconds, for
+  // whether it is reachable and when Barkpark last heard from it (Settings > Computer's "Last opened").
   // A failed ask keeps the last answer (the page may be the thing that is offline).
   const [online, setOnline] = useState(chat.host?.online ?? false)
+  const [seen, setSeen] = useState(chat.host?.lastSeenAt ?? null)
   useEffect(() => {
     if (!chat.host) return
     setOnline(chat.host.online)
+    setSeen(chat.host.lastSeenAt ?? null)
     const hostId = chat.host.id
-    const t = setInterval(() => void computerOnline({data: {hostId}}).then(setOnline, () => {}), 5000)
+    const t = setInterval(() => void computerOnline({data: {hostId}}).then((h) => { setOnline(h.online); setSeen(h.lastSeenAt) }, () => {}), 5000)
     return () => clearInterval(t)
   }, [chat.host])
   const offline = chat.host && !online ? `${name}'s computer is unreachable. Messages wait until it is back. Start it with: npm run host` : null
@@ -323,7 +326,7 @@ function Home({chat, state, working, unread, onOpened, unsaved, onPick, kept, on
   const computer = leaving ? '' : online ? 'Asleep' : 'Unreachable'
   return (
     <Shell
-      scene={{bots: chat.bots, active: chat.botId, panelOpen: true, computer, seen: chat.host?.lastSeenAt ?? null, voice: VOICE}}
+      scene={{bots: chat.bots, active: chat.botId, panelOpen: true, computer, seen: chat.host ? seen : null, voice: VOICE}}
       onRenameBot={rename}
       onCreateBot={create}
       onPickBot={pick}

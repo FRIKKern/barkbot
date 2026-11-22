@@ -312,14 +312,18 @@ export const createBot = createServerFn({method: 'POST'})
     return {id: bot.id}
   })
 
-/** Is the open bot's computer reachable right now? The page asks every few seconds: Barkpark accepts
- *  a message for a computer that is off (202) and answers it only when the computer is back, so
- *  without this a send looked like it went nowhere (seen live 2026-11-11). It is asked about the open
- *  bot's own computer (its record's host, loadChat's `host`), and answers only for one of the
- *  caller's own enrolled, unrevoked computers: any other id is not reachable. */
+/** Is the open bot's computer reachable right now, and when did Barkpark last hear from it? The page
+ *  asks every few seconds: Barkpark accepts a message for a computer that is off (202) and answers it
+ *  only when the computer is back, so without this a send looked like it went nowhere (seen live
+ *  2026-11-11); and Settings > Computer's "Last opened" would keep the time the page loaded with. It is
+ *  asked about the open bot's own computer (its record's host, loadChat's `host`), and answers only for
+ *  one of the caller's own enrolled, unrevoked computers: any other id is not reachable, never seen. */
 export const computerOnline = createServerFn({method: 'GET'})
   .validator((d: {hostId: unknown}) => ({hostId: typeof d?.hostId === 'string' ? d.hostId : ''}))
-  .handler(async ({data}): Promise<boolean> => (await ownHosts()).find((h) => h.id === data.hostId)?.online ?? false)
+  .handler(async ({data}): Promise<{online: boolean; lastSeenAt: string | null}> => {
+    const h = (await ownHosts()).find((x) => x.id === data.hostId)
+    return {online: h?.online ?? false, lastSeenAt: h?.lastSeenAt ?? null}
+  })
 
 /** A new conversation on the bot's computer, kept in the bot's record so a reload opens it again.
  *  Claude starts in plan mode (the host's default). Only a record that is the caller's own, on that

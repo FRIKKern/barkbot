@@ -3,9 +3,12 @@ import {tanstackStart} from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import {execFileSync} from 'node:child_process'
 
-// The app's own version for Settings > Updates: the short commit this build is made from. Null when
-// git cannot say (no repository, no git): the page then shows a placeholder, never a made-up number.
+// The app's own version for Settings > Updates: BARKBOT_VERSION when set (Gate A and behaviour pin it,
+// scripts/lib/pinned-version.mjs, so a record does not move with every commit), else the short commit
+// this build is made from. Null when neither says (no repository, no git): the page then shows a
+// placeholder, never a made-up number.
 const version = (() => {
+  if (process.env.BARKBOT_VERSION) return process.env.BARKBOT_VERSION
   try {
     return execFileSync('git', ['rev-parse', '--short', 'HEAD'], {encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore']}).trim() || null
   } catch {

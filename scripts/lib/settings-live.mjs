@@ -3,7 +3,7 @@
 // own build, and a flipped switch stays flipped across a tab change. Before this, the page read
 // "Last opened 13 minutes ago" and "Version 1.2.3" whatever the computer and build were.
 // The live page (/) against the stand-in Barkpark; Settings is opened from the account menu.
-import { execFileSync } from 'node:child_process';
+import { PINNED_VERSION } from './pinned-version.mjs';
 
 export async function settingsLive({ check, precondition, ev, open, base, click, wait, until, stub, host }) {
   const clickOn = async (sel) => {
@@ -56,13 +56,27 @@ export async function settingsLive({ check, precondition, ev, open, base, click,
   check('a switch flipped on one Settings page is still flipped after another tab and back (control: Read Texts was off and the click turned it on)', before === 'false' && flipped === 'true' && back === 'true', { before, flipped, back });
 
   // Updates shows this build, and claims nothing it cannot know.
-  let build = null;
-  try { build = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim(); } catch {}
-  check("Settings > Updates on the live page shows the app's own build as its version (the short commit it runs from), not Grok's 1.2.3, and does not say \"You're up to date\" (nothing checks)", updates.head === 'Updates' && build !== null && updates.version === build && !/up to date/i.test(updates.status ?? ''), { ...updates, build });
+  // The app runs with BARKBOT_VERSION pinned (behaviour.mjs), so the page must show that value.
+  const build = PINNED_VERSION;
+  check("Settings > Updates on the live page shows the app's own build as its version (BARKBOT_VERSION, pinned here to 0000000), not Grok's 1.2.3, and does not say \"You're up to date\" (nothing checks)", updates.head === 'Updates' && updates.version === build && !/up to date/i.test(updates.status ?? ''), { ...updates, build });
 
   // A computer Barkpark never heard from: no time is made up.
   const never = await page(null);
   check("Settings > Computer with no last_seen_at shows a placeholder after 'Computer ·', no time (control: the same page said 2 hours above)", never.head === 'Computer' && never.device === 'Computer ·' && two.device !== never.device, never);
+
+  // The computer comes back while Settings is open: "Last opened" follows Barkpark's last_seen_at
+  // with no reload (the page asks every 5 s), not the time the page loaded with.
+  stub.hosts = host(false).map((h) => ({ ...h, last_seen_at: new Date(Date.now() - 3 * 3600_000).toISOString() }));
+  await open(`${base}/`);
+  await until(async () => (await ev(() => !!document.querySelector('button[aria-label^="Open account menu"]') && document.querySelector('.computer-state')?.textContent === 'Unreachable')), 30000, 'the live page with its computer off').catch(() => {});
+  await wait(300);
+  await settings(); await tab('Computer');
+  const stale = await read();
+  precondition('Settings > Computer opened with the computer off, last heard from 3 hours ago', stale.head === 'Computer' && stale.device === 'Computer · Last opened 3 hours ago', stale);
+  stub.hosts = host(true).map((h) => ({ ...h, last_seen_at: new Date().toISOString() }));
+  await until(async () => (await read()).device === 'Computer · Last opened 1 minute ago', 15000, 'Settings to follow the computer').catch(() => {});
+  const fresh = { ...(await read()), state: await ev(() => document.querySelector('.computer-state')?.textContent ?? null) };
+  check("the computer comes back while Settings is open (last_seen_at 3 hours ago, then now): within 15 s and with no reload, Settings > Computer reads 'Computer · Last opened 1 minute ago' (control: it read 3 hours before, and the header now says Asleep)", fresh.head === 'Computer' && fresh.device === 'Computer · Last opened 1 minute ago' && fresh.state === 'Asleep', { stale, fresh });
 
   stub.hosts = host(true);
 }
