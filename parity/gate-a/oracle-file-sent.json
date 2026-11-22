@@ -7,7 +7,7 @@
   2
  ],
  "cases": 78,
- "pass": 76,
+ "pass": 77,
  "results": [
   {
    "key": "aside:Bots",
@@ -212,7 +212,7 @@
   {
    "key": "time",
    "pass": false,
-   "why": "x off by -2.1; width off by 4.1"
+   "why": "width off by 1.8"
   },
   {
    "key": "card#1 parts",
@@ -268,8 +268,7 @@
   },
   {
    "key": "card#2 text:Which tree do you prefer?#1",
-   "pass": false,
-   "why": "box off by 0,-1,0.1,-0.5"
+   "pass": true
   },
   {
    "key": "card#2 text:B#1",
@@ -324,7 +323,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-22T19:03:17.183Z",
+ "run": "2026-11-22T18:36:11.081Z",
  "inventory": {
   "id": "oracle-file-sent",
   "controls": [

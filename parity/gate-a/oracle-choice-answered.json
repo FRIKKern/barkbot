@@ -7,7 +7,7 @@
   2
  ],
  "cases": 69,
- "pass": 69,
+ "pass": 68,
  "results": [
   {
    "key": "aside:Bots",
@@ -211,7 +211,8 @@
   },
   {
    "key": "card#1 parts",
-   "pass": true
+   "pass": false,
+   "why": "box 2 ≠ 1"
   },
   {
    "key": "card#1 control:Open oracle-note.txt#1",
@@ -286,7 +287,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-20T03:05:49.380Z",
+ "run": "2026-11-22T18:36:14.713Z",
  "inventory": {
   "id": "oracle-choice-answered",
   "controls": [
