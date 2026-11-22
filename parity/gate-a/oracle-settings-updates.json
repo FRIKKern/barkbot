@@ -224,7 +224,7 @@
   {
    "key": "span:Version",
    "pass": false,
-   "why": "box off by 0,0,26.7,0"
+   "why": "box off by 0,0,30.2,0"
   },
   {
    "key": "bdi:1.2.3",
@@ -309,7 +309,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-21T17:41:59.439Z",
+ "run": "2026-11-22T08:06:31.944Z",
  "inventory": {
   "id": "oracle-settings-updates",
   "controls": [
