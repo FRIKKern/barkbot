@@ -55,11 +55,11 @@ const overlays: Record<string, Render> = {
   'connect-apps': ({close, scene}) => <ConnectApps onClose={close} today={scene?.apps?.today} />,
   'get-mobile': ({close}) => <GetMobile onClose={close} />,
   'edit-avatar': () => <AvatarEditor />,
-  settings: ({close}) => <Settings onClose={close} />,
+  settings: ({scene, close}) => <Settings seen={scene?.seen} onClose={close} />,
   // A scene can open Settings on another page (oracle-settings-computer, ...); the tabs switch it.
-  'settings-computer': ({close}) => <Settings page="Computer" onClose={close} />,
-  'settings-permissions': ({close}) => <Settings page="Permissions" onClose={close} />,
-  'settings-updates': ({close}) => <Settings page="Updates" onClose={close} />,
+  'settings-computer': ({scene, close}) => <Settings page="Computer" seen={scene?.seen} onClose={close} />,
+  'settings-permissions': ({scene, close}) => <Settings page="Permissions" seen={scene?.seen} onClose={close} />,
+  'settings-updates': ({scene, close}) => <Settings page="Updates" seen={scene?.seen} onClose={close} />,
 }
 
 const modals = new Set(['new-bot-dialog', 'connect-apps', 'get-mobile', 'settings', 'settings-computer', 'settings-permissions', 'settings-updates'])

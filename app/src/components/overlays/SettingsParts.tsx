@@ -1,7 +1,7 @@
 // The pieces every Settings page is built from (fixtures/states/oracle-settings*.json, Grok 1.2.3).
 // Long descriptions are kept as lengths in the fixtures, so they are placeholders of the captured
 // size: a wrapped one fills its row (lines: 2), a one-line one has its measured width.
-import {useState, type ReactNode} from 'react'
+import {createContext, useContext, useState, type ReactNode} from 'react'
 import {Icon} from '../Composer'
 import {SETTINGS, fit} from './fit'
 
@@ -98,10 +98,17 @@ export function Select({label, value}: {label: string; value: string}) {
   )
 }
 
+// The switches' positions, kept by the dialog (Settings) so a flipped switch stays flipped when its
+// page is left and opened again (a page's own state goes with the page on a tab change). Without a
+// dialog around it a switch keeps its own.
+export const SwitchState = createContext<{flipped: Record<string, boolean>; flip: (label: string, on: boolean) => void} | null>(null)
+
 export function Switch({label, on = true}: {label: string; on?: boolean}) {
-  const [checked, setChecked] = useState(on)
+  const kept = useContext(SwitchState)
+  const [own, setOwn] = useState(on)
+  const checked = kept ? (kept.flipped[label] ?? on) : own
   return (
-    <button role="switch" aria-checked={checked} aria-label={label} className="set-switch" onClick={() => setChecked(!checked)}>
+    <button role="switch" aria-checked={checked} aria-label={label} className="set-switch" onClick={() => (kept ? kept.flip(label, !checked) : setOwn(!checked))}>
       <span />
     </button>
   )
@@ -110,7 +117,7 @@ export function Switch({label, on = true}: {label: string; on?: boolean}) {
 // A grey pill button: Check for Updates, Update, Open apps. Look only: none acts yet (0005).
 export function PillButton({text, label}: {text: string; label?: string}) {
   return (
-    <button aria-label={label} className="pill set-check">
+    <button aria-label={label} className="pill set-pill">
       <span style={fit(SETTINGS, text)}>{text}</span>
     </button>
   )

@@ -4,9 +4,32 @@
 import type {ReactNode} from 'react'
 import {Icon} from '../Composer'
 import {SETTINGS, fit} from './fit'
+import {ago} from './ago'
 import {Bar, DescRow, Group, PillButton, PlainRow, Select, Switch, info} from './SettingsParts'
 
-function ComputerPage() {
+/** What a page draws from the live page: `seen`, when Barkpark last heard from the bot's computer. */
+export type PageProps = {seen?: string | null}
+
+// The device's line: "Computer · Last opened 13 minutes ago" from the computer's last_seen_at. With no
+// computer, or one never heard from, the time is a placeholder of the captured length, never made up.
+function DeviceState({seen}: PageProps) {
+  const when = ago(seen)
+  const text = when ? `Computer · Last opened ${when}` : null
+  return (
+    <span className="set-device-state">
+      <span style={text ? fit(SETTINGS, text) : undefined}>
+        <span className="set-dot" />
+        {text ?? (
+          <>
+            Computer · <Bar w={160} />
+          </>
+        )}
+      </span>
+    </span>
+  )
+}
+
+function ComputerPage({seen}: PageProps) {
   return (
     <>
       <Group title="Your computer">
@@ -33,12 +56,7 @@ function ComputerPage() {
                   <Icon d="M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 7.25V11M8 5v.25" />
                 </span>
               </div>
-              <span className="set-device-state">
-                <span style={fit(SETTINGS, 'Computer · Last opened 13 minutes ago')}>
-                  <span className="set-dot" />
-                  Computer · Last opened 13 minutes ago
-                </span>
-              </span>
+              <DeviceState seen={seen} />
             </div>
           </div>
         </div>
@@ -122,16 +140,19 @@ function UpdatesPage() {
       <div className="set-drow">
         <div>
           <div className="set-label">
+            {/* The app's own build (__BARKBOT_VERSION__, vite.config.ts), not Grok's number; a placeholder when the build had none. */}
             <span>
-              Version <bdi style={fit(SETTINGS, '1.2.3')}>1.2.3</bdi>
+              Version <bdi>{__BARKBOT_VERSION__ ?? <Bar w={34} />}</bdi>
             </span>
             <span className="set-info">{info}</span>
             <span className="set-info set-notes">
               <Icon d="M4 2.5h6l2.5 2.5v8.5H4zM6 8h4.5M6 10.5h4.5" />
             </span>
           </div>
-          <span role="status" className="set-uptodate">
-            You&apos;re up to date
+          {/* Grok says "You're up to date" here. Nothing checks for updates yet (0005), so nothing may
+              claim it: a placeholder of the captured length. */}
+          <span className="set-uptodate">
+            <Bar w={105} />
           </span>
         </div>
         <div>
@@ -142,4 +163,4 @@ function UpdatesPage() {
   )
 }
 
-export const pages: Record<string, () => ReactNode> = {Computer: ComputerPage, Permissions: PermissionsPage, Updates: UpdatesPage}
+export const pages: Record<string, (p: PageProps) => ReactNode> = {Computer: ComputerPage, Permissions: PermissionsPage, Updates: UpdatesPage}

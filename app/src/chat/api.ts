@@ -7,7 +7,9 @@ import {bp, conf, BarkparkError, READ_MS} from '../server/barkpark'
 import {CREATE_UNSURE} from './create-unsure'
 import {addId, botFolder, dropBot, freshId, keyTaken, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, readListed, removeId, sessionOf, setBotField, trusted, validColour, validName, validShape, write, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
-export type Host = {id: string; name: string; online: boolean}
+/** A computer the bot runs on. `lastSeenAt`: when Barkpark last heard from it (its last_seen_at,
+ *  ISO), null when never; Settings > Computer draws it as "Last opened ... ago". */
+export type Host = {id: string; name: string; online: boolean; lastSeenAt?: string | null}
 /** A bot as the page gets it: its id, its name, and `main` on the Main Bot (its id is made from its
  *  computer's, mainBotId), which the rail draws alone in the main slot with the Main Bot badge, as the
  *  gate scenes and Grok's rail do (task-b04631fa0d533e9a). The record's pointers stay on the server. */
@@ -17,7 +19,7 @@ export type ChatBot = {id: string; name: string; main?: boolean}
  *  by bot id (`sessions`: only sessions checked as the caller's own, for Working and Unread per tile). */
 export type Chat = {bots: ChatBot[]; botId: string; bot: string; host: Host | null; sessionId: string | null; startedAt: string | null; notice: string | null; sessions: Record<string, string>}
 
-type RawHost = {id: string; name: string; online: boolean; enrolled: boolean; revoked: boolean}
+type RawHost = {id: string; name: string; online: boolean; enrolled: boolean; revoked: boolean; last_seen_at?: string | null}
 type RawSession = {id: string; execution_target: string; execution_host_id?: string | null; inserted_at: string; status: string}
 
 // Phase 1 has one bot, on one computer: the host enrolled under this name (npm run host:enroll).
@@ -27,7 +29,7 @@ const BOT_NAME = () => process.env.BARKBOT_NAME || 'BarkBot'
 async function findHost(): Promise<Host | null> {
   const {hosts} = await bp<{hosts: RawHost[]}>(`/w/${conf().workspace}/v1/chat-hosts`)
   const h = hosts.find((x) => x.name === HOST_NAME() && x.enrolled && !x.revoked)
-  return h ? {id: h.id, name: h.name, online: h.online} : null
+  return h ? {id: h.id, name: h.name, online: h.online, lastSeenAt: h.last_seen_at ?? null} : null
 }
 
 // Whether a conversation has a bot folder, as a read that worked showed it. Barkpark sets the folder
@@ -71,7 +73,7 @@ async function folderless<S extends {id: string}>(onHost: S[], taken: Set<string
 // bot record is checked against (server/bots.ts trusted).
 async function ownHosts(): Promise<Host[]> {
   const {hosts} = await bp<{hosts: RawHost[]}>(`/w/${conf().workspace}/v1/chat-hosts`)
-  return hosts.filter((x) => x.enrolled && !x.revoked).map((h) => ({id: h.id, name: h.name, online: h.online}))
+  return hosts.filter((x) => x.enrolled && !x.revoked).map((h) => ({id: h.id, name: h.name, online: h.online, lastSeenAt: h.last_seen_at ?? null}))
 }
 async function ownSessions(): Promise<OwnSession[]> {
   const {sessions} = await bp<{sessions: RawSession[]}>('/v1/chat/sessions')
@@ -310,14 +312,18 @@ export const createBot = createServerFn({method: 'POST'})
     return {id: bot.id}
   })
 
-/** Is the open bot's computer reachable right now? The page asks every few seconds: Barkpark accepts
- *  a message for a computer that is off (202) and answers it only when the computer is back, so
- *  without this a send looked like it went nowhere (seen live 2026-11-11). It is asked about the open
- *  bot's own computer (its record's host, loadChat's `host`), and answers only for one of the
- *  caller's own enrolled, unrevoked computers: any other id is not reachable. */
+/** Is the open bot's computer reachable right now, and when did Barkpark last hear from it? The page
+ *  asks every few seconds: Barkpark accepts a message for a computer that is off (202) and answers it
+ *  only when the computer is back, so without this a send looked like it went nowhere (seen live
+ *  2026-11-11); and Settings > Computer's "Last opened" would keep the time the page loaded with. It is
+ *  asked about the open bot's own computer (its record's host, loadChat's `host`), and answers only for
+ *  one of the caller's own enrolled, unrevoked computers: any other id is not reachable, never seen. */
 export const computerOnline = createServerFn({method: 'GET'})
   .validator((d: {hostId: unknown}) => ({hostId: typeof d?.hostId === 'string' ? d.hostId : ''}))
-  .handler(async ({data}): Promise<boolean> => (await ownHosts()).find((h) => h.id === data.hostId)?.online ?? false)
+  .handler(async ({data}): Promise<{online: boolean; lastSeenAt: string | null}> => {
+    const h = (await ownHosts()).find((x) => x.id === data.hostId)
+    return {online: h?.online ?? false, lastSeenAt: h?.lastSeenAt ?? null}
+  })
 
 /** A new conversation on the bot's computer, kept in the bot's record so a reload opens it again.
  *  Claude starts in plan mode (the host's default). Only a record that is the caller's own, on that
