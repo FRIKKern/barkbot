@@ -212,7 +212,7 @@
   {
    "key": "time",
    "pass": false,
-   "why": "width off by 1.8"
+   "why": "x off by -2.1; width off by 4.1"
   },
   {
    "key": "card#1 parts",
@@ -324,7 +324,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-21T17:05:46.863Z",
+ "run": "2026-11-22T19:03:17.183Z",
  "inventory": {
   "id": "oracle-file-sent",
   "controls": [
