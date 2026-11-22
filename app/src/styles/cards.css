@@ -3,10 +3,12 @@
    Gated: Gate A card cases (scripts/lib/cards.mjs). */
 
 /* The row: 2 above and below like a turn, the card 12 below the bubble before it (group 137 at
-   460, the row at 446); a reply under a card starts 13 below it (choice-answered: 575 -> 588).
+   460, the row at 446). The reply's row under a card starts its bubble 10 in, 12 below the card:
+   file-waiting 137/140 (486.5 -> 496.5), and the same in file-sent, pictures-sent, voice-picker-start.
+   choice-answered alone puts 1 more between the two rows (card row ends 599, reply row starts 600).
    A card still waiting sits 8 higher above the composer than a bubble would (spacer 120, not 112). */
 .turn-card { padding: 14px 0 2px; display: flex; }
-.turn-card + .turn { padding-top: 11px; }
+.turn-card + .turn { padding-top: 10px; }
 .turn-ask { margin-bottom: 8px; }
 
 /* The question card: 480 wide (80% of the column), rgb 31 on the pane, radius 24, a 0.5 ring. */

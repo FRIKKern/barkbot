@@ -7,7 +7,7 @@
   2
  ],
  "cases": 78,
- "pass": 76,
+ "pass": 77,
  "results": [
   {
    "key": "aside:Bots",
@@ -268,8 +268,7 @@
   },
   {
    "key": "card#2 text:Which tree do you prefer?#1",
-   "pass": false,
-   "why": "box off by 0,-1,0.1,-0.5"
+   "pass": true
   },
   {
    "key": "card#2 text:B#1",
@@ -324,7 +323,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-21T17:05:46.863Z",
+ "run": "2026-11-22T18:36:11.081Z",
  "inventory": {
   "id": "oracle-file-sent",
   "controls": [
