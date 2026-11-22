@@ -4,6 +4,7 @@ import {Fragment, useLayoutEffect, useRef, type ReactNode} from 'react'
 import type {Answers, Ask, Bubble, Working} from '../chat/useConversation'
 import {filler} from '../chat/turn'
 import {AnsweredCard, FileCard, PictureTiles, QuestionCard} from './Cards'
+import {numberSame} from './fileNumbers'
 
 /** A message as lengths only (O2): what a gate scene holds (gate/transcripts.ts). */
 export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; height?: number; marks?: {tag: 'strong' | 'code'; len: number}[]}[]}
@@ -188,7 +189,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
                 <div role="article" className={`turn turn-${b.role} turn-attached${change}`} data-role={b.role}>
                   {b.files && b.files.length > 0 && (
                     <div className="file-stack">
-                      {b.files.map((f, j) => (
+                      {numberSame(b.files).map((f, j) => (
                         <FileCard key={j} {...f} />
                       ))}
                     </div>
