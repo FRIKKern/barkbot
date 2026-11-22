@@ -120,7 +120,7 @@ export function PageMark() {
 const NUMBER_FIT: Record<string, string> = {'(1)': '-0.31px'}
 
 /** The name, its kind kept apart so a long name loses its middle, not its ending (span 148 and 149);
- *  a number the oracle gives one of two files of the same name ("(2)") follows it. */
+ *  the number that tells two files of the same name apart ("(2)", fileNumbers.ts) follows it. */
 export function FileName({name}: {name: string}) {
   const [, stem, number] = /^(.*?)(?: (\(\d+\)))?$/.exec(name) ?? [name, name]
   const dot = stem.lastIndexOf('.')

@@ -35,6 +35,7 @@ import { quietStream } from './lib/quiet-stream.mjs';
 import { settingsLive } from './lib/settings-live.mjs';
 import { PINNED_VERSION } from './lib/pinned-version.mjs';
 import { timeRows } from './lib/time-rows.mjs';
+import { fileNumbers } from './lib/file-numbers.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -1273,6 +1274,7 @@ else {
   f = await box();
   check('a reload: the stored row shows its file card by name and size, once (control: the row with no attachments shows none)', f.bubbles === 2 && f.cards.length === 1 && f.cards[0][0] === 'Open note.txt' && f.cards[0][1] === `${NOTE.length}B`, { f });
   stub.rows = [];
+  await fileNumbers({ check, precondition, ev, open, base, until, key, stub, page, path, port: CHROME_PORT, session: SESSION });
   await timeRows({ check, precondition, ev, open, base, until, wait, stub, page });
   [notePath, zipPath, binPath].forEach((x) => rmSync(x, { force: true }));
 
