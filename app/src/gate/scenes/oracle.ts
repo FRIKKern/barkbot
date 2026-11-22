@@ -17,6 +17,12 @@ export const oracle: Scene = {
   transcript: {bubbles: transcripts.main},
 }
 
+/** Settings > Computer reads "Last opened 13 minutes ago" in the captures: the computer was last
+ *  heard from 13 minutes before the state was taken. A scene gets it as `seen`, the same field the
+ *  live page fills from Barkpark's last_seen_at, stamped when the scene is served (sceneFor): a time
+ *  taken when this module loads would be as old as the dev server by the time a page draws it. */
+export const seenAtCapture = (now = Date.now()) => new Date(now - 13 * 60_000).toISOString()
+
 /** The base scene with the conversation as one captured state shows it: its column's paragraph
  *  heights and where its scroll was left (transcripts and lifts by the state's id less "oracle-"; a
  *  state with no entry shows it as main does). */

@@ -7,7 +7,7 @@
   2
  ],
  "cases": 74,
- "pass": 74,
+ "pass": 71,
  "results": [
   {
    "key": "aside:Bots",
@@ -223,15 +223,18 @@
   },
   {
    "key": "span:Version",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,0,30.2,0"
   },
   {
    "key": "bdi:1.2.3",
-   "pass": true
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "span:You're up to date",
-   "pass": true
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Check for Updates",
@@ -306,7 +309,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-21T15:51:36.747Z",
+ "run": "2026-11-22T08:06:31.944Z",
  "inventory": {
   "id": "oracle-settings-updates",
   "controls": [

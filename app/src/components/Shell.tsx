@@ -19,6 +19,9 @@ export type Scene = {
   active?: string
   panelOpen: boolean
   computer?: string
+  /** When Barkpark last heard from the bot's computer (its last_seen_at, ISO; null: never or no
+   *  computer). Settings > Computer draws it as "Last opened ... ago". */
+  seen?: string | null
   /** The Voice chat card: the voice and its speed (one row on 1.2.3, "Helix 1.0x"), the language. */
   voice?: {voice: string; speed: number; language: string}
   tab?: 'activity' | 'library'

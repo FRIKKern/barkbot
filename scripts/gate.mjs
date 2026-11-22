@@ -11,6 +11,7 @@
 // A run with zero cases fails. A pass count lower than the recorded one fails (QUALITY.md);
 // --accept records a lower count on purpose, and says so.
 import { spawn } from 'node:child_process';
+import { PINNED_VERSION } from './lib/pinned-version.mjs';
 import { createServer } from 'node:net';
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { connect } from './oracle/cdp.mjs';
@@ -56,7 +57,7 @@ if (!base) {
   base = `http://localhost:${APP_PORT}`;
   // Measure only the app this run started: a busy port could be anything.
   if (await fetch(base).then(() => true, () => false)) { console.error(`Gate A: port ${APP_PORT} is already in use. Pass another --port, or --url to measure that server on purpose.`); process.exit(1); }
-  const app = spawn('pnpm', ['-s', 'dev', '--port', String(APP_PORT), '--strictPort'], { cwd: path('app'), stdio: ['ignore', 'pipe', 'pipe'] });
+  const app = spawn('pnpm', ['-s', 'dev', '--port', String(APP_PORT), '--strictPort'], { cwd: path('app'), stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, BARKBOT_VERSION: PINNED_VERSION } });
   kids.push(app);
   let log = '';
   app.stdout.on('data', (d) => (log += d)); app.stderr.on('data', (d) => (log += d));
