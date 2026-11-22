@@ -125,7 +125,7 @@ export function ConnectApps({onClose, today}: {onClose?: () => void; today?: str
                     {c}
                   </button>
                 ))}
-                <button aria-haspopup="menu" className="ca-cat" style={fit(CATEGORY, 'More')}>
+                <button className="ca-cat" style={fit(CATEGORY, 'More')}>
                   More
                   <span>{chevronDown}</span>
                 </button>
