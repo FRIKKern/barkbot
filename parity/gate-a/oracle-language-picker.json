@@ -7,7 +7,7 @@
   2
  ],
  "cases": 70,
- "pass": 70,
+ "pass": 69,
  "results": [
   {
    "key": "aside:Bots",
@@ -283,14 +283,15 @@
   },
   {
    "key": "card#1 text(4)#1",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.1,0,1.5,0"
   },
   {
    "key": "card#1 text(3)#2",
    "pass": true
   }
  ],
- "run": "2026-11-20T19:35:14.229Z",
+ "run": "2026-11-22T19:29:58.831Z",
  "inventory": {
   "id": "oracle-language-picker",
   "controls": [

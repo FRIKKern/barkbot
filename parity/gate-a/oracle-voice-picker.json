@@ -7,7 +7,7 @@
   2
  ],
  "cases": 121,
- "pass": 121,
+ "pass": 120,
  "results": [
   {
    "key": "aside:Bots",
@@ -487,14 +487,15 @@
   },
   {
    "key": "card#1 text(4)#1",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.1,0,1.5,0"
   },
   {
    "key": "card#1 text(3)#2",
    "pass": true
   }
  ],
- "run": "2026-11-20T19:41:06.585Z",
+ "run": "2026-11-22T19:30:57.086Z",
  "inventory": {
   "id": "oracle-voice-picker",
   "controls": [

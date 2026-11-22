@@ -7,7 +7,7 @@
   2
  ],
  "cases": 82,
- "pass": 81,
+ "pass": 80,
  "results": [
   {
    "key": "aside:Bots",
@@ -332,14 +332,15 @@
   },
   {
    "key": "card#1 text(4)#1",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.1,0,1.5,0"
   },
   {
    "key": "card#1 text(3)#2",
    "pass": true
   }
  ],
- "run": "2026-11-22T08:06:43.301Z",
+ "run": "2026-11-22T19:30:38.296Z",
  "inventory": {
   "id": "oracle-settings-computer",
   "controls": [

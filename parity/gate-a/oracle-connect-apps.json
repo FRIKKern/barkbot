@@ -7,7 +7,7 @@
   2
  ],
  "cases": 121,
- "pass": 118,
+ "pass": 117,
  "results": [
   {
    "key": "aside:Bots",
@@ -490,14 +490,15 @@
   },
   {
    "key": "card#1 text(4)#1",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.1,0,1.5,0"
   },
   {
    "key": "card#1 text(3)#2",
    "pass": true
   }
  ],
- "run": "2026-11-21T14:17:56.578Z",
+ "run": "2026-11-22T19:28:27.429Z",
  "inventory": {
   "id": "oracle-connect-apps",
   "controls": [

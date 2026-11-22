@@ -7,7 +7,7 @@
   2
  ],
  "cases": 62,
- "pass": 61,
+ "pass": 60,
  "results": [
   {
    "key": "aside:Bots",
@@ -252,14 +252,15 @@
   },
   {
    "key": "card#1 text(4)#1",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.1,-0.5,1.5,0"
   },
   {
    "key": "card#1 text(3)#1",
    "pass": true
   }
  ],
- "run": "2026-11-22T19:03:13.596Z",
+ "run": "2026-11-22T19:30:34.315Z",
  "inventory": {
   "id": "oracle-pictures-waiting",
   "controls": [
