@@ -6,7 +6,7 @@ import {filler} from '../chat/turn'
 import {AnsweredCard, FileCard, PictureTiles, QuestionCard} from './Cards'
 
 /** A message as lengths only (O2): what a gate scene holds (gate/transcripts.ts). */
-export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; height?: number; marks?: {tag: 'strong' | 'code'; len: number}[]}[]; overlap?: number}
+export type SceneBubble = {role: 'user' | 'assistant'; paras: {len: number; height?: number; marks?: {tag: 'strong' | 'code'; len: number}[]}[]}
 /** A card in a gate scene (scripts/lib/cards.mjs sceneCard): a question waiting (choices) or answered. */
 export type SceneCard =
   | {card: 'question'; question: string | null; choices?: string[]; answered?: {letter: string; label: string}}
@@ -63,7 +63,7 @@ export function fromLengths(list: SceneBubble[]): Bubble[] {
     })
     return out + words(rest, marks.length > 0, false)
   }
-  return list.map((b, i) => ({key: `scene-${i}`, role: b.role, text: b.paras.map(para).join('\n\n'), heights: b.paras.map((p) => p.height ?? 0), ...(b.overlap ? {overlap: b.overlap} : {})}))
+  return list.map((b, i) => ({key: `scene-${i}`, role: b.role, text: b.paras.map(para).join('\n\n'), heights: b.paras.map((p) => p.height ?? 0)}))
 }
 // n characters of words, with a space where it meets a mark before or after it.
 const words = (n: number, before: boolean, after: boolean) => {
@@ -124,9 +124,10 @@ const timeOf = (iso: string): string | null => {
   return `${today ? 'Today' : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} ${t}`
 }
 
-// `lift` (gate scenes): where the captured oracle state left its scroll. Above 0, the last row ends
-// that far above the transcript's end; below 0, the transcript is scrolled up that far from it
-// (gate/transcripts.ts lifts). The live page leaves it out: pinned to the end.
+// `lift` (gate scenes): where the captured oracle state left its scroll: below 0, the transcript is
+// scrolled up that far from its end (gate/transcripts.ts lifts). Only a lift below 0 is drawn: a
+// list pinned to its end never leaves its last row above it, so a spacer for a lift above would be
+// a look only the gate draws (scripts/check.mjs refuses one). The live page leaves it out: pinned.
 // `of`: the live page's bot and the computer its next new conversation is made on (index.tsx's
 // chat.host.id, which startChat sends), as data-bot-id / data-host-id. scripts/turn-live.mjs reads
 // them before a first message, which no stream can check yet (V1).
@@ -196,7 +197,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
                 </div>
               )}
               {(b.text || !attached) && (
-                <div role="article" className={`turn turn-${b.role}${attached ? '' : change}${joins(bubbles[i - 1], b) && !attached ? ' group-prev' : ''}${joins(bubbles[i + 1], b) && !hasAttachments(bubbles[i + 1]) ? ' group-next' : ''}`} style={b.overlap ? {marginBottom: -b.overlap} : undefined}>
+                <div role="article" className={`turn turn-${b.role}${attached ? '' : change}${joins(bubbles[i - 1], b) && !attached ? ' group-prev' : ''}${joins(bubbles[i + 1], b) && !hasAttachments(bubbles[i + 1]) ? ' group-next' : ''}`}>
                   <div role="article" className={`bubble bubble-${b.role}`} data-role={b.role}>
                     <span className="sr-only">{b.role === 'user' ? 'You' : bot}</span>
                     <div className="bubble-text">
@@ -243,7 +244,6 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
             </div>
           </div>
         )}
-        {lift > 0 && <div style={{height: lift, flex: 'none'}} aria-hidden="true" />}
         {error && (
           <p className="chat-error" role="alert">
             {error}

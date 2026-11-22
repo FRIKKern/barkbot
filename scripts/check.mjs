@@ -234,8 +234,30 @@ for (const [name, c, want] of [
   if (got !== JSON.stringify(want)) fail(`scene cards: ${name}: ${got}, not ${JSON.stringify(want)}`);
 }
 
+// A gate scene carries only what the live page can draw (lead's ruling on rev295; #295 round 2):
+// no row overlap (the oracle's list placed a row by an estimate, ours never does) and no lift above 0
+// (a list pinned to its end never leaves its last row above it). Transcript.tsx no longer draws
+// either, so a generator change that brought one back would quietly feed only the gate.
+{
+  const f = 'app/src/gate/transcripts.ts';
+  const lines = readFileSync(path(f), 'utf8').split('\n');
+  let inLifts = false;
+  lines.forEach((l, i) => {
+    if (/^\s*\/\//.test(l)) return; // a comment names, it draws nothing
+    if (/^export const lifts\b/.test(l)) inLifts = true;
+    else if (/^export const /.test(l)) inLifts = false;
+    if (/^\s*"[^"]+": \[/.test(l)) rule('scene spacers', 1);
+    if (/\boverlap\b/.test(l)) fail(`scene spacers: ${f}:${i + 1} carries a row overlap, which the live page never draws`);
+    const lift = inLifts && l.match(/^\s*"([^"]+)":\s*(-?[\d.]+)/);
+    if (lift) {
+      rule('scene spacers', 1);
+      if (Number(lift[2]) > 0) fail(`scene spacers: ${f}:${i + 1} lifts ${lift[1]} by ${lift[2]}, above 0: a spacer only the gate draws`);
+    }
+  });
+}
+
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards']) {
+for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 
