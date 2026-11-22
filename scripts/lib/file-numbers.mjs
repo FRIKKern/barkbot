@@ -22,7 +22,8 @@ export async function fileNumbers({ check, precondition, ev, open, base, until, 
   // Picked and sent: two files named note.txt, from two folders, in one message.
   stub.rows = [];
   await open(`${base}/`);
-  await until(async () => !!(await ev(() => document.querySelector('.composer-wrap input[type=file]'))), 15000, 'the composer').catch(() => {});
+  // !! inside the page: a DOM node cannot come back by value, so returning one throws every poll.
+  await until(() => ev(() => !!document.querySelector('.composer-wrap input[type=file]')), 15000, 'the composer').catch(() => {});
   const sent0 = stub.sent.length;
   await pick(`${dirs[0]}/note.txt`);
   await until(async () => (await chips()).length === 1, 5000, 'the first chip').catch(() => {});
