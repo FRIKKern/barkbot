@@ -4,15 +4,15 @@ import type {SceneRow} from '../components/Transcript'
 
 export const transcripts: Record<string, SceneRow[]> = {
   // oracle-turn-1040
-  "main": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":110},{"len":303,"height":110}]}],
+  "main": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}],"rowGap":22},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":110},{"len":303,"height":110}]}],
   // oracle-main-1000
-  "main-1000": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":88},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":110},{"len":303,"height":132}]}],
+  "main-1000": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}],"rowGap":22},{"role":"assistant","paras":[{"len":185,"height":88},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":110},{"len":303,"height":132}]}],
   // oracle-main-1280
-  "main-1280": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
+  "main-1280": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}],"rowGap":22},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
   // oracle-main-1600
-  "main-1600": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
+  "main-1600": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}],"rowGap":22},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
   // oracle-main-2000
-  "main-2000": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
+  "main-2000": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}],"rowGap":22},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
   // oracle-main-720
   "main-720": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":44}]},{"role":"assistant","paras":[{"len":185,"height":110},{"len":211,"height":132},{"len":270,"height":176},{"len":289,"height":176},{"len":303,"height":198}]}],
   // oracle-main-790
@@ -24,9 +24,9 @@ export const transcripts: Record<string, SceneRow[]> = {
   // oracle-main-880
   "main-880": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54}]},{"role":"assistant","paras":[{"len":185,"height":88},{"len":211,"height":110},{"len":270,"height":154},{"len":289,"height":154},{"len":303,"height":154}]}],
   // oracle-main-980
-  "main-980": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":88},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":132},{"len":303,"height":132}]}],
+  "main-980": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}],"rowGap":22},{"role":"assistant","paras":[{"len":185,"height":88},{"len":211,"height":88},{"len":270,"height":110},{"len":289,"height":132},{"len":303,"height":132}]}],
   // oracle-panel-closed
-  "panel-closed": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}]},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
+  "panel-closed": [{"card":"file","files":[{"name":"oracle-note.txt (1)","size":3},{"name":"oracle-note.txt (2)","size":3}]},{"role":"user","paras":[{"len":54,"height":22}],"rowGap":22},{"role":"assistant","paras":[{"len":185,"height":66},{"len":211,"height":66},{"len":270,"height":88},{"len":289,"height":88},{"len":303,"height":110}]}],
   // oracle-ask-choice
   "ask-choice": [{"role":"user","paras":[{"len":24,"height":22}]},{"role":"assistant","paras":[{"len":15,"height":22}]},{"role":"assistant","paras":[{"len":35,"height":22}]},{"card":"pictures","count":5},{"role":"user","paras":[{"len":43,"height":22}]},{"role":"assistant","paras":[{"len":33,"height":22}]},{"role":"user","paras":[{"len":122,"height":44}]},{"card":"question","question":"Which tree do you prefer?","choices":["Maple","Cedar","Birch"]}],
   // oracle-choice-answered
