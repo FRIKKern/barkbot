@@ -115,8 +115,10 @@ export const laterRow = (before: Bubble | undefined, b: Bubble): string | null =
   return t1 - t0 >= GAP_MS || new Date(t0).toDateString() !== new Date(t1).toDateString() ? b.at : null
 }
 
-const timeOf = (iso: string) => {
+// Null for a time that cannot be read (a stored inserted_at that is not a time): no row, never "Invalid Date".
+const timeOf = (iso: string): string | null => {
   const d = new Date(iso)
+  if (!Number.isFinite(d.getTime())) return null
   const today = new Date().toDateString() === d.toDateString()
   const t = d.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'})
   return `${today ? 'Today' : d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} ${t}`
@@ -155,7 +157,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
       pinned.current = Math.abs(el.scrollHeight - el.scrollTop - el.clientHeight - below) < 2
     }}>
       <div className="column">
-        {startedAt && (
+        {startedAt && timeOf(startedAt) && (
           <div className="time-row">
             <time dateTime={startedAt}>{timeOf(startedAt)}</time>
           </div>
@@ -168,7 +170,8 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
                 <AnsweredCard {...b.answered} />
               </div>
             )
-          const time = laterRow(bubbles.slice(0, i).filter((x) => x.at).at(-1), b)
+          const later = laterRow(bubbles.slice(0, i).filter((x) => x.at).at(-1), b)
+          const time = later && timeOf(later) ? later : null
           // A time row parts the speakers itself: the row under it takes no extra space (oracle-file-sent article 79: 2 above).
           const change = i > 0 && bubbles[i - 1].role !== b.role && !time ? ' turn-change' : ''
           const attached = hasAttachments(b)
