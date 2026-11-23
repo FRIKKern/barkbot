@@ -12,6 +12,7 @@ import { turnTraces } from './lib/turn-traces.mjs';
 import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
 import { guardBeforeSend } from './lib/host-guard.mjs';
 import { sceneCard } from './lib/cards.mjs';
+import { pickByLabel } from './lib/hover-label.mjs';
 
 const fails = [];
 const ran = {};
@@ -256,8 +257,30 @@ for (const [name, c, want] of [
   });
 }
 
+// Hover label (the sweep's hoverLabel step, N2): on saved 1.2.3 captures, the pointer goes to the
+// newest message's own group wholly on screen; a cut one or a tile's nested group is passed over,
+// and a prefix with nothing to hover throws instead of capturing the resting screen.
+{
+  const st = (id) => JSON.parse(read(`fixtures/states/${id}.json`));
+  const ORACLE = 'Message actions for Oracle message', YOURS = 'Message actions for your message';
+  for (const [name, id, prefix, want] of [
+    ["Oracle's one message", 'oracle-file-sent', ORACLE, 118],
+    ['yours: the earlier message is cut off at the top', 'oracle-file-sent', YOURS, 143],
+    ['yours: two wholly on screen, the newest wins', 'oracle-pictures-sent', YOURS, 135],
+    ["yours: the message's own group, not its last tile's", 'oracle-ask-choice', YOURS, 93],
+    ['yours: the only one is cut off', 'oracle-turn-1040', YOURS, /none wholly on screen/],
+    ['a label nothing carries', 'oracle-turn-1040', 'Message actions for nobody', /nothing by that label on screen/],
+  ]) {
+    rule('hover label', 1);
+    let got;
+    try { got = pickByLabel(st(id), prefix).e.i; } catch (e) { got = e.message; }
+    const ok = want instanceof RegExp ? typeof got === 'string' && want.test(got) : got === want;
+    if (!ok) fail(`hover label: ${name} (${id}): got ${got}, want ${want}`);
+  }
+}
+
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers']) {
+for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'hover label']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 
