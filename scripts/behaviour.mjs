@@ -1229,8 +1229,8 @@ else {
   // What that tab gets: the picture as itself, never sniffed; the same id named under another
   // conversation is refused (Barkpark's 404, passed on), and no bytes come back.
   const OTHER_SESSION = '00000000-0000-4000-8000-0000000000ee';
-  const got = await ev(async (u, other) => { const f = async (x) => { const r = await fetch(x); const b = await r.arrayBuffer(); return [r.status, r.headers.get('content-type'), r.headers.get('x-content-type-options'), b.byteLength]; }; return [await f(u), await f(u.replace(/chat\/[^/]+\//, `chat/${other}/`))]; }, url, OTHER_SESSION);
-  check('the opened tab gets the picture as image/png with nosniff; the same id under another conversation is a 404 with no picture in it', got[0][0] === 200 && got[0][1] === 'image/png' && got[0][2] === 'nosniff' && got[0][3] === PNG.length && got[1][0] === 404 && !/^image\//.test(got[1][1] ?? '') && got[1][3] < 32, { got });
+  const got = await ev(async (u, other) => { const f = async (x) => { const r = await fetch(x); const b = await r.arrayBuffer(); return [r.status, r.headers.get('content-type'), r.headers.get('x-content-type-options'), b.byteLength, new TextDecoder().decode(b.slice(0, 40))]; }; return [await f(u), await f(u.replace(/chat\/[^/]+\//, `chat/${other}/`))]; }, url, OTHER_SESSION);
+  check('the opened tab gets the picture as image/png with nosniff; the same id under another conversation is a 404 with no picture in it, only the not-ours line (server/own-session.ts)', got[0][0] === 200 && got[0][1] === 'image/png' && got[0][2] === 'nosniff' && got[0][3] === PNG.length && got[1][0] === 404 && !/^image\//.test(got[1][1] ?? '') && got[1][4].startsWith('This conversation could not be checked') && got[1][3] < 200, { got });
   rmSync(pngPath, { force: true });
 
   // A text file goes with a message as a picture does, named by its id and its name; the sent
