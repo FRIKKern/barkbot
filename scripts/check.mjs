@@ -14,6 +14,7 @@ import { guardBeforeSend } from './lib/host-guard.mjs';
 import { sceneCard } from './lib/cards.mjs';
 import { hostedNote, CLOCKS } from './lib/gate-b-hosted.mjs';
 import { pickByLabel } from './lib/hover-label.mjs';
+import { labelPressAllowed, underPoint } from './lib/press-guard.mjs';
 
 const fails = [];
 const ran = {};
@@ -322,8 +323,36 @@ for (const [name, c, want] of [
   }
 }
 
+// Press guard (the sweep's last look before a press, task-1c715b946dff6176): the point must still hold
+// the picked element, by its box (and, for pressLabel, its exact label); pressLabel takes only the
+// viewer's two openers. Run on a stand-in document: an element is {tag, label, rect, parent}.
+{
+  const el = (tag, label, rect, parent = null) => ({ tagName: tag.toUpperCase(), parentElement: parent, getAttribute: (k) => (k === 'aria-label' ? label : null), getBoundingClientRect: () => ({ x: rect[0], y: rect[1], width: rect[2], height: rect[3] }) });
+  const doc = (top) => ({ elementFromPoint: () => top });
+  const TILE = [386, 398, 156, 156], OPEN = 'Open image full screen';
+  const body = el('body', null, [0, 0, 1040, 760]);
+  const tile = el('button', OPEN, TILE, body), img = el('img', null, TILE, tile);
+  for (const [name, top, label, want] of [
+    ['the picked tile itself under the point', tile, OPEN, true],
+    ["the tile's own picture under the point (its button is an ancestor)", img, OPEN, true],
+    ['a different element sits under the point (a toast over the tile)', el('div', 'Saved', [300, 420, 400, 60], body), OPEN, false],
+    ['the right box with another label', el('button', 'Open the remaining 3 images full screen', TILE, body), OPEN, false],
+    ['nothing under the point', null, OPEN, false],
+    ['a plain press (no label asked) on its own box', el('div', null, [17, 698, 54, 54], el('button', null, [17, 698, 54, 54], body)), null, true],
+    ['a plain press with a different element under the point (only the box can tell)', el('div', null, [0, 600, 300, 160], body), null, false],
+  ]) {
+    rule('press guard', 1);
+    const got = underPoint(TILE[0] + 78, TILE[1] + 78, label !== null ? TILE : [17, 698, 54, 54], label, doc(top));
+    if (got.ok !== want) fail(`press guard: ${name}: ok ${got.ok} (under ${got.under}), want ${want}`);
+  }
+  for (const [name, want] of [[OPEN, true], ['Open the remaining 3 images full screen', true], ['Settings', false], ['Close', false], ['Open image', false]]) {
+    rule('press guard', 1);
+    if (labelPressAllowed(name) !== want) fail(`press guard: pressLabel "${name}": allowed ${!want}, want ${want}`);
+  }
+}
+
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label']) {
+for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label', 'press guard']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

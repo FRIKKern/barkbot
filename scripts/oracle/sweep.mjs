@@ -14,6 +14,7 @@ import { activeBot, ORACLE_BOT } from './recipes.mjs';
 import { collect } from './collect.mjs';
 import { controls, namedElements } from '../lib/controls.mjs';
 import { pickByLabel } from '../lib/hover-label.mjs';
+import { VIEWER, labelPressAllowed, underPoint } from '../lib/press-guard.mjs';
 import { path } from '../lib/data.mjs';
 
 const args = process.argv.slice(2);
@@ -26,8 +27,8 @@ const SETTLE = args.includes('--settle') ? Number(args[args.indexOf('--settle') 
 const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
 // The only controls the sweep may press. Anything else is refused, by name.
-// The two picture openers sit inside a message (pressLabel, below): they open the viewer and act on nothing.
-const VIEWER = ['Open image full screen', 'Open the remaining 3 images full screen'];
+// The two picture openers (VIEWER, lib/press-guard.mjs) sit inside a message: pressLabel reaches only
+// them. They open the viewer and act on nothing.
 const MAY_PRESS = new Set(['View conversation details', 'Library', 'Activity', 'Composer actions', 'Open account menu', 'New Bot', 'Voice', 'Language', 'Close', 'Connect apps', 'Edit Bot avatar', 'Settings', 'Get Grok Bot for mobile', 'Computer', 'Permissions', 'Updates', ...VIEWER]);
 // Names that only open a view: 'Connect apps' opens the list (each row's own Connect stays refused); the
 // picture openers open the viewer.
@@ -141,27 +142,32 @@ const base = await names();
 const mayPress = (name) => MAY_PRESS.has(name) && (!NEVER.test(name) || OPENS_ONLY.has(name));
 // A real pointer press at the control's centre (menus open on pointerdown, not on click()). `byLabel`: a
 // control inside a message (controls() leaves those out), picked by its exact label wholly on screen
-// (lib/hover-label.mjs); the label it lands on must itself be on the list.
+// (lib/hover-label.mjs); only the VIEWER labels. Right before the press the page is asked what is under
+// the point (lib/press-guard.mjs underPoint): the picked element, by its box, or the sweep stops.
 async function press(name, byLabel = false) {
   if (!mayPress(name)) throw new Error(`refusing to press "${name}": not on the sweep's list`);
+  if (byLabel && !labelPressAllowed(name)) throw new Error(`refusing to press "${name}" by its label: pressLabel takes only ${VIEWER.join(' / ')}`);
   const state = await page.evaluate(collect);
-  let x, y;
+  let target;
   if (byLabel) {
-    const { e, at } = pickByLabel(state, name);
-    if (e.label !== name || !mayPress(e.label)) throw new Error(`refusing to press "${e.label}": not "${name}"`);
-    [x, y] = at;
+    const { e } = pickByLabel(state, name);
+    if (e.label !== name) throw new Error(`refusing to press "${e.label}": not "${name}"`);
+    target = e;
   } else {
     const hit = controls(state).filter((c) => c.name === name);
     if (hit.length !== 1) throw new Error(`"${name}": ${hit.length} controls by that name, need exactly 1`);
-    const [bx, by, w, h] = hit[0].e.box;
-    [x, y] = [bx + w / 2, by + h / 2];
+    target = hit[0].e;
   }
+  const [bx, by, w, h] = target.box;
+  const [x, y] = [bx + w / 2, by + h / 2];
   // The oracle only takes pointer input while its window is in front.
   execFileSync('open', ['-a', 'Grok Bot']);
   await page.send('Page.bringToFront');
   await wait(300);
   const at = { x, y, button: 'left', clickCount: 1 };
   await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...at });
+  const under = await page.evaluate(underPoint, x, y, target.box, byLabel ? name : null);
+  if (!under?.ok) throw new Error(`refusing to press "${name}": the point (${Math.round(x)}, ${Math.round(y)}) now holds ${under?.under ?? 'nothing'}, not the picked element; stopping`);
   await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', ...at });
   await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...at });
 }
