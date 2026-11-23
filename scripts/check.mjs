@@ -14,7 +14,7 @@ import { guardBeforeSend } from './lib/host-guard.mjs';
 import { sceneCard } from './lib/cards.mjs';
 import { hostedNote, CLOCKS } from './lib/gate-b-hosted.mjs';
 import { pickByLabel } from './lib/hover-label.mjs';
-import { labelPressAllowed, underPoint } from './lib/press-guard.mjs';
+import { labelPressAllowed, markPicked, underPoint } from './lib/press-guard.mjs';
 
 const fails = [];
 const ran = {};
@@ -348,17 +348,20 @@ for (const [name, c, want] of [
   }
 }
 
-// Press guard (the sweep's last look before a press, task-1c715b946dff6176): the press reaches the
-// nearest pressable ancestor-or-self of what is under the point, and that must be the picked element
-// itself: its box and its name (for pressLabel also its place among the openers by that label); a
-// zero-size box is refused; pressLabel takes only the viewer's two openers. Run on a stand-in
-// document whose elements answer what underPoint asks (closest, text, boxes, aria-labels).
+// Press guard (the sweep's last look before a press, task-1c715b946dff6176, task-7521aa645350a9ed): the
+// picked element is held in the page right after the pick (markPicked, found by collect's index and
+// checked by its box and visible name), and the press must reach that very element (the nearest
+// pressable ancestor-or-self of what is under the point), still in the picked box; a zero-size box is
+// refused; pressLabel takes only the viewer's two openers. Run on a stand-in document whose elements
+// answer what the page functions ask (closest, text, boxes, styles, aria-labels).
 {
-  const all = [];
-  const el = (tag, { label = null, text = '', role = null, rect, parent = null }) => {
+  let all = [];
+  const view = { innerWidth: 1040, innerHeight: 760, __sweepPicked: null, getComputedStyle: (e) => e.style };
+  const el = (tag, { label = null, text = '', role = null, rect, parent = null, style = {} }) => {
     const attrs = { ...(label ? { 'aria-label': label } : {}), ...(role ? { role } : {}) };
-    const e = { tagName: tag.toUpperCase(), parentElement: parent, attrs, kids: [], childNodes: text ? [{ nodeType: 3, textContent: text }] : [],
-      getAttribute: (k) => attrs[k] ?? null, getBoundingClientRect: () => ({ x: rect[0], y: rect[1], width: rect[2], height: rect[3] }) };
+    const e = { tagName: tag.toUpperCase(), parentElement: parent, attrs, kids: [], rect, style: { visibility: 'visible', display: 'block', opacity: '1', ...style }, childNodes: text ? [{ nodeType: 3, textContent: text }] : [],
+      getAttribute: (k) => attrs[k] ?? null };
+    e.getBoundingClientRect = () => ({ x: e.rect[0], y: e.rect[1], width: e.rect[2], height: e.rect[3], left: e.rect[0], top: e.rect[1], right: e.rect[0] + e.rect[2], bottom: e.rect[1] + e.rect[3] });
     // A selector list of tag, tag[attr], [attr] and [attr=value] parts, as underPoint's PRESSABLE is.
     e.matches = (sel) => sel.split(',').map((x) => x.trim().match(/^(\w+)?(?:\[([\w-]+)(?:=([\w-]+))?\])?$/)).some((m) => m && (!m[1] || m[1].toUpperCase() === e.tagName) && (!m[2] || (m[2] in attrs && (m[3] === undefined || attrs[m[2]] === m[3]))) && (m[1] || m[2]));
     e.closest = (sel) => { for (let x = e; x; x = x.parentElement) if (x.matches(sel)) return x; return null; };
@@ -367,39 +370,68 @@ for (const [name, c, want] of [
     all.push(e);
     return e;
   };
-  const doc = (top) => ({ elementFromPoint: () => top, querySelectorAll: () => all.filter((x) => x.attrs['aria-label'] !== undefined) });
+  const doc = (top, body) => ({ defaultView: view, body, elementFromPoint: () => top });
   const OPEN = 'Open image full screen', TILE = [386, 398, 156, 156], ROW = [600, 300, 200, 36], SET = [17, 698, 54, 54];
   const at = (box) => [box[0] + box[2] / 2, box[1] + box[3] / 2];
-  const cases = () => {
-    all.length = 0;
+  const fresh = () => {
+    all = []; view.__sweepPicked = null;
     const body = el('body', { rect: [0, 0, 1040, 760] });
     const tile = el('button', { label: OPEN, rect: TILE, parent: body }), img = el('img', { rect: TILE, parent: tile });
     const settings = el('button', { rect: SET, parent: body }), inner = el('span', { text: 'Settings', rect: SET, parent: settings });
-    return { body, tile, img, settings, inner };
+    const menu = el('div', { role: 'menu', rect: [600, 264, 200, 108], parent: body }), row = el('div', { role: 'menuitem', text: 'Settings', rect: ROW, parent: menu });
+    return { body, tile, img, settings, inner, menu, row };
   };
+  // underPoint: [name, scene → [under the point, picked box, the held element], want].
   for (const [name, scene, want] of [
-    ['the picked tile itself under the point', ({ tile }) => [tile, TILE, OPEN, 0], true],
-    ["the tile's own picture under the point (the press reaches its button)", ({ img }) => [img, TILE, OPEN, 0], true],
-    ['a toast over the tile (nothing pressable under the point)', ({ body }) => [el('div', { label: 'Saved', rect: [300, 420, 400, 60], parent: body }), TILE, OPEN, 0], false],
-    ['the right box with another label', ({ body }) => [el('button', { label: 'Open the remaining 3 images full screen', rect: TILE, parent: body }), TILE, OPEN, 0], false],
-    ['nothing under the point', () => [null, TILE, OPEN, 0], false],
-    ['a plain press on its own control, named by the text inside it', ({ inner }) => [inner, SET, 'Settings', null], true],
-    ['a plain press with nothing pressable under the point', ({ body }) => [el('div', { rect: [0, 600, 300, 160], parent: body }), SET, 'Settings', null], false],
-    // rev299 on #318 (b08f9a5 let each of these four through):
-    ['a label on a parent, and a pressable child fills it ("Delete image" under the point)', ({ body }) => { const wrap = el('div', { label: OPEN, rect: TILE, parent: body }); return [el('button', { label: 'Delete image', rect: TILE, parent: wrap }), TILE, OPEN, 0]; }, false],
-    ['a plain press after a one-row scroll: "Sign out" now in the picked "Settings" box', ({ body }) => { const menu = el('div', { role: 'menu', rect: [600, 264, 200, 108], parent: body }); return [el('div', { role: 'menuitem', text: 'Sign out', rect: ROW, parent: menu }), ROW, 'Settings', null]; }, false],
-    ['pressLabel: two tiles, scrolled one tile, the second now in the picked first\'s box', ({ body, tile }) => { tile.getBoundingClientRect = () => ({ x: 230, y: 398, width: 156, height: 156 }); return [el('button', { label: OPEN, rect: TILE, parent: body }), TILE, OPEN, 0]; }, false],
-    ['a zero-size picked box, a button over its corner', ({ body }) => { const wrap = el('div', { rect: [17, 698, 0, 0], parent: body }); return [el('button', { text: 'Settings', rect: [7, 688, 40, 40], parent: wrap }), [17, 698, 0, 0], 'Settings', null]; }, false],
-    ['a zero-size picked box that is itself pressable, its text spilling over the point', ({ body }) => { const zero = el('button', { rect: [17, 698, 0, 0], parent: body }); return [el('span', { text: 'Settings', rect: [7, 688, 40, 40], parent: zero }), [17, 698, 0, 0], 'Settings', null]; }, false],
-    ['the picked tile moved 10 px after the pick (only its box tells)', ({ tile }) => { tile.getBoundingClientRect = () => ({ x: 396, y: 398, width: 156, height: 156 }); return [tile, TILE, OPEN, 0]; }, false],
-    // Controls for the two above: the second tile pressed as the second; the same row unmoved.
-    ['control: the second tile, picked as the second', ({ body }) => [el('button', { label: OPEN, rect: [560, 398, 156, 156], parent: body }), [560, 398, 156, 156], OPEN, 1], true],
-    ['control: "Settings" still in its row', ({ body }) => { const menu = el('div', { role: 'menu', rect: [600, 264, 200, 108], parent: body }); return [el('div', { role: 'menuitem', text: 'Settings', rect: ROW, parent: menu }), ROW, 'Settings', null]; }, true],
+    ['the held tile itself under the point', ({ tile }) => [tile, TILE, tile], true],
+    ["the held tile's own picture under the point (the press reaches its button)", ({ img, tile }) => [img, TILE, tile], true],
+    ['a toast over the tile (nothing pressable under the point)', ({ body, tile }) => [el('div', { label: 'Saved', rect: [300, 420, 400, 60], parent: body }), TILE, tile], false],
+    ['the right box with another label', ({ body, tile }) => [el('button', { label: 'Open the remaining 3 images full screen', rect: TILE, parent: body }), TILE, tile], false],
+    ['nothing under the point', ({ tile }) => [null, TILE, tile], false],
+    ['nothing held (markPicked did not run, or refused)', ({ tile }) => [tile, TILE, null], false],
+    ['a plain press on the held control, reached through the text inside it', ({ inner, settings }) => [inner, SET, settings], true],
+    ['a plain press with nothing pressable under the point', ({ body, settings }) => [el('div', { rect: [0, 600, 300, 160], parent: body }), SET, settings], false],
+    // rev299 on #318 (b08f9a5 let each through):
+    ['a label on a held parent, and a pressable child fills it ("Delete image" under the point)', ({ body }) => { const wrap = el('div', { label: OPEN, rect: TILE, parent: body }); return [el('button', { label: 'Delete image', rect: TILE, parent: wrap }), TILE, wrap]; }, false],
+    ['a plain press after a one-row scroll: "Sign out" now in the held "Settings" box', ({ menu, row }) => [el('div', { role: 'menuitem', text: 'Sign out', rect: ROW, parent: menu }), ROW, row], false],
+    ['two tiles swapped by a one-tile scroll', ({ body, tile }) => { tile.rect = [230, 398, 156, 156]; return [el('button', { label: OPEN, rect: TILE, parent: body }), TILE, tile]; }, false],
+    ['a zero-size picked box, a button over its corner', ({ body }) => { const wrap = el('div', { rect: [17, 698, 0, 0], parent: body }); return [el('button', { text: 'Settings', rect: [7, 688, 40, 40], parent: wrap }), [17, 698, 0, 0], wrap]; }, false],
+    ['a zero-size picked box that is itself pressable and held', ({ body }) => { const zero = el('button', { rect: [17, 698, 0, 0], parent: body }); return [el('span', { text: 'Settings', rect: [7, 688, 40, 40], parent: zero }), [17, 698, 0, 0], zero]; }, false],
+    ['the held tile moved 10 px after the pick (only its box tells)', ({ tile }) => { tile.rect = [396, 398, 156, 156]; return [tile, TILE, tile]; }, false],
+    // rev299 on #318's PASS (ac63acd let each through): a same-named twin in the picked box.
+    ['a plain press: a second "Settings", scrolled up from below the fold, now in the held one\'s box', ({ menu, row }) => { row.rect = [600, 264, 200, 36]; return [el('div', { role: 'menuitem', text: 'Settings', rect: ROW, parent: menu }), ROW, row]; }, false],
+    ['pressLabel: the held tile scrolled off the top, the next tile by that label now in its box', ({ body, tile }) => { tile.rect = [386, -170, 156, 156]; return [el('button', { label: OPEN, rect: TILE, parent: body }), TILE, tile]; }, false],
+    ['pressLabel: an opacity-0 twin over the held tile turns visible', ({ body, tile }) => [el('button', { label: OPEN, rect: TILE, parent: body }), TILE, tile], false],
+    ['control: the second of two tiles, held, under the point', ({ body }) => { const second = el('button', { label: OPEN, rect: [560, 398, 156, 156], parent: body }); return [second, [560, 398, 156, 156], second]; }, true],
   ]) {
     rule('press guard', 1);
-    const [top, box, want_name, nth] = scene(cases());
-    const got = underPoint(...at(box), box, want_name, nth, doc(top));
+    const s = fresh();
+    const [top, box, held] = scene(s);
+    view.__sweepPicked = held;
+    const got = underPoint(...at(box), box, doc(top, s.body));
     if (got.ok !== want) fail(`press guard: ${name}: ok ${got.ok} (under ${got.under}), want ${want}`);
+  }
+  // markPicked: [name, scene → [collect's index, picked box, picked name, the element it must hold or null]].
+  for (const [name, scene] of [
+    // Counted as collect counts: body's children in document order, the hidden and the zero-size left out.
+    ['holds the element collect gave that index, counting past a hidden and a zero-size one', ({ body }) => { el('div', { rect: [0, 0, 10, 10], parent: body, style: { display: 'none' } }); el('div', { rect: [0, 0, 0, 10], parent: body }); const b = el('button', { label: 'Close', rect: [900, 20, 30, 30], parent: body }); return [all.filter((x) => x !== body && x.rect[2] >= 1 && x.rect[3] >= 1 && x.style.display !== 'none').indexOf(b), [900, 20, 30, 30], 'Close', b]; }],
+    ['refuses when that element moved between the pick and the mark', ({ tile }) => { tile.rect = [396, 398, 156, 156]; return [0, TILE, OPEN, null]; }],
+    ['refuses when that index now holds another name', ({ row }) => { row.childNodes = [{ nodeType: 3, textContent: 'Sign out' }]; return [5, ROW, 'Settings', null]; }],
+    // ac63acd read the first text inside, hidden or not, so a hidden first span made a good press refuse.
+    ['a hidden first span inside the control: its visible text is its name, and the press goes', ({ body }) => { const b = el('button', { rect: [17, 600, 80, 30], parent: body }); el('span', { text: 'Beta', rect: [17, 600, 30, 30], parent: b, style: { display: 'none' } }); el('span', { text: 'Settings', rect: [47, 600, 50, 30], parent: b }); return [all.filter((x) => x !== body && x.rect[2] >= 1 && x.rect[3] >= 1 && x.style.display !== 'none').indexOf(b), [17, 600, 80, 30], 'Settings', b]; }],
+  ]) {
+    rule('press guard', 1);
+    const s = fresh();
+    const [i, box, want, held] = scene(s);
+    const got = markPicked(i, box, want, doc(null, s.body));
+    if (got.ok !== (held !== null) || view.__sweepPicked !== held) fail(`press guard: markPicked ${name}: ok ${got.ok} (${got.under}), held ${view.__sweepPicked?.tagName ?? 'nothing'}`);
+  }
+  // markPicked counts as collect does: collect.mjs's own two skip conditions, word for word.
+  rule('press guard', 1);
+  {
+    const src = read('scripts/oracle/collect.mjs'), mark = markPicked.toString().replace(/view\.innerWidth/g, 'innerWidth').replace(/view\.innerHeight/g, 'innerHeight');
+    const skips = [...src.matchAll(/if \(([^\n]*?)\) continue;/g)].map((m) => m[1]).filter((c) => /width < 1|visibility/.test(c));
+    if (skips.length !== 2 || !skips.every((c) => mark.includes(c)) || !/document\.body\.querySelectorAll\('\*'\)/.test(src) || !/doc\.body\.querySelectorAll\('\*'\)/.test(mark)) fail(`press guard: markPicked no longer counts elements as collect.mjs does (${skips.length} skip conditions read from collect.mjs)`);
   }
   for (const [name, want] of [[OPEN, true], ['Open the remaining 3 images full screen', true], ['Settings', false], ['Close', false], ['Open image', false]]) {
     rule('press guard', 1);
