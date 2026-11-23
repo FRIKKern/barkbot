@@ -14,7 +14,7 @@ import { guardBeforeSend } from './lib/host-guard.mjs';
 import { sceneCard } from './lib/cards.mjs';
 import { hostedNote, CLOCKS } from './lib/gate-b-hosted.mjs';
 import { pickByLabel } from './lib/hover-label.mjs';
-import { labelPressAllowed, markPicked, underPoint } from './lib/press-guard.mjs';
+import { VIEWER, dropPicked, labelPressAllowed, markPicked, pickedName, underPoint } from './lib/press-guard.mjs';
 
 const fails = [];
 const ran = {};
@@ -374,7 +374,7 @@ for (const [name, c, want] of [
   const OPEN = 'Open image full screen', TILE = [386, 398, 156, 156], ROW = [600, 300, 200, 36], SET = [17, 698, 54, 54];
   const at = (box) => [box[0] + box[2] / 2, box[1] + box[3] / 2];
   const fresh = () => {
-    all = []; view.__sweepPicked = null;
+    all = []; delete view.__sweepPicked;
     const body = el('body', { rect: [0, 0, 1040, 760] });
     const tile = el('button', { label: OPEN, rect: TILE, parent: body }), img = el('img', { rect: TILE, parent: tile });
     const settings = el('button', { rect: SET, parent: body }), inner = el('span', { text: 'Settings', rect: SET, parent: settings });
@@ -424,7 +424,54 @@ for (const [name, c, want] of [
     const s = fresh();
     const [i, box, want, held] = scene(s);
     const got = markPicked(i, box, want, doc(null, s.body));
-    if (got.ok !== (held !== null) || view.__sweepPicked !== held) fail(`press guard: markPicked ${name}: ok ${got.ok} (${got.under}), held ${view.__sweepPicked?.tagName ?? 'nothing'}`);
+    // A refusal leaves nothing on the window, not even a null (rev299 on #321).
+    if (got.ok !== (held !== null) || (view.__sweepPicked ?? null) !== held || ('__sweepPicked' in view) !== (held !== null)) fail(`press guard: markPicked ${name}: ok ${got.ok} (${got.under}), held ${'__sweepPicked' in view ? view.__sweepPicked?.tagName ?? String(view.__sweepPicked) : 'nothing on the window'}`);
+  }
+  // markPicked's refusal says which changed: the box or the name (rev299's nit on #321).
+  rule('press guard', 1);
+  {
+    const s = fresh(); s.tile.rect = [396, 398, 156, 156];
+    const moved = markPicked(0, TILE, OPEN, doc(null, s.body)).under;
+    const s2 = fresh(); s2.row.childNodes = [{ nodeType: 3, textContent: 'Sign out' }];
+    const renamed = markPicked(5, ROW, 'Settings', doc(null, s2.body)).under;
+    if (!/moved from the picked box/.test(moved) || /not the picked/.test(moved) || !/now named "Sign out", not the picked "Settings"/.test(renamed)) fail(`press guard: markPicked's refusal does not say which changed: ${JSON.stringify([moved, renamed])}`);
+  }
+  // press() itself, run as sweep.mjs's own text with stand-ins: whatever way it ends (pressed, refused,
+  // or a throw after the mark), nothing of the pick is left on the window. cf8a058 left null on
+  // every path and the held button on four throws (rev299 on #321).
+  {
+    const sweep = read('scripts/oracle/sweep.mjs');
+    const from = sweep.indexOf('async function press('), to = sweep.indexOf('\n}\n', from) + 2;
+    for (const [name, failAt, want] of [
+      ['the press goes', null, /^pressed$/],
+      ['the mark refuses: the control moved before it', 'mark', /^refusing.*moved from the picked box/],
+      ['open -a fails after the mark', 'open', /no such app/],
+      ['bringToFront fails after the mark', 'Page.bringToFront', /bringToFront failed/],
+      ['mouseMoved fails after the mark', 'mouseMoved', /mouseMoved failed/],
+      ['underPoint refuses: a twin took the box', 'under', /^refusing.*another element than the picked one/],
+      ['mousePressed fails after underPoint said yes', 'mousePressed', /mousePressed failed/],
+    ]) {
+      rule('press guard', 1);
+      all = []; delete view.__sweepPicked;
+      const body = el('body', { rect: [0, 0, 1040, 760] });
+      const button = el('button', { rect: SET, parent: body }), inner = el('span', { text: 'Settings', rect: SET, parent: button });
+      const state = { elements: [{ i: 0, tag: 'button', box: SET, style: {} }, { i: 1, parent: 0, tag: 'span', text: 'Settings', box: SET, style: {} }] };
+      const collect = () => state;
+      const page = {
+        evaluate: async (f, ...a) => {
+          if (f === collect) return state;
+          if (f === markPicked && failAt === 'mark') button.rect = [27, 698, 54, 54];
+          if (f === markPicked && failAt !== 'mark') button.rect = SET;
+          const top = failAt === 'under' ? el('button', { text: 'Settings', rect: SET, parent: body }) : inner;
+          return f(...a, doc(top, body));
+        },
+        send: async (m, p) => { if (m === failAt || p?.type === failAt) throw new Error(`${m === failAt ? m : p.type} failed`); },
+      };
+      const deps = { mayPress: () => true, labelPressAllowed, VIEWER, page, collect, pickByLabel, controls, markPicked, pickedName, underPoint, dropPicked, wait: async () => {}, execFileSync: () => { if (failAt === 'open') throw new Error('open -a Grok Bot: no such app'); } };
+      let got;
+      try { await new Function(...Object.keys(deps), `return ${sweep.slice(from, to)}`)(...Object.values(deps))('Settings'); got = 'pressed'; } catch (e) { got = e.message; }
+      if (!want.test(got) || '__sweepPicked' in view) fail(`press guard: press(), ${name}: ended "${got}", and the window ${'__sweepPicked' in view ? `still has __sweepPicked (${view.__sweepPicked?.tagName ?? String(view.__sweepPicked)})` : 'is clean'}`);
+    }
   }
   // markPicked counts as collect does: collect.mjs's own two skip conditions, word for word.
   rule('press guard', 1);

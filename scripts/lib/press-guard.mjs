@@ -21,10 +21,15 @@ export const pickedName = (els, e) => e.label?.split(', ')[0] || e.text || inner
  *  collect: finds the element collect gave index `i`, counting as collect counts (the same filter,
  *  pinned by check.mjs against collect.mjs), and holds it as `window.__sweepPicked`. It must still
  *  have the picked `box` and `name`, or nothing is held: the screen moved between the pick and the
- *  mark. Answers {ok, under}. `doc`: the page's document; check.mjs passes a stand-in. */
+ *  mark. Answers {ok, under}. `doc`: the page's document; check.mjs passes a stand-in.
+ *  The global exists only while a mark holds: a refusal deletes it, and so does dropPicked, which the
+ *  sweep's press runs in a finally on every way out (rev299 on #321).
+ *  Accepted residual (the lead, 2026-11-23): collect and the mark are two evaluates, one CDP round
+ *  trip apart. A same-named twin that lands in the picked box in that gap is counted at the picked
+ *  index and held, and the press goes to it. Closing it needs collect and the mark in one evaluate. */
 export function markPicked(i, box, name, doc = document) {
   const view = doc.defaultView;
-  view.__sweepPicked = null;
+  delete view.__sweepPicked;
   const own = (el) => [...(el.childNodes ?? [])].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim();
   const shown = (el) => { const r = el.getBoundingClientRect(); if (r.width < 1 || r.height < 1 || r.right < 0 || r.bottom < 0 || r.left > view.innerWidth || r.top > view.innerHeight) return false; const cs = view.getComputedStyle(el); return !(cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) === 0); };
   const nameOf = (el) => { const label = el.getAttribute?.('aria-label')?.slice(0, 80)?.split(', ')[0]; if (label) return label; for (const d of [el, ...(el.querySelectorAll?.('*') ?? [])]) { if (d !== el && !shown(d)) continue; const t = own(d); if (t && t.length <= 40) return t; } return null; };
@@ -33,7 +38,10 @@ export function markPicked(i, box, name, doc = document) {
   if (!el) return { ok: false, under: `no element ${i} on screen any more` };
   const r = el.getBoundingClientRect();
   const same = [r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10) / 10).every((v, k) => Math.abs(v - box[k]) <= 0.06);
-  if (!same || nameOf(el) !== name) return { ok: false, under: `element ${i} is now ${el.tagName?.toLowerCase()}${nameOf(el) ? ` "${nameOf(el)}"` : ''}, not the picked "${name}"` };
+  const tag = el.tagName?.toLowerCase(), now = nameOf(el);
+  // Say which of the two changed: the box, or the name.
+  if (!same) return { ok: false, under: `element ${i} (${tag}${now ? ` "${now}"` : ''}) has moved from the picked box (${box.join(', ')} → ${[r.x, r.y, r.width, r.height].map((v) => Math.round(v * 10) / 10).join(', ')})` };
+  if (now !== name) return { ok: false, under: `element ${i} (${tag}) is now named ${now ? `"${now}"` : 'nothing'}, not the picked "${name}"` };
   view.__sweepPicked = el;
   return { ok: true, under: `${el.tagName?.toLowerCase()} "${name}"` };
 }
@@ -59,5 +67,5 @@ export function underPoint(x, y, box, doc = document) {
   return { ok: true, under: say(hit) };
 }
 
-/** Runs IN THE PAGE, after the press: lets the held element go. */
-export function dropPicked(doc = document) { doc.defaultView.__sweepPicked = null; }
+/** Runs IN THE PAGE, after the press or a refusal: lets the held element go, leaving nothing on the window. */
+export function dropPicked(doc = document) { delete doc.defaultView.__sweepPicked; }
