@@ -44,7 +44,8 @@ export async function ownSessionDoors({ check, precondition, ev, base, stub, ses
     return out;
   }, id);
   const reached = () => ({ to: stub.to.length, sent: stub.sent.length, uploads: stub.uploads.length, answers: stub.answers.length, choices: stub.choices.length });
-  const noneOf = (out) => /could not be checked/.test(out.send?.failed ?? '') && /could not be checked/.test(out.upload?.refused ?? '') && /could not be checked/.test(out.approve?.threw ?? '') && /could not be checked/.test(out.choose?.threw ?? '');
+  // Each refuses by throwing the guard's NOT_OWN (server/own-session.ts requireOwnSession).
+  const noneOf = (out) => ['send', 'upload', 'approve', 'choose'].every((k) => /could not be checked/.test(out[k]?.threw ?? ''));
 
   const own = { file: await file(session), stream: await stream(session) };
   precondition('the open conversation, one of our own: its file and its stream come back (the routes work here)', own.file.status === 200 && own.file.text === note.toString() && own.stream.status === 200 && own.stream.text.includes(SECRET), own);

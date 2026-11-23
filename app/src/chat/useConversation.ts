@@ -5,6 +5,7 @@
 // while it is written); the line leaves once the turn ends.
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {answerApproval, answerQuestion, sendMessage, uploadAttachment, type AttachmentRef} from './api'
+import {NOT_OWN} from './notOwn'
 
 export type Bubble = {
   key: string
@@ -150,11 +151,19 @@ const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 /** Where a conversation's events come from and where a send goes: Barkpark, or Gate B's replay.
  *  `fleet` is the stream of every bot's state (Barkpark's /v1/chat/events: snapshot, then state). */
 export type Transport = {events: (sessionId: string) => string; fleet?: (sessionId: string) => string; send: (sessionId: string, content: string, attachments?: AttachmentRef[], key?: string) => Promise<unknown>; upload?: (sessionId: string, data: string) => Promise<Stored | {refused: string}>; picture?: (sessionId: string, id: string) => string; answer?: (sessionId: string, requestId: string, decision: 'allow' | 'deny') => Promise<unknown>; choose?: (sessionId: string, requestId: string, answers: Answers) => Promise<unknown>}
+/** A server function's refusal of a conversation that is not one of BarkBot's own (it throws NOT_OWN) as
+ *  the answer `no`; anything else it throws is thrown on. */
+const notOwn = <T, N>(call: Promise<T>, no: N): Promise<T | N> => call.catch((e: unknown) => {
+  if (e instanceof Error && e.message === NOT_OWN) return no
+  throw e
+})
 export const barkpark: Transport = {
   events: (id) => `/api/chat/${id}/events`,
   fleet: () => '/api/chat/events',
-  send: (id, content, attachments, key) => sendMessage({data: {id, content, attachments, key}}),
-  upload: (id, data) => uploadAttachment({data: {id, data}}),
+  // A conversation that is not one of BarkBot's own refuses before anything goes (server/own-session.ts):
+  // a sure no, said as Barkpark's own refusals are, so the words and the files stay in the box.
+  send: (id, content, attachments, key) => notOwn(sendMessage({data: {id, content, attachments, key}}), {failed: NOT_OWN}),
+  upload: (id, data) => notOwn(uploadAttachment({data: {id, data}}), {refused: NOT_OWN}),
   picture: (id, aid) => `/api/chat/${id}/attachments/${aid}`,
   answer: (id, requestId, decision) => answerApproval({data: {id, requestId, decision}}),
   choose: (id, requestId, answers) => answerQuestion({data: {id, requestId, answers}}),
