@@ -2,7 +2,8 @@
 // sent, the pictures sent. Read on the oracle 1.0.3 (fixtures/states/oracle-ask-choice,
 // -choice-answered, -file-sent, -pictures-sent; Gate A card cases, scripts/lib/cards.mjs).
 // Numbers in styles/cards.css.
-import {useState} from 'react'
+import {useContext, useState} from 'react'
+import {OpenViewer} from './Viewer'
 import type {Answers, Question} from '../chat/useConversation'
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -177,10 +178,11 @@ const MAX_TILES = 3
 
 /** A message's pictures: square tiles in a row above its bubble, three at most; past three the third
  *  is dimmed and says how many more (oracle-pictures-sent, article 128: 156 squares 6 apart, "+3" for five).
- *  A press opens the tile's picture in a new tab, with no opener, by the route the tile's own <img>
- *  loads: four picture types only, nosniff (routes/api/chat.$id.attachments.$aid.ts). The oracle's
- *  large view is not captured, so the browser's own view of the picture stands in. */
-export function PictureTiles({ids, picture}: {ids: string[]; picture?: (id: string) => string | null}) {
+ *  A press opens the picture viewer (Viewer.tsx) at the tile's picture; the +N tile opens the first
+ *  picture it stands for, the third (oracle-picture-viewer-rest: "3 / 5"). `names`: each picture's
+ *  name as sent, in the order of `ids`. */
+export function PictureTiles({ids, names = [], picture}: {ids: string[]; names?: string[]; picture?: (id: string) => string | null}) {
+  const view = useContext(OpenViewer)
   const shown = ids.slice(0, MAX_TILES)
   const more = ids.length - MAX_TILES + 1
   return (
@@ -190,7 +192,7 @@ export function PictureTiles({ids, picture}: {ids: string[]; picture?: (id: stri
         const src = picture?.(id)
         return (
           <div className="tile" key={id}>
-            <button className="tile-open" aria-label={rest ? `Open the remaining ${more} images full screen` : 'Open image full screen'} onClick={src ? () => window.open(src, '_blank', 'noopener,noreferrer') : undefined}>
+            <button className="tile-open" aria-label={rest ? `Open the remaining ${more} images full screen` : 'Open image full screen'} onClick={src && view && picture ? (e) => view({ids, names, at: i, picture, from: e.currentTarget}) : undefined}>
               {src && <img src={src} alt="" loading="lazy" />}
             </button>
             {rest && <span className="tile-more" aria-hidden="true">+{more}</span>}
@@ -201,9 +203,12 @@ export function PictureTiles({ids, picture}: {ids: string[]; picture?: (id: stri
   )
 }
 
-// A gate scene's pictures: plain squares of colour (O2: no picture from the capture is kept).
-const COLOURS = ['#b33', '#3a3', '#33b', '#bb3', '#838']
+// A gate scene's pictures: plain squares of colour (O2: no picture from the capture is kept), 256
+// square as the captured ones draw in the viewer (oracle-picture-viewer 317). Named by their colour:
+// the viewer captures show the second as green.png and the third as blue.png.
+const COLOURS = [['#b33', 'red'], ['#3a3', 'green'], ['#33b', 'blue'], ['#bb3', 'yellow'], ['#838', 'purple']]
 export const scenePicture = (id: string) => {
   const n = Number(id.split(':')[1] ?? 0)
-  return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8" fill="${COLOURS[n % COLOURS.length]}"/></svg>`)}`
+  return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 8 8"><rect width="8" height="8" fill="${COLOURS[n % COLOURS.length][0]}"/></svg>`)}`
 }
+export const scenePictureName = (n: number) => `${COLOURS[n % COLOURS.length][1]}.png`

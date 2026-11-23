@@ -13,6 +13,8 @@ export type Bubble = {
   seq?: number
   /** Picture ids sent with the message (Barkpark's attachments); shown above its words. */
   images?: string[]
+  /** Each picture's name as it was sent, in the order of `images` (the viewer's pill and line). */
+  imageNames?: string[]
   /** Gate scenes only: each paragraph's height on the oracle, kept whatever the placeholder words do. */
   heights?: number[]
   /** Text files and PDFs sent with the message, by name and size: shown as a file card above its words.
@@ -133,7 +135,7 @@ export const CANNOT_TAKE_FILES = "The bot's computer cannot take this file yet, 
  *  answered for sure, unless that attempt's words were given back (then the box holds them, and a
  *  send of them must find the key). A refusal or failure always ends it: nothing ran, and a 4xx is
  *  remembered under its key. An answer to an earlier attempt never ends it: a later one has the box. */
-type Unsent = {content: string; sig: string; refs: AttachmentRef[]; images: string[]; files: {id: string; name: string; size: string}[]; key: string; at: number; latest: number; given: number; stored: Promise<boolean>}
+type Unsent = {content: string; sig: string; refs: AttachmentRef[]; images: string[]; imageNames: string[]; files: {id: string; name: string; size: string}[]; key: string; at: number; latest: number; given: number; stored: Promise<boolean>}
 const unsent = new Map<string, Unsent[]>()
 const KEY_MS = 23 * 3600 * 1000
 let attempts = 0
@@ -256,10 +258,12 @@ export function useConversation(sessionId: string | null, transport: Transport =
       const m = JSON.parse((e as MessageEvent).data) as {seq: number; role: string; source_markdown?: string; inserted_at?: string; metadata?: Frame; attachments?: {id: string; media_type?: string; byte_size?: number | null; name?: string}[]}
       // A stored row names its pictures by id, and its text files and PDFs by id, type, size and name.
       const held = (m.attachments ?? []).filter((a) => typeof a.id === 'string')
-      const images = held.filter((a) => isPicture(a.media_type)).map((a) => a.id)
+      const pictures = held.filter((a) => isPicture(a.media_type))
+      const images = pictures.map((a) => a.id)
+      const imageNames = pictures.map((a) => a.name ?? '')
       const files = held.filter((a) => !isPicture(a.media_type)).map((a) => ({id: a.id, name: a.name || 'file', size: typeof a.byte_size === 'number' ? fileSize(a.byte_size) : ''}))
       if ((m.role === 'user' || m.role === 'assistant') && (m.source_markdown || held.length)) {
-        land({role: m.role, text: m.source_markdown ?? '', seq: m.seq, ...(typeof m.inserted_at === 'string' && Number.isFinite(Date.parse(m.inserted_at)) ? {at: m.inserted_at} : {}), ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
+        land({role: m.role, text: m.source_markdown ?? '', seq: m.seq, ...(typeof m.inserted_at === 'string' && Number.isFinite(Date.parse(m.inserted_at)) ? {at: m.inserted_at} : {}), ...(images.length ? {images, imageNames} : {}), ...(files.length ? {files} : {})})
         // A row after a stored ask: that ask is over.
         return setAsk((a) => (a?.stored ? null : a))
       }
@@ -461,7 +465,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
       else {
         // Each is stored for the conversation first; the message then names a picture by its id,
         // a text file or PDF by its id and its name.
-        const e: Unsent = {content, sig, refs: [], images: [], files: [], key: crypto.randomUUID(), at: Date.now(), latest: n, given: 0, stored: Promise.resolve(true)}
+        const e: Unsent = {content, sig, refs: [], images: [], imageNames: [], files: [], key: crypto.randomUUID(), at: Date.now(), latest: n, given: 0, stored: Promise.resolve(true)}
         let stored!: (ok: boolean) => void
         e.stored = new Promise((ok) => (stored = ok))
         unsent.set(sessionId, [...(unsent.get(sessionId) ?? []), e])
@@ -475,7 +479,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
               break
             }
             if (o.file && !isPicture(r.media_type)) e.refs.push({id: r.id, name: o.name}), e.files.push({id: r.id, name: o.name, size: fileSize(r.byte_size)})
-            else e.refs.push(r.id), e.images.push(r.id)
+            else e.refs.push(r.id), e.images.push(r.id), e.imageNames.push(o.name)
           }
         } catch (err) {
           drop(sessionId, e)
@@ -509,7 +513,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
         // A replay: it went before. The conversation may show it already (its stored row): not twice.
         const last = sent?.replay ? [...shown.current].reverse().find((b) => b.role === 'user') : undefined
         if (last && flat(last.text) === flat(content)) return null
-        land({role: 'user', text: content, ...(e.images.length ? {images: e.images} : {}), ...(e.files.length ? {files: e.files} : {})})
+        land({role: 'user', text: content, ...(e.images.length ? {images: e.images, imageNames: e.imageNames} : {}), ...(e.files.length ? {files: e.files} : {})})
       } catch (err) {
         if (flying.current?.e === e && flying.current.n === n) flying.current = null
         // The page's own call was lost on its way back: the message may have gone all the same, and

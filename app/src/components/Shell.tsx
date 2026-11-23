@@ -1,7 +1,7 @@
 // The three panes: rail, conversation, details. Sizes and colours come from the captured
 // oracle state fixtures/states/oracle-turn-1040.json (see styles.css). The bots' faces are
 // plain stand-ins of the same size (O2): never the oracle's mascot art.
-import {useEffect, useMemo, useRef, useState, type ReactNode} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState, type ReactNode} from 'react'
 import {Composer, Icon, placeholderFor, type ComposerStart} from './Composer'
 import {Rail} from './Rail'
 import {Details} from './Details'
@@ -9,6 +9,7 @@ import {Face} from './parts'
 import {Overlay, type CreateBot} from './overlays'
 import {Transcript, fromScene, type SceneRow} from './Transcript'
 import {scenePicture} from './Cards'
+import {OpenViewer, Viewer, type Viewing} from './Viewer'
 
 /** A bot as the page knows it: by its id; the name is only its label, so two bots may share one. */
 export type SceneBot = {id: string; name: string; main?: boolean}
@@ -35,6 +36,9 @@ export type Scene = {
   composer?: ComposerStart
   /** Connect Apps as captured: the day its Calendar tile shows (the live page shows today). */
   apps?: {today: string}
+  /** The picture viewer as captured: open on the conversation's first message with pictures, at
+   *  picture `at` (0 is the first; oracle-picture-viewer: 1, -rest: 2). */
+  viewer?: {at: number}
 }
 
 // The scene is where the page starts; what the person does from there (panel, tab, the bot they
@@ -64,6 +68,19 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
   const scene: Scene = {...start, panelOpen, voice, active: pageActive ?? picked ?? start.active}
   const talk = useMemo(() => (start.transcript ? fromScene(start.transcript.bubbles) : null), [start.transcript])
   const unread = useUnread(workingBots)
+  // The picture viewer, opened by a tile press (Cards.tsx PictureTiles) or open in the scene.
+  const [viewing, setViewing] = useState<Viewing | null>(() => {
+    const b = start.viewer && talk?.bubbles.find((x) => x.images?.length)
+    return b && start.viewer ? {ids: b.images!, names: b.imageNames ?? [], at: start.viewer.at, picture: scenePicture} : null
+  })
+  // Closing gives focus back to the tile that opened it.
+  const shownViewer = useRef(viewing)
+  shownViewer.current = viewing
+  const closeViewer = useCallback(() => {
+    const from = shownViewer.current?.from
+    setViewing(null)
+    from?.focus()
+  }, [])
   const active = scene.active ?? ''
   // A pick the page is still loading: the panel shows the picked bot while the page still holds the
   // one it is leaving, so nothing typed in the panel can belong to either. The name field is read-only.
@@ -78,48 +95,51 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
     onPickBot?.(id)
   }
   return (
-    <div className="app" data-panel={panelOpen ? 'open' : 'closed'}>
-      <Rail scene={scene} onPick={pick} working={workingBots} unread={[...new Set([...unreadBots, ...unread])]} names={names} />
+    <OpenViewer.Provider value={setViewing}>
+      <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-viewing={viewing ? '' : undefined}>
+        <Rail scene={scene} onPick={pick} working={workingBots} unread={[...new Set([...unreadBots, ...unread])]} names={names} />
 
-      {/* Focusable like the oracle's transcript (role=log, tabindex 0): a click on it takes focus,
-          which is where a click away from the Bot name field leaves it (rename trace). */}
-      <main className="convo" aria-label="Conversation transcript" tabIndex={0}>
-        <header className="convo-head">
-          {active && (
-            <button className="bot-pill" aria-label="View conversation details" aria-expanded={panelOpen} onClick={() => setPanelOpen((o) => !o)}>
-              <Face size={18} />
-              <span role="heading" aria-level={1}>
-                {shown}
+        {/* Focusable like the oracle's transcript (role=log, tabindex 0): a click on it takes focus,
+            which is where a click away from the Bot name field leaves it (rename trace). */}
+        <main className="convo" aria-label="Conversation transcript" tabIndex={0}>
+          <header className="convo-head">
+            {active && (
+              <button className="bot-pill" aria-label="View conversation details" aria-expanded={panelOpen} onClick={() => setPanelOpen((o) => !o)}>
+                <Face size={18} />
+                <span role="heading" aria-level={1}>
+                  {shown}
+                </span>
+              </button>
+            )}
+            <button className="share" aria-label="Share">
+              <span className="share-label">Share</span>
+              <span className="share-icon">
+                <Icon d="M8 10V2.5M5 5.5l3-3 3 3M3 9v3.5h10V9" />
               </span>
             </button>
-          )}
-          <button className="share" aria-label="Share">
-            <span className="share-label">Share</span>
-            <span className="share-icon">
-              <Icon d="M8 10V2.5M5 5.5l3-3 3 3M3 9v3.5h10V9" />
-            </span>
-          </button>
-        </header>
-        {transcript ??
-          (talk ? (
-            <Transcript bot={shown} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} picture={scenePicture} lift={scene.transcript?.lift} />
-          ) : (
-            <div className="transcript" />
-          ))}
-        {composer ?? <Composer placeholder={placeholderFor(shown, talk?.ask)} start={start.composer} />}
-      </main>
+          </header>
+          {transcript ??
+            (talk ? (
+              <Transcript bot={shown} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} picture={scenePicture} lift={scene.transcript?.lift} />
+            ) : (
+              <div className="transcript" />
+            ))}
+          {composer ?? <Composer placeholder={placeholderFor(shown, talk?.ask)} start={start.composer} />}
+        </main>
 
-      <Details scene={{...scene, overlay: opened ?? scene.overlay}} name={shown} between={between} onRename={(n) => {
-        // While a pick loads the field belongs to no page yet: a change to it is not a rename.
-        if (between) return
-        setNames((m) => ({...m, [active]: n}))
-        onRenameBot?.(active, n)
-      }} onClose={() => setPanelOpen(false)} />
-      <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} onCreateBot={onCreateBot} onChoose={(overlay, value) => {
-        const key = voiceRows[overlay]
-        if (key) setVoice((v) => v && {...v, [key]: value})
-      }} />
-    </div>
+        <Details scene={{...scene, overlay: opened ?? scene.overlay}} name={shown} between={between} onRename={(n) => {
+          // While a pick loads the field belongs to no page yet: a change to it is not a rename.
+          if (between) return
+          setNames((m) => ({...m, [active]: n}))
+          onRenameBot?.(active, n)
+        }} onClose={() => setPanelOpen(false)} />
+        <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} onCreateBot={onCreateBot} onChoose={(overlay, value) => {
+          const key = voiceRows[overlay]
+          if (key) setVoice((v) => v && {...v, [key]: value})
+        }} />
+        {viewing && <Viewer key={`${viewing.ids.join()} ${viewing.at}`} viewing={viewing} onClose={closeViewer} />}
+      </div>
+    </OpenViewer.Provider>
   )
 }
 
