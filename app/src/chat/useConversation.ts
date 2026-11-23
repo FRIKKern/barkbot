@@ -15,8 +15,9 @@ export type Bubble = {
   images?: string[]
   /** Gate scenes only: each paragraph's height on the oracle, kept whatever the placeholder words do. */
   heights?: number[]
-  /** Text files and PDFs sent with the message, by name and size: shown as a file card above its words. */
-  files?: {name: string; size: string}[]
+  /** Text files and PDFs sent with the message, by name and size: shown as a file card above its words.
+   *  `id`: Barkpark's attachment id, so the card opens the file (a gate scene's cards have none). */
+  files?: {id?: string; name: string; size: string}[]
   /** A question the person answered, shown as its card in place of a bubble (gate scenes; the live page clears an ask once answered). */
   answered?: {question: string; letter: string; label: string}
   /** When the message was written (ISO): Barkpark's inserted_at for a stored row, the page's clock for
@@ -132,7 +133,7 @@ export const CANNOT_TAKE_FILES = "The bot's computer cannot take this file yet, 
  *  answered for sure, unless that attempt's words were given back (then the box holds them, and a
  *  send of them must find the key). A refusal or failure always ends it: nothing ran, and a 4xx is
  *  remembered under its key. An answer to an earlier attempt never ends it: a later one has the box. */
-type Unsent = {content: string; sig: string; refs: AttachmentRef[]; images: string[]; files: {name: string; size: string}[]; key: string; at: number; latest: number; given: number; stored: Promise<boolean>}
+type Unsent = {content: string; sig: string; refs: AttachmentRef[]; images: string[]; files: {id: string; name: string; size: string}[]; key: string; at: number; latest: number; given: number; stored: Promise<boolean>}
 const unsent = new Map<string, Unsent[]>()
 const KEY_MS = 23 * 3600 * 1000
 let attempts = 0
@@ -256,7 +257,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
       // A stored row names its pictures by id, and its text files and PDFs by id, type, size and name.
       const held = (m.attachments ?? []).filter((a) => typeof a.id === 'string')
       const images = held.filter((a) => isPicture(a.media_type)).map((a) => a.id)
-      const files = held.filter((a) => !isPicture(a.media_type)).map((a) => ({name: a.name || 'file', size: typeof a.byte_size === 'number' ? fileSize(a.byte_size) : ''}))
+      const files = held.filter((a) => !isPicture(a.media_type)).map((a) => ({id: a.id, name: a.name || 'file', size: typeof a.byte_size === 'number' ? fileSize(a.byte_size) : ''}))
       if ((m.role === 'user' || m.role === 'assistant') && (m.source_markdown || held.length)) {
         land({role: m.role, text: m.source_markdown ?? '', seq: m.seq, ...(typeof m.inserted_at === 'string' && Number.isFinite(Date.parse(m.inserted_at)) ? {at: m.inserted_at} : {}), ...(images.length ? {images} : {}), ...(files.length ? {files} : {})})
         // A row after a stored ask: that ask is over.
@@ -473,7 +474,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
               refused = `${o.name} was not taken: ${r.refused}`
               break
             }
-            if (o.file && !isPicture(r.media_type)) e.refs.push({id: r.id, name: o.name}), e.files.push({name: o.name, size: fileSize(r.byte_size)})
+            if (o.file && !isPicture(r.media_type)) e.refs.push({id: r.id, name: o.name}), e.files.push({id: r.id, name: o.name, size: fileSize(r.byte_size)})
             else e.refs.push(r.id), e.images.push(r.id)
           }
         } catch (err) {
