@@ -17,7 +17,7 @@ function DeviceState({seen}: PageProps) {
   const text = when ? `Computer · Last opened ${when}` : null
   return (
     <span className="set-device-state">
-      <span style={text ? fit(SETTINGS, text) : undefined}>
+      <span>
         <span className="set-dot" />
         {text ?? (
           <>
