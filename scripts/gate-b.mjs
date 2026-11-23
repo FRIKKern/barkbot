@@ -170,9 +170,10 @@ function compare(oracle, ours, focusAtEnd, skipped = []) {
 
   const first = (list, kind) => list.find((m) => m.kind === kind);
   // A budget is judged only where the oracle itself meets it; a skip is printed, never silent.
-  // budget() is the clock: its value and limit are ms, so its case carries clock: true, and a
-  // hosted drop calls a flip runner timing from that tag only, never from the key's wording
-  // (lib/gate-b-hosted.mjs). A budget that is not a clock pushes its own case, untagged.
+  // budget() is the clock: its value and limit are ms, so its case carries clock: true, the one place
+  // that tag is set. A hosted drop calls a flip runner timing only when it is tagged AND its key is in
+  // lib/gate-b-hosted.mjs CLOCKS, never from the key's wording. A budget that is not a clock pushes its
+  // own case, untagged; check.mjs keeps CLOCKS equal to the keys called here.
   const budget = (key, value, limit, applies = true, oracleAt) => {
     if (!applies) return skipped.push(`${key}: not judged, the oracle's own is ${oracleAt} ms`);
     cases.push({ key, clock: true, pass: value !== undefined && value <= limit, ours: value, why: value === undefined ? 'never happened' : value > limit ? `${Math.round(value)} ms > ${Math.round(limit)} ms` : undefined });

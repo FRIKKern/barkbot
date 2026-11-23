@@ -12,7 +12,7 @@ import { turnTraces } from './lib/turn-traces.mjs';
 import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
 import { guardBeforeSend } from './lib/host-guard.mjs';
 import { sceneCard } from './lib/cards.mjs';
-import { hostedNote } from './lib/gate-b-hosted.mjs';
+import { hostedNote, CLOCKS } from './lib/gate-b-hosted.mjs';
 import { pickByLabel } from './lib/hover-label.mjs';
 
 const fails = [];
@@ -259,25 +259,37 @@ for (const [name, c, want] of [
 }
 
 // Hosted Gate B's line under a drop (rev299 on #311): runner timing only when every flipped case is a
-// timing budget; anything else, or a mix, or a drop with nothing named, says "look at it". A timing
-// budget is one gate-b.mjs's budget() tagged clock: true, never one whose key reads like a clock
-// (task-4ce61dac9b63c95c). The tagged set is read from gate-b.mjs: a new budget() call reds here
-// until it is named below as a clock on purpose.
+// clock budget; anything else, or a mix, or a drop with nothing named, says "look at it". A clock
+// budget is a case tagged clock: true whose key is in lib/gate-b-hosted.mjs CLOCKS, never a key that
+// reads like a clock (task-4ce61dac9b63c95c; rev on #314). Here: CLOCKS equals gate-b.mjs's budget()
+// keys in any quote style, and gate-b.mjs sets the tag in one place, inside budget().
 {
   const GONE = 'budget: working line gone ≤ 250 ms after the reply';
-  const CLOCKS = ['budget: composer clears in 1 frame', GONE, 'budget: own bubble ≤ 440 ms', 'budget: working line ≤ 2.0 s'];
-  const src = read('scripts/gate-b.mjs');
-  const tagged = [...src.matchAll(/\bbudget\('([^']+)'/g)].map((m) => m[1]);
-  for (const k of CLOCKS) { rule('gate b hosted', 1); if (!tagged.includes(k)) fail(`gate b hosted: "${k}" is a clock, but gate-b.mjs no longer judges it through budget()`); }
-  for (const k of tagged.filter((k) => !CLOCKS.includes(k))) fail(`gate b hosted: gate-b.mjs judges "${k}" through budget(), which tags it a clock: name it in CLOCKS here if it is one, or push its case untagged`);
+  // Code only: a line comment that names the tag is not a tag.
+  const src = read('scripts/gate-b.mjs').replace(/(^|\s)\/\/.*$/gm, '$1');
+  const called = [...src.matchAll(/\bbudget\(\s*(['"`])((?:(?!\1).)+)\1/g)].map((m) => m[2]);
+  for (const k of CLOCKS) { rule('gate b hosted', 1); if (!called.includes(k)) fail(`gate b hosted: CLOCKS names "${k}", but gate-b.mjs no longer judges it through budget()`); }
   rule('gate b hosted', 1);
-  if (!/cases\.push\(\{ key: 'budget: focus stays in Prompt', pass:/.test(src)) fail('gate b hosted: "budget: focus stays in Prompt" is not a clock and must be pushed as its own untagged case');
+  for (const k of called.filter((k) => !CLOCKS.includes(k))) fail(`gate b hosted: gate-b.mjs judges "${k}" through budget(): name it in CLOCKS (lib/gate-b-hosted.mjs) if it is a clock, or push its case untagged`);
+  rule('gate b hosted', 1);
+  const tags = [...src.matchAll(/\bclock\s*:\s*true\b|\.clock\s*=(?!=)|\[\s*['"`]clock['"`]\s*\]\s*[:=](?!=)/g)];
+  const inBudget = src.slice(src.indexOf('const budget = '), src.indexOf('};', src.indexOf('const budget = ')));
+  if (tags.length !== 1 || !/\bclock: true\b/.test(inBudget)) fail(`gate b hosted: gate-b.mjs sets the clock tag ${tags.length} time(s); it must be once, inside budget()`);
+  rule('gate b hosted', 1);
+  // budget() is only ever called by name: an alias (const tick = budget) or a pass-along would judge a
+  // key this scan cannot see. Its flips would still say "look at it"; this names it at check time.
+  const bare = [...src.matchAll(/\bbudget\b(?!\s*[(:])/g)].length;
+  if (bare !== 1) fail(`gate b hosted: gate-b.mjs names budget ${bare} time(s) other than in a call; only its definition may`);
   for (const [name, flipped, want] of [
     ['only the exit budget', [{ id: 'say-hi', key: GONE, clock: true }, { id: 'storage', key: GONE, clock: true }], /^Gate B: report only, runner timing: /],
     ['the rail\'s unread mark', [{ id: 'say-hi', key: 'rail:unread#1' }, { id: 'storage', key: 'rail:unread#1' }], /^Gate B: report only: a non-timing case flipped \(say-hi · rail:unread#1, storage · rail:unread#1\): look at it\.$/],
     ['the exit budget and focus', [{ id: 'say-hi', key: GONE, clock: true }, { id: 'storage', key: 'budget: focus stays in Prompt' }], /^Gate B: report only: a non-timing case flipped \(storage · budget: focus stays in Prompt\): look at it\.$/],
     ['a drop with nothing named', [], /look at it/],
     ['a non-clock budget worded like a clock', [{ id: 'say-hi', key: 'budget: the card sits in 2 frames of the bubble' }], /^Gate B: report only: a non-timing case flipped \(say-hi · budget: the card sits in 2 frames of the bubble\): look at it\.$/],
+    ['a stray tag on focus', [{ id: 'storage', key: 'budget: focus stays in Prompt', clock: true }], /^Gate B: report only: a non-timing case flipped \(storage · budget: focus stays in Prompt\): look at it\.$/],
+    ['a stray tag on a key not in CLOCKS', [{ id: 'say-hi', key: GONE, clock: true }, { id: 'say-hi', key: 'nothing extra', clock: true }], /^Gate B: report only: a non-timing case flipped \(say-hi · nothing extra\): look at it\.$/],
+    ['a tagged budget worded like a clock, not in CLOCKS', [{ id: 'say-hi', key: 'budget: the card sits in 2 frames of the bubble', clock: true }], /look at it\.$/],
+    ['a clock key with no tag', [{ id: 'say-hi', key: GONE }], /^Gate B: report only: a non-timing case flipped \(say-hi · budget: working line gone ≤ 250 ms after the reply\): look at it\.$/],
   ]) {
     rule('gate b hosted', 1);
     const got = hostedNote(flipped);
