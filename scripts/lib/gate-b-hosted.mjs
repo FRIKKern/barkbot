@@ -16,8 +16,25 @@ export const CLOCKS = Object.freeze([
 ]);
 const isTiming = (f) => f.clock === true && CLOCKS.includes(f.key);
 
-/** The one line for a hosted drop, from what flipped: [{id, key, clock}]. */
-export function hostedNote(flipped) {
+// A record matches a case by its key, so two cases of one turn under one key cannot be told apart: a
+// failing case pushed under a clock key word for word, with a computed tag, would hide behind the
+// real budget (door J, review of #314; task-f294c8197a92c306). A key may repeat across turns.
+/** Keys two or more cases of one turn share: [{id, key}]. `turns`: [{id, results: [{key}]}]. */
+export function sharedKeys(turns) {
+  const out = [];
+  for (const t of turns) {
+    const seen = new Set();
+    for (const { key } of t.results) { if (seen.has(key) && !out.some((o) => o.id === t.id && o.key === key)) out.push({ id: t.id, key }); seen.add(key); }
+  }
+  return out;
+}
+
+/** The one line for a hosted drop, from what flipped ([{id, key, clock}]) and this run's turns
+ *  ([{id, results}], required: a shared key is read from them, not from what flipped). */
+export function hostedNote(flipped, turns) {
+  if (!Array.isArray(turns)) throw new Error('hostedNote: give it this run\'s turns ([{id, results}]), so a shared key is seen');
+  const shared = sharedKeys(turns);
+  if (shared.length) return `Gate B: report only: two cases of one turn share a key (${shared.map((f) => `${f.id} · ${f.key}`).join(', ')}): a record cannot tell them apart: look at it.`;
   const other = flipped.filter((f) => !isTiming(f));
   if (!flipped.length) return 'Gate B: report only: the count went down with no case named as flipped: look at it.';
   if (other.length) return `Gate B: report only: a non-timing case flipped (${other.map((f) => `${f.id} · ${f.key}`).join(', ')}): look at it.`;

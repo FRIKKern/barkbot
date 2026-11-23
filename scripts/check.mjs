@@ -281,6 +281,14 @@ for (const [name, c, want] of [
   // key this scan cannot see. Its flips would still say "look at it"; this names it at check time.
   const bare = [...src.matchAll(/\bbudget\b(?!\s*[(:])/g)].length;
   if (bare !== 1) fail(`gate b hosted: gate-b.mjs names budget ${bare} time(s) other than in a call; only its definition may`);
+  rule('gate b hosted', 1);
+  // A shared key stops the run before anything is judged or written (task-f294c8197a92c306), and the
+  // hosted line is given this run's turns.
+  const stop = src.search(/const shared = sharedKeys\(report\);\s*if \(shared\.length\) \{[^\n]*process\.exit\(1\); \}/);
+  const first = Math.min(...['writeFileSync(opt(', 'const lower = '].map((n) => src.indexOf(n)).filter((i) => i >= 0));
+  if (stop < 0 || !(stop < first)) fail('gate b hosted: gate-b.mjs no longer stops on a shared key (sharedKeys(report), exit 1) before it compares or writes');
+  rule('gate b hosted', 1);
+  if (!/hostedNote\(flipped, report\)/.test(src)) fail('gate b hosted: gate-b.mjs calls hostedNote without this run\'s turns (report)');
   for (const [name, flipped, want] of [
     ['only the exit budget', [{ id: 'say-hi', key: GONE, clock: true }, { id: 'storage', key: GONE, clock: true }], /^Gate B: report only, runner timing: /],
     ['the rail\'s unread mark', [{ id: 'say-hi', key: 'rail:unread#1' }, { id: 'storage', key: 'rail:unread#1' }], /^Gate B: report only: a non-timing case flipped \(say-hi · rail:unread#1, storage · rail:unread#1\): look at it\.$/],
@@ -293,9 +301,26 @@ for (const [name, c, want] of [
     ['a clock key with no tag', [{ id: 'say-hi', key: GONE }], /^Gate B: report only: a non-timing case flipped \(say-hi · budget: working line gone ≤ 250 ms after the reply\): look at it\.$/],
   ]) {
     rule('gate b hosted', 1);
-    const got = hostedNote(flipped);
+    // Each flip's turn holds that one case: no key shared.
+    const turns = [...new Set(flipped.map((f) => f.id))].map((id) => ({ id, results: flipped.filter((f) => f.id === id).map((f) => ({ key: f.key })) }));
+    const got = hostedNote(flipped, turns);
     if (!want.test(got)) fail(`gate b hosted: ${name}: ${got}`);
   }
+  // A shared key (task-f294c8197a92c306): a failing case pushed under a clock key word for word, with a
+  // computed tag, beside the real budget. Only it flips, tagged and in CLOCKS; the turn gives it away.
+  const twin = [{ key: GONE, clock: true, pass: true }, { key: GONE, clock: true, pass: false }];
+  for (const [name, flipped, turns, want] of [
+    ['two cases of one turn share a clock key, one not from budget()', [{ id: 'say-hi', key: GONE, clock: true }], [{ id: 'say-hi', results: twin }, { id: 'storage', results: [{ key: GONE }] }], /^Gate B: report only: two cases of one turn share a key \(say-hi · budget: working line gone ≤ 250 ms after the reply\): a record cannot tell them apart: look at it\.$/],
+    ['one key in two turns is no shared key (control)', [{ id: 'say-hi', key: GONE, clock: true }, { id: 'storage', key: GONE, clock: true }], [{ id: 'say-hi', results: [{ key: GONE }] }, { id: 'storage', results: [{ key: GONE }] }], /^Gate B: report only, runner timing: /],
+  ]) {
+    rule('gate b hosted', 1);
+    const got = hostedNote(flipped, turns);
+    if (!want.test(got)) fail(`gate b hosted: ${name}: ${got}`);
+  }
+  rule('gate b hosted', 1);
+  let threw = false;
+  try { hostedNote([{ id: 'say-hi', key: GONE, clock: true }]); } catch { threw = true; }
+  if (!threw) fail('gate b hosted: hostedNote without the turns still answered: a shared key would go unseen');
 }
 
 // Hover label (the sweep's hoverLabel step, N2): on saved 1.2.3 captures, the pointer goes to the
