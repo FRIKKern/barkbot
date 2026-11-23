@@ -11,7 +11,7 @@ export async function ownSessionDoors({ check, precondition, ev, base, stub, ses
   const ELSEWHERE = '00000000-0000-4000-8000-000000000772'; // on a computer that is not ours
   const MANAGED = '00000000-0000-4000-8000-000000000773';
   const KEPT = '00000000-0000-4000-8000-000000000774'; // in a bot record, never opened by this server
-  const KEPT_BOT = '6a7b8c9d-0e1f-4a2b-8c3d-4e5f6a7b8c9d';
+  const KEPT_BOT = 'a1b2c3d4-0e1f-4c2b-8c3d-000000000775';
   const on = (id, h) => ({ id, execution_target: 'registered_host', execution_host_id: h, inserted_at: '2026-11-13T10:00:00Z', status: 'active' });
   const SECRET = 'words only its owner may read';
   const plant = (id) => { stub.pictures.set(`${id}/${noteId}`, { data: note.toString('base64'), media_type: 'text/plain' }); stub.rowsBy.set(id, [{ seq: 1, role: 'user', source_markdown: SECRET }]); };
@@ -84,7 +84,7 @@ export async function ownSessionDoors({ check, precondition, ev, base, stub, ses
 
   // The control: a conversation this server made whose bot record was not saved (startChat's
   // kept: false, here a bot with no record) still opens: the page keeps it and streams it.
-  const made = await ev(async ([h, b]) => { const m = await import('/src/chat/api.ts'); try { return await m.startChat({ data: { hostId: h, botId: b } }); } catch (e) { return { threw: String(e?.message ?? e) }; } }, [hostId, '7b8c9d0e-1f2a-4b3c-8d4e-5f6a7b8c9d0e']);
+  const made = await ev(async ([h, b]) => { const m = await import('/src/chat/api.ts'); try { return await m.startChat({ data: { hostId: h, botId: b } }); } catch (e) { return { threw: String(e?.message ?? e) }; } }, [hostId, 'a1b2c3d4-0e1f-4c2b-8c3d-000000000776']);
   if (made?.sessionId) plant(made.sessionId);
   const fresh = made?.sessionId ? { file: await file(made.sessionId), stream: await stream(made.sessionId) } : null;
   check('control: a conversation this server made whose bot record was not saved (kept: false) still opens: its file and its stream come back', made?.kept === false && fresh?.file.status === 200 && fresh.file.text === note.toString() && fresh.stream.status === 200 && fresh.stream.text.includes(SECRET), { made, fresh });
