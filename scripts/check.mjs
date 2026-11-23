@@ -12,6 +12,7 @@ import { turnTraces } from './lib/turn-traces.mjs';
 import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
 import { guardBeforeSend } from './lib/host-guard.mjs';
 import { sceneCard } from './lib/cards.mjs';
+import { hostedNote, isTimingBudget } from './lib/gate-b-hosted.mjs';
 import { pickByLabel } from './lib/hover-label.mjs';
 
 const fails = [];
@@ -257,6 +258,24 @@ for (const [name, c, want] of [
   });
 }
 
+// Hosted Gate B's line under a drop (rev299 on #311): runner timing only when every flipped case is a
+// timing budget; anything else, or a mix, or a drop with nothing named, says "look at it".
+{
+  const GONE = 'budget: working line gone ≤ 250 ms after the reply';
+  for (const k of ['budget: composer clears in 1 frame', GONE, 'budget: own bubble ≤ 440 ms', 'budget: working line ≤ 2.0 s']) { rule('gate b hosted', 1); if (!isTimingBudget(k)) fail(`gate b hosted: "${k}" is a timing budget`); }
+  for (const k of ['budget: focus stays in Prompt', 'rail:unread#1', 'nothing extra', 'label:typing#1']) { rule('gate b hosted', 1); if (isTimingBudget(k)) fail(`gate b hosted: "${k}" is not a timing budget`); }
+  for (const [name, flipped, want] of [
+    ['only the exit budget', [{ id: 'say-hi', key: GONE }, { id: 'storage', key: GONE }], /^Gate B: report only, runner timing: /],
+    ['the rail\'s unread mark', [{ id: 'say-hi', key: 'rail:unread#1' }, { id: 'storage', key: 'rail:unread#1' }], /^Gate B: report only: a non-timing case flipped \(say-hi · rail:unread#1, storage · rail:unread#1\): look at it\.$/],
+    ['the exit budget and focus', [{ id: 'say-hi', key: GONE }, { id: 'storage', key: 'budget: focus stays in Prompt' }], /^Gate B: report only: a non-timing case flipped \(storage · budget: focus stays in Prompt\): look at it\.$/],
+    ['a drop with nothing named', [], /look at it/],
+  ]) {
+    rule('gate b hosted', 1);
+    const got = hostedNote(flipped);
+    if (!want.test(got)) fail(`gate b hosted: ${name}: ${got}`);
+  }
+}
+
 // Hover label (the sweep's hoverLabel step, N2): on saved 1.2.3 captures, the pointer goes to the
 // newest message's own group wholly on screen; a cut one or a tile's nested group is passed over,
 // and a prefix with nothing to hover throws instead of capturing the resting screen.
@@ -280,7 +299,7 @@ for (const [name, c, want] of [
 }
 
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'hover label']) {
+for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

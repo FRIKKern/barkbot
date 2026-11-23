@@ -35,6 +35,7 @@ import { connect } from './oracle/cdp.mjs';
 import { RECIPES as recipes } from './oracle/recipes.mjs';
 import { path } from './lib/data.mjs';
 import { turnTraces } from './lib/turn-traces.mjs';
+import { hostedNote } from './lib/gate-b-hosted.mjs';
 import { oracleTurn, replayScript, stateScript, filler, awayAtReply } from '../app/src/chat/turn.ts';
 
 const args = process.argv.slice(2);
@@ -287,18 +288,25 @@ if (opt('dump')) writeFileSync(opt('dump'), JSON.stringify(report, null, 1));
 const dir = path('parity', 'gate-b');
 mkdirSync(dir, { recursive: true });
 const recorded = (id) => (existsSync(`${dir}/${id}.json`) ? JSON.parse(readFileSync(`${dir}/${id}.json`, 'utf8')) : null);
-const lower = [], higher = [], unrecorded = [];
+const lower = [], higher = [], unrecorded = [], flipped = [];
 for (const s of report) {
   const p = recorded(s.id);
   if (!p) unrecorded.push(s.id);
   else if (s.pass < p.pass) {
     lower.push(`${s.id} ${p.pass} → ${s.pass}`);
     // Name what flipped, whatever --show says: a drop with no name cannot be told from load.
-    for (const c of s.results) if (!c.pass && p.results.find((x) => x.key === c.key)?.pass) console.error(`  flipped ${s.id} · ${c.key}: ${c.why}`);
+    for (const c of s.results) if (!c.pass && p.results.find((x) => x.key === c.key)?.pass) { flipped.push({ id: s.id, key: c.key }); console.error(`  flipped ${s.id} · ${c.key}: ${c.why}`); }
   }
   else if (s.pass > p.pass) higher.push(`${s.id} ${p.pass} → ${s.pass}`);
 }
-if (lower.length && !ACCEPT) { console.error(`Gate B: the pass count went down (${lower.join(', ')}). Not recorded. A change that lowers it does not land; --accept records it on purpose.`); process.exit(1); }
+// On a hosted runner (gate.yml runs this report only) a timer fires late under load: say whether
+// what flipped is only timing budgets, or something to look at (lib/gate-b-hosted.mjs).
+const HOSTED = process.env.GITHUB_ACTIONS === 'true';
+if (lower.length && !ACCEPT) {
+  console.error(`Gate B: the pass count went down (${lower.join(', ')}). Not recorded. A change that lowers it does not land; --accept records it on purpose.`);
+  if (HOSTED) console.error(hostedNote(flipped));
+  process.exit(1);
+}
 if (CI) {
   if (unrecorded.length) { console.error(`Gate B: no recorded run for ${unrecorded.join(', ')}: run npm run gate:b and commit parity/gate-b/`); process.exit(1); }
   if (higher.length) console.log(`Gate B: higher than recorded (${higher.join(', ')}): run npm run gate:b to record it`);
