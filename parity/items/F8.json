@@ -14,6 +14,6 @@
   "Upgrade plan",
   "Done"
  ],
- "gate": "Gate A oracle-account-menu 64/65 on 1.2.3 (the 1: the file card's \".txt\", 1.5 wide in the stand-in face (A1))",
+ "gate": "Gate A oracle-account-menu 65/65 on 1.2.3",
  "evidence": "app/src/components/overlays/Menus.tsx AccountMenu, opens from the account button with the rows in the oracle's order and look. 1.2.3 (decision 0010): three groups (Weekly usage, Upgrade plan · Get Grok Bot for mobile, Support, Settings · Add account, Log out), 228 wide, Support's trail a submenu chevron (the oracle's Support says aria-haspopup menu; ours does not, as no capture shows the submenu); Upgrade plan's glyph is a stand-in. Settings opens Settings and Get Grok Bot for mobile opens its dialog (GetMobile.tsx); every other row closes the menu, as its target is its own item. The usage % is redacted in the fixtures (O2), so the usage line is a placeholder held at its captured width (53.7). Keys: on open the menu has focus, no row highlighted; arrows move focus and data-highlighted; Escape closes without choosing and returns focus. Not built: the real weekly usage (no Barkpark source), Support's submenu (not captured), and Upgrade plan's target. Enter on a highlighted row is assumed from the oracle's Radix-style markup, not observed."
 }

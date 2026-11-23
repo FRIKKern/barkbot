@@ -10,8 +10,9 @@
    (1.2.3: oracle-file-sent, -pictures-sent, -pictures-waiting; Gate A's "time" case). The oracle's
    12/16 on 0.12px, unfitted. The captures show two times, and the stand-in face (F6) sets both
    wider than the oracle: "Today 8:21 PM" (pictures-waiting) 84.7 over 82.4, "Today 11:31 PM"
-   (file-sent, pictures-sent) 88.5 over 84.4. No one spacing holds for both: a word-spacing fitted
-   to 8:21 alone (it was -1.15) left 11:31 1.8 wide, so the time cases wait for the face. */
+   (file-sent, pictures-sent) 88.5 over 84.4. A word-spacing fitted to 8:21 alone (it was -1.15)
+   left 11:31 1.8 wide. The time changes with every message; a spacing fitted to the captured times
+   would fit the captures, not the face, so none is set. */
 .time-row { margin-bottom: 10px; display: flex; justify-content: center; }
 .time-later { margin-top: 16px; }   /* between messages: 16 under the row above (1.2.3, oracle-file-sent: article 67 ends 386, time 402) */
 .time-row time { display: block; height: 28px; padding: 6px 0; box-sizing: border-box; font-size: 12px; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-66); }

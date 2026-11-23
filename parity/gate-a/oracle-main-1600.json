@@ -7,7 +7,7 @@
   2
  ],
  "cases": 60,
- "pass": 58,
+ "pass": 60,
  "results": [
   {
    "key": "aside:Bots",
@@ -199,8 +199,7 @@
   },
   {
    "key": "card#1 text(4)#1",
-   "pass": false,
-   "why": "box off by 0.1,0,1.5,0"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#2",
@@ -244,15 +243,14 @@
   },
   {
    "key": "card#1 text(4)#2",
-   "pass": false,
-   "why": "box off by 0.1,0,1.5,0"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#4",
    "pass": true
   }
  ],
- "run": "2026-11-22T19:30:08.724Z",
+ "run": "2026-11-20T19:35:47.202Z",
  "inventory": {
   "id": "oracle-main-1600",
   "controls": [

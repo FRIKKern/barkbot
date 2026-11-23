@@ -7,7 +7,7 @@
   2
  ],
  "cases": 66,
- "pass": 65,
+ "pass": 66,
  "results": [
   {
    "key": "aside:Bots",
@@ -55,8 +55,7 @@
   },
   {
    "key": "span:.txt",
-   "pass": false,
-   "why": "box off by 0.1,0,1.5,0"
+   "pass": true
   },
   {
    "key": "p:25B",
@@ -275,7 +274,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-22T19:29:48.779Z",
+ "run": "2026-11-22T18:36:05.369Z",
  "inventory": {
   "id": "oracle-file-waiting",
   "controls": [
