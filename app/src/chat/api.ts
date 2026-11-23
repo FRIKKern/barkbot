@@ -344,7 +344,7 @@ export const startChat = createServerFn({method: 'POST'})
       throw e
     }
     // Made here: its doors open for this server even if the bot record below is not saved (kept:false).
-    madeHere(s.id, data.hostId)
+    madeHere(s)
     let kept = false
     try {
       kept = await oneAtATime(data.botId, async (write) => {

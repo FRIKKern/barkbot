@@ -38,8 +38,13 @@ const keep = (m: Map<string, string>, id: string, host: string) => {
   if (m.size > KEEP) m.delete(m.keys().next().value as string)
 }
 
-/** A conversation this server just made on `hostId` (startChat), saved to its bot or not. */
-export const madeHere = (id: string, hostId: string) => keep(known, id, hostId)
+/** A conversation this server just made (startChat), saved to its bot or not, as Barkpark's own
+ *  create answer shows it: its computer is known without another read. */
+export function madeHere(s: {id: string; execution_target?: unknown; execution_host_id?: unknown}) {
+  if (s.execution_target !== 'registered_host' || typeof s.execution_host_id !== 'string') return
+  keep(runsOn, s.id, s.execution_host_id)
+  keep(known, s.id, s.execution_host_id)
+}
 
 /** The computer a registered-host session runs on, or null: gone (404), managed, or not that id. */
 async function hostOf(id: string): Promise<string | null> {

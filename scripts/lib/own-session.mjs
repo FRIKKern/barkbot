@@ -7,10 +7,10 @@
 // Main Bot's record, and `noteId` is stored for it.
 
 export async function ownSessionDoors({ check, precondition, ev, base, stub, session, hostId, otherHost, note, noteId, rec }) {
-  const MATE = '00000000-0000-4000-8000-0000000000b1'; // a workspace-mate's, on our computer, in no record
-  const ELSEWHERE = '00000000-0000-4000-8000-0000000000b2'; // on a computer that is not ours
-  const MANAGED = '00000000-0000-4000-8000-0000000000b3';
-  const KEPT = '00000000-0000-4000-8000-0000000000c7'; // in a bot record, never opened by this server
+  const MATE = '00000000-0000-4000-8000-000000000771'; // a workspace-mate's, on our computer, in no record
+  const ELSEWHERE = '00000000-0000-4000-8000-000000000772'; // on a computer that is not ours
+  const MANAGED = '00000000-0000-4000-8000-000000000773';
+  const KEPT = '00000000-0000-4000-8000-000000000774'; // in a bot record, never opened by this server
   const KEPT_BOT = '6a7b8c9d-0e1f-4a2b-8c3d-4e5f6a7b8c9d';
   const on = (id, h) => ({ id, execution_target: 'registered_host', execution_host_id: h, inserted_at: '2026-11-13T10:00:00Z', status: 'active' });
   const SECRET = 'words only its owner may read';
