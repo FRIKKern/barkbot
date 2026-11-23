@@ -258,8 +258,9 @@ for (const [name, c, want] of [
 }
 
 // Hover label (the sweep's hoverLabel step, N2): on saved 1.2.3 captures, the pointer goes to the
-// newest message's own group wholly on screen; a cut one or a tile's nested group is passed over,
-// and a prefix with nothing to hover throws instead of capturing the resting screen.
+// newest message's own group wholly on screen; a cut one (even with its centre on screen) or a
+// tile's nested group is passed over, and a prefix with nothing to hover throws instead of
+// capturing the resting screen.
 {
   const st = (id) => JSON.parse(read(`fixtures/states/${id}.json`));
   const ORACLE = 'Message actions for Oracle message', YOURS = 'Message actions for your message';
@@ -270,12 +271,15 @@ for (const [name, c, want] of [
     ["yours: the message's own group, not its last tile's", 'oracle-ask-choice', YOURS, 93],
     ['yours: the only one is cut off', 'oracle-turn-1040', YOURS, /none wholly on screen/],
     ['a label nothing carries', 'oracle-turn-1040', 'Message actions for nobody', /nothing by that label on screen/],
+    // Synthetic: a message whose centre is on screen but whose top (or bottom) the window cuts is not wholly on it.
+    ['cut off at the top, its centre on screen', { viewport: [1040, 760, 2], elements: [{ i: 0, label: `${ORACLE} at 1:00 PM`, box: [104, -20, 480, 200] }] }, ORACLE, /none wholly on screen/],
+    ['a whole one, then one cut off at the bottom with its centre on screen', { viewport: [1040, 760, 2], elements: [{ i: 0, label: `${YOURS} at 1:00 PM`, box: [224, 300, 480, 96] }, { i: 1, label: `${YOURS} at 1:01 PM`, box: [224, 600, 480, 200] }] }, YOURS, 0],
   ]) {
     rule('hover label', 1);
     let got;
-    try { got = pickByLabel(st(id), prefix).e.i; } catch (e) { got = e.message; }
+    try { got = pickByLabel(typeof id === 'string' ? st(id) : id, prefix).e.i; } catch (e) { got = e.message; }
     const ok = want instanceof RegExp ? typeof got === 'string' && want.test(got) : got === want;
-    if (!ok) fail(`hover label: ${name} (${id}): got ${got}, want ${want}`);
+    if (!ok) fail(`hover label: ${name} (${typeof id === 'string' ? id : 'synthetic'}): got ${got}, want ${want}`);
   }
 }
 

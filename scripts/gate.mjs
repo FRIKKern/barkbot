@@ -21,6 +21,7 @@ import { transcriptCases, transcriptKeys } from './lib/transcript.mjs';
 import { path, ROOT, items as allItems } from './lib/data.mjs';
 import { judged } from './lib/versions.mjs';
 import { cardCases, cardKeys } from './lib/cards.mjs';
+import { pickByLabel } from './lib/hover-label.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -136,6 +137,13 @@ for (const state of states) {
     // The capture's last step (fixture `act`), replayed on ours the same way.
     const act = state.act;
     if (act?.type) { await page.send('Input.insertText', { text: act.type }); await wait(400); }
+    // A message hovered (the sweep's hoverLabel, N2): the same pick on ours. Ours with nothing by
+    // that label is measured unhovered, so the hover's cases fail as misses, not the run.
+    if (act?.hoverLabel) {
+      let at = null;
+      try { ({ at } = pickByLabel(await page.evaluate(collect), act.hoverLabel)); } catch (e) { console.log(`  ${state.id}: ours: ${e.message}; measured unhovered`); }
+      if (at) { await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at[0], y: at[1] }); await wait(600); }
+    }
     if (act?.wheel || act?.hoverRole) {
       const el = (await page.evaluate(collect)).elements.find((e) => e.role === (act.wheel || act.hoverRole) && e.box[2] > 0 && e.box[3] > 0);
       if (el) {
