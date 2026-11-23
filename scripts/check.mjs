@@ -14,6 +14,8 @@ import { guardBeforeSend } from './lib/host-guard.mjs';
 import { sceneCard } from './lib/cards.mjs';
 import { hostedNote, CLOCKS } from './lib/gate-b-hosted.mjs';
 import { pickByLabel } from './lib/hover-label.mjs';
+import { appSources, doorReds } from './lib/session-doors.mjs';
+import { CASES as DOOR_CASES } from './lib/session-doors-cases.mjs';
 import { VIEWER, dropPicked, labelPressAllowed, markPicked, pickedName, underPoint } from './lib/press-guard.mjs';
 
 const fails = [];
@@ -348,6 +350,31 @@ for (const [name, c, want] of [
   }
 }
 
+// Own session (task-26a1a137b955ef3b): deny by default (lib/session-doors.mjs), over every source
+// file under app/. Every server function opens with `await requireOwnSessionFn(…)` and every method
+// handler of every server route with `await requireOwnSessionRoute(…)` (app/src/server/own-session.ts),
+// or it is on the open list with its reason; anything else is a red.
+{
+  const files = appSources(path('app'));
+  // The walk itself: app/ outside src is read, generated output is not.
+  rule('own session', 1);
+  const seen = files.map((f) => f.path);
+  if (!seen.includes('app/vite.config.ts') || !seen.includes('app/src/chat/api.ts') || seen.some((p) => /node_modules|routeTree\.gen/.test(p))) fail(`own session: the walk of app/ is not what it should be (${seen.length} files; vite.config.ts ${seen.includes('app/vite.config.ts')}, api.ts ${seen.includes('app/src/chat/api.ts')})`);
+  const { doors, reds } = doorReds(files);
+  for (const d of doors) rule('own session', 1);
+  for (const r of reds) fail(`own session: ${r}`);
+  // A floor, not a list: a scan that finds no guarded route or no guarded server function is broken.
+  rule('own session', 1);
+  const guarded = doors.filter((d) => !d.why);
+  if (!guarded.some((d) => d.where.includes('/routes/')) || !guarded.some((d) => !d.where.includes('/routes/'))) fail(`own session: the scan found ${doors.length} door(s) but no guarded route or no guarded server function: it no longer reads the doors`);
+  // The scan itself, on made-up sources (lib/session-doors-cases.mjs).
+  for (const [name, files, want, open = {}, like] of DOOR_CASES) {
+    rule('own session', 1);
+    const got = doorReds(files, open).reds;
+    if (got.length !== want || (like && !got.every((r) => like.test(r)))) fail(`own session: ${name}: the scan gave ${got.length} red(s), want ${want}${like ? ` like ${like}` : ''}: ${JSON.stringify(got)}`);
+  }
+}
+
 // Press guard (the sweep's last look before a press, task-1c715b946dff6176, task-7521aa645350a9ed): the
 // picked element is held in the page right after the pick (markPicked, found by collect's index and
 // checked by its box and visible name), and the press must reach that very element (the nearest
@@ -487,7 +514,7 @@ for (const [name, c, want] of [
 }
 
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label', 'press guard']) {
+for (const name of ['own session', 'doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label', 'press guard']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

@@ -37,6 +37,7 @@ import { PINNED_VERSION } from './lib/pinned-version.mjs';
 import { timeRows } from './lib/time-rows.mjs';
 import { fileNumbers } from './lib/file-numbers.mjs';
 import { openFiles } from './lib/open-files.mjs';
+import { ownSessionDoors, ownSessionComposer } from './lib/own-session.mjs';
 import { pictureViewer } from './lib/picture-viewer.mjs';
 
 const args = process.argv.slice(2);
@@ -61,7 +62,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], quiet: false, quietOpened: [], quietBytes: new Map(), noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { failHosts: false, bodies: [], quiet: false, quietOpened: [], quietBytes: new Map(), noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -169,7 +170,8 @@ await new Promise((ok) => httpServer((req, res) => {
         return got();
       }
     }
-    if (req.url.startsWith('/w/default/v1/chat-hosts')) return json(200, { hosts: stub.hosts });
+    // `failHosts`: Barkpark cannot list the computers (500).
+    if (req.url.startsWith('/w/default/v1/chat-hosts')) return stub.failHosts ? json(500, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : json(200, { hosts: stub.hosts });
     // As Barkpark (studio_chat.ex list_sessions): the list leaves out archived sessions and holds
     // only the 50 most recently active. A session's own read answers any session the admin token
     // can see, archived too, and 404 for an unknown id; it always carries bot_folder, null when none
@@ -1231,8 +1233,8 @@ else {
   // What the viewer's picture gets: the picture as itself, never sniffed; the same id named under another
   // conversation is refused (Barkpark's 404, passed on), and no bytes come back.
   const OTHER_SESSION = '00000000-0000-4000-8000-0000000000ee';
-  const got = await ev(async (u, other) => { const f = async (x) => { const r = await fetch(x); const b = await r.arrayBuffer(); return [r.status, r.headers.get('content-type'), r.headers.get('x-content-type-options'), b.byteLength]; }; return [await f(u), await f(u.replace(/chat\/[^/]+\//, `chat/${other}/`))]; }, url, OTHER_SESSION);
-  check('the viewer\'s picture comes as image/png with nosniff; the same id under another conversation is a 404 with no picture in it', got[0][0] === 200 && got[0][1] === 'image/png' && got[0][2] === 'nosniff' && got[0][3] === PNG.length && got[1][0] === 404 && !/^image\//.test(got[1][1] ?? '') && got[1][3] < 32, { got });
+  const got = await ev(async (u, other) => { const f = async (x) => { const r = await fetch(x); const b = await r.arrayBuffer(); return [r.status, r.headers.get('content-type'), r.headers.get('x-content-type-options'), b.byteLength, new TextDecoder().decode(b.slice(0, 40))]; }; return [await f(u), await f(u.replace(/chat\/[^/]+\//, `chat/${other}/`))]; }, url, OTHER_SESSION);
+  check('the viewer\'s picture comes as image/png with nosniff; the same id under another conversation is a 404 with no picture in it, only the not-ours line (server/own-session.ts)', got[0][0] === 200 && got[0][1] === 'image/png' && got[0][2] === 'nosniff' && got[0][3] === PNG.length && got[1][0] === 404 && !/^image\//.test(got[1][1] ?? '') && got[1][4].startsWith('This conversation could not be checked') && got[1][3] < 200, { got });
   rmSync(pngPath, { force: true });
 
   // A text file goes with a message as a picture does, named by its id and its name; the sent
@@ -1304,6 +1306,8 @@ else {
   check('a reload: the stored row shows its file card by name and size, once (control: the row with no attachments shows none)', f.bubbles === 2 && f.cards.length === 1 && f.cards[0][0] === 'Open note.txt' && f.cards[0][1] === `${NOTE.length}B`, { f });
   stub.rows = [];
   await openFiles({ check, precondition, ev, open, base, until, stub, page, click, session: SESSION, note: NOTE, noteId });
+  await ownSessionDoors({ check, precondition, ev, base, stub, session: SESSION, hostId: HOST_ID, otherHost: OTHER_HOST, note: NOTE, noteId, rec });
+  await ownSessionComposer({ check, precondition, ev, open, base, until, key, page, wait, stub, hostId: HOST_ID });
   await pictureViewer({ check, precondition, ev, open, base, until, key, stub, click, session: SESSION });
   await fileNumbers({ check, precondition, ev, open, base, until, key, stub, page, path, port: CHROME_PORT, session: SESSION });
   await timeRows({ check, precondition, ev, open, base, until, wait, stub, page });
@@ -1457,22 +1461,28 @@ else {
     const held = { header: shown?.header ?? null, record: stub.prefs.get(KEY) ?? null, ms: heldMs, baseMs };
     stub.holdShow.clear(); stub.heldShows.splice(0).forEach((r) => r.destroy()); await wait(1000);
     check('a session read Barkpark never answers holds the page about 8 s, not forever; then the move-in takes no conversation, not that one and not an older one', held.header === 'Legacy Name' && held.ms >= 7500 && held.ms - baseMs < 12000 && !!held.record && held.record.session_id === null, held);
-    // With no bot list and the saved name unreadable, each load shows the Main Bot from memory and
-    // picks its conversation again. What a read showed (a folder or none) is known: not asked again.
+    // With no bot list and the Main Bot's save failing, each load picks its conversation again, and
+    // opens none: the pick is not saved, so no bot record names it and this server did not make it
+    // (app/src/server/own-session.ts; task-26a1a137b955ef3b). What a read showed (a folder or none)
+    // is known: not asked again. The next message starts a conversation (startChat), which opens.
     const F = (n) => `00000000-0000-4000-8000-0000000001c${n}`;
     const folderOf = (n) => ({ ...at(`2026-11-15T1${n}:00:00Z`, session(F(n))), bot_folder: `bot-0000000${n}` });
     stub.sessions = [at('2026-11-15T08:00:00Z', session(F(1))), folderOf(2), folderOf(3), folderOf(4)];
-    freshStore(); stub.fail.set('GET barkbot.bot', 500);
+    freshStore(); stub.fail.set(`PUT ${KEY}`, 500);
     const reads = () => stub.shown.filter((id) => /-0000000001c\d$/.test(id)).length;
-    stub.shown = []; s = await showing('BarkBot'); const first = { reads: reads(), opened: [...stub.opened] };
-    stub.shown = []; s = await showing('BarkBot'); const second = { reads: reads(), opened: [...stub.opened] };
-    check('the second load with no bot list and the saved name unreadable asks Barkpark nothing it already knows, and opens the same conversation (control: the first load read all four)', first.reads === 4 && second.reads === 0 && first.opened.includes(F(1)) && second.opened.includes(F(1)), { first, second });
+    stub.shown = []; stub.opened = []; s = await showing('BarkBot'); const first = { reads: reads(), opened: [...stub.opened] };
+    stub.shown = []; stub.opened = []; s = await showing('BarkBot'); const second = { reads: reads(), opened: [...stub.opened] };
+    const m0 = stub.made.length, t0n = stub.to.length;
+    await typeSend('a first word'); await until(() => stub.to.length > t0n, 8000, 'the first message').catch(() => {}); await wait(500);
+    const next = { made: stub.made.slice(m0), to: stub.to.slice(t0n), opened: [...stub.opened], record: stub.prefs.get(KEY) ?? null };
+    check("the second load with no bot list and the Main Bot's save failing asks Barkpark nothing it already knows, and neither load opens the picked conversation, which no bot record names; the next message starts one, which opens and takes it (control: the first load read all four)", first.reads === 4 && second.reads === 0 && !first.opened.includes(F(1)) && !second.opened.includes(F(1)) && next.made.length === 1 && next.to.length === 1 && next.to[0] === next.made[0] && next.opened.includes(next.made[0]) && !next.to.includes(F(1)), { first, second, next });
     // A read that failed is never remembered: the next load asks again, and never takes that one.
     stub.sessions = [at('2026-11-15T08:00:00Z', session(F(5))), folderOf(6)]; stub.failShow.set(F(6), 500);
-    stub.shown = []; s = await showing('BarkBot'); const failedLoad = { opened: [...stub.opened] };
-    stub.failShow.clear();
-    stub.shown = []; s = await showing('BarkBot'); const nextLoad = { opened: [...stub.opened], asked: stub.shown.includes(F(6)) };
-    check('control: a read that failed is not remembered: that load opens nothing, the next asks again and takes the conversation with no folder, never the one with a folder', !failedLoad.opened.includes(F(5)) && !failedLoad.opened.includes(F(6)) && nextLoad.asked && nextLoad.opened.includes(F(5)) && !nextLoad.opened.includes(F(6)), { failedLoad, nextLoad });
+    freshStore();
+    stub.shown = []; stub.opened = []; s = await showing('BarkBot'); const failedLoad = { opened: [...stub.opened], record: stub.prefs.get(KEY) ?? null };
+    stub.failShow.clear(); stub.fail.delete(`PUT ${KEY}`);
+    stub.shown = []; stub.opened = []; s = await showing('BarkBot'); const nextLoad = { opened: [...stub.opened], asked: stub.shown.includes(F(6)), record: stub.prefs.get(KEY) ?? null };
+    check('control: a read that failed is not remembered: that load opens nothing and saves nothing, the next asks again and takes the conversation with no folder, saved in the Main Bot, never the one with a folder', !failedLoad.opened.includes(F(5)) && !failedLoad.opened.includes(F(6)) && failedLoad.record === null && nextLoad.asked && nextLoad.record?.session_id === F(5) && nextLoad.opened.includes(F(5)) && !nextLoad.opened.includes(F(6)), { failedLoad, nextLoad });
     stub.fail.clear(); freshStore();
     // A 503 storage_unavailable after Barkpark took the message (its turn went before it was stored):
     // the words stay, and one line says it may have been sent (the 500 case is #69's rule).

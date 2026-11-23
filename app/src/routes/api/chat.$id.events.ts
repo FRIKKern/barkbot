@@ -1,7 +1,7 @@
 import {createFileRoute} from '@tanstack/react-router'
 import {bpStream, historyCursor} from '../../server/barkpark'
+import {requireOwnSessionRoute} from '../../server/own-session'
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const OPEN = new TextEncoder().encode(': open\n\n')
 
 // GET /api/chat/<session>/events: Barkpark's event stream for one conversation, passed through
@@ -12,7 +12,9 @@ export const Route = createFileRoute('/api/chat/$id/events')({
   server: {
     handlers: {
       GET: async ({request, params}) => {
-        if (!UUID.test(params.id)) return new Response('bad id', {status: 400})
+        // One of BarkBot's own conversations only (server/own-session.ts): any other id, a malformed one
+        // too, is not found.
+        await requireOwnSessionRoute(params.id)
         const up = await bpStream(`/v1/chat/sessions/${params.id}/events`, request.signal, historyCursor(request))
         if (!up.ok || !up.body) return new Response(await up.text(), {status: up.status})
         // Barkpark sends the headers at once but its first body bytes only with a keepalive, 30 s
