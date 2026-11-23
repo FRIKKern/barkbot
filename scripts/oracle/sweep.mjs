@@ -13,6 +13,7 @@ import { connect } from './cdp.mjs';
 import { activeBot, ORACLE_BOT } from './recipes.mjs';
 import { collect } from './collect.mjs';
 import { controls, namedElements } from '../lib/controls.mjs';
+import { pickByLabel } from '../lib/hover-label.mjs';
 import { path } from '../lib/data.mjs';
 
 const args = process.argv.slice(2);
@@ -77,6 +78,13 @@ const slug = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g
 // Bot tile #2 is Oracle's. #1 is the owner's real bot and is never touched, not even hovered (O1).
 for (const [name, nth] of [...HOVER.map((n) => [n, 0]), ['Bot tile', 1]])
   SWEEP.push([`oracle-hover-${slug(name)}${name === 'Bot tile' ? `-${nth + 1}` : ''}`, `pointer over ${name}${name === 'Bot tile' ? ` #${nth + 1}` : ''}`, [{ hover: name, nth }], [{ park: true }], { keepPointer: true, diff: true, pointer: { over: name, nth } }]);
+// Message hovers (N2): the pointer on the newest message of each speaker, by its group's label
+// (lib/hover-label.mjs); look only. Needs a conversation with both wholly on screen at 1040.
+// Kept as `act`, so Gate A can replay the same pick on ours.
+SWEEP.push(
+  ['oracle-hover-message-oracle', "pointer over Oracle's newest message", [{ hoverLabel: 'Message actions for Oracle message' }], [{ park: true }], { keepPointer: true, diff: true }],
+  ['oracle-hover-message-yours', 'pointer over your newest message', [{ hoverLabel: 'Message actions for your message' }], [{ park: true }], { keepPointer: true, diff: true }],
+);
 // Overlay follow-ups. A recipe with { diff: true } keeps `changed`: the keys its LAST step changed.
 // Not here, on purpose: the account menu's first row opens a usage submenu with the owner's spend
 // (never captured, O2); the composer menu's first row showed no hover to a pointer move (0.79.3): it needs a
@@ -155,6 +163,13 @@ async function step(s) {
     if (s.hoverRole) await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + w / 2, y: y + Math.min(h, 32) / 2 });
     // Near the list's top: a list taller than its scroller (1.2.3's Language, 938 in 360) has its middle off screen.
     else for (let i = 0; i < 10; i++) { await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: x + w / 2, y: y + Math.min(h, 120) / 2, deltaX: 0, deltaY: s.up ? -400 : 400 }); await wait(80); }
+    return wait(SETTLE);
+  }
+  if (s.hoverLabel) {
+    const { at: [x, y] } = pickByLabel(await page.evaluate(collect), s.hoverLabel);
+    execFileSync('open', ['-a', 'Grok Bot']);
+    await page.send('Page.bringToFront');
+    await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
     return wait(SETTLE);
   }
   if (s.hover) {
@@ -253,7 +268,7 @@ for (const [id, what, open, close, opts = {}] of SWEEP) {
   if (opts.focus) out.focus = opts.focus;
   // Where the pointer rested: some looks (the Suggested card's Hide) show only while it is over the window.
   else if (!opts.keepPointer && parkedAt) out.parked = parkedAt;
-  if (opts.diff && !opts.pointer) out.act = open.at(-1); // Gate A replays it on ours: { wheel | type | hoverRole }
+  if (opts.diff && !opts.pointer) out.act = open.at(-1); // Gate A replays it on ours: { wheel | type | hoverRole | hoverLabel }
   if (rest) {
     const look = (e) => JSON.stringify([e.box.map((v) => Math.round(v * 10) / 10), e.style]);
     out.changed = namedElements(state).filter((c) => !rest.has(c.key) || look(rest.get(c.key)) !== look(c.e)).map((c) => c.key);
