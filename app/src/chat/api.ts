@@ -5,6 +5,7 @@ import {readFileSync} from 'node:fs'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError, READ_MS} from '../server/barkpark'
 import {CREATE_UNSURE} from './create-unsure'
+import {madeHere, NOT_OWN, ownHosts, ownSession} from '../server/own-session'
 import {addId, botFolder, dropBot, freshId, keyTaken, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, readListed, removeId, sessionOf, setBotField, trusted, validColour, validName, validShape, write, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 /** A computer the bot runs on. `lastSeenAt`: when Barkpark last heard from it (its last_seen_at,
@@ -69,12 +70,8 @@ async function folderless<S extends {id: string}>(onHost: S[], taken: Set<string
   return undefined
 }
 
-// The caller's own computers and sessions, as Barkpark lists them to the caller: what a stored
-// bot record is checked against (server/bots.ts trusted).
-async function ownHosts(): Promise<Host[]> {
-  const {hosts} = await bp<{hosts: RawHost[]}>(`/w/${conf().workspace}/v1/chat-hosts`)
-  return hosts.filter((x) => x.enrolled && !x.revoked).map((h) => ({id: h.id, name: h.name, online: h.online, lastSeenAt: h.last_seen_at ?? null}))
-}
+// The caller's own computers (server/own-session.ts ownHosts) and sessions, as Barkpark lists them
+// to the caller: what a stored bot record is checked against (server/bots.ts trusted).
 async function ownSessions(): Promise<OwnSession[]> {
   const {sessions} = await bp<{sessions: RawSession[]}>('/v1/chat/sessions')
   return sessions.filter((s) => s.execution_target === 'registered_host')
@@ -346,6 +343,8 @@ export const startChat = createServerFn({method: 'POST'})
       if ((e as Error)?.name === 'TimeoutError') throw new Error(`This message was not sent: Barkpark did not open its conversation within ${READ_MS / 1000} s. Send it again.`)
       throw e
     }
+    // Made here: its doors open for this server even if the bot record below is not saved (kept:false).
+    madeHere(s.id, data.hostId)
     let kept = false
     try {
       kept = await oneAtATime(data.botId, async (write) => {
@@ -410,6 +409,8 @@ const IN_USE_TRIES = 8
 export const sendMessage = createServerFn({method: 'POST'})
   .validator((d: {id: string; content: string; attachments?: AttachmentRef[]; key?: string}) => d)
   .handler(async ({data}): Promise<{accepted: true; key?: string; replay?: boolean} | {refused: string} | {failed: string} | {unsure: string; again: 'safe' | 'look'; key?: string}> => {
+    // Nothing went: a sure no, so the page keeps the words as for any refusal before sending.
+    if (!(await ownSession(data.id))) return {failed: NOT_OWN}
     // What it names was stored for this conversation first (uploadAttachment below).
     const json = data.attachments?.length ? {content: data.content, attachments: data.attachments} : {content: data.content}
     let key = data.key
@@ -451,6 +452,7 @@ export const sendMessage = createServerFn({method: 'POST'})
 export const uploadAttachment = createServerFn({method: 'POST'})
   .validator((d: {id: string; data: string}) => d)
   .handler(async ({data}): Promise<{id: string; media_type: string; byte_size: number} | {refused: string}> => {
+    if (!(await ownSession(data.id))) return {refused: NOT_OWN}
     try {
       const r = await bp<{attachment: {id: string; media_type: string; byte_size: number}}>(`/v1/chat/sessions/${encodeURIComponent(data.id)}/attachments`, {method: 'POST', json: {data: data.data}})
       return {id: r.attachment.id, media_type: r.attachment.media_type, byte_size: r.attachment.byte_size}
@@ -468,6 +470,7 @@ export const answerApproval = createServerFn({method: 'POST'})
     return d
   })
   .handler(async ({data}) => {
+    if (!(await ownSession(data.id))) throw new Error(NOT_OWN)
     await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/approval`, {method: 'POST', json: {request_id: data.requestId, decision: data.decision}})
     return {answered: true}
   })
@@ -477,6 +480,7 @@ export const answerApproval = createServerFn({method: 'POST'})
 export const answerQuestion = createServerFn({method: 'POST'})
   .validator((d: {id: string; requestId: string; answers: Record<string, string | string[]>}) => d)
   .handler(async ({data}) => {
+    if (!(await ownSession(data.id))) throw new Error(NOT_OWN)
     await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/answer`, {method: 'POST', json: {request_id: data.requestId, answers: data.answers}})
     return {answered: true}
   })

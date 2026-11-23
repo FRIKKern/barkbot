@@ -1,5 +1,6 @@
 import {createFileRoute} from '@tanstack/react-router'
 import {bp} from '../../server/barkpark'
+import {ownSession} from '../../server/own-session'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const SHA = /^[0-9a-f]{64}$/
@@ -25,6 +26,8 @@ export const Route = createFileRoute('/api/chat/$id/attachments/$aid')({
     handlers: {
       GET: async ({params, request}) => {
         if (!UUID.test(params.id) || !SHA.test(params.aid)) return new Response('bad id', {status: 400})
+        // One of BarkBot's own conversations only (server/own-session.ts); any other is not found.
+        if (!(await ownSession(params.id))) return new Response('not found', {status: 404})
         try {
           // A picture's bytes are not bounded (barkpark.ts READ_MS): a slow link is not a hang.
           const {attachment} = await bp<{attachment: {media_type: string; data: string}}>(`/v1/chat/sessions/${params.id}/attachments/${params.aid}`, {unbounded: true})

@@ -14,6 +14,7 @@ import { guardBeforeSend } from './lib/host-guard.mjs';
 import { sceneCard } from './lib/cards.mjs';
 import { hostedNote, CLOCKS } from './lib/gate-b-hosted.mjs';
 import { pickByLabel } from './lib/hover-label.mjs';
+import { sessionDoors } from './lib/session-doors.mjs';
 
 const fails = [];
 const ran = {};
@@ -322,8 +323,38 @@ for (const [name, c, want] of [
   }
 }
 
+// Own session (task-26a1a137b955ef3b): every door that takes a session id, read from the source
+// (lib/session-doors.mjs), asks app/src/server/own-session.ts ownSession before it uses the id.
+{
+  const walk = (d) => readdirSync(path(d), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : /\.tsx?$/.test(e.name) ? [`${d}/${e.name}`] : []));
+  const files = walk('app/src').map((p) => ({ path: p, src: read(p) }));
+  const found = sessionDoors(files);
+  for (const d of found) { rule('own session', 1); if (!d.guarded) fail(`own session: ${d.where} uses ${d.input} as a session id without first asking ownSession (if (!(await ownSession(${d.input}))) …)`); }
+  // A floor, not a list: a scan that finds no route or no server function door is broken.
+  rule('own session', 1);
+  if (!found.some((d) => d.input.startsWith('params.')) || !found.some((d) => d.input.startsWith('data.'))) fail(`own session: the scan found ${found.length} door(s), none of one kind: it no longer reads the doors`);
+  // The scan itself, on made-up sources: what it must catch, and what it must let through.
+  const FN = (body) => [{ path: 'app/src/x.ts', src: `const askedFor = async (id: string) => bp(\`/v1/chat/sessions/\${id}?since=1\`)\nexport const door = createServerFn({method: 'POST'})\n  .handler(async ({data}) => {\n${body}\n  })\n` }];
+  const ROUTE = (body) => [{ path: 'app/src/routes/api/chat.$id.x.ts', src: `export const Route = createFileRoute('/api/chat/$id/x')({server: {handlers: {GET: async ({params}) => {\n${body}\n}}}})\n` }];
+  for (const [name, files, want] of [
+    ['a server function that sends to data.id with no guard', FN('    await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`)'), [false]],
+    ['the same, guarded first', FN('    if (!(await ownSession(data.id))) throw new Error(NOT_OWN)\n    await bp(`/v1/chat/sessions/${encodeURIComponent(data.id)}/messages`)'), [true]],
+    ['a guard after the use', FN('    await bp(`/v1/chat/sessions/${data.id}/answer`)\n    if (!(await ownSession(data.id))) throw new Error(NOT_OWN)'), [false]],
+    ['a guard on another input', FN('    if (!(await ownSession(data.other))) throw new Error(NOT_OWN)\n    await bp(`/v1/chat/sessions/${data.id}/answer`)'), [false]],
+    ['a guard whose answer is not used', FN('    await ownSession(data.id)\n    await bp(`/v1/chat/sessions/${data.id}/answer`)'), [false]],
+    ['the id handed to a function that builds the path', FN('    return askedFor(data.id)'), [false]],
+    ['a route that streams params.id with no guard', ROUTE('const up = await bpStream(`/v1/chat/sessions/${params.id}/events`)'), [false]],
+    ['the same route, guarded first', ROUTE("if (!(await ownSession(params.id))) return new Response('not found', {status: 404})\nconst up = await bpStream(`/v1/chat/sessions/${params.id}/events`)"), [true]],
+    ['a server function that takes no session id', FN("    return bp('/v1/chat/sessions', {method: 'POST'})"), []],
+  ]) {
+    rule('own session', 1);
+    const got = sessionDoors(files).map((d) => d.guarded);
+    if (JSON.stringify(got) !== JSON.stringify(want)) fail(`own session: ${name}: the scan said ${JSON.stringify(got)}, want ${JSON.stringify(want)}`);
+  }
+}
+
 // No skip-pass: every rule must have checked something.
-for (const name of ['doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label']) {
+for (const name of ['own session', 'doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

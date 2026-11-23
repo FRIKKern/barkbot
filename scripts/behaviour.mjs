@@ -37,6 +37,7 @@ import { PINNED_VERSION } from './lib/pinned-version.mjs';
 import { timeRows } from './lib/time-rows.mjs';
 import { fileNumbers } from './lib/file-numbers.mjs';
 import { openFiles } from './lib/open-files.mjs';
+import { ownSessionDoors } from './lib/own-session.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -60,7 +61,7 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { bodies: [], quiet: false, quietOpened: [], quietBytes: new Map(), noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { failHosts: false, bodies: [], quiet: false, quietOpened: [], quietBytes: new Map(), noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -168,7 +169,8 @@ await new Promise((ok) => httpServer((req, res) => {
         return got();
       }
     }
-    if (req.url.startsWith('/w/default/v1/chat-hosts')) return json(200, { hosts: stub.hosts });
+    // `failHosts`: Barkpark cannot list the computers (500).
+    if (req.url.startsWith('/w/default/v1/chat-hosts')) return stub.failHosts ? json(500, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : json(200, { hosts: stub.hosts });
     // As Barkpark (studio_chat.ex list_sessions): the list leaves out archived sessions and holds
     // only the 50 most recently active. A session's own read answers any session the admin token
     // can see, archived too, and 404 for an unknown id; it always carries bot_folder, null when none
@@ -1300,6 +1302,7 @@ else {
   check('a reload: the stored row shows its file card by name and size, once (control: the row with no attachments shows none)', f.bubbles === 2 && f.cards.length === 1 && f.cards[0][0] === 'Open note.txt' && f.cards[0][1] === `${NOTE.length}B`, { f });
   stub.rows = [];
   await openFiles({ check, precondition, ev, open, base, until, stub, page, click, session: SESSION, note: NOTE, noteId });
+  await ownSessionDoors({ check, precondition, ev, base, stub, session: SESSION, hostId: HOST_ID, otherHost: OTHER_HOST, note: NOTE, noteId, rec });
   await fileNumbers({ check, precondition, ev, open, base, until, key, stub, page, path, port: CHROME_PORT, session: SESSION });
   await timeRows({ check, precondition, ev, open, base, until, wait, stub, page });
   [notePath, zipPath, binPath].forEach((x) => rmSync(x, { force: true }));
