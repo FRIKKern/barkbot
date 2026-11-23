@@ -1,8 +1,8 @@
 // A sent file opens from its card (A1, task-71ee600273461306). The card opens the file in a new tab
 // at our route (app/src/routes/api/chat.$id.attachments.$aid.ts), and the route's headers decide what
-// the tab does with it, never the page: a text file downloads, a PDF draws in the browser's viewer,
-// both with nosniff and a CSP sandbox, so nothing a person sent runs as a page on BarkBot's origin.
-// Barkpark stores HTML, SVG and script as text/plain; a type outside pictures, text and PDF is a 415.
+// the tab does with it, never the page: a text file and a PDF both download (a PDF is never drawn
+// here: Chrome's viewer runs its script under this origin, rev299 on #317), with nosniff and a CSP
+// sandbox. Barkpark stores HTML, SVG and script as text/plain; any other type is a 415.
 // Run inside the stand-in's open conversation (behaviour.mjs, after the file card's reload rule).
 import { createHash } from 'node:crypto';
 
@@ -38,7 +38,7 @@ export async function openFiles({ check, precondition, ev, open, base, until, st
   const txt = await get(url(noteId, 'note.txt'));
   check('a text file opens as a download, never drawn here: text/plain; charset=utf-8, nosniff, attachment by its name, a CSP sandbox, and its own bytes', txt.status === 200 && txt.type === 'text/plain; charset=utf-8' && txt.sniff === 'nosniff' && txt.disposition === 'attachment; filename="note.txt"' && txt.csp === 'sandbox' && txt.text === note.toString(), { txt });
   const pdf = await get(url(pdfId, 'report.pdf'));
-  check('a PDF opens in the browser\'s viewer: application/pdf, nosniff, inline by its name, a CSP sandbox, and its own bytes', pdf.status === 200 && pdf.type === 'application/pdf' && pdf.sniff === 'nosniff' && pdf.disposition === 'inline; filename="report.pdf"' && pdf.csp === 'sandbox' && pdf.size === PDF.length, { pdf: { ...pdf, text: undefined } });
+  check('a PDF downloads, never drawn here: application/pdf, nosniff, attachment by its name, a CSP sandbox, and its own bytes', pdf.status === 200 && pdf.type === 'application/pdf' && pdf.sniff === 'nosniff' && pdf.disposition === 'attachment; filename="report.pdf"' && pdf.csp === 'sandbox' && pdf.size === PDF.length, { pdf: { ...pdf, text: undefined } });
   // Barkpark stored an HTML file as text/plain: it stays text, a sandboxed download. A name that is not
   // plainly safe (a quote, a line break) is left out of the header instead of being written into it.
   const html = await get(url(htmlId, 'page.html'));
