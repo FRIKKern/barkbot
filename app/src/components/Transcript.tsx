@@ -3,7 +3,7 @@
 import {Fragment, useLayoutEffect, useRef, type ReactNode} from 'react'
 import type {Answers, Ask, Bubble, Working} from '../chat/useConversation'
 import {filler} from '../chat/turn'
-import {AnsweredCard, FileCard, PictureTiles, QuestionCard} from './Cards'
+import {AnsweredCard, FileCard, PictureTiles, QuestionCard, scenePictureName} from './Cards'
 import {numberSame} from './fileNumbers'
 
 /** A message as lengths only (O2): what a gate scene holds (gate/transcripts.ts). */
@@ -23,7 +23,7 @@ export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null
   const waiting = last && 'card' in last && last.card === 'question' && last.choices ? last : null
   const ask: Ask | null = waiting ? {id: 'scene-ask', what: 'ask you something', detail: null, answering: null, questions: [{question: waiting.question ?? '', header: null, multi: false, options: (waiting.choices ?? []).map((label) => ({label, description: null}))}]} : null
   // A file or picture card belongs to the message under it, as the live page holds it.
-  let carried: Pick<Bubble, 'files' | 'images'> = {}
+  let carried: Pick<Bubble, 'files' | 'images' | 'imageNames'> = {}
   // The messages are timed as the live page's are (Bubble.at): from a time row on, at its clock;
   // before the scene's first one, a day earlier. laterRow then draws the row where the oracle has it.
   const clocks = rows.flatMap((r) => ('card' in r && r.card === 'time' ? [todayAt(r.time)] : []))
@@ -36,7 +36,7 @@ export function fromScene(rows: SceneRow[]): {bubbles: Bubble[]; ask: Ask | null
     }
     if (r.card === 'time') at = todayAt(r.time)
     if (r.card === 'file') carried = {...carried, files: r.files.map((f) => ({name: f.name, size: filler(f.size)}))}
-    if (r.card === 'pictures') carried = {...carried, images: Array.from({length: r.count}, (_, j) => `scene:${j}`)}
+    if (r.card === 'pictures') carried = {...carried, images: Array.from({length: r.count}, (_, j) => `scene:${j}`), imageNames: Array.from({length: r.count}, (_, j) => scenePictureName(j))}
     // A question off screen above (a card cut off at the top) gets placeholder words, one line.
     return r.card === 'question' && r.answered ? [{key: `scene-${i}`, role: 'assistant', text: '', answered: {question: r.question ?? filler(25), ...r.answered}, ...(at && {at})}] : []
   })
@@ -198,7 +198,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
                       ))}
                     </div>
                   )}
-                  {b.images && b.images.length > 0 && <PictureTiles ids={b.images} picture={picture} />}
+                  {b.images && b.images.length > 0 && <PictureTiles ids={b.images} names={b.imageNames} picture={picture} />}
                 </div>
               )}
               {(b.text || !attached) && (
