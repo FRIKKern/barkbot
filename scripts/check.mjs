@@ -310,6 +310,9 @@ for (const [name, c, want] of [
     ["yours: the message's own group, not its last tile's", 'oracle-ask-choice', YOURS, 93],
     ['yours: the only one is cut off', 'oracle-turn-1040', YOURS, /none wholly on screen/],
     ['a label nothing carries', 'oracle-turn-1040', 'Message actions for nobody', /nothing by that label on screen/],
+    // The sweep's pressLabel (oracle-picture-viewer*): the openers inside the five-picture message.
+    ['the viewer from a tile: the last whole tile, not the +3 one', 'oracle-pictures-sent', 'Open image full screen', 145],
+    ['the viewer from the +3 tile', 'oracle-pictures-sent', 'Open the remaining 3 images full screen', 150],
   ]) {
     rule('hover label', 1);
     let got;
