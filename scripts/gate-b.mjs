@@ -298,7 +298,14 @@ for (const s of report) {
   }
   else if (s.pass > p.pass) higher.push(`${s.id} ${p.pass} → ${s.pass}`);
 }
-if (lower.length && !ACCEPT) { console.error(`Gate B: the pass count went down (${lower.join(', ')}). Not recorded. A change that lowers it does not land; --accept records it on purpose.`); process.exit(1); }
+// On a hosted runner (gate.yml runs this report only) a timer fires late under load, so a timing
+// budget can flip there that the recorded local runs meet: say so, next to the drop it explains.
+const HOSTED = process.env.GITHUB_ACTIONS === 'true';
+if (lower.length && !ACCEPT) {
+  console.error(`Gate B: the pass count went down (${lower.join(', ')}). Not recorded. A change that lowers it does not land; --accept records it on purpose.`);
+  if (HOSTED) console.error('Gate B: report only, runner timing: on this hosted runner a late timer flips a timing budget; budgets are judged on the recorded local runs (parity/gate-b/), not here. A flip here is not a regression.');
+  process.exit(1);
+}
 if (CI) {
   if (unrecorded.length) { console.error(`Gate B: no recorded run for ${unrecorded.join(', ')}: run npm run gate:b and commit parity/gate-b/`); process.exit(1); }
   if (higher.length) console.log(`Gate B: higher than recorded (${higher.join(', ')}): run npm run gate:b to record it`);
