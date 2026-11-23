@@ -38,6 +38,7 @@ import { timeRows } from './lib/time-rows.mjs';
 import { fileNumbers } from './lib/file-numbers.mjs';
 import { openFiles } from './lib/open-files.mjs';
 import { ownSessionDoors } from './lib/own-session.mjs';
+import { pictureViewer } from './lib/picture-viewer.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -1219,18 +1220,21 @@ else {
   await page.send('Input.insertText', { text: 'words only' }); await key('Enter');
   await until(() => stub.sent.length > 1, 8000, 'the second message').catch(() => {});
   check('a message without a picture names none (control)', stub.sent.length === 2 && !('attachments' in stub.sent[1]) && stub.uploads.length === 1, { sent: stub.sent });
-  // A press on the tile opens that picture in a new tab, by our route (task-71ee600273461306).
+  // A press on the tile opens it in our viewer, by our route, under the name it was sent with; never
+  // a new tab (task-a58919378f43975d; the viewer's own rules: lib/picture-viewer.mjs). Escape closes it.
   await ev(() => { window.__opened = []; window.open = (...a) => { window.__opened.push(a); return null; }; });
   const tile = await ev(() => { const r = document.querySelector('.turn-attached .picture-tiles .tile-open')?.getBoundingClientRect(); return r ? [r.x + r.width / 2, r.y + r.height / 2] : null; });
   if (tile) await click(...tile);
-  const opened = await ev(() => window.__opened);
+  await until(async () => !!(await ev(() => document.querySelector('[role=dialog].viewer'))), 3000, 'the viewer').catch(() => {});
+  const viewed = await ev(() => ({ opened: window.__opened, img: document.querySelector('.viewer-stage img')?.getAttribute('src'), pill: document.querySelector('.viewer-pill')?.textContent }));
   const url = `/api/chat/${shown.imgs[0]?.[0]?.split('/')[3]}/attachments/${pngId}`;
-  check('a press on a sent picture opens it in a new tab at our route, with no opener (it did nothing before)', !!tile && opened.length === 1 && opened[0][0] === url && opened[0][1] === '_blank' && opened[0][2] === 'noopener,noreferrer', { tile, opened, url });
-  // What that tab gets: the picture as itself, never sniffed; the same id named under another
+  check('a press on a picture just sent opens it in our viewer at our route, under the name it was sent with, and no new tab (a new tab before)', !!tile && viewed.opened.length === 0 && viewed.img === url && viewed.pill === `behaviour-picture-${CHROME_PORT}.png`, { tile, viewed, url });
+  await key('Escape');
+  // What the viewer's picture gets: the picture as itself, never sniffed; the same id named under another
   // conversation is refused (Barkpark's 404, passed on), and no bytes come back.
   const OTHER_SESSION = '00000000-0000-4000-8000-0000000000ee';
   const got = await ev(async (u, other) => { const f = async (x) => { const r = await fetch(x); const b = await r.arrayBuffer(); return [r.status, r.headers.get('content-type'), r.headers.get('x-content-type-options'), b.byteLength, new TextDecoder().decode(b.slice(0, 40))]; }; return [await f(u), await f(u.replace(/chat\/[^/]+\//, `chat/${other}/`))]; }, url, OTHER_SESSION);
-  check('the opened tab gets the picture as image/png with nosniff; the same id under another conversation is a 404 with no picture in it, only the not-ours line (server/own-session.ts)', got[0][0] === 200 && got[0][1] === 'image/png' && got[0][2] === 'nosniff' && got[0][3] === PNG.length && got[1][0] === 404 && !/^image\//.test(got[1][1] ?? '') && got[1][4].startsWith('This conversation could not be checked') && got[1][3] < 200, { got });
+  check('the viewer\'s picture comes as image/png with nosniff; the same id under another conversation is a 404 with no picture in it, only the not-ours line (server/own-session.ts)', got[0][0] === 200 && got[0][1] === 'image/png' && got[0][2] === 'nosniff' && got[0][3] === PNG.length && got[1][0] === 404 && !/^image\//.test(got[1][1] ?? '') && got[1][4].startsWith('This conversation could not be checked') && got[1][3] < 200, { got });
   rmSync(pngPath, { force: true });
 
   // A text file goes with a message as a picture does, named by its id and its name; the sent
@@ -1303,6 +1307,7 @@ else {
   stub.rows = [];
   await openFiles({ check, precondition, ev, open, base, until, stub, page, click, session: SESSION, note: NOTE, noteId });
   await ownSessionDoors({ check, precondition, ev, base, stub, session: SESSION, hostId: HOST_ID, otherHost: OTHER_HOST, note: NOTE, noteId, rec });
+  await pictureViewer({ check, precondition, ev, open, base, until, key, stub, click, session: SESSION });
   await fileNumbers({ check, precondition, ev, open, base, until, key, stub, page, path, port: CHROME_PORT, session: SESSION });
   await timeRows({ check, precondition, ev, open, base, until, wait, stub, page });
   [notePath, zipPath, binPath].forEach((x) => rmSync(x, { force: true }));

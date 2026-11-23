@@ -1,0 +1,33 @@
+/* The picture viewer (components/Viewer.tsx), measured on fixtures/states/oracle-picture-viewer.json
+   and -rest.json (1040 x 760). It covers all right of the rail (dialog 297: 88, 0, 952 x 760, rgb 18),
+   the media group over it at 95% black (315). The top bar is 60: the name pill centred, 10 down, 40 tall,
+   0.5 ring at 6% (300, 301: 14/500); the three rounds 36, 8 apart, 12 from the top and the right
+   (305, 308, 311: rgb 31, 1 ring at 6%, ink at 90%). */
+.viewer { position: fixed; z-index: 40; top: 0; bottom: 0; left: var(--rail); right: 0; background: var(--bg); color: var(--ink); }
+.viewer-top { position: absolute; z-index: 1; inset: 0 0 auto; height: 60px; }
+.viewer-pill { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); height: 40px; padding: 0 13.5px; display: flex; align-items: center; border-radius: 9999px; background: var(--bg-raised); border: 0.5px solid var(--wash-06); white-space: nowrap; }
+.viewer-pill > span { font-size: 14px; font-weight: 500; line-height: 20px; letter-spacing: 0.14px; }
+.viewer-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; }
+.viewer-round { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 9999px; background: var(--bg-raised); border: 1px solid var(--wash-06); color: var(--ink-90); }
+/* Under the bar, down the middle: the picture's stage from 72 (316: 500 tall at 760), 16, the name
+   and place (321: 12/16, 8 above and below, ink at 54%), 16, the strip (322), and the composer's
+   room: 15, its 53, 8 (336). */
+.viewer-media { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: 72px 0 76px; background: rgb(0 0 0 / 0.95); }
+.viewer-stage { flex: 1; min-height: 0; width: 100%; display: grid; place-items: center; }
+.viewer-stage img { display: block; max-width: 100%; max-height: 100%; border-radius: 8px; }
+.viewer-caption { margin-top: 16px; padding: 8px 0; font-size: 12px; line-height: 16px; letter-spacing: 0.12px; color: var(--ink-54); white-space: nowrap; }
+/* The strip: 48 squares 8 apart, radius 8 (326-335). The others at half opacity with a 0.5 ring at
+   10%; the one shown with a 2 ink ring and the picture 2 inside it, radius 4. */
+.viewer-strip { margin-top: 16px; display: flex; gap: 8px; }
+.viewer-thumb { width: 48px; height: 48px; flex: none; border-radius: 8px; border: 0.5px solid var(--wash-10); opacity: 0.5; color: rgb(255, 255, 255); }
+.viewer-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 7.5px; }
+.viewer-thumb.on { border: 2px solid var(--ink); padding: 2px; opacity: 1; }
+.viewer-thumb.on img { border-radius: 4px; }
+/* A composer about the picture: 568 wide centred, 8 from the bottom (336); its group 4 in with a clear
+   0.5 ring, radius 24 (337); the box inside is the main composer's (composer.css). */
+.viewer-composer { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 568px; max-width: 100%; padding: 0 4px; }
+.viewer-compose { border: 0.5px solid transparent; border-radius: 24px; padding: 4px; }
+.viewer-compose .composer-wrap { padding: 0; }
+/* The conversation's own composer is not shown while the viewer is open (none in either capture);
+   it keeps its room, so the conversation behind does not move. */
+.app[data-viewing] .convo > .composer-wrap { visibility: hidden; }
