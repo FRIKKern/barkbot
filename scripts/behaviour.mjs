@@ -1221,6 +1221,7 @@ else {
   console.log('Behaviour · a text file with a message (the live page, against the stand-in Barkpark)');
   const NOTE = Buffer.from('The code is K7-PLUM-42.\n'); const noteId = createHash('sha256').update(NOTE).digest('hex');
   const notePath = path('.cache', `note-${CHROME_PORT}.txt`); writeFileSync(notePath, NOTE);
+  const mdPath = path('.cache', `plan-${CHROME_PORT}.md`); writeFileSync(mdPath, NOTE);
   const zipPath = path('.cache', `bundle-${CHROME_PORT}.zip`); writeFileSync(zipPath, Buffer.from('504b0304140000000000', 'hex'));
   const binPath = path('.cache', `blob-${CHROME_PORT}`); /* no extension: the browser gives it no type, so Barkpark judges it */ writeFileSync(binPath, Buffer.from([0, 1, 2, 3, 0xff, 0]));
   const pick = async (file) => { const { root: r } = await page.send('DOM.getDocument'); const { nodeId: n } = await page.send('DOM.querySelector', { nodeId: r.nodeId, selector: '.composer-wrap input[type=file]' }); await page.send('DOM.setFileInputFiles', { nodeId: n, files: [file] }); };
@@ -1231,8 +1232,17 @@ else {
   await until(async () => (await box()).line !== null, 5000, 'the refusal line').catch(() => {});
   let f = await box();
   check('a zip is refused in a plain line, and nothing is stored or sent', /bundle-\d+\.zip is not a picture, a text file or a PDF/.test(f.line ?? '') && f.chips.length === 0 && stub.uploads.length === up0 && stub.sent.length === sent0 && stub.refused.length === 0, { f, uploads: stub.uploads.length - up0, sent: stub.sent.length - sent0 });
+  // A file's kind carries a fit only on its exact text: ".txt" (measured on the oracle), and no other.
+  const kindSpacing = () => ev(() => { const e = document.querySelector('.composer-attachments .file-ext'); return e ? [e.textContent, getComputedStyle(e).letterSpacing] : null; });
+  await pick(mdPath);
+  await until(async () => (await box()).chips.length === 1, 5000, 'the .md chip').catch(() => {});
+  const mdKind = await kindSpacing();
+  await ev(() => document.querySelector('.attach-file-remove')?.click());
+  await until(async () => (await box()).chips.length === 0, 5000, 'the .md chip to go').catch(() => {});
   await pick(notePath);
   await until(async () => (await box()).chips.length === 1, 5000, 'the file chip').catch(() => {});
+  const txtKind = await kindSpacing();
+  check('a file\'s kind is fitted on its exact text only: ".md" draws at the name\'s 0.14px, ".txt" at its own -0.2px', mdKind?.[0] === '.md' && mdKind[1] === '0.14px' && txtKind?.[0] === '.txt' && txtKind[1] === '-0.2px', { mdKind, txtKind });
   f = await box();
   check('a picked text file waits in the box by name and size, and nothing is stored or sent yet', f.chips.length === 1 && /^note-\d+\.txt$/.test(f.chips[0]) && f.size === `${NOTE.length}B` && f.line === null && stub.uploads.length === up0 && stub.sent.length === sent0, { f });
   await type('read it'); await key('Enter');
