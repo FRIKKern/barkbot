@@ -119,6 +119,11 @@ export function PageMark() {
 // (oracle-main-720: 19.9 after the name; " (2)" meets its 23.1 as it is).
 const NUMBER_FIT: Record<string, string> = {'(1)': '-0.31px'}
 
+// A kind where the stand-in face runs off the oracle's: ".txt" is 1.5 wide at the name's 0.14px
+// (22.4 over oracle-file-waiting's 20.9; -0.2px meets it). It holds for ".txt" alone: any other kind
+// a user sends is drawn at the name's tracking, unfitted.
+const KIND_FIT: Record<string, string> = {'.txt': '-0.2px'}
+
 /** The name, its kind kept apart so a long name loses its middle, not its ending (span 148 and 149);
  *  the number that tells two files of the same name apart ("(2)", fileNumbers.ts) follows it. */
 export function FileName({name}: {name: string}) {
@@ -130,7 +135,7 @@ export function FileName({name}: {name: string}) {
       <span className="file-label" style={number && NUMBER_FIT[number] ? {letterSpacing: NUMBER_FIT[number]} : undefined}>
         <bdi>
           <span className="file-base">{base}</span>
-          {ext && <span className="file-ext">{ext}</span>}
+          {ext && <span className="file-ext" style={KIND_FIT[ext] ? {letterSpacing: KIND_FIT[ext]} : undefined}>{ext}</span>}
         </bdi>
         {number && `\u00a0${number}`}
       </span>
