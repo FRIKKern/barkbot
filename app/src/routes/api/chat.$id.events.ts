@@ -1,6 +1,6 @@
 import {createFileRoute} from '@tanstack/react-router'
 import {bpStream, historyCursor} from '../../server/barkpark'
-import {requireOwnSession} from '../../server/own-session'
+import {requireOwnSessionRoute} from '../../server/own-session'
 
 const OPEN = new TextEncoder().encode(': open\n\n')
 
@@ -14,7 +14,7 @@ export const Route = createFileRoute('/api/chat/$id/events')({
       GET: async ({request, params}) => {
         // One of BarkBot's own conversations only (server/own-session.ts): any other id, a malformed one
         // too, is not found.
-        await requireOwnSession(params.id)
+        await requireOwnSessionRoute(params.id)
         const up = await bpStream(`/v1/chat/sessions/${params.id}/events`, request.signal, historyCursor(request))
         if (!up.ok || !up.body) return new Response(await up.text(), {status: up.status})
         // Barkpark sends the headers at once but its first body bytes only with a keepalive, 30 s

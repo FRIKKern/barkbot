@@ -1,17 +1,22 @@
 // Every server door is closed unless it proves otherwise (task-26a1a137b955ef3b; rev299 on #320,
-// the lead's ruling: deny by default, never try to spot which doors take a session id). A door is:
-//  - every createServerFn( call in app/src, in any form (const, let, var, export default, an object
-//    member, an alias of the import), each judged by its own .handler; and
+// the lead's rulings: deny by default, never try to spot which doors take a session id). The scan
+// reads every source file under app/ (appSources: all but node_modules and generated output). A door is:
+//  - every direct call `createServerFn(` (const, let, var, export default, an object member), each
+//    judged by its own .handler; and
 //  - every method handler (GET, POST, DELETE, ...) of every server route under app/src/routes, each
 //    judged on its own, never the whole file.
-// A door passes only when its handler's first statement is `await requireOwnSession(<input>.<key>)`,
-// standing alone, with requireOwnSession imported from server/own-session and not defined in the
-// file; or when it is on OPEN (below) with its reason. Anything the scan cannot read as one of those
-// shapes is a red, not a pass: a handler passed by name, an expression body, a createServerFn the
-// scan cannot tie to a call, a `handlers` it cannot read, an import of Start it cannot follow.
-// What it still does not see: which input the guard names (requireOwnSession(data.a) passes while
+// A door passes only when its handler's first statement is its own kind's guard, standing alone, on
+// a field of the handler's input: `await requireOwnSessionFn(data.<key>)` for a server function (it
+// throws an Error), `await requireOwnSessionRoute(params.<key>)` for a route (it throws a 404
+// Response); the guard imported from server/own-session, not renamed, not made in the file. Or when
+// it is on OPEN (below) with a reason of 10 characters or more. Anything else is a red, not a pass:
+// a handler passed by name, an expression body, `handlers` the scan cannot read, and createServerFn
+// anywhere but its plain named import from @tanstack/react-start and a direct call (an alias, a
+// namespace, a bracket, a destructure, a re-export, a comment or a string that names it).
+// What it still does not see: which input the guard names (requireOwnSessionFn(data.a) passes while
 // data.b is the session used), a validator that reads Barkpark before the handler runs, and a door
-// made by something other than createServerFn or a route's server handlers.
+// made by something other than createServerFn or a route's server handlers (createMiddleware).
+import { readdirSync, readFileSync } from 'node:fs';
 
 /** The doors that open without the guard, each with its reason. A stale entry (no such door) is a red. */
 export const OPEN = Object.freeze({
@@ -27,6 +32,18 @@ export const OPEN = Object.freeze({
 
 export const SOURCE = /\.(?:[cm]?[jt]sx?)$/;
 const START = /@tanstack\/[\w-]*start[\w-]*/;
+const GUARD = Object.freeze({ fn: 'requireOwnSessionFn', route: 'requireOwnSessionRoute' });
+// What appSources leaves out: installed packages and what a build or the router writes.
+const SKIP = new Set(['node_modules', 'dist', '.output', '.tanstack', '.vinxi', '.nitro']);
+const GENERATED = /\.gen\.[cm]?[jt]sx?$/;
+
+/** Every source file under `abs` (the repo's app/), as [{path, src}] with paths from `rel`. */
+export function appSources(abs, rel = 'app') {
+  return readdirSync(abs, { withFileTypes: true }).flatMap((e) => {
+    if (e.isDirectory()) return SKIP.has(e.name) ? [] : appSources(`${abs}/${e.name}`, `${rel}/${e.name}`);
+    return SOURCE.test(e.name) && !GENERATED.test(e.name) ? [{ path: `${rel}/${e.name}`, src: readFileSync(`${abs}/${e.name}`, 'utf8') }] : [];
+  });
+}
 const METHODS = new Set(['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'ANY']);
 
 /** The source with every comment, string and template text blanked to spaces, the same length, so
@@ -106,10 +123,14 @@ function fnAt(code, src, i, key) {
 }
 
 /** Whether the body opening at `at` starts with the guard, alone, on its own input. */
-function guardFirst(code, src, at, input) {
+function guardFirst(code, src, at, input, kind) {
   const j = ws(code, at + 1);
-  const G = 'await requireOwnSession(';
-  if (!code.startsWith(G, j)) return `its first statement is not \`${G}…)\``;
+  const G = `await ${GUARD[kind]}(`;
+  if (!code.startsWith(G, j)) {
+    const other = GUARD[kind === 'fn' ? 'route' : 'fn'];
+    if (code.startsWith(`await ${other}(`, j)) return `it opens with ${other}, the guard for a ${kind === 'fn' ? 'route' : 'server function'}; a ${kind === 'fn' ? 'server function' : 'route'} needs \`${G}…)\``;
+    return `its first statement is not \`${G}…)\``;
+  }
   const p = j + G.length - 1, e = close(code, p);
   if (e < 0) return 'its guard does not close';
   const arg = src.slice(p + 1, e).trim();
@@ -126,46 +147,50 @@ export function serverDoors(files) {
   for (const { path, src } of files) {
     if (!SOURCE.test(path)) continue;
     const code = codeOf(src);
-    // The guard is the real one: imported from server/own-session, not renamed, not made here.
+    // A guard is the real one: imported from server/own-session, not renamed, not made here.
     const outside = code.replace(/\bimport\s*\{[^}]*\}\s*from\s*['"][^'"]*['"]/g, (x) => ' '.repeat(x.length));
-    const real = /import\s*\{[^}]*\brequireOwnSession\b[^}]*\}\s*from\s*['"](?:\.\.?\/)+(?:[\w.-]+\/)*server\/own-session(?:\.ts)?['"]/.test(src) &&
-      !/\brequireOwnSession\s+as\b|\bas\s+requireOwnSession\b/.test(src) &&
-      !/\b(?:function\s*\*?|const|let|var|class)\s+requireOwnSession\b|\brequireOwnSession\s*=(?!=)/.test(outside);
-    const judge = (where, line, fn) => {
+    const real = (g) => new RegExp(`import\\s*\\{[^}]*\\b${g}\\b[^}]*\\}\\s*from\\s*['"](?:\\.\\.?\\/)+(?:[\\w.-]+\\/)*server\\/own-session(?:\\.ts)?['"]`).test(src) &&
+      !new RegExp(`\\b${g}\\s+as\\b|\\bas\\s+${g}\\b`).test(src) &&
+      !new RegExp(`\\b(?:function\\s*\\*?|const|let|var|class)\\s+${g}\\b|\\b${g}\\s*=(?!=)`).test(outside);
+    const judge = (where, line, fn, kind) => {
       if (!fn) return doors.push({ where, line, why: 'its handler is not one the scan can read (a function written there, with a body)' });
-      const why = guardFirst(code, src, fn.body, fn.input);
-      doors.push({ where, line, why: why ?? (real ? null : 'its requireOwnSession is not the one imported from server/own-session') });
+      const why = guardFirst(code, src, fn.body, fn.input, kind);
+      doors.push({ where, line, why: why ?? (real(GUARD[kind]) ? null : `its ${GUARD[kind]} is not the one imported from server/own-session`) });
     };
 
-    // Server functions. The names createServerFn goes by here: its import, renamed or not, and a
-    // namespace's member. Any other use of Start's import is one the scan cannot follow.
-    const names = [], spaces = [];
-    for (const m of src.matchAll(/import\s+(?:type\s+)?([^'";]*?)\s+from\s*['"]([^'"]+)['"]/g)) {
-      if (!START.test(m[2])) continue;
-      const what = m[1];
-      const ns = /\*\s*as\s+([\w$]+)/.exec(what); if (ns) spaces.push(ns[1]);
-      for (const part of (/\{([^}]*)\}/.exec(what)?.[1] ?? '').split(',')) { const [a, b] = part.trim().split(/\s+as\s+/); if (a === 'createServerFn') names.push(b ?? a); }
+    // Start, imported the one way the scan reads: \`import {…} from\` a Start package (or \`import type\`).
+    // A namespace or default import, a re-export, require() or import() is a red.
+    for (const m of src.matchAll(/import\s+(type\s+)?([^'";]*?)\s+from\s*['"]([^'"]+)['"]/g)) {
+      if (START.test(m[3]) && !/^\{[^}]*\}$/.test(m[2].trim())) unread.push(`${path}:${lineAt(src, m.index)}: Start is imported here other than as \`import {…}\` (a namespace or a default), which the scan does not follow`);
     }
     for (const m of src.matchAll(new RegExp(`(?:export\\s*(?:\\*|\\{[^}]*\\})\\s*(?:as\\s+[\\w$]+\\s*)?from|require\\(|import\\()\\s*['"]${START.source}`, 'g'))) unread.push(`${path}:${lineAt(src, m.index)}: Start is re-exported or loaded here, which the scan cannot follow`);
-    const callee = [...names.map((n) => n.replace(/\$/g, '\\$')), ...spaces.map((n) => `${n.replace(/\$/g, '\\$')}\\s*\\.\\s*createServerFn`)];
-    if (callee.length) {
-      for (const m of code.matchAll(new RegExp(`(?<![\\w$.])(?:${callee.join('|')})(?![\\w$])`, 'g'))) {
-        const at = ws(code, m.index + m[0].length);
-        if (code[at] !== '(') { if (!inImport(src, m.index)) unread.push(`${path}:${lineAt(src, m.index)}: createServerFn is used here other than called`); continue; }
-        const before = code.slice(0, m.index).match(/(?:(?:export\s+)?(?:const|let|var)\s+([\w$]+)\s*(?::[^=]*)?=|export\s+default|([\w$]+)\s*:)\s*$/);
-        const name = before?.[1] ?? before?.[2] ?? (before ? 'default' : `line ${lineAt(src, m.index)}`);
-        // Its own .handler: the chain after the call, up to the next call of its own.
-        let j = close(code, at), fn = null;
-        while (j > 0) {
-          const k = ws(code, j + 1);
-          const link = /^\.\s*([\w$]+)\s*\(/.exec(code.slice(k));
-          if (!link) break;
-          const open = code.indexOf('(', k);
-          if (link[1] === 'handler') { fn = fnAt(code, src, open + 1, 'data'); break; }
-          j = close(code, open);
-        }
-        judge(`${path} ${name}`, lineAt(src, m.index), fn);
+    // createServerFn appears only as its plain named import from @tanstack/react-start, and as a direct
+    // call. Every other mention is a red: an alias, a member (Start.createServerFn, Start['createServerFn']),
+    // a destructure, a re-export, a comment or a string, or a call the scan cannot read as code.
+    const plain = [];
+    for (const m of src.matchAll(/\bimport\s*\{([^}]*)\}\s*from\s*(['"])@tanstack\/react-start\2/g)) {
+      let at = m.index + m[0].indexOf('{') + 1;
+      for (const part of m[1].split(',')) { const t = part.trim(); if (t === 'createServerFn') plain.push(at + part.indexOf('createServerFn')); at += part.length + 1; }
+    }
+    for (const m of src.matchAll(/createServerFn/g)) {
+      const i = m.index;
+      if (plain.includes(i)) continue;
+      const call = code.slice(i, i + 14) === 'createServerFn' && !/[\w$]/.test(code[i + 14] ?? '') && !/[\w$.]/.test(code[i - 1] ?? '') && !/[.?]\s*$/.test(code.slice(Math.max(0, i - 4), i)) && code[ws(code, i + 14)] === '(';
+      if (!call) { unread.push(`${path}:${lineAt(src, i)}: createServerFn here is not its plain named import from @tanstack/react-start nor a direct call`); continue; }
+      const at = ws(code, i + 14);
+      const before = code.slice(0, i).match(/(?:(?:export\s+)?(?:const|let|var)\s+([\w$]+)\s*(?::[^=]*)?=|export\s+default|([\w$]+)\s*:)\s*$/);
+      const name = before?.[1] ?? before?.[2] ?? (before ? 'default' : `line ${lineAt(src, i)}`);
+      // Its own .handler: the chain after the call.
+      let j = close(code, at), fn = null;
+      while (j > 0) {
+        const k = ws(code, j + 1);
+        const link = /^\.\s*([\w$]+)\s*\(/.exec(code.slice(k));
+        if (!link) break;
+        const open = code.indexOf('(', k);
+        if (link[1] === 'handler') { fn = fnAt(code, src, open + 1, 'data'); break; }
+        j = close(code, open);
       }
+      judge(`${path} ${name}`, lineAt(src, i), fn, 'fn');
     }
 
     // Server routes: each method under a route's `handlers`, on its own.
@@ -185,7 +210,7 @@ export function serverDoors(files) {
           const k = ws(code, j + key[0].length);
           const fn = code[k] === ':' ? fnAt(code, src, k + 1, 'params') : code[k] === '(' ? fnAt(code, src, k, 'params') : null;
           if (!METHODS.has(method)) unread.push(`${path}:${lineAt(src, j)}: \`${method}\` is not a method the scan knows`);
-          judge(`${path} ${method}`, lineAt(src, j), fn);
+          judge(`${path} ${method}`, lineAt(src, j), fn, 'route');
           count++;
           if (!fn || fn.end < 0) break;
           j = ws(code, fn.end + 1);
@@ -199,9 +224,6 @@ export function serverDoors(files) {
   return { doors, unread };
 }
 
-/** Whether `i` falls inside an import statement's braces. */
-const inImport = (src, i) => { const s = src.lastIndexOf('import', i); if (s < 0) return false; const e = src.indexOf('from', s); return e > i && !src.slice(s, i).includes(';'); };
-
 /** Each red for `files`: a door that is neither guarded first nor on `open`, an `open` entry with no
  *  such door, and what the scan could not read. */
 export function doorReds(files, open = OPEN) {
@@ -209,6 +231,9 @@ export function doorReds(files, open = OPEN) {
   const reds = [...unread];
   const where = new Set(doors.map((d) => d.where));
   for (const d of doors) if (d.why && !open[d.where]) reds.push(`${d.where} (line ${d.line}): ${d.why}, and it is not on the open list`);
-  for (const k of Object.keys(open)) if (!where.has(k)) reds.push(`open list: ${k} is no door the scan finds (take it off, or say where it went)`);
+  for (const [k, why] of Object.entries(open)) {
+    if (!where.has(k)) reds.push(`open list: ${k} is no door the scan finds (take it off, or say where it went)`);
+    if (typeof why !== 'string' || why.trim().length < 10) reds.push(`open list: ${k} gives no reason (10 characters at least)`);
+  }
   return { doors, reds };
 }

@@ -37,7 +37,7 @@ import { PINNED_VERSION } from './lib/pinned-version.mjs';
 import { timeRows } from './lib/time-rows.mjs';
 import { fileNumbers } from './lib/file-numbers.mjs';
 import { openFiles } from './lib/open-files.mjs';
-import { ownSessionDoors } from './lib/own-session.mjs';
+import { ownSessionDoors, ownSessionComposer } from './lib/own-session.mjs';
 import { pictureViewer } from './lib/picture-viewer.mjs';
 
 const args = process.argv.slice(2);
@@ -1307,6 +1307,7 @@ else {
   stub.rows = [];
   await openFiles({ check, precondition, ev, open, base, until, stub, page, click, session: SESSION, note: NOTE, noteId });
   await ownSessionDoors({ check, precondition, ev, base, stub, session: SESSION, hostId: HOST_ID, otherHost: OTHER_HOST, note: NOTE, noteId, rec });
+  await ownSessionComposer({ check, precondition, ev, open, base, until, key, page, wait, stub, hostId: HOST_ID });
   await pictureViewer({ check, precondition, ev, open, base, until, key, stub, click, session: SESSION });
   await fileNumbers({ check, precondition, ev, open, base, until, key, stub, page, path, port: CHROME_PORT, session: SESSION });
   await timeRows({ check, precondition, ev, open, base, until, wait, stub, page });

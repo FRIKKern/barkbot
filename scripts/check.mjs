@@ -14,7 +14,7 @@ import { guardBeforeSend } from './lib/host-guard.mjs';
 import { sceneCard } from './lib/cards.mjs';
 import { hostedNote, CLOCKS } from './lib/gate-b-hosted.mjs';
 import { pickByLabel } from './lib/hover-label.mjs';
-import { doorReds, SOURCE } from './lib/session-doors.mjs';
+import { appSources, doorReds } from './lib/session-doors.mjs';
 import { CASES as DOOR_CASES } from './lib/session-doors-cases.mjs';
 import { labelPressAllowed, underPoint } from './lib/press-guard.mjs';
 
@@ -350,12 +350,17 @@ for (const [name, c, want] of [
   }
 }
 
-// Own session (task-26a1a137b955ef3b): deny by default (lib/session-doors.mjs). Every server function
-// and every method handler of every server route opens with `await requireOwnSession(…)`
-// (app/src/server/own-session.ts), or is on the open list with its reason; anything else is a red.
+// Own session (task-26a1a137b955ef3b): deny by default (lib/session-doors.mjs), over every source
+// file under app/. Every server function opens with `await requireOwnSessionFn(…)` and every method
+// handler of every server route with `await requireOwnSessionRoute(…)` (app/src/server/own-session.ts),
+// or it is on the open list with its reason; anything else is a red.
 {
-  const walk = (d) => readdirSync(path(d), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : SOURCE.test(e.name) ? [`${d}/${e.name}`] : []));
-  const { doors, reds } = doorReds(walk('app/src').map((p) => ({ path: p, src: read(p) })));
+  const files = appSources(path('app'));
+  // The walk itself: app/ outside src is read, generated output is not.
+  rule('own session', 1);
+  const seen = files.map((f) => f.path);
+  if (!seen.includes('app/vite.config.ts') || !seen.includes('app/src/chat/api.ts') || seen.some((p) => /node_modules|routeTree\.gen/.test(p))) fail(`own session: the walk of app/ is not what it should be (${seen.length} files; vite.config.ts ${seen.includes('app/vite.config.ts')}, api.ts ${seen.includes('app/src/chat/api.ts')})`);
+  const { doors, reds } = doorReds(files);
   for (const d of doors) rule('own session', 1);
   for (const r of reds) fail(`own session: ${r}`);
   // A floor, not a list: a scan that finds no guarded route or no guarded server function is broken.

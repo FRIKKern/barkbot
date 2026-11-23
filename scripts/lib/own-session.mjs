@@ -44,7 +44,7 @@ export async function ownSessionDoors({ check, precondition, ev, base, stub, ses
     return out;
   }, id);
   const reached = () => ({ to: stub.to.length, sent: stub.sent.length, uploads: stub.uploads.length, answers: stub.answers.length, choices: stub.choices.length });
-  // Each refuses by throwing the guard's NOT_OWN (server/own-session.ts requireOwnSession).
+  // Each refuses by throwing the guard's NOT_OWN (server/own-session.ts requireOwnSessionFn).
   const noneOf = (out) => ['send', 'upload', 'approve', 'choose'].every((k) => /could not be checked/.test(out[k]?.threw ?? ''));
 
   const own = { file: await file(session), stream: await stream(session) };
@@ -93,4 +93,40 @@ export async function ownSessionDoors({ check, precondition, ev, base, stub, ses
   for (const id of [MATE, ELSEWHERE, MANAGED, KEPT, made?.sessionId]) if (id) { stub.pictures.delete(`${id}/${noteId}`); stub.rowsBy.delete(id); }
   stub.rowsBy.delete(session);
   stub.sessions = stub.sessions.filter((x) => ![MATE, ELSEWHERE, MANAGED, KEPT, made?.sessionId].includes(x.id));
+}
+
+// The same refusal through the real composer (review round 2 on #320): the page's send is the server
+// function, and its NOT_OWN must reach the page as a no. Our computer is revoked between the page's
+// load and Enter (its 5 s online poll does not stop a send), and, apart, the computers read answers
+// 500. Each time the words stay in the box, no bubble is added, nothing is posted, and the one line
+// says why. Then, with the computer back, Enter sends those words (control).
+export async function ownSessionComposer({ check, precondition, ev, open, base, until, key, page, wait, stub, hostId }) {
+  const WORDS = 'to a computer that is not checked';
+  const box = () => ev(() => ({ words: document.querySelector('.prompt')?.innerText.trim() ?? '', bubbles: document.querySelectorAll('.bubble-user').length, line: document.querySelector('.composer-refused, .chat-error')?.textContent ?? null }));
+  await open(`${base}/`);
+  await until(async () => (await ev(() => !!document.querySelector('.prompt'))), 30000, 'the composer').catch(() => {});
+  await wait(500);
+  const hosts = stub.hosts;
+  precondition('the composer is open on our own conversation, on our computer, with nothing in it', hosts.some((h) => h.id === hostId && !h.revoked) && (await box()).words === '', { hosts, box: await box() });
+  await ev(() => document.querySelector('.prompt').focus()); await page.send('Input.insertText', { text: WORDS });
+  const tries = [
+    ['our computer is revoked', () => { stub.hosts = hosts.map((h) => (h.id === hostId ? { ...h, revoked: true } : h)); }],
+    ['the computers read answers 500', () => { stub.failHosts = true; }],
+  ];
+  for (const [what, set] of tries) {
+    const b0 = await box(); const sent0 = stub.sent.length, to0 = stub.to.length, up0 = stub.uploads.length;
+    set();
+    await ev(() => document.querySelector('.prompt').focus()); await key('Enter');
+    await until(async () => (await box()).line !== null, 8000, 'the not-sent line').catch(() => {});
+    await wait(500);
+    const b = await box();
+    stub.hosts = hosts; stub.failHosts = false;
+    check(`through the composer, when ${what}: Enter keeps the words in the box, adds no bubble, posts nothing, and the one line says it could not be checked`, b.words === WORDS && b.bubbles === b0.bubbles && stub.sent.length === sent0 && stub.to.length === to0 && stub.uploads.length === up0 && /could not be checked/.test(b.line ?? ''), { b0, b, sent: stub.sent.slice(sent0), to: stub.to.slice(to0) });
+  }
+  const b0 = await box(); const sent0 = stub.sent.length;
+  await ev(() => document.querySelector('.prompt').focus()); await key('Enter');
+  await until(() => stub.sent.length > sent0, 8000, 'the kept words to go').catch(() => {});
+  await wait(300);
+  const b = await box();
+  check('control: with our computer back, Enter sends the kept words and the box empties', stub.sent.length === sent0 + 1 && stub.sent.at(-1).content === WORDS && b.words === '' && b.bubbles === b0.bubbles + 1, { b0, b, sent: stub.sent.slice(sent0) });
 }

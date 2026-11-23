@@ -1,6 +1,6 @@
 import {createFileRoute} from '@tanstack/react-router'
 import {bp} from '../../server/barkpark'
-import {requireOwnSession} from '../../server/own-session'
+import {requireOwnSessionRoute} from '../../server/own-session'
 
 const SHA = /^[0-9a-f]{64}$/
 const PICTURES = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp'])
@@ -26,7 +26,7 @@ export const Route = createFileRoute('/api/chat/$id/attachments/$aid')({
       GET: async ({params, request}) => {
         // One of BarkBot's own conversations only (server/own-session.ts): any other id, a malformed one
         // too, is not found.
-        await requireOwnSession(params.id)
+        await requireOwnSessionRoute(params.id)
         if (!SHA.test(params.aid)) return new Response('bad id', {status: 400})
         try {
           // A picture's bytes are not bounded (barkpark.ts READ_MS): a slow link is not a hang.

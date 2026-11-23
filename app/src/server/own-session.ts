@@ -13,7 +13,6 @@
 // A read that fails or does not answer is never a yes: the door answers as for a stranger's.
 // Known misses (accepted): after a restart, a kept:false conversation is not known until its record
 // is saved; a conversation on a computer that was revoked does not open (the list leaves it out).
-import {getRequest} from '@tanstack/react-start/server'
 import {bp, conf, BarkparkError} from './barkpark'
 import {NOT_OWN} from '../chat/notOwn'
 import {listIds, NO_MESSAGES, READ_CAP, readListed, trusted} from './bots'
@@ -92,16 +91,21 @@ async function ownSession(id: unknown): Promise<boolean> {
   }
 }
 
-/** The guard every door opens with, as its first statement (scripts/lib/session-doors.mjs reds a door
- *  that does not): it returns nothing when the session is one of BarkBot's own, and otherwise throws
- *  that says NOT_OWN. There is no answer to test, so there is no `if` to get wrong. In a route it
- *  throws a 404 Response, which Start sends as the answer. In a server function call (Start's
- *  client marks it x-tsr-serverFn) it throws Error(NOT_OWN), which the caller gets as a throw:
- *  Start hands a thrown Response back to a server function's caller as its return value (the
- *  behaviour run saw each of the four resolve to a Response), so a caller that reads the shape
- *  would take it as an answer. */
-export async function requireOwnSession(id: unknown): Promise<void> {
+// The two guards, one for each kind of door. Each is its door's first statement
+// (scripts/lib/session-doors.mjs reds a door that does not open with its own kind's guard). Each
+// returns nothing when the session is one of BarkBot's own and otherwise throws, so there is no
+// answer to test and no `if` to get wrong.
+
+/** A server route's guard: a 404 Response that says NOT_OWN, which Start sends as the route's answer. */
+export async function requireOwnSessionRoute(id: unknown): Promise<void> {
   if (await ownSession(id)) return
-  if (getRequest()?.headers.get('x-tsr-serverfn') === 'true') throw new Error(NOT_OWN)
   throw new Response(NOT_OWN, {status: 404, headers: {'content-type': 'text/plain; charset=utf-8', 'x-content-type-options': 'nosniff'}})
+}
+
+/** A server function's guard: Error(NOT_OWN), which its caller gets as a throw. Never a Response:
+ *  Start hands a thrown Response back to a server function's caller as its return value, so the
+ *  page took a refused send as sent (rev299 on #320, c3f8ad6: all four resolved to {}). */
+export async function requireOwnSessionFn(id: unknown): Promise<void> {
+  if (await ownSession(id)) return
+  throw new Error(NOT_OWN)
 }
