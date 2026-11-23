@@ -7,7 +7,7 @@ const CONTROL_ROLES = new Set(['button', 'tab', 'combobox', 'textbox', 'switch',
 const ancestors = (els, e) => { const out = []; let p = e.parent; while (p !== undefined) { out.push(els[p]); p = els[p].parent; } return out; };
 const inArticle = (els, e) => e.role === 'article' || ancestors(els, e).some((a) => a.role === 'article');
 // The first text inside an element, for controls whose name is their content.
-const innerText = (els, e) => els.find((x) => x.i > e.i && x.text && ancestors(els, x).includes(e))?.text;
+export const innerText = (els, e) => els.find((x) => x.i > e.i && x.text && ancestors(els, x).includes(e))?.text;
 const isControl = (e) => (CONTROL_TAGS.has(e.tag) || CONTROL_ROLES.has(e.role)) && e.box[2] >= 2 && e.box[3] >= 2;
 
 // A control's name: its label, or its text, with two rules that make a name mean the same
