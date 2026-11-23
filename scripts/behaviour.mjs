@@ -1223,7 +1223,7 @@ else {
   if (tile) await click(...tile);
   const opened = await ev(() => window.__opened);
   const url = `/api/chat/${shown.imgs[0]?.[0]?.split('/')[3]}/attachments/${pngId}`;
-  check('a press on a sent picture opens it in a new tab at our route, with no opener (it did nothing before)', !!tile && opened.length === 1 && opened[0][0] === url && opened[0][1] === '_blank' && /noopener/.test(opened[0][2] ?? ''), { tile, opened, url });
+  check('a press on a sent picture opens it in a new tab at our route, with no opener (it did nothing before)', !!tile && opened.length === 1 && opened[0][0] === url && opened[0][1] === '_blank' && opened[0][2] === 'noopener,noreferrer', { tile, opened, url });
   // What that tab gets: the picture as itself, never sniffed; the same id named under another
   // conversation is refused (Barkpark's 404, passed on), and no bytes come back.
   const OTHER_SESSION = '00000000-0000-4000-8000-0000000000ee';

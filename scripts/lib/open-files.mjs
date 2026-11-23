@@ -31,7 +31,7 @@ export async function openFiles({ check, precondition, ev, open, base, until, st
   for (const type of ['keyDown', 'keyUp']) await page.send('Input.dispatchKeyEvent', { type, key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
   const opened = await ev(() => window.__opened);
   const url = (id, name) => `/api/chat/${session}/attachments/${id}?name=${encodeURIComponent(name)}`;
-  check('a press on a sent file\'s card opens it in a new tab at our route, by its name and with no opener, and so does Enter on the next card (both were disabled before)', opened.length === 2 && opened[0][0] === url(noteId, 'note.txt') && opened[1][0] === url(pdfId, 'report.pdf') && opened.every((o) => o[1] === '_blank' && /noopener/.test(o[2] ?? '')) && shown.every((c) => c[1] === null && c[2] === 0), { opened, shown });
+  check('a press on a sent file\'s card opens it in a new tab at our route, by its name and with no opener, and so does Enter on the next card (both were disabled before)', opened.length === 2 && opened[0][0] === url(noteId, 'note.txt') && opened[1][0] === url(pdfId, 'report.pdf') && opened.every((o) => o[1] === '_blank' && o[2] === 'noopener,noreferrer') && shown.every((c) => c[1] === null && c[2] === 0), { opened, shown });
 
   // What each tab gets, read from the route itself.
   const get = (u) => ev(async (x) => { const r = await fetch(x); const b = new Uint8Array(await r.arrayBuffer()); const h = (k) => r.headers.get(k); return { status: r.status, type: h('content-type'), sniff: h('x-content-type-options'), disposition: h('content-disposition'), csp: h('content-security-policy'), size: b.length, text: new TextDecoder().decode(b) }; }, u);
