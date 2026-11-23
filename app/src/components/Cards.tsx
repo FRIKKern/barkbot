@@ -165,7 +165,10 @@ export function FileCard({name, size}: {name: string; size: string}) {
 const MAX_TILES = 3
 
 /** A message's pictures: square tiles in a row above its bubble, three at most; past three the third
- *  is dimmed and says how many more (oracle-pictures-sent, article 128: 156 squares 6 apart, "+3" for five). */
+ *  is dimmed and says how many more (oracle-pictures-sent, article 128: 156 squares 6 apart, "+3" for five).
+ *  A press opens the tile's picture in a new tab, with no opener, by the route the tile's own <img>
+ *  loads: four picture types only, nosniff (routes/api/chat.$id.attachments.$aid.ts). The oracle's
+ *  large view is not captured, so the browser's own view of the picture stands in. */
 export function PictureTiles({ids, picture}: {ids: string[]; picture?: (id: string) => string | null}) {
   const shown = ids.slice(0, MAX_TILES)
   const more = ids.length - MAX_TILES + 1
@@ -176,7 +179,7 @@ export function PictureTiles({ids, picture}: {ids: string[]; picture?: (id: stri
         const src = picture?.(id)
         return (
           <div className="tile" key={id}>
-            <button className="tile-open" aria-label={rest ? `Open the remaining ${more} images full screen` : 'Open image full screen'}>
+            <button className="tile-open" aria-label={rest ? `Open the remaining ${more} images full screen` : 'Open image full screen'} onClick={src ? () => window.open(src, '_blank', 'noopener,noreferrer') : undefined}>
               {src && <img src={src} alt="" loading="lazy" />}
             </button>
             {rest && <span className="tile-more" aria-hidden="true">+{more}</span>}

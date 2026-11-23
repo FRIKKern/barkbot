@@ -222,12 +222,13 @@ await new Promise((ok) => httpServer((req, res) => {
         const { data } = JSON.parse(body); const bytes = Buffer.from(data, 'base64'); const id = createHash('sha256').update(bytes).digest('hex');
         const media_type = bytes[0] === 0x89 && bytes.subarray(1, 4).toString() === 'PNG' ? 'image/png' : bytes.subarray(0, 5).toString() === '%PDF-' ? 'application/pdf' : bytes.length && !bytes.includes(0) && Buffer.from(bytes.toString('utf8'), 'utf8').equals(bytes) ? 'text/plain' : null;
         if (!media_type) { stub.refused.push({ upload: id }); return json(400, { error: { code: 'invalid_request', message: 'attachment must be UTF-8 text, a PDF, or one of: image/png, image/jpeg, image/gif, image/webp' } }); }
-        stub.uploads.push(id); stub.pictures.set(id, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
+        stub.uploads.push(id); stub.pictures.set(`${req.url.split('/')[4]}/${id}`, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
       };
       if (stub.holdUpload) { stub.heldUploads.push(take); return; }
       return take();
     }
-    if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const id = req.url.split('/').pop(); return stub.pictures.has(id) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(id) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
+    // A read is scoped as Barkpark's (<session>/<sha256>): an id stored in another conversation is a 404.
+    if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const [, , , , session, , id] = req.url.split('/'); const at = `${session}/${id}`; return stub.pictures.has(at) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(at) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/messages(\?.*)?$/.test(req.url) && req.method === 'POST') {
       const m = JSON.parse(body);
       // Idempotency-Key as Barkpark answers it (PR #26689, plugs/idempotency.ex, bind_request: true):
@@ -1214,6 +1215,18 @@ else {
   await page.send('Input.insertText', { text: 'words only' }); await key('Enter');
   await until(() => stub.sent.length > 1, 8000, 'the second message').catch(() => {});
   check('a message without a picture names none (control)', stub.sent.length === 2 && !('attachments' in stub.sent[1]) && stub.uploads.length === 1, { sent: stub.sent });
+  // A press on the tile opens that picture in a new tab, by our route (task-71ee600273461306).
+  await ev(() => { window.__opened = []; window.open = (...a) => { window.__opened.push(a); return null; }; });
+  const tile = await ev(() => { const r = document.querySelector('.turn-attached .picture-tiles .tile-open')?.getBoundingClientRect(); return r ? [r.x + r.width / 2, r.y + r.height / 2] : null; });
+  if (tile) await click(...tile);
+  const opened = await ev(() => window.__opened);
+  const url = `/api/chat/${shown.imgs[0]?.[0]?.split('/')[3]}/attachments/${pngId}`;
+  check('a press on a sent picture opens it in a new tab at our route, with no opener (it did nothing before)', !!tile && opened.length === 1 && opened[0][0] === url && opened[0][1] === '_blank' && /noopener/.test(opened[0][2] ?? ''), { tile, opened, url });
+  // What that tab gets: the picture as itself, never sniffed; the same id named under another
+  // conversation is refused (Barkpark's 404, passed on), and no bytes come back.
+  const OTHER_SESSION = '00000000-0000-4000-8000-0000000000ee';
+  const got = await ev(async (u, other) => { const f = async (x) => { const r = await fetch(x); const b = await r.arrayBuffer(); return [r.status, r.headers.get('content-type'), r.headers.get('x-content-type-options'), b.byteLength]; }; return [await f(u), await f(u.replace(/chat\/[^/]+\//, `chat/${other}/`))]; }, url, OTHER_SESSION);
+  check('the opened tab gets the picture as image/png with nosniff; the same id under another conversation is a 404 with no picture in it', got[0][0] === 200 && got[0][1] === 'image/png' && got[0][2] === 'nosniff' && got[0][3] === PNG.length && got[1][0] === 404 && !/^image\//.test(got[1][1] ?? '') && got[1][3] < 32, { got });
   rmSync(pngPath, { force: true });
 
   // A text file goes with a message as a picture does, named by its id and its name; the sent
