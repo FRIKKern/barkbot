@@ -26,12 +26,15 @@ const SETTLE = args.includes('--settle') ? Number(args[args.indexOf('--settle') 
 const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
 // The only controls the sweep may press. Anything else is refused, by name.
-const MAY_PRESS = new Set(['View conversation details', 'Library', 'Activity', 'Composer actions', 'Open account menu', 'New Bot', 'Voice', 'Language', 'Close', 'Connect apps', 'Edit Bot avatar', 'Settings', 'Get Grok Bot for mobile', 'Computer', 'Permissions', 'Updates']);
-// Names NEVER would refuse that only open a view: 'Connect apps' opens the list; each row's own Connect stays refused.
-const OPENS_ONLY = new Set(['Close', 'Connect apps']);
+// The two picture openers sit inside a message (pressLabel, below): they open the viewer and act on nothing.
+const VIEWER = ['Open image full screen', 'Open the remaining 3 images full screen'];
+const MAY_PRESS = new Set(['View conversation details', 'Library', 'Activity', 'Composer actions', 'Open account menu', 'New Bot', 'Voice', 'Language', 'Close', 'Connect apps', 'Edit Bot avatar', 'Settings', 'Get Grok Bot for mobile', 'Computer', 'Permissions', 'Updates', ...VIEWER]);
+// Names that only open a view: 'Connect apps' opens the list (each row's own Connect stays refused); the
+// picture openers open the viewer.
+const OPENS_ONLY = new Set(['Close', 'Connect apps', ...VIEWER]);
 const NEVER = /send|share|connect|approve|allow|create|add to|delete|remove|invite|upgrade|sign out|log out|wake|start voice/i;
 
-// [id, what it shows, steps to open, steps to close]. A step: {press: name} | {key: 'Escape'} | {width: n}.
+// [id, what it shows, steps to open, steps to close]. A step: {press: name} | {pressLabel: label} | {key: 'Escape'} | {width: n}.
 const SWEEP = [
   ['oracle-turn-1040', 'the main view, 1040 wide (the window as it rests)', [], []],
   ['oracle-main-1280', 'the main view, 1280 wide', [{ width: 1280 }], [{ width: null }]],
@@ -93,6 +96,13 @@ SWEEP.push(
   // A typed name, never Create: Escape discards it.
   ['oracle-new-bot-named', 'Create New Bot with a name typed', [{ press: 'New Bot' }, { type: 'Test' }], [{ key: 'Escape' }], { diff: true }],
 );
+// The picture viewer (A2), look only: in Oracle's conversation with the five pictures (oracle-pictures-sent),
+// one tile's opener and the dimmed +3 tile's, each pressed where it sits wholly on screen, captured, and closed
+// with Escape; the base check below stops the sweep if Escape did not bring the screen back.
+SWEEP.push(
+  ['oracle-picture-viewer', 'the picture viewer, from one tile', [{ pressLabel: 'Open image full screen' }], [{ key: 'Escape' }]],
+  ['oracle-picture-viewer-rest', 'the picture viewer, from the +3 tile', [{ pressLabel: 'Open the remaining 3 images full screen' }], [{ key: 'Escape' }]],
+);
 const only2 = args.includes('--hovers');
 const only3 = args.includes('--followups');
 // Second-level views: look only, closed with Escape. Captured with --out first and read before any is kept.
@@ -128,18 +138,29 @@ if (!controls(await page.evaluate(collect)).some((c) => c.name === 'Close')) {
 }
 const base = await names();
 
-// A real pointer press at the control's centre (menus open on pointerdown, not on click()).
-async function press(name) {
-  if (!MAY_PRESS.has(name) || (NEVER.test(name) && !OPENS_ONLY.has(name))) throw new Error(`refusing to press "${name}": not on the sweep's list`);
+const mayPress = (name) => MAY_PRESS.has(name) && (!NEVER.test(name) || OPENS_ONLY.has(name));
+// A real pointer press at the control's centre (menus open on pointerdown, not on click()). `byLabel`: a
+// control inside a message (controls() leaves those out), picked by its exact label wholly on screen
+// (lib/hover-label.mjs); the label it lands on must itself be on the list.
+async function press(name, byLabel = false) {
+  if (!mayPress(name)) throw new Error(`refusing to press "${name}": not on the sweep's list`);
   const state = await page.evaluate(collect);
-  const hit = controls(state).filter((c) => c.name === name);
-  if (hit.length !== 1) throw new Error(`"${name}": ${hit.length} controls by that name, need exactly 1`);
-  const [x, y, w, h] = hit[0].e.box;
+  let x, y;
+  if (byLabel) {
+    const { e, at } = pickByLabel(state, name);
+    if (e.label !== name || !mayPress(e.label)) throw new Error(`refusing to press "${e.label}": not "${name}"`);
+    [x, y] = at;
+  } else {
+    const hit = controls(state).filter((c) => c.name === name);
+    if (hit.length !== 1) throw new Error(`"${name}": ${hit.length} controls by that name, need exactly 1`);
+    const [bx, by, w, h] = hit[0].e.box;
+    [x, y] = [bx + w / 2, by + h / 2];
+  }
   // The oracle only takes pointer input while its window is in front.
   execFileSync('open', ['-a', 'Grok Bot']);
   await page.send('Page.bringToFront');
   await wait(300);
-  const at = { x: x + w / 2, y: y + h / 2, button: 'left', clickCount: 1 };
+  const at = { x, y, button: 'left', clickCount: 1 };
   await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...at });
   await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', ...at });
   await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...at });
@@ -200,7 +221,7 @@ async function step(s) {
     return;
   }
   const before = await names();
-  if (s.press) await press(s.press);
+  if (s.press || s.pressLabel) await press(s.press || s.pressLabel, !!s.pressLabel);
   else if (s.key) for (const type of ['keyDown', 'keyUp']) await page.send('Input.dispatchKeyEvent', { type, key: s.key, code: s.key, windowsVirtualKeyCode: 27 });
   else if ('width' in s) {
     if (s.width === null) await page.send('Emulation.clearDeviceMetricsOverride');
