@@ -177,10 +177,12 @@ export const loadChat = createServerFn({method: 'GET'})
       // A Main Bot key that is there but not well formed is never written over: in memory only.
     }
   }
-  // Nothing to show: the Main Bot from what the caller itself can see, written nowhere. Once the
-  // store exists (or could not be read) it opens no conversation: the newest one on the computer
-  // may be another bot's, and a message would go to the wrong bot.
-  if (!rail.length) rail = [listed?.length === 0 ? await withToday() : {bot: main, session: {is: 'none'}}]
+  // Nothing saved: the Main Bot, written nowhere, with no conversation open. The newest one on the
+  // computer may be another bot's (a message would go to the wrong bot), and one picked here, not
+  // saved, is in no bot record and was not made by this server, so its doors would refuse it
+  // (server/own-session.ts; task-26a1a137b955ef3b). The next message starts one (startChat), which
+  // this server made, so it opens.
+  if (!rail.length) rail = [{bot: main, session: {is: 'none'}}]
   const open = rail.find((x) => x.bot.id === want) ?? rail[0]
   const session = open.session.is === 'open' ? open.session.session : null
   const home = hosts.find((h) => h.id === open.bot.host_id) ?? host

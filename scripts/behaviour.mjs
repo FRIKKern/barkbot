@@ -1455,22 +1455,28 @@ else {
     const held = { header: shown?.header ?? null, record: stub.prefs.get(KEY) ?? null, ms: heldMs, baseMs };
     stub.holdShow.clear(); stub.heldShows.splice(0).forEach((r) => r.destroy()); await wait(1000);
     check('a session read Barkpark never answers holds the page about 8 s, not forever; then the move-in takes no conversation, not that one and not an older one', held.header === 'Legacy Name' && held.ms >= 7500 && held.ms - baseMs < 12000 && !!held.record && held.record.session_id === null, held);
-    // With no bot list and the saved name unreadable, each load shows the Main Bot from memory and
-    // picks its conversation again. What a read showed (a folder or none) is known: not asked again.
+    // With no bot list and the Main Bot's save failing, each load picks its conversation again, and
+    // opens none: the pick is not saved, so no bot record names it and this server did not make it
+    // (app/src/server/own-session.ts; task-26a1a137b955ef3b). What a read showed (a folder or none)
+    // is known: not asked again. The next message starts a conversation (startChat), which opens.
     const F = (n) => `00000000-0000-4000-8000-0000000001c${n}`;
     const folderOf = (n) => ({ ...at(`2026-11-15T1${n}:00:00Z`, session(F(n))), bot_folder: `bot-0000000${n}` });
     stub.sessions = [at('2026-11-15T08:00:00Z', session(F(1))), folderOf(2), folderOf(3), folderOf(4)];
-    freshStore(); stub.fail.set('GET barkbot.bot', 500);
+    freshStore(); stub.fail.set(`PUT ${KEY}`, 500);
     const reads = () => stub.shown.filter((id) => /-0000000001c\d$/.test(id)).length;
-    stub.shown = []; s = await showing('BarkBot'); const first = { reads: reads(), opened: [...stub.opened] };
-    stub.shown = []; s = await showing('BarkBot'); const second = { reads: reads(), opened: [...stub.opened] };
-    check('the second load with no bot list and the saved name unreadable asks Barkpark nothing it already knows, and opens the same conversation (control: the first load read all four)', first.reads === 4 && second.reads === 0 && first.opened.includes(F(1)) && second.opened.includes(F(1)), { first, second });
+    stub.shown = []; stub.opened = []; s = await showing('BarkBot'); const first = { reads: reads(), opened: [...stub.opened] };
+    stub.shown = []; stub.opened = []; s = await showing('BarkBot'); const second = { reads: reads(), opened: [...stub.opened] };
+    const m0 = stub.made.length, t0n = stub.to.length;
+    await typeSend('a first word'); await until(() => stub.to.length > t0n, 8000, 'the first message').catch(() => {}); await wait(500);
+    const next = { made: stub.made.slice(m0), to: stub.to.slice(t0n), opened: [...stub.opened], record: stub.prefs.get(KEY) ?? null };
+    check("the second load with no bot list and the Main Bot's save failing asks Barkpark nothing it already knows, and neither load opens the picked conversation, which no bot record names; the next message starts one, which opens and takes it (control: the first load read all four)", first.reads === 4 && second.reads === 0 && !first.opened.includes(F(1)) && !second.opened.includes(F(1)) && next.made.length === 1 && next.to.length === 1 && next.to[0] === next.made[0] && next.opened.includes(next.made[0]) && !next.to.includes(F(1)), { first, second, next });
     // A read that failed is never remembered: the next load asks again, and never takes that one.
     stub.sessions = [at('2026-11-15T08:00:00Z', session(F(5))), folderOf(6)]; stub.failShow.set(F(6), 500);
-    stub.shown = []; s = await showing('BarkBot'); const failedLoad = { opened: [...stub.opened] };
-    stub.failShow.clear();
-    stub.shown = []; s = await showing('BarkBot'); const nextLoad = { opened: [...stub.opened], asked: stub.shown.includes(F(6)) };
-    check('control: a read that failed is not remembered: that load opens nothing, the next asks again and takes the conversation with no folder, never the one with a folder', !failedLoad.opened.includes(F(5)) && !failedLoad.opened.includes(F(6)) && nextLoad.asked && nextLoad.opened.includes(F(5)) && !nextLoad.opened.includes(F(6)), { failedLoad, nextLoad });
+    freshStore();
+    stub.shown = []; stub.opened = []; s = await showing('BarkBot'); const failedLoad = { opened: [...stub.opened], record: stub.prefs.get(KEY) ?? null };
+    stub.failShow.clear(); stub.fail.delete(`PUT ${KEY}`);
+    stub.shown = []; stub.opened = []; s = await showing('BarkBot'); const nextLoad = { opened: [...stub.opened], asked: stub.shown.includes(F(6)), record: stub.prefs.get(KEY) ?? null };
+    check('control: a read that failed is not remembered: that load opens nothing and saves nothing, the next asks again and takes the conversation with no folder, saved in the Main Bot, never the one with a folder', !failedLoad.opened.includes(F(5)) && !failedLoad.opened.includes(F(6)) && failedLoad.record === null && nextLoad.asked && nextLoad.record?.session_id === F(5) && nextLoad.opened.includes(F(5)) && !nextLoad.opened.includes(F(6)), { failedLoad, nextLoad });
     stub.fail.clear(); freshStore();
     // A 503 storage_unavailable after Barkpark took the message (its turn went before it was stored):
     // the words stay, and one line says it may have been sent (the 500 case is #69's rule).
