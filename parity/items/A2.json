@@ -4,7 +4,11 @@
  "journey": "J08",
  "title": "Picture grid with a +N tile; each opens large",
  "controls": [
-  "Open image full screen"
+  "Open image full screen",
+  "Mark up image",
+  "Download media",
+  "Back to chat",
+  "/^View media \\d+ of \\d+$/"
  ],
  "status": "partial",
  "gate": "Gate A oracle-pictures-sent 74/75 (the tiles: card#3, 10 parts; scripts/lib/cards.mjs), oracle-pictures-waiting 61/62 (thumbnails in the composer, Remove on hover); behaviour 5 picture rules; live parity/live/picture.json",

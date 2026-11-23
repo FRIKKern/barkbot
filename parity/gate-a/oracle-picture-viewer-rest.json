@@ -1,0 +1,557 @@
+{
+ "id": "oracle-picture-viewer-rest",
+ "captured": "2026-11-23",
+ "viewport": [
+  1040,
+  760,
+  2
+ ],
+ "cases": 79,
+ "pass": 0,
+ "scene": false,
+ "results": [
+  {
+   "key": "aside:Bots",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot tile#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:New Bot",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Connect apps",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Open account menu",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Oracle",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Share",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "aside:Conversation details",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Close",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Edit Bot avatar",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot name",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Activity",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Library",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Suggested",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Hide",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Create a routine",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Create a routine",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Bot's computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bdi:Bot's computer",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bdi:Asleep",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Voice",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Voice",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Helix 1.0x",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Language",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Language",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:Auto-detect",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:blue.png",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Mark up image",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Download media",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Back to chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "span:blue.png · 3 / 5",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View media 1 of 5",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View media 2 of 5",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View media 3 of 5",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View media 4 of 5",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:View media 5 of 5",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Prompt",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Composer actions",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice input",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "control:Start voice chat",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#1 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#1 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#1 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#1 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#2 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#1 parts",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#1 control:Open oracle-note.txt#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#1 box#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#1 box#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 parts",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 box#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 control:Open image full screen#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 img#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 box#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 control:Open image full screen#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 img#2",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 box#3",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 control:Open the remaining 3 images full screen#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 img#3",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#2 text(2)#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#3 parts",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#3 box#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#3 text:Which tree do you prefer?#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#3 text:B#1",
+   "pass": false,
+   "why": "no scene"
+  },
+  {
+   "key": "card#3 text:Cedar#1",
+   "pass": false,
+   "why": "no scene"
+  }
+ ],
+ "run": "2026-11-23T17:16:04.675Z",
+ "inventory": {
+  "id": "oracle-picture-viewer-rest",
+  "controls": [
+   {
+    "name": "Bot tile",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "New Bot",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Connect apps",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "Open account menu",
+    "item": "F1",
+    "ours": false
+   },
+   {
+    "name": "View conversation details",
+    "item": "F2",
+    "ours": false
+   },
+   {
+    "name": "Share",
+    "item": "F5",
+    "ours": false
+   },
+   {
+    "name": "Close",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Edit Bot avatar",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Bot name",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Activity",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Library",
+    "item": "F3",
+    "ours": false
+   },
+   {
+    "name": "Hide",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Create a routine",
+    "item": "N3",
+    "ours": false
+   },
+   {
+    "name": "Bot's computer",
+    "item": "F4",
+    "ours": false
+   },
+   {
+    "name": "Voice",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Language",
+    "item": "N4",
+    "ours": false
+   },
+   {
+    "name": "Mark up image",
+    "item": "A2",
+    "ours": false
+   },
+   {
+    "name": "Download media",
+    "item": "A2",
+    "ours": false
+   },
+   {
+    "name": "Back to chat",
+    "item": "A2",
+    "ours": false
+   },
+   {
+    "name": "View media 1 of 5",
+    "item": "A2",
+    "ours": false
+   },
+   {
+    "name": "View media 2 of 5",
+    "item": "A2",
+    "ours": false
+   },
+   {
+    "name": "View media 3 of 5",
+    "item": "A2",
+    "ours": false
+   },
+   {
+    "name": "View media 4 of 5",
+    "item": "A2",
+    "ours": false
+   },
+   {
+    "name": "View media 5 of 5",
+    "item": "A2",
+    "ours": false
+   },
+   {
+    "name": "Prompt",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Composer actions",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice input",
+    "item": "T4",
+    "ours": false
+   },
+   {
+    "name": "Start voice chat",
+    "item": "T4",
+    "ours": false
+   }
+  ],
+  "missing": 28,
+  "untracked": []
+ }
+}
