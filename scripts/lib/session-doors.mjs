@@ -25,7 +25,7 @@ export const OPEN = Object.freeze({
   'app/src/chat/api.ts computerOnline': 'takes a computer id, answered only for one of ownHosts()',
   'app/src/chat/api.ts startChat': 'makes the conversation, from a computer id and a bot id: no session id to check yet (the page picks the computer: T1 known miss 4, task-7baccaa5734a64bd)',
   'app/src/chat/api.ts renameBot': "takes a bot id, and writes only a record trusted() holds as the caller's own",
-  'app/src/routes/api/chat.events.ts GET': "takes no id: Barkpark's fleet stream, each session's state, no content",
+  'app/src/routes/api/chat.events.ts GET': "takes no id: Barkpark's fleet stream, cut by server/fleet.ts to our own sessions' {session_id, agent_state} in snapshot and state frames; titles, ts, heartbeat and title frames, and every other session never go out",
   'app/src/routes/api/gate-b.$trace.ts GET': 'development builds only (404 in production): a recorded oracle trace, no Barkpark session',
   'app/src/routes/api/gate-b.$trace.ts POST': 'development builds only (404 in production): a recorded oracle trace, no Barkpark session',
 });
