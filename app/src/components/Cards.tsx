@@ -144,10 +144,21 @@ export function FileName({name}: {name: string}) {
 }
 
 /** A text file or PDF sent with a message: a card with a page mark, the name and the size, above its
- *  bubble (oracle-file-sent, article 131: 300 x 72, radius 22, on rgb 37). Not openable yet. */
-export function FileCard({name, size}: {name: string; size: string}) {
+ *  bubble (oracle-file-sent, article 131: 300 x 72, radius 22, on rgb 37). `href`: where the file opens,
+ *  in a new tab with no opener: a PDF in the browser's viewer, a text file as a download (the route's
+ *  headers decide, never this page). A gate scene's card has none and stays disabled. */
+export function FileCard({name, size, href = null}: {name: string; size: string; href?: string | null}) {
+  const open = href ? () => window.open(href, '_blank', 'noopener,noreferrer') : undefined
   return (
-    <div className="file-card" role="button" aria-label={`Open ${name}`} aria-disabled="true">
+    <div
+      className="file-card"
+      role="button"
+      aria-label={`Open ${name}`}
+      aria-disabled={open ? undefined : 'true'}
+      tabIndex={open ? 0 : undefined}
+      onClick={open}
+      onKeyDown={open ? (e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), open()) : undefined}
+    >
       <section className="file-box">
         <div className="file-body">
           <PageMark />

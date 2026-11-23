@@ -132,6 +132,10 @@ const timeOf = (iso: string): string | null => {
 // `of`: the live page's bot and the computer its next new conversation is made on (index.tsx's
 // chat.host.id, which startChat sends), as data-bot-id / data-host-id. scripts/turn-live.mjs reads
 // them before a first message, which no stream can check yet (V1).
+// A sent file opens at the route its id names, with its shown name for the download's header
+// (routes/api/chat.$id.attachments.$aid.ts takes a name only when it is plainly safe).
+const opened = (url: string | null, name: string) => (url ? `${url}?name=${encodeURIComponent(name)}` : null)
+
 export function Transcript({bot, startedAt, bubbles, working, error, picture, ask, onAnswer, onChoose, lift = 0, of}: {bot: string; startedAt: string | null; bubbles: Bubble[]; working: Working; error: string | null; picture?: (id: string) => string | null; ask?: Ask | null; onAnswer?: (decision: 'allow' | 'deny') => void; onChoose?: (answers: Answers) => void; lift?: number; of?: {botId: string; hostId: string}}) {
   const box = useRef<HTMLDivElement>(null)
   const pinned = useRef(true)
@@ -190,7 +194,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
                   {b.files && b.files.length > 0 && (
                     <div className="file-stack">
                       {numberSame(b.files).map((f, j) => (
-                        <FileCard key={j} {...f} />
+                        <FileCard key={j} name={f.name} size={f.size} href={f.id && picture ? opened(picture(f.id), f.name) : null} />
                       ))}
                     </div>
                   )}

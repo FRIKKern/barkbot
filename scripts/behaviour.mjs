@@ -36,6 +36,7 @@ import { settingsLive } from './lib/settings-live.mjs';
 import { PINNED_VERSION } from './lib/pinned-version.mjs';
 import { timeRows } from './lib/time-rows.mjs';
 import { fileNumbers } from './lib/file-numbers.mjs';
+import { openFiles } from './lib/open-files.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : null);
@@ -222,13 +223,14 @@ await new Promise((ok) => httpServer((req, res) => {
         const { data } = JSON.parse(body); const bytes = Buffer.from(data, 'base64'); const id = createHash('sha256').update(bytes).digest('hex');
         const media_type = bytes[0] === 0x89 && bytes.subarray(1, 4).toString() === 'PNG' ? 'image/png' : bytes.subarray(0, 5).toString() === '%PDF-' ? 'application/pdf' : bytes.length && !bytes.includes(0) && Buffer.from(bytes.toString('utf8'), 'utf8').equals(bytes) ? 'text/plain' : null;
         if (!media_type) { stub.refused.push({ upload: id }); return json(400, { error: { code: 'invalid_request', message: 'attachment must be UTF-8 text, a PDF, or one of: image/png, image/jpeg, image/gif, image/webp' } }); }
-        stub.uploads.push(id); stub.pictures.set(`${req.url.split('/')[4]}/${id}`, data); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
+        stub.uploads.push(id); stub.pictures.set(`${req.url.split('/')[4]}/${id}`, { data, media_type }); return json(201, { attachment: { id, media_type, byte_size: bytes.length, url: `/v1/chat/sessions/x/attachments/${id}` } });
       };
       if (stub.holdUpload) { stub.heldUploads.push(take); return; }
       return take();
     }
     // A read is scoped as Barkpark's (<session>/<sha256>): an id stored in another conversation is a 404.
-    if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const [, , , , session, , id] = req.url.split('/'); const at = `${session}/${id}`; return stub.pictures.has(at) ? json(200, { attachment: { id, media_type: 'image/png', byte_size: 1, data: stub.pictures.get(at) } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
+    // It answers the type sniffed at the upload, as Barkpark does.
+    if (/^\/v1\/chat\/sessions\/[^/]+\/attachments\/[0-9a-f]{64}$/.test(req.url) && req.method === 'GET') { const [, , , , session, , id] = req.url.split('/'); const at = `${session}/${id}`; const held = stub.pictures.get(at); return held ? json(200, { attachment: { id, media_type: held.media_type, byte_size: Buffer.from(held.data, 'base64').length, data: held.data } }) : json(404, { error: { code: 'not_found', message: 'chat attachment not found' } }); }
     if (/^\/v1\/chat\/sessions\/[^/]+\/messages(\?.*)?$/.test(req.url) && req.method === 'POST') {
       const m = JSON.parse(body);
       // Idempotency-Key as Barkpark answers it (PR #26689, plugs/idempotency.ex, bind_request: true):
@@ -1297,6 +1299,7 @@ else {
   f = await box();
   check('a reload: the stored row shows its file card by name and size, once (control: the row with no attachments shows none)', f.bubbles === 2 && f.cards.length === 1 && f.cards[0][0] === 'Open note.txt' && f.cards[0][1] === `${NOTE.length}B`, { f });
   stub.rows = [];
+  await openFiles({ check, precondition, ev, open, base, until, stub, page, click, session: SESSION, note: NOTE, noteId });
   await fileNumbers({ check, precondition, ev, open, base, until, key, stub, page, path, port: CHROME_PORT, session: SESSION });
   await timeRows({ check, precondition, ev, open, base, until, wait, stub, page });
   [notePath, zipPath, binPath].forEach((x) => rmSync(x, { force: true }));
