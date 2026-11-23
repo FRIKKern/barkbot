@@ -14,7 +14,7 @@ import { activeBot, ORACLE_BOT } from './recipes.mjs';
 import { collect } from './collect.mjs';
 import { controls, namedElements } from '../lib/controls.mjs';
 import { pickByLabel } from '../lib/hover-label.mjs';
-import { VIEWER, labelPressAllowed, pickedName, underPoint } from '../lib/press-guard.mjs';
+import { VIEWER, dropPicked, labelPressAllowed, markPicked, pickedName, underPoint } from '../lib/press-guard.mjs';
 import { path } from '../lib/data.mjs';
 
 const args = process.argv.slice(2);
@@ -142,9 +142,9 @@ const base = await names();
 const mayPress = (name) => MAY_PRESS.has(name) && (!NEVER.test(name) || OPENS_ONLY.has(name));
 // A real pointer press at the control's centre (menus open on pointerdown, not on click()). `byLabel`: a
 // control inside a message (controls() leaves those out), picked by its exact label wholly on screen
-// (lib/hover-label.mjs); only the VIEWER labels. Right before the press the page is asked what the press
-// would reach (lib/press-guard.mjs underPoint): the picked element itself, by its box and its name (and,
-// for pressLabel, its place among the openers by that label), or the sweep stops.
+// (lib/hover-label.mjs); only the VIEWER labels. Right after the pick the page holds the picked element
+// (lib/press-guard.mjs markPicked), and right before the press it is asked what the press would reach
+// (underPoint): that held element itself, in the picked box, or the sweep stops.
 async function press(name, byLabel = false) {
   if (!mayPress(name)) throw new Error(`refusing to press "${name}": not on the sweep's list`);
   if (byLabel && !labelPressAllowed(name)) throw new Error(`refusing to press "${name}" by its label: pressLabel takes only ${VIEWER.join(' / ')}`);
@@ -159,19 +159,26 @@ async function press(name, byLabel = false) {
     if (hit.length !== 1) throw new Error(`"${name}": ${hit.length} controls by that name, need exactly 1`);
     target = hit[0].e;
   }
-  const [bx, by, w, h] = target.box;
-  const [x, y] = [bx + w / 2, by + h / 2];
-  // The oracle only takes pointer input while its window is in front.
-  execFileSync('open', ['-a', 'Grok Bot']);
-  await page.send('Page.bringToFront');
-  await wait(300);
-  const at = { x, y, button: 'left', clickCount: 1 };
-  await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...at });
-  const nth = byLabel ? state.elements.filter((e) => e.label === name && e.i < target.i).length : null;
-  const under = await page.evaluate(underPoint, x, y, target.box, pickedName(state.elements, target), nth);
-  if (!under?.ok) throw new Error(`refusing to press "${name}": the point (${Math.round(x)}, ${Math.round(y)}) now holds ${under?.under ?? 'nothing'}, not the picked element; stopping`);
-  await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', ...at });
-  await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...at });
+  // From the mark on, the page may hold the picked element: every way out lets it go, a press, a
+  // refusal or a throw (rev299 on #321), so nothing of the sweep stays on Grok's window.
+  try {
+    const mark = await page.evaluate(markPicked, target.i, target.box, pickedName(state.elements, target));
+    if (!mark?.ok) throw new Error(`refusing to press "${name}": ${mark?.under ?? 'the pick could not be held'}; stopping`);
+    const [bx, by, w, h] = target.box;
+    const [x, y] = [bx + w / 2, by + h / 2];
+    // The oracle only takes pointer input while its window is in front.
+    execFileSync('open', ['-a', 'Grok Bot']);
+    await page.send('Page.bringToFront');
+    await wait(300);
+    const at = { x, y, button: 'left', clickCount: 1 };
+    await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...at });
+    const under = await page.evaluate(underPoint, x, y, target.box);
+    if (!under?.ok) throw new Error(`refusing to press "${name}": the point (${Math.round(x)}, ${Math.round(y)}) now holds ${under?.under ?? 'nothing'}, not the picked element; stopping`);
+    await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', ...at });
+    await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...at });
+  } finally {
+    await page.evaluate(dropPicked).catch(() => {});
+  }
 }
 // Every step must visibly change the screen (its controls, or the width) within 3 s, or the
 // sweep stops: a press that did not take would capture the wrong state under the right name.
