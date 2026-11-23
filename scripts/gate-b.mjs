@@ -35,7 +35,7 @@ import { connect } from './oracle/cdp.mjs';
 import { RECIPES as recipes } from './oracle/recipes.mjs';
 import { path } from './lib/data.mjs';
 import { turnTraces } from './lib/turn-traces.mjs';
-import { hostedNote } from './lib/gate-b-hosted.mjs';
+import { hostedNote, sharedKeys } from './lib/gate-b-hosted.mjs';
 import { oracleTurn, replayScript, stateScript, filler, awayAtReply } from '../app/src/chat/turn.ts';
 
 const args = process.argv.slice(2);
@@ -287,6 +287,9 @@ for (const line of notJudged) console.log(line);
 const total = report.reduce((n, s) => n + s.cases, 0), passed = report.reduce((n, s) => n + s.pass, 0);
 console.log(`Gate B · all ${report.length} turns${ONLY ? '' : ` on oracle ${[...new Set(report.map((s) => s.oracle_version))].join(', ')}`} · ${passed}/${total} pass`);
 if (!total) { console.error('Gate B: zero cases: a gate with nothing to check fails'); process.exit(1); }
+// A record matches a case by its key: two cases of one turn under one key cannot be judged or recorded.
+const shared = sharedKeys(report);
+if (shared.length) { console.error(`Gate B: two cases of one turn share a key (${shared.map((f) => `${f.id} · ${f.key}`).join(', ')}): a record cannot tell them apart, so this run is neither judged nor recorded. Give each case its own key.`); process.exit(1); }
 // --dump <file>: this run's full report, numbers included (for hunting a flaky case).
 if (opt('dump')) writeFileSync(opt('dump'), JSON.stringify(report, null, 1));
 const dir = path('parity', 'gate-b');
@@ -308,7 +311,7 @@ for (const s of report) {
 const HOSTED = process.env.GITHUB_ACTIONS === 'true';
 if (lower.length && !ACCEPT) {
   console.error(`Gate B: the pass count went down (${lower.join(', ')}). Not recorded. A change that lowers it does not land; --accept records it on purpose.`);
-  if (HOSTED) console.error(hostedNote(flipped));
+  if (HOSTED) console.error(hostedNote(flipped, report));
   process.exit(1);
 }
 if (CI) {
