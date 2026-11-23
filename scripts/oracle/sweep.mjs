@@ -14,7 +14,7 @@ import { activeBot, ORACLE_BOT } from './recipes.mjs';
 import { collect } from './collect.mjs';
 import { controls, namedElements } from '../lib/controls.mjs';
 import { pickByLabel } from '../lib/hover-label.mjs';
-import { VIEWER, labelPressAllowed, underPoint } from '../lib/press-guard.mjs';
+import { VIEWER, labelPressAllowed, pickedName, underPoint } from '../lib/press-guard.mjs';
 import { path } from '../lib/data.mjs';
 
 const args = process.argv.slice(2);
@@ -142,8 +142,9 @@ const base = await names();
 const mayPress = (name) => MAY_PRESS.has(name) && (!NEVER.test(name) || OPENS_ONLY.has(name));
 // A real pointer press at the control's centre (menus open on pointerdown, not on click()). `byLabel`: a
 // control inside a message (controls() leaves those out), picked by its exact label wholly on screen
-// (lib/hover-label.mjs); only the VIEWER labels. Right before the press the page is asked what is under
-// the point (lib/press-guard.mjs underPoint): the picked element, by its box, or the sweep stops.
+// (lib/hover-label.mjs); only the VIEWER labels. Right before the press the page is asked what the press
+// would reach (lib/press-guard.mjs underPoint): the picked element itself, by its box and its name (and,
+// for pressLabel, its place among the openers by that label), or the sweep stops.
 async function press(name, byLabel = false) {
   if (!mayPress(name)) throw new Error(`refusing to press "${name}": not on the sweep's list`);
   if (byLabel && !labelPressAllowed(name)) throw new Error(`refusing to press "${name}" by its label: pressLabel takes only ${VIEWER.join(' / ')}`);
@@ -166,7 +167,8 @@ async function press(name, byLabel = false) {
   await wait(300);
   const at = { x, y, button: 'left', clickCount: 1 };
   await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...at });
-  const under = await page.evaluate(underPoint, x, y, target.box, byLabel ? name : null);
+  const nth = byLabel ? state.elements.filter((e) => e.label === name && e.i < target.i).length : null;
+  const under = await page.evaluate(underPoint, x, y, target.box, pickedName(state.elements, target), nth);
   if (!under?.ok) throw new Error(`refusing to press "${name}": the point (${Math.round(x)}, ${Math.round(y)}) now holds ${under?.under ?? 'nothing'}, not the picked element; stopping`);
   await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', ...at });
   await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...at });
