@@ -170,9 +170,12 @@ function compare(oracle, ours, focusAtEnd, skipped = []) {
 
   const first = (list, kind) => list.find((m) => m.kind === kind);
   // A budget is judged only where the oracle itself meets it; a skip is printed, never silent.
+  // budget() is the clock: its value and limit are ms, so its case carries clock: true, and a
+  // hosted drop calls a flip runner timing from that tag only, never from the key's wording
+  // (lib/gate-b-hosted.mjs). A budget that is not a clock pushes its own case, untagged.
   const budget = (key, value, limit, applies = true, oracleAt) => {
     if (!applies) return skipped.push(`${key}: not judged, the oracle's own is ${oracleAt} ms`);
-    cases.push({ key, pass: value !== undefined && value <= limit, ours: value, why: value === undefined ? 'never happened' : value > limit ? `${Math.round(value)} ms > ${Math.round(limit)} ms` : undefined });
+    cases.push({ key, clock: true, pass: value !== undefined && value <= limit, ours: value, why: value === undefined ? 'never happened' : value > limit ? `${Math.round(value)} ms > ${Math.round(limit)} ms` : undefined });
   };
   budget('budget: composer clears in 1 frame', first(ours, 'clear')?.t, FRAME);
   cases.push({ key: 'budget: focus stays in Prompt', pass: focusAtEnd && !first(ours, 'blur'), why: focusAtEnd && !first(ours, 'blur') ? undefined : 'focus left Prompt' });
@@ -295,7 +298,7 @@ for (const s of report) {
   else if (s.pass < p.pass) {
     lower.push(`${s.id} ${p.pass} → ${s.pass}`);
     // Name what flipped, whatever --show says: a drop with no name cannot be told from load.
-    for (const c of s.results) if (!c.pass && p.results.find((x) => x.key === c.key)?.pass) { flipped.push({ id: s.id, key: c.key }); console.error(`  flipped ${s.id} · ${c.key}: ${c.why}`); }
+    for (const c of s.results) if (!c.pass && p.results.find((x) => x.key === c.key)?.pass) { flipped.push({ id: s.id, key: c.key, clock: c.clock === true }); console.error(`  flipped ${s.id} · ${c.key}: ${c.why}`); }
   }
   else if (s.pass > p.pass) higher.push(`${s.id} ${p.pass} → ${s.pass}`);
 }
