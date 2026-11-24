@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 120,
- "pass": 113,
+ "cases": 117,
+ "pass": 116,
  "results": [
   {
    "key": "aside:Bots",
@@ -339,8 +339,7 @@
   },
   {
    "key": "box:page › header#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:control:View conversation details › img#1",
@@ -349,8 +348,7 @@
   },
   {
    "key": "box:page › div#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:control:Edit Bot avatar › svg#1",
@@ -358,8 +356,7 @@
   },
   {
    "key": "box:aside:Conversation details › dialog#1",
-   "pass": false,
-   "why": "box off by -11.5,-78,23,360.5"
+   "pass": true
   },
   {
    "key": "box:control:blob character shape › svg#1",
@@ -480,24 +477,9 @@
   {
    "key": "box:aside:Conversation details › ul#3",
    "pass": true
-  },
-  {
-   "key": "box:main:Conversation transcript › header extra@88,0,632,60",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:main:Conversation transcript › div extra@104,700,600,44",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:page › dialog extra@732,138,297,340",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-24T23:10:20.759Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-edit-avatar",
   "controls": [
