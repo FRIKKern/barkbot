@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 66,
- "pass": 47,
+ "cases": 63,
+ "pass": 49,
  "results": [
   {
    "key": "aside:Bots",
@@ -240,8 +240,7 @@
   },
   {
    "key": "box:page › header#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:control:View conversation details › img#1",
@@ -250,8 +249,7 @@
   },
   {
    "key": "box:page › div#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:control:Edit Bot avatar › svg#1",
@@ -276,24 +274,9 @@
   {
    "key": "box:aside:Conversation details › ul#3",
    "pass": true
-  },
-  {
-   "key": "box:main:Conversation transcript › header extra@88,0,872,60",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:main:Conversation transcript › div extra@104,700,840,44",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:aside:Conversation details › div extra@960,60,320,700",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-24T23:10:20.759Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-main-1280",
   "controls": [

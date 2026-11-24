@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 168,
- "pass": 146,
+ "cases": 159,
+ "pass": 142,
  "results": [
   {
    "key": "aside:Bots",
@@ -510,8 +510,7 @@
   },
   {
    "key": "box:page › header#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:control:View conversation details › img#1",
@@ -520,8 +519,7 @@
   },
   {
    "key": "box:page › div#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:control:Edit Bot avatar › svg#1",
@@ -548,33 +546,9 @@
    "pass": true
   },
   {
-   "key": "box:page › presentation#1",
-   "pass": true
-  },
-  {
-   "key": "box:page › dialog#1",
-   "pass": true
-  },
-  {
-   "key": "box:control:Your plugins › span#1",
-   "pass": true
-  },
-  {
    "key": "box:control:Your plugins › img#1",
    "pass": false,
    "why": "missing"
-  },
-  {
-   "key": "box:control:Your plugins › span#2",
-   "pass": true
-  },
-  {
-   "key": "box:control:Your plugins › span#3",
-   "pass": true
-  },
-  {
-   "key": "box:control:Your plugins › span#4",
-   "pass": true
   },
   {
    "key": "box:page › div#2",
@@ -664,47 +638,32 @@
    "pass": true
   },
   {
-   "key": "box:main:Conversation transcript › header extra@88,0,632,60",
+   "key": "box:extra › svg@111,558,24,24",
    "pass": false,
    "why": "extra: the oracle draws no box here"
   },
   {
-   "key": "box:main:Conversation transcript › div extra@104,700,600,44",
+   "key": "box:extra › svg@544,558,24,24",
    "pass": false,
    "why": "extra: the oracle draws no box here"
   },
   {
-   "key": "box:aside:Conversation details › div extra@720,60,320,700",
+   "key": "box:extra › svg@111,624,24,24",
    "pass": false,
    "why": "extra: the oracle draws no box here"
   },
   {
-   "key": "box:control:Open Messages › svg extra@111,558,24,24",
+   "key": "box:extra › svg@111,690,24,24",
    "pass": false,
    "why": "extra: the oracle draws no box here"
   },
   {
-   "key": "box:control:Open Notes › svg extra@544,558,24,24",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:control:Open Reminders › svg extra@111,624,24,24",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:control:Open Location › svg extra@111,690,24,24",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:control:Open Contacts › svg extra@544,690,24,24",
+   "key": "box:extra › svg@544,690,24,24",
    "pass": false,
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-24T23:10:20.759Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-connect-apps",
   "controls": [

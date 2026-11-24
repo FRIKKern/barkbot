@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 88,
- "pass": 70,
+ "cases": 80,
+ "pass": 77,
  "results": [
   {
    "key": "aside:Bots",
@@ -272,8 +272,7 @@
   },
   {
    "key": "box:page › header#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:control:View conversation details › img#1",
@@ -282,33 +281,27 @@
   },
   {
    "key": "box:page › div#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:page › listitem#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:page › listitem#2",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:page › listitem#3",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:page › listitem#4",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:page › listitem#5",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:control:Edit Bot avatar › svg#1",
@@ -335,52 +328,12 @@
    "pass": true
   },
   {
-   "key": "box:main:Conversation transcript › header extra@88,0,632,60",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:main:Conversation transcript › alert extra@254,574,300,28",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:main:Conversation transcript › div extra@104,608,600,136",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:main:Conversation transcript › listitem extra@113,617,56,56",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:main:Conversation transcript › listitem extra@177,617,56,56",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:main:Conversation transcript › listitem extra@241,617,56,56",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:main:Conversation transcript › listitem extra@305,617,56,56",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:main:Conversation transcript › listitem extra@369,617,56,56",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:aside:Conversation details › div extra@720,60,320,700",
+   "key": "box:extra › alert@254,574,300,28",
    "pass": false,
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-24T23:10:20.759Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-pictures-waiting",
   "controls": [
