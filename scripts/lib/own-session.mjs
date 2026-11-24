@@ -143,6 +143,8 @@ export async function ownFleet({ check, precondition, base, stub, session, hostI
   const t0 = mine.title, f0 = stub.fleet;
   mine.title = OURS; stub.fleet = 'idle';
   stub.sessions.push({ id: MATE, execution_target: 'registered_host', execution_host_id: hostId, inserted_at: '2026-11-13T10:00:00Z', status: 'active', title: TITLE });
+  const ODD = 'words that are not a state';
+  const hosts0 = stub.hosts; let odd = '', revoked = '';
   const ac = new AbortController(); let text = '';
   try {
     const r = await fetch(`${base}/api/chat/events`, { signal: ac.signal });
@@ -163,8 +165,27 @@ export async function ownFleet({ check, precondition, base, stub, session, hostI
     send(`event: title\ndata: ${JSON.stringify({ session_id: session, title: OURS })}\n\n`);
     send(`id: 9:2\nevent: state\ndata: ${JSON.stringify({ session_id: session, agent_state: 'working', ts: '2026-11-13T10:00:00Z', title: null })}\n\n`);
     await readUntil(() => text.includes('9:2'), 8000);
-  } catch (e) { text += `\n[read failed: ${e}]`; } finally { ac.abort(); }
+    // A state that is not one of Barkpark's four words (an object carrying text, an unknown word)
+    // never goes out; idle after them does (control).
+    const at2 = text.length;
+    send(`id: 9:3\nevent: state\ndata: ${JSON.stringify({ session_id: session, agent_state: { text: ODD }, ts: null, title: null })}\n\n`);
+    send(`id: 9:4\nevent: state\ndata: ${JSON.stringify({ session_id: session, agent_state: ODD, ts: null, title: null })}\n\n`);
+    send(`id: 9:5\nevent: state\ndata: ${JSON.stringify({ session_id: session, agent_state: 'idle', ts: null, title: null })}\n\n`);
+    await readUntil(() => text.includes('9:5'), 8000);
+    odd = text.slice(at2);
+    // Our computer is revoked while the stream is open: within 10 s it stops naming our session.
+    // A keepalive after the flip shows the flip was read.
+    stub.hosts = hosts0.map((h) => (h.id === hostId ? { ...h, revoked: true } : h));
+    await new Promise((ok) => setTimeout(ok, 10500));
+    const at3 = text.length;
+    send(`id: 9:6\nevent: state\ndata: ${JSON.stringify({ session_id: session, agent_state: 'working', ts: null, title: null })}\n\n`);
+    send(': ping\n\n');
+    await readUntil(() => text.slice(at3).includes(': keepalive'), 8000);
+    revoked = text.slice(at3);
+  } catch (e) { text += `\n[read failed: ${e}]`; } finally { ac.abort(); stub.hosts = hosts0; }
   stub.sessions = stub.sessions.filter((x) => x.id !== MATE); mine.title = t0; stub.fleet = f0;
+  check("the fleet stream: a state that is not one of Barkpark's four words (an object carrying text, an unknown word) never goes out; idle after them does (control)", !odd.includes('9:3') && !odd.includes('9:4') && !odd.includes(ODD) && /id: 9:5\nevent: state\ndata: \{"session_id":"[^"]+","agent_state":"idle"\}\n\n/.test(odd), { odd: odd.slice(0, 400) });
+  check('the fleet stream: once our computer is revoked, an open stream stops naming our conversation within 10 s (a keepalive after its flip shows the flip was read)', revoked.includes(': keepalive') && !revoked.includes('9:6') && !revoked.includes(session), { revoked: revoked.slice(0, 300) });
   const snap = /event: snapshot\ndata: (.*)\n/.exec(text)?.[1];
   let entries = null; try { entries = JSON.parse(snap).sessions; } catch {}
   check("the fleet stream: a workspace-mate's conversation on our computer never goes out (no id, no state, no title), and no title or heartbeat frame does", !text.includes(MATE) && !text.includes(TITLE) && !/event: (title|heartbeat)/.test(text), { text: text.slice(0, 600) });

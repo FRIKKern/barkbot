@@ -27,11 +27,14 @@ function parse(block: string): Frame {
   return f
 }
 
+// Barkpark's four states (studio_chat/session.ex @agent_states). Anything else, an object that
+// carries text among them, is not passed on: the entry is dropped (rev299 on #324).
+const STATES = new Set(['working', 'blocked', 'idle', 'unknown'])
 const frame = (event: string, data: unknown, id?: string) => `${id !== undefined ? `id: ${id}\n` : ''}event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
-const entry = (x: unknown): {session_id: string; agent_state: unknown} | null => {
+const entry = (x: unknown): {session_id: string; agent_state: string} | null => {
   if (!x || typeof x !== 'object') return null
   const r = x as Record<string, unknown>
-  return typeof r.session_id === 'string' ? {session_id: r.session_id, agent_state: r.agent_state} : null
+  return typeof r.session_id === 'string' && STATES.has(r.agent_state as string) ? {session_id: r.session_id, agent_state: r.agent_state as string} : null
 }
 
 /** One frame of Barkpark's, as it goes to the page: '' when nothing of it may. */
