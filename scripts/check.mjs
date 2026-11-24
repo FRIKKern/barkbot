@@ -430,6 +430,21 @@ for (const [name, c, want] of [
   const us = els([[50, 50, 30, 30], [0, 0, 40, 40], [100.5, 0, 40, 40], [200, 0, 25, 25], [60, 200, 40, 40]]);
   const res = boxCases(them, us).map((c) => (c.pass ? 'pass' : c.why.split(':')[0]));
   if (JSON.stringify(res) !== '["pass","pass","missing","pass","missing","extra","extra"]') fail(`box cases: pairing by overlap, want pass, pass, missing, pass, missing, extra, extra, got ${JSON.stringify(res)}`);
+  // An svg by its centre, never its size: a padded 55 around a tight 33 at one centre passes; one
+  // 2 pt off-centre fails. A background the colour of the box under it, opaque, is not paint (1 in 0);
+  // a see-through one is (3 in 2), and so is another colour (4 in 0).
+  rule('box cases', 1);
+  const svg = (box) => ({ elements: [{ i: 0, tag: 'svg', box, style: {} }] });
+  const svgRes = [boxCases(svg([0, 0, 55, 55]), svg([11, 11, 33, 33]))[0].pass, boxCases(svg([0, 0, 55, 55]), svg([13, 11, 33, 33]))[0].pass];
+  const same = { elements: [
+    { i: 0, tag: 'div', box: [0, 0, 300, 300], style: { 'background-color': 'rgb(18, 18, 18)' } },
+    { i: 1, tag: 'div', box: [10, 10, 100, 100], style: { 'background-color': 'rgb(18, 18, 18)' }, parent: 0 },
+    { i: 2, tag: 'div', box: [120, 10, 100, 100], style: { 'background-color': 'rgba(245, 245, 245, 0.04)' }, parent: 0 },
+    { i: 3, tag: 'div', box: [130, 20, 50, 50], style: { 'background-color': 'rgba(245, 245, 245, 0.04)' }, parent: 2 },
+    { i: 4, tag: 'div', box: [10, 120, 100, 100], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 },
+  ] };
+  const sameRes = boxElements(same).map(({ e }) => e.i);
+  if (JSON.stringify(svgRes) !== '[true,false]' || JSON.stringify(sameRes) !== '[0,2,3,4]') fail(`box cases: svg by centre want [true,false], got ${JSON.stringify(svgRes)}; same-colour background want [0,2,3,4], got ${JSON.stringify(sameRes)}`);
 }
 
 // Press guard (the sweep's last look before a press, task-1c715b946dff6176, task-7521aa645350a9ed): the

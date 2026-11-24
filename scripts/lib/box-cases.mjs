@@ -11,10 +11,16 @@ import { namedElements } from './controls.mjs';
 
 const ancestors = (els, e) => { const out = []; let p = e.parent; while (p !== undefined) { out.push(els[p]); p = els[p].parent; } return out; };
 const clear = (c) => !c || /^rgba\(.*,\s*0\)$/.test(c) || c === 'transparent';
-export function paints(e) {
+// A background is paint only where it shows: an opaque one the same colour as the nearest
+// ancestor's background is the ancestor's colour again, and draws nothing the eye can tell (the
+// lead's ruling on #328, family 5). A see-through one stacks on the ancestor's, so it still paints.
+const opaque = (c) => /^rgb\(/.test(c) || /^rgba\(.*,\s*1\)$/.test(c);
+const under = (els, e) => { let p = e.parent; while (p !== undefined) { const c = els[p].style?.['background-color']; if (!clear(c)) return c; p = els[p].parent; } return null; };
+export function paints(e, els = []) {
   const s = e.style || {};
   if (e.tag === 'img' || e.tag === 'svg') return true;
-  if (!clear(s['background-color'])) return true;
+  const bg = s['background-color'];
+  if (!clear(bg) && !(opaque(bg) && under(els, e) === bg)) return true;
   if (s['background-image'] && s['background-image'] !== 'none') return true;
   if (parseFloat(s['border-top-width'] || '0') > 0 && !clear(s['border-top-color'])) return true;
   if (s['box-shadow'] && s['box-shadow'] !== 'none') return true;
@@ -37,7 +43,7 @@ export function boxElements(state) {
   const out = [];
   for (const e of els) {
     // Scored by another case already: a named one (box and look), the transcript's time row.
-    if (e.box[2] < 20 || e.box[3] < 20 || keyOf.has(e.i) || e.tag === 'time' || !paints(e)) continue;
+    if (e.box[2] < 20 || e.box[3] < 20 || keyOf.has(e.i) || e.tag === 'time' || !paints(e, els)) continue;
     const up = ancestors(els, e);
     if (e.role === 'article' || up.some((a) => a.role === 'article' || a.tag === 'svg') || transcript(e)) continue;
     if (e.parent !== undefined && keyOf.has(e.parent) && sameBox(e, els[e.parent])) continue;
@@ -81,6 +87,12 @@ export function boxCases(theirs, ours, tol = 1) {
     const m = got.get(a);
     if (!m) return { key, pass: false, why: 'missing' };
     const d = e.box.map((v, i) => Math.round((m.e.box[i] - v) * 10) / 10);
+    // An svg by its centre only, never its size: an svg's box is its viewBox, padding and all, and
+    // the capture cannot see where its ink is (the lead's ruling on #328, family 2).
+    if (e.tag === 'svg' || m.e.tag === 'svg') {
+      const c = [d[0] + d[2] / 2, d[1] + d[3] / 2].map((x) => Math.round(x * 10) / 10);
+      return c.some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `svg centre off by ${c.join(',')}` } : { key, pass: true };
+    }
     return [d[0], d[1], d[0] + d[2], d[1] + d[3]].some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `box off by ${d.join(',')}` } : { key, pass: true };
   });
   for (const [b, o] of mine.entries()) if (!used.has(b)) cases.push({ key: `box:${o.where} › ${o.e.role || o.e.tag} extra@${o.e.box.map(Math.round).join(',')}`, pass: false, why: 'extra: the oracle draws no box here' });
