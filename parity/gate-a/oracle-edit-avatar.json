@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 122,
- "pass": 97,
+ "cases": 120,
+ "pass": 113,
  "results": [
   {
    "key": "aside:Bots",
@@ -327,13 +327,11 @@
   },
   {
    "key": "box:control:Bot tile › svg#1",
-   "pass": false,
-   "why": "box off by 10.8,10.6,-21.2,-21.2"
+   "pass": true
   },
   {
    "key": "box:control:Bot tile#2 › svg#1",
-   "pass": false,
-   "why": "box off by 7.7,9,-15,-17.9"
+   "pass": true
   },
   {
    "key": "box:control:Open account menu › img#1",
@@ -355,14 +353,8 @@
    "why": "missing"
   },
   {
-   "key": "box:page › div#2",
-   "pass": false,
-   "why": "missing"
-  },
-  {
    "key": "box:control:Edit Bot avatar › svg#1",
-   "pass": false,
-   "why": "box off by 18.3,20.6,-36.6,-41.1"
+   "pass": true
   },
   {
    "key": "box:aside:Conversation details › dialog#1",
@@ -371,18 +363,15 @@
   },
   {
    "key": "box:control:blob character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:cloud character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:square character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:square character shape › span#1",
@@ -390,53 +379,43 @@
   },
   {
    "key": "box:control:sparkle character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:clover character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:heart character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:flower character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:teardrop character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:tablet character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:wedge character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:house character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:star character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:hex character shape › svg#1",
-   "pass": false,
-   "why": "box off by 9.6,9.6,-19.2,-19.2"
+   "pass": true
   },
   {
    "key": "box:control:Black character color › span#1",
@@ -483,10 +462,6 @@
    "pass": true
   },
   {
-   "key": "box:aside:Conversation details › div#1",
-   "pass": true
-  },
-  {
    "key": "box:aside:Conversation details › ul#1",
    "pass": true
   },
@@ -500,8 +475,7 @@
   },
   {
    "key": "box:control:Bot's computer › svg#1",
-   "pass": false,
-   "why": "box off by 7,7.8,-13.9,-15.7"
+   "pass": true
   },
   {
    "key": "box:aside:Conversation details › ul#3",
@@ -523,7 +497,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-24T22:48:13.157Z",
+ "run": "2026-11-24T23:10:20.759Z",
  "inventory": {
   "id": "oracle-edit-avatar",
   "controls": [

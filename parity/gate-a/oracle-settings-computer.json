@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 109,
- "pass": 94,
+ "cases": 107,
+ "pass": 97,
  "results": [
   {
    "key": "aside:Bots",
@@ -340,13 +340,11 @@
   },
   {
    "key": "box:control:Bot tile › svg#1",
-   "pass": false,
-   "why": "box off by 10.8,10.6,-21.2,-21.2"
+   "pass": true
   },
   {
    "key": "box:control:Bot tile#2 › svg#1",
-   "pass": false,
-   "why": "box off by 7.7,9,-15,-17.9"
+   "pass": true
   },
   {
    "key": "box:control:Open account menu › img#1",
@@ -368,17 +366,7 @@
    "why": "missing"
   },
   {
-   "key": "box:page › div#2",
-   "pass": false,
-   "why": "missing"
-  },
-  {
    "key": "box:control:Edit Bot avatar › svg#1",
-   "pass": false,
-   "why": "box off by 18.3,20.6,-36.6,-41.1"
-  },
-  {
-   "key": "box:aside:Conversation details › div#1",
    "pass": true
   },
   {
@@ -395,8 +383,7 @@
   },
   {
    "key": "box:control:Bot's computer › svg#1",
-   "pass": false,
-   "why": "box off by 6.8,7.6,-13.6,-15.4"
+   "pass": true
   },
   {
    "key": "box:aside:Conversation details › ul#3",
@@ -411,7 +398,7 @@
    "pass": true
   },
   {
-   "key": "box:page › div#3",
+   "key": "box:page › div#2",
    "pass": true
   },
   {
@@ -429,15 +416,15 @@
    "why": "missing"
   },
   {
+   "key": "box:page › div#3",
+   "pass": true
+  },
+  {
    "key": "box:page › div#4",
    "pass": true
   },
   {
    "key": "box:page › div#5",
-   "pass": true
-  },
-  {
-   "key": "box:page › div#6",
    "pass": true
   },
   {
@@ -461,7 +448,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-24T22:48:13.157Z",
+ "run": "2026-11-24T23:10:20.759Z",
  "inventory": {
   "id": "oracle-settings-computer",
   "controls": [
