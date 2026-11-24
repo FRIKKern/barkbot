@@ -4,8 +4,11 @@
 // scores bubbles only, so without this a card is never measured.
 //
 // A card is judged by what it paints: every part with a fill, a shadow, a border, an image, text
-// or a press, in order, each by its kind (control:<name>, text:<label>, text(<length>), img, box).
-// Wrappers that paint nothing are left out, so ours may nest differently. Each part: its box
+// or a press, each by its kind (control:<name>, text:<label>, text(<length>), img, box). Wrappers
+// that paint nothing are left out, so ours may nest differently. Each part of the oracle's pairs
+// with one of ours of the same kind by overlap (best IoU first, one to one, IoU > 0), as box cases
+// do, never by order: one part shifted or one too many reds only itself (the lead's ruling, the
+// 103-miss sort: order pairing spread a 22 pt shift over ~20 cases a state). Each part: its box
 // within 1 pt on every edge and the same look; and each card: the same parts, no more, no fewer.
 
 const ancestors = (els, e) => { const out = []; let p = e.parent; while (p !== undefined) { out.push(els[p]); p = els[p].parent; } return out; };
@@ -60,10 +63,11 @@ export function cardCases(state, ours) {
     const a = count(t), b = count(m);
     const diff = [...new Set([...Object.keys(a), ...Object.keys(b)])].filter((k) => a[k] !== b[k]).map((k) => `${k} ${b[k] ?? 0} ≠ ${a[k] ?? 0}`);
     cases.push({ key: `${key} parts`, pass: !diff.length, why: diff.join('; ') || undefined });
+    const got = pairParts(t.parts, m.parts);
     t.parts.forEach((p, j) => {
       const n = t.parts.slice(0, j + 1).filter((x) => x.kind === p.kind).length;
       const pk = `${key} ${p.kind}#${n}`;
-      const q = m.parts.filter((x) => x.kind === p.kind)[n - 1];
+      const q = got.get(j);
       if (!q) { cases.push({ key: pk, pass: false, why: 'missing' }); return; }
       const d = p.e.box.map((v, k) => Math.round((q.e.box[k] - v) * 10) / 10);
       const why = [];
@@ -76,6 +80,22 @@ export function cardCases(state, ours) {
     });
   });
   return cases;
+}
+
+const iou = (a, b) => {
+  const x = Math.max(0, Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0]));
+  const y = Math.max(0, Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]));
+  const i = x * y;
+  return i / (a[2] * a[3] + b[2] * b[3] - i);
+};
+/** Part j of theirs -> its part of ours: same kind, best overlap first, one to one, IoU > 0. */
+function pairParts(theirs, mine) {
+  const pairs = [];
+  theirs.forEach((t, a) => mine.forEach((o, b) => { if (t.kind !== o.kind) return; const v = iou(t.e.box, o.e.box); if (v > 0) pairs.push([v, a, b]); }));
+  pairs.sort((x, y) => y[0] - x[0] || x[1] - y[1] || x[2] - y[2]);
+  const got = new Map(), used = new Set();
+  for (const [, a, b] of pairs) if (!got.has(a) && !used.has(b)) { got.set(a, mine[b]); used.add(b); }
+  return got;
 }
 
 /** The case keys alone, for a state the app has no scene for. */
