@@ -7,7 +7,8 @@ import { path, read, items, journeys, slices } from './lib/data.mjs';
 import { roadmapSvg } from './generate-roadmap.mjs';
 import { journeysSvg, parityMd } from './generate-parity.mjs';
 import { heroSvg } from './generate-hero.mjs';
-import { controls, claims, unscoredBoxes, boxElements } from './lib/controls.mjs';
+import { controls, claims, unscoredBoxes } from './lib/controls.mjs';
+import { boxCases, boxElements } from './lib/box-cases.mjs';
 import { turnTraces } from './lib/turn-traces.mjs';
 import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
 import { guardBeforeSend } from './lib/host-guard.mjs';
@@ -394,32 +395,38 @@ for (const [name, c, want] of [
   ] };
   const got = unscoredBoxes(fake).map((e) => e.i);
   if (JSON.stringify(got) !== '[2]') fail(`unscored boxes: on the made-up state, want only the unlabelled img (2), got ${JSON.stringify(got)}`);
-  // Gate A's box cases (boxElements): the viewer's picture is one, keyed from structure.
+  // Gate A's box cases (lib/box-cases.mjs): the viewer's picture is one.
   rule('box cases', 1);
   const pic = boxElements(at('oracle-picture-viewer')).find(({ e }) => e.tag === 'img' && e.box.map(Math.round).join() === '436,213,256,256');
   if (pic?.key !== 'box:page › img#1') fail(`box cases: oracle-picture-viewer's picture is not the case box:page › img#1 (${pic?.key ?? 'none'})`);
-  // What is dropped, and how keys come out, on a made-up state: a same-box wrapper (6 in 5), a
-  // second box at one place (7 beside 5), an svg's part (9 in 8), the log and its scroll box (10
-  // holds 11), the named button's own box again (12 in 1), and two spans under one named button pair as #1 and #2 in document order.
+  // Only what paints is a case: a clear wrapper (1) is not; a background (2), a top border (3), a
+  // shadow (4), an img (5) and own text (6) are; a 19-wide box (7), a named control (8) and the
+  // control's own box again (9) are not.
   rule('box cases', 1);
-  const made = { elements: [
-    { i: 0, tag: 'div', box: [0, 0, 800, 800] },
-    { i: 1, tag: 'button', label: 'Open', box: [10, 10, 100, 40], parent: 0 },
-    { i: 2, tag: 'span', box: [12, 12, 20, 20], parent: 1 },
-    { i: 3, tag: 'span', box: [40, 12, 20, 20], parent: 1 },
-    { i: 4, tag: 'div', box: [200, 0, 300, 300] },
-    { i: 5, tag: 'div', box: [210, 10, 100, 100], parent: 4 },
-    { i: 6, tag: 'div', box: [210, 10, 100, 100], parent: 5 },
-    { i: 7, tag: 'div', box: [210, 10, 100, 100], parent: 4 },
-    { i: 8, tag: 'svg', box: [320, 10, 40, 40], parent: 4 },
-    { i: 9, tag: 'g', box: [322, 12, 30, 30], parent: 8 },
-    { i: 10, tag: 'div', box: [0, 400, 500, 300] },
-    { i: 11, tag: 'div', role: 'log', box: [0, 400, 500, 300], parent: 10 },
-    { i: 12, tag: 'span', box: [10, 10, 100, 40], parent: 1 },
+  const bg = { 'background-color': 'rgb(31, 31, 31)' };
+  const paintState = { elements: [
+    { i: 0, tag: 'div', box: [0, 0, 100, 100], style: { 'background-color': 'rgba(0, 0, 0, 0)' } },
+    { i: 1, tag: 'div', box: [0, 0, 90, 90], style: {}, parent: 0 },
+    { i: 2, tag: 'div', box: [100, 0, 40, 40], style: bg },
+    { i: 3, tag: 'div', box: [150, 0, 40, 40], style: { 'border-top-width': '1px', 'border-top-color': 'rgba(245, 245, 245, 0.06)' } },
+    { i: 4, tag: 'div', box: [200, 0, 40, 40], style: { 'box-shadow': 'rgba(0, 0, 0, 0.2) 0px 1px 2px 0px' } },
+    { i: 5, tag: 'img', box: [250, 0, 40, 40], style: {} },
+    { i: 6, tag: 'p', box: [300, 0, 40, 40], style: {}, textLength: 12 },
+    { i: 7, tag: 'div', box: [350, 0, 19, 40], style: bg },
+    { i: 8, tag: 'button', label: 'Go', box: [400, 0, 40, 40], style: bg },
+    { i: 9, tag: 'span', box: [400, 0, 40, 40], style: bg, parent: 8 },
   ] };
-  const keys = boxElements(made).map(({ key, e }) => `${e.i}=${key}`);
-  const want = ['2=box:control:Open › span#1', '3=box:control:Open › span#2', '4=box:page › div#1', '5=box:page › div#2', '8=box:page › svg#1'];
-  if (JSON.stringify(keys) !== JSON.stringify(want)) fail(`box cases: on the made-up state, want ${JSON.stringify(want)}, got ${JSON.stringify(keys)}`);
+  const painted = boxElements(paintState).map(({ e }) => e.i);
+  if (JSON.stringify(painted) !== '[2,3,4,5,6]') fail(`box cases: what paints, want [2,3,4,5,6], got ${JSON.stringify(painted)}`);
+  // Pairing by overlap, one to one: ours has an extra painted box first and lacks one of theirs.
+  // The extra moves nothing, only the lacking one reds, and concentric near-equal boxes pair with
+  // their own (24 and 25 of theirs; ours has only the 25: the 24 is missing, never a green on the 25).
+  rule('box cases', 1);
+  const els = (bs) => ({ elements: bs.map(([x, y, w, h], i) => ({ i, tag: 'div', box: [x, y, w, h], style: bg })) });
+  const them = els([[0, 0, 40, 40], [100, 0, 40, 40], [200, 0, 24, 24], [200, 0, 25, 25]]);
+  const us = els([[50, 50, 30, 30], [0, 0, 40, 40], [100.5, 0, 40, 40], [200, 0, 25, 25]]);
+  const res = boxCases(them, us).map((c) => (c.pass ? 'pass' : c.why));
+  if (JSON.stringify(res) !== '["pass","pass","missing","pass"]') fail(`box cases: pairing by overlap, want pass, pass, missing, pass, got ${JSON.stringify(res)}`);
 }
 
 // Press guard (the sweep's last look before a press, task-1c715b946dff6176, task-7521aa645350a9ed): the

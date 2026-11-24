@@ -16,7 +16,8 @@ import { createServer } from 'node:net';
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { connect } from './oracle/cdp.mjs';
 import { collect } from './oracle/collect.mjs';
-import { controls, namedElements, claims, boxElements } from './lib/controls.mjs';
+import { controls, namedElements, claims } from './lib/controls.mjs';
+import { boxCases, boxElements } from './lib/box-cases.mjs';
 import { transcriptCases, transcriptKeys } from './lib/transcript.mjs';
 import { path, ROOT, items as allItems } from './lib/data.mjs';
 import { judged } from './lib/versions.mjs';
@@ -181,18 +182,6 @@ for (const state of states) {
     try { ours = await limited(); } catch (e2) { console.error(`Gate A: ${state.id} could not be measured: ${e2?.message ?? e2?.type ?? e2}`); process.exit(1); }
   }
 
-  // Gate A's box cases (lib/controls.mjs boxElements): each unnamed box of theirs, paired by its
-  // structural key with ours, within 1 pt on every edge. The box only: a wrapper's look is the look
-  // of what it holds, which the named cases score.
-  const boxCases = (theirs, ours) => {
-    const mine = new Map(boxElements(ours).map((c) => [c.key, c]));
-    return boxElements(theirs).map(({ key, e }) => {
-      const m = mine.get(key);
-      if (!m) return { key, pass: false, why: 'missing' };
-      const d = e.box.map((v, i) => Math.round((m.e.box[i] - v) * 10) / 10);
-      return [d[0], d[1], d[0] + d[2], d[1] + d[3]].some((x) => Math.abs(x) > TOL) ? { key, pass: false, why: `box off by ${d.join(',')}` } : { key, pass: true };
-    });
-  };
   // Gate A: same name, box within 1 pt on every edge, the same look.
   const mine = new Map(namedElements(ours).map((c) => [c.key, c]));
   const cases = theirs.map(({ key, e }) => {
@@ -208,7 +197,7 @@ for (const state of states) {
     }
     return { key, pass: !why.length, why: why.join('; ') || undefined };
   });
-  if (talk) cases.push(...transcriptCases(state, ours), ...cardCases(state, ours), ...boxCases(state, ours));
+  if (talk) cases.push(...transcriptCases(state, ours), ...cardCases(state, ours), ...boxCases(state, ours, TOL));
   const pass = cases.filter((c) => c.pass).length;
   report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: cases.length, pass, results: cases });
 
