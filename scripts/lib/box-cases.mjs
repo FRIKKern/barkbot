@@ -36,7 +36,8 @@ export function boxElements(state) {
   const counts = new Map();
   const out = [];
   for (const e of els) {
-    if (e.box[2] < 20 || e.box[3] < 20 || keyOf.has(e.i) || !paints(e)) continue;
+    // Scored by another case already: a named one (box and look), the transcript's time row.
+    if (e.box[2] < 20 || e.box[3] < 20 || keyOf.has(e.i) || e.tag === 'time' || !paints(e)) continue;
     const up = ancestors(els, e);
     if (e.role === 'article' || up.some((a) => a.role === 'article' || a.tag === 'svg') || transcript(e)) continue;
     if (e.parent !== undefined && keyOf.has(e.parent) && sameBox(e, els[e.parent])) continue;
@@ -59,9 +60,11 @@ const iou = (a, b) => {
 };
 
 /** One case per box of theirs: paired inside its `where` with one box of ours, one to one, best
- *  overlap first (IoU; boxes that do not overlap never pair). It passes within `tol` on every
- *  edge; with no partner it fails as missing. A box of ours with no partner of theirs is no case
- *  and moves no other pairing. The look is not compared: a painted box's look is for a later step. */
+ *  overlap first. The floor is any overlap at all (IoU > 0): two boxes that share no point are not
+ *  the same box. A pair passes within `tol` on every edge. A box of theirs with no partner fails as
+ *  missing, and a painted box of ours with none fails as extra (it is drawn where the oracle draws
+ *  nothing), so either reds only itself and moves no other pairing. The look is not compared: a
+ *  painted box's look is for a later step. */
 export function boxCases(theirs, ours, tol = 1) {
   const mine = boxElements(ours);
   const want = boxElements(theirs);
@@ -74,10 +77,12 @@ export function boxCases(theirs, ours, tol = 1) {
   pairs.sort((x, y) => y[0] - x[0] || x[1] - y[1] || x[2] - y[2]);
   const got = new Map(), used = new Set();
   for (const [, a, b] of pairs) if (!got.has(a) && !used.has(b)) { got.set(a, mine[b]); used.add(b); }
-  return want.map(({ key, e }, a) => {
+  const cases = want.map(({ key, e }, a) => {
     const m = got.get(a);
     if (!m) return { key, pass: false, why: 'missing' };
     const d = e.box.map((v, i) => Math.round((m.e.box[i] - v) * 10) / 10);
     return [d[0], d[1], d[0] + d[2], d[1] + d[3]].some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `box off by ${d.join(',')}` } : { key, pass: true };
   });
+  for (const [b, o] of mine.entries()) if (!used.has(b)) cases.push({ key: `box:${o.where} › ${o.e.role || o.e.tag} extra@${o.e.box.map(Math.round).join(',')}`, pass: false, why: 'extra: the oracle draws no box here' });
+  return cases;
 }

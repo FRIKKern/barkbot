@@ -400,8 +400,8 @@ for (const [name, c, want] of [
   const pic = boxElements(at('oracle-picture-viewer')).find(({ e }) => e.tag === 'img' && e.box.map(Math.round).join() === '436,213,256,256');
   if (pic?.key !== 'box:page › img#1') fail(`box cases: oracle-picture-viewer's picture is not the case box:page › img#1 (${pic?.key ?? 'none'})`);
   // Only what paints is a case: a clear wrapper (1) is not; a background (2), a top border (3), a
-  // shadow (4), an img (5) and own text (6) are; a 19-wide box (7), a named control (8) and the
-  // control's own box again (9) are not.
+  // shadow (4), an img (5) and own text (6) are; a 19-wide box (7), a named control (8), the
+  // control's own box again (9) and the transcript's time row (10) are not.
   rule('box cases', 1);
   const bg = { 'background-color': 'rgb(31, 31, 31)' };
   const paintState = { elements: [
@@ -415,18 +415,21 @@ for (const [name, c, want] of [
     { i: 7, tag: 'div', box: [350, 0, 19, 40], style: bg },
     { i: 8, tag: 'button', label: 'Go', box: [400, 0, 40, 40], style: bg },
     { i: 9, tag: 'span', box: [400, 0, 40, 40], style: bg, parent: 8 },
+    { i: 10, tag: 'time', box: [450, 0, 80, 28], style: {}, textLength: 13 },
   ] };
   const painted = boxElements(paintState).map(({ e }) => e.i);
   if (JSON.stringify(painted) !== '[2,3,4,5,6]') fail(`box cases: what paints, want [2,3,4,5,6], got ${JSON.stringify(painted)}`);
-  // Pairing by overlap, one to one: ours has an extra painted box first and lacks one of theirs.
-  // The extra moves nothing, only the lacking one reds, and concentric near-equal boxes pair with
-  // their own (24 and 25 of theirs; ours has only the 25: the 24 is missing, never a green on the 25).
+  // Pairing by overlap, one to one, floor IoU > 0: ours has an extra painted box first and lacks one
+  // of theirs. The extra reds only itself (extra) and moves nothing; the lacking one reds (missing);
+  // concentric near-equal boxes pair with their own (24 and 25 of theirs; ours has only the 25: the
+  // 24 is missing, never a green on the 25). A box of ours that shares no point with theirs (60,200)
+  // does not pair with theirs at 0,200: both red.
   rule('box cases', 1);
   const els = (bs) => ({ elements: bs.map(([x, y, w, h], i) => ({ i, tag: 'div', box: [x, y, w, h], style: bg })) });
-  const them = els([[0, 0, 40, 40], [100, 0, 40, 40], [200, 0, 24, 24], [200, 0, 25, 25]]);
-  const us = els([[50, 50, 30, 30], [0, 0, 40, 40], [100.5, 0, 40, 40], [200, 0, 25, 25]]);
-  const res = boxCases(them, us).map((c) => (c.pass ? 'pass' : c.why));
-  if (JSON.stringify(res) !== '["pass","pass","missing","pass"]') fail(`box cases: pairing by overlap, want pass, pass, missing, pass, got ${JSON.stringify(res)}`);
+  const them = els([[0, 0, 40, 40], [100, 0, 40, 40], [200, 0, 24, 24], [200, 0, 25, 25], [0, 200, 40, 40]]);
+  const us = els([[50, 50, 30, 30], [0, 0, 40, 40], [100.5, 0, 40, 40], [200, 0, 25, 25], [60, 200, 40, 40]]);
+  const res = boxCases(them, us).map((c) => (c.pass ? 'pass' : c.why.split(':')[0]));
+  if (JSON.stringify(res) !== '["pass","pass","missing","pass","missing","extra","extra"]') fail(`box cases: pairing by overlap, want pass, pass, missing, pass, missing, extra, extra, got ${JSON.stringify(res)}`);
 }
 
 // Press guard (the sweep's last look before a press, task-1c715b946dff6176, task-7521aa645350a9ed): the
