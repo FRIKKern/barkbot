@@ -38,5 +38,9 @@ export function collect() {
     if (p) e.parent = index.get(p);
     els.push(e);
   }
-  return { viewport: [innerWidth, innerHeight, devicePixelRatio], elements: els };
+  // The page's own background (body, else html), which no element above carries: what a box with
+  // no painted ancestor is laid over (lib/box-cases.mjs). Captures from before it have none.
+  const bodyBg = getComputedStyle(document.body).backgroundColor;
+  const page = bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)' ? bodyBg : getComputedStyle(document.documentElement).backgroundColor;
+  return { viewport: [innerWidth, innerHeight, devicePixelRatio], page, elements: els };
 }

@@ -7,25 +7,39 @@
 // text of its own. The capture keeps only those (collect.mjs KEYS): a box drawn only by a side or
 // bottom border, an outline, ::before/::after or a mask reads as paintless and is not scored. A
 // paintless wrapper's box comes from what it holds, which the other cases score, so it is no case.
-// A fill or top border with alpha under 0.1 is no paint either: a perception floor, not a number
-// from any capture (rev299's round 2 on #328: a 0.01 fill at each missing spot raised the score).
+// A fill or top border paints only when it shows: laid over what is behind it, it changes the
+// pixel by at least 4/255 in some channel (the lead's ruling on #328 round 3, a perception floor,
+// not a number from any capture). A 0.06 white hairline on rgb(18,18,18) moves it 14 and paints; a
+// 0.01 fill, or an opaque one the colour already behind it, moves it 0 or 2 and does not.
 import { namedElements } from './controls.mjs';
 
 const ancestors = (els, e) => { const out = []; let p = e.parent; while (p !== undefined) { out.push(els[p]); p = els[p].parent; } return out; };
-const alpha = (c) => { const m = /^rgba\(.*,\s*([\d.]+)\)$/.exec(c); return m ? parseFloat(m[1]) : 1; };
-const clear = (c) => !c || c === 'transparent' || alpha(c) < 0.1;
-// A background is paint only where it shows: an opaque one the same colour as the nearest
-// ancestor's background is the ancestor's colour again, and draws nothing the eye can tell (the
-// lead's ruling on #328, family 5). A see-through one stacks on the ancestor's, so it still paints.
-const opaque = (c) => /^rgb\(/.test(c) || /^rgba\(.*,\s*1\)$/.test(c);
-const under = (els, e) => { let p = e.parent; while (p !== undefined) { const c = els[p].style?.['background-color']; if (!clear(c)) return c; p = els[p].parent; } return null; };
-export function paints(e, els = []) {
+// [r, g, b, a] of a computed colour; null for a form this does not read (it then counts as paint).
+const rgba = (c) => {
+  if (!c || c === 'transparent') return [0, 0, 0, 0];
+  const m = /^rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)$/.exec(c);
+  return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null;
+};
+const over = (c, b) => [0, 1, 2].map((i) => c[3] * c[i] + (1 - c[3]) * b[i]);
+const shows = (c, b) => { const x = rgba(c); return !x || over(x, b).some((v, i) => Math.abs(v - b[i]) >= 4); };
+// What is behind a box: its ancestors' backgrounds laid one over another, on the page's background
+// (the capture's `page`: body's, else html's), or the browser's white canvas for a capture without
+// one (an unreadable colour is taken as opaque grey: it still lets the box paint).
+const behind = (els, e, page) => {
+  const up = []; let p = e.parent;
+  while (p !== undefined) { up.push(els[p]); p = els[p].parent; }
+  const canvas = rgba(page) ? over(rgba(page), [255, 255, 255]) : [255, 255, 255];
+  return up.reverse().reduce((b, a) => { const x = rgba(a.style?.['background-color']); return x ? over(x, b) : [128, 128, 128]; }, canvas);
+};
+export function paints(e, els = [], page) {
   const s = e.style || {};
   if (e.tag === 'img' || e.tag === 'svg') return true;
-  const bg = s['background-color'];
-  if (!clear(bg) && !(opaque(bg) && under(els, e) === bg)) return true;
+  const back = behind(els, e, page);
+  if (shows(s['background-color'], back)) return true;
   if (s['background-image'] && s['background-image'] !== 'none') return true;
-  if (parseFloat(s['border-top-width'] || '0') > 0 && !clear(s['border-top-color'])) return true;
+  // The top border is drawn over the box's own background.
+  const own = rgba(s['background-color']);
+  if (parseFloat(s['border-top-width'] || '0') > 0 && shows(s['border-top-color'], own ? over(own, back) : back)) return true;
   if (s['box-shadow'] && s['box-shadow'] !== 'none') return true;
   return !!(e.text || e.textLength);
 }
@@ -46,7 +60,7 @@ export function boxElements(state) {
   const out = [];
   for (const e of els) {
     // Scored by another case already: a named one (box and look), the transcript's time row.
-    if (e.box[2] < 20 || e.box[3] < 20 || keyOf.has(e.i) || e.tag === 'time' || !paints(e, els)) continue;
+    if (e.box[2] < 20 || e.box[3] < 20 || keyOf.has(e.i) || e.tag === 'time' || !paints(e, els, state.page)) continue;
     const up = ancestors(els, e);
     if (e.role === 'article' || up.some((a) => a.role === 'article' || a.tag === 'svg') || transcript(e)) continue;
     if (e.parent !== undefined && keyOf.has(e.parent) && sameBox(e, els[e.parent])) continue;
