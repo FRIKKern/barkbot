@@ -7,10 +7,13 @@
 // text of its own. The capture keeps only those (collect.mjs KEYS): a box drawn only by a side or
 // bottom border, an outline, ::before/::after or a mask reads as paintless and is not scored. A
 // paintless wrapper's box comes from what it holds, which the other cases score, so it is no case.
+// A fill or top border with alpha under 0.1 is no paint either: a perception floor, not a number
+// from any capture (rev299's round 2 on #328: a 0.01 fill at each missing spot raised the score).
 import { namedElements } from './controls.mjs';
 
 const ancestors = (els, e) => { const out = []; let p = e.parent; while (p !== undefined) { out.push(els[p]); p = els[p].parent; } return out; };
-const clear = (c) => !c || /^rgba\(.*,\s*0\)$/.test(c) || c === 'transparent';
+const alpha = (c) => { const m = /^rgba\(.*,\s*([\d.]+)\)$/.exec(c); return m ? parseFloat(m[1]) : 1; };
+const clear = (c) => !c || c === 'transparent' || alpha(c) < 0.1;
 // A background is paint only where it shows: an opaque one the same colour as the nearest
 // ancestor's background is the ancestor's colour again, and draws nothing the eye can tell (the
 // lead's ruling on #328, family 5). A see-through one stacks on the ancestor's, so it still paints.
@@ -30,9 +33,9 @@ const sameBox = (a, b) => a.box.every((v, i) => Math.abs(v - b.box[i]) < 0.5);
 
 /** The painted, unnamed boxes of 20x20 or more, outside the conversation (its articles, its log
  *  and the boxes that hold the log: transcript.mjs scores it) and not an svg's parts (the svg is
- *  the box). A box at the place of its named parent, or of a box already kept under the same
- *  element, is that box again. Each carries `where`: the nearest named element it is inside (its
- *  namedElements key, or the page), and a key from the oracle's order there, for the report only. */
+ *  the box). A box at the place of its named parent, or of a box already kept, is that box again.
+ *  Each carries `where`: the nearest named element it is inside (its namedElements key, or the
+ *  page), and a key from the oracle's order there, for the report only: pairing never reads them. */
 export function boxElements(state) {
   const els = state.elements;
   const named = namedElements(state);
@@ -49,7 +52,7 @@ export function boxElements(state) {
     if (e.parent !== undefined && keyOf.has(e.parent) && sameBox(e, els[e.parent])) continue;
     const anchor = up.find((a) => keyOf.has(a.i));
     const where = anchor ? keyOf.get(anchor.i) : 'page';
-    if (out.some((o) => o.where === where && sameBox(o.e, e))) continue;
+    if (out.some((o) => sameBox(o.e, e))) continue;
     const base = `box:${where} › ${e.role || e.tag}`;
     const n = (counts.get(base) || 0) + 1;
     counts.set(base, n);
@@ -65,8 +68,10 @@ const iou = (a, b) => {
   return i / (a[2] * a[3] + b[2] * b[3] - i);
 };
 
-/** One case per box of theirs: paired inside its `where` with one box of ours, one to one, best
- *  overlap first. The floor is any overlap at all (IoU > 0): two boxes that share no point are not
+/** One case per box of theirs: paired with one box of ours anywhere on the page, one to one, best
+ *  overlap first. No anchor scope: which named element holds a box is DOM nesting, not where it is
+ *  drawn (rev299's round 2 on #328: our labelled <main> held a header and composer pixel-identical
+ *  to the oracle's and red them twice). The floor is any overlap at all (IoU > 0): two boxes that share no point are not
  *  the same box. A pair passes within `tol` on every edge. A box of theirs with no partner fails as
  *  missing, and a painted box of ours with none fails as extra (it is drawn where the oracle draws
  *  nothing), so either reds only itself and moves no other pairing. The look is not compared: a
@@ -76,7 +81,6 @@ export function boxCases(theirs, ours, tol = 1) {
   const want = boxElements(theirs);
   const pairs = [];
   for (const [a, t] of want.entries()) for (const [b, o] of mine.entries()) {
-    if (t.where !== o.where) continue;
     const v = iou(t.e.box, o.e.box);
     if (v > 0) pairs.push([v, a, b]);
   }
@@ -95,6 +99,6 @@ export function boxCases(theirs, ours, tol = 1) {
     }
     return [d[0], d[1], d[0] + d[2], d[1] + d[3]].some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `box off by ${d.join(',')}` } : { key, pass: true };
   });
-  for (const [b, o] of mine.entries()) if (!used.has(b)) cases.push({ key: `box:${o.where} › ${o.e.role || o.e.tag} extra@${o.e.box.map(Math.round).join(',')}`, pass: false, why: 'extra: the oracle draws no box here' });
+  for (const [b, o] of mine.entries()) if (!used.has(b)) cases.push({ key: `box:extra › ${o.e.role || o.e.tag}@${o.e.box.map(Math.round).join(',')}`, pass: false, why: 'extra: the oracle draws no box here' });
   return cases;
 }

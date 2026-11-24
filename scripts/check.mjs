@@ -408,7 +408,7 @@ for (const [name, c, want] of [
     { i: 0, tag: 'div', box: [0, 0, 100, 100], style: { 'background-color': 'rgba(0, 0, 0, 0)' } },
     { i: 1, tag: 'div', box: [0, 0, 90, 90], style: {}, parent: 0 },
     { i: 2, tag: 'div', box: [100, 0, 40, 40], style: bg },
-    { i: 3, tag: 'div', box: [150, 0, 40, 40], style: { 'border-top-width': '1px', 'border-top-color': 'rgba(245, 245, 245, 0.06)' } },
+    { i: 3, tag: 'div', box: [150, 0, 40, 40], style: { 'border-top-width': '1px', 'border-top-color': 'rgba(245, 245, 245, 0.1)' } },
     { i: 4, tag: 'div', box: [200, 0, 40, 40], style: { 'box-shadow': 'rgba(0, 0, 0, 0.2) 0px 1px 2px 0px' } },
     { i: 5, tag: 'img', box: [250, 0, 40, 40], style: {} },
     { i: 6, tag: 'p', box: [300, 0, 40, 40], style: {}, textLength: 12 },
@@ -439,12 +439,30 @@ for (const [name, c, want] of [
   const same = { elements: [
     { i: 0, tag: 'div', box: [0, 0, 300, 300], style: { 'background-color': 'rgb(18, 18, 18)' } },
     { i: 1, tag: 'div', box: [10, 10, 100, 100], style: { 'background-color': 'rgb(18, 18, 18)' }, parent: 0 },
-    { i: 2, tag: 'div', box: [120, 10, 100, 100], style: { 'background-color': 'rgba(245, 245, 245, 0.04)' }, parent: 0 },
-    { i: 3, tag: 'div', box: [130, 20, 50, 50], style: { 'background-color': 'rgba(245, 245, 245, 0.04)' }, parent: 2 },
+    { i: 2, tag: 'div', box: [120, 10, 100, 100], style: { 'background-color': 'rgba(245, 245, 245, 0.12)' }, parent: 0 },
+    { i: 3, tag: 'div', box: [130, 20, 50, 50], style: { 'background-color': 'rgba(245, 245, 245, 0.12)' }, parent: 2 },
     { i: 4, tag: 'div', box: [10, 120, 100, 100], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 },
   ] };
   const sameRes = boxElements(same).map(({ e }) => e.i);
   if (JSON.stringify(svgRes) !== '[true,false]' || JSON.stringify(sameRes) !== '[0,2,3,4]') fail(`box cases: svg by centre want [true,false], got ${JSON.stringify(svgRes)}; same-colour background want [0,2,3,4], got ${JSON.stringify(sameRes)}`);
+  // The alpha floor: a fill or top border under 0.1 is no paint (0, 1), at 0.1 it is (2, 3). And the
+  // page-wide pairing: one box, under the page on the oracle's side and under a named button on ours,
+  // is one passing case, not a missing one and an extra.
+  rule('box cases', 1);
+  const faint = { elements: [
+    { i: 0, tag: 'div', box: [0, 0, 40, 40], style: { 'background-color': 'rgba(18, 18, 18, 0.01)' } },
+    { i: 1, tag: 'div', box: [50, 0, 40, 40], style: { 'border-top-width': '1px', 'border-top-color': 'rgba(245, 245, 245, 0.06)' } },
+    { i: 2, tag: 'div', box: [100, 0, 40, 40], style: { 'background-color': 'rgba(245, 245, 245, 0.1)' } },
+    { i: 3, tag: 'div', box: [150, 0, 40, 40], style: { 'border-top-width': '1px', 'border-top-color': 'rgba(245, 245, 245, 0.1)' } },
+  ] };
+  const faintRes = boxElements(faint).map(({ e }) => e.i);
+  const onPage = { elements: [{ i: 0, tag: 'div', box: [10, 10, 50, 50], style: { 'background-color': 'rgb(31, 31, 31)' } }] };
+  const inButton = { elements: [
+    { i: 0, tag: 'button', label: 'Go', box: [0, 0, 100, 100] },
+    { i: 1, tag: 'div', box: [10, 10, 50, 50], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 },
+  ] };
+  const pageRes = boxCases(onPage, inButton).map((c) => c.pass);
+  if (JSON.stringify(faintRes) !== '[2,3]' || JSON.stringify(pageRes) !== '[true]') fail(`box cases: alpha floor want [2,3], got ${JSON.stringify(faintRes)}; page-wide pairing want [true], got ${JSON.stringify(pageRes)}`);
 }
 
 // Press guard (the sweep's last look before a press, task-1c715b946dff6176, task-7521aa645350a9ed): the
