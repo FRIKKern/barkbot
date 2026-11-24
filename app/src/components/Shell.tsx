@@ -99,13 +99,13 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
       <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-viewing={viewing ? '' : undefined}>
         <Rail scene={scene} onPick={pick} working={workingBots} unread={[...new Set([...unreadBots, ...unread])]} names={names} />
 
-        {/* Focusable like the oracle's transcript (role=log, tabindex 0): a click on it takes focus,
-            which is where a click away from the Bot name field leaves it (rename trace). */}
-        <main className="convo" aria-label="Conversation transcript" tabIndex={0}>
+        {/* The transcript (Transcript.tsx) is the oracle's role=log, named "Conversation transcript" and
+            focusable (tabindex 0); <main> is unnamed, as on the oracle (oracle-main-1280: main i46, log i64). */}
+        <main className="convo">
           <header className="convo-head">
             {active && (
               <button className="bot-pill" aria-label="View conversation details" aria-expanded={panelOpen} onClick={() => setPanelOpen((o) => !o)}>
-                <Face size={18} />
+                <Face size={24} />
                 <span role="heading" aria-level={1}>
                   {shown}
                 </span>
@@ -122,7 +122,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
             (talk ? (
               <Transcript bot={shown} startedAt={scene.transcript?.time ?? null} bubbles={talk.bubbles} working={null} error={null} ask={talk.ask} picture={scenePicture} lift={scene.transcript?.lift} />
             ) : (
-              <div className="transcript" />
+              <div className="transcript" role="log" aria-label="Conversation transcript" tabIndex={0} />
             ))}
           {composer ?? <Composer placeholder={placeholderFor(shown, talk?.ask)} start={start.composer} />}
         </main>

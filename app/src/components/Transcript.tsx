@@ -158,7 +158,7 @@ export function Transcript({bot, startedAt, bubbles, working, error, picture, as
     return () => ro.disconnect()
   }, [])
   return (
-    <div className="transcript" data-transcript="" data-bot-id={of?.botId} data-host-id={of?.hostId} ref={box} onScroll={(e) => {
+    <div className="transcript" role="log" aria-label="Conversation transcript" tabIndex={0} data-transcript="" data-bot-id={of?.botId} data-host-id={of?.hostId} ref={box} onScroll={(e) => {
       const el = e.currentTarget
       pinned.current = Math.abs(el.scrollHeight - el.scrollTop - el.clientHeight - below) < 2
     }}>
