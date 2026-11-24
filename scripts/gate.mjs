@@ -89,7 +89,7 @@ for (const state of states) {
   const talk = !state.changed;
   // A captured state the app has no scene for yet scores 0: every case is open work.
   if ((await fetch(`${base}/gate/${state.id}`)).status === 404) {
-    const keys = [...theirs.map(({ key }) => key), ...(talk ? [...transcriptKeys(state), ...cardKeys(state), ...boxElements(state).map(({ key }) => key)] : [])];
+    const keys = [...theirs.map(({ key }) => key), ...(talk ? [...transcriptKeys(state), ...cardKeys(state), ...boxElements(state).filter((b) => !b.unknown).map(({ key }) => key)] : [])];
     report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: keys.length, pass: 0, scene: false, results: keys.map((key) => ({ key, pass: false, why: 'no scene' })) });
     inventory.states.push(inventoryOf(state, null));
     console.log(`Gate A · ${state.id} · 0/${keys.length} pass (no scene yet)`);
@@ -204,6 +204,10 @@ for (const state of states) {
   inventory.states.push(inventoryOf(state, ours));
 
   console.log(`Gate A · ${state.id} · ${pass}/${cases.length} pass`);
+  // Boxes of the oracle's not scored because what is behind them is not in its capture (no page
+  // background, no opaque ancestor: lib/box-cases.mjs paints). Counted, never guessed.
+  const blind = talk ? boxElements(state).filter((b) => b.unknown) : [];
+  if (blind.length) console.log(`  Unscored · ${blind.length} box(es) behind unknown: ${blind.map((b) => `${b.key} @${b.e.box.map(Math.round).join(',')}`).join('; ')}`);
   for (const c of cases.filter((x) => !x.pass).slice(0, Number(opt('show') || 12))) console.log(`  ✗ ${c.key}: ${c.why}`);
   const inv = inventory.states.at(-1);
   console.log(`Inventory · ${state.id} · ours has ${inv.controls.length - inv.missing}/${inv.controls.length} controls${inv.untracked.length ? ` · untracked: ${inv.untracked.join(', ')}` : ''}`);

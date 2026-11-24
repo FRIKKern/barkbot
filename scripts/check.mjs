@@ -426,7 +426,7 @@ for (const [name, c, want] of [
   // 24 is missing, never a green on the 25). A box of ours that shares no point with theirs (60,200)
   // does not pair with theirs at 0,200: both red.
   rule('box cases', 1);
-  const els = (bs) => ({ elements: bs.map(([x, y, w, h], i) => ({ i, tag: 'div', box: [x, y, w, h], style: bg })) });
+  const els = (bs) => ({ page: 'rgb(18, 18, 18)', elements: bs.map(([x, y, w, h], i) => ({ i, tag: 'div', box: [x, y, w, h], style: bg })) });
   const them = els([[0, 0, 40, 40], [100, 0, 40, 40], [200, 0, 24, 24], [200, 0, 25, 25], [0, 200, 40, 40]]);
   const us = els([[50, 50, 30, 30], [0, 0, 40, 40], [100.5, 0, 40, 40], [200, 0, 25, 25], [60, 200, 40, 40]]);
   const res = boxCases(them, us).map((c) => (c.pass ? 'pass' : c.why.split(':')[0]));
@@ -465,19 +465,27 @@ for (const [name, c, want] of [
   ] };
   const faintRes = boxElements(faint).map(({ e }) => e.i);
   // With no painted ancestor a box lies on the page's own background (body's): rgb(18,18,18) on a
-  // page of that colour is no paint (0), rgb(31,31,31) is (1); with no page read, white is behind.
+  // page of that colour is no paint (0), rgb(31,31,31) is (1). With no page in the capture (the
+  // oracle's, before `page`) what is behind is unknown: both are kept marked unknown (?), and no
+  // case is made of an unknown box of theirs, nor of the box of ours it pairs with.
   const onBody = (page) => boxElements({ page, elements: [
     { i: 0, tag: 'div', box: [0, 0, 40, 40], style: { 'background-color': 'rgb(18, 18, 18)' } },
     { i: 1, tag: 'div', box: [50, 0, 40, 40], style: { 'background-color': 'rgb(31, 31, 31)' } },
-  ] }).map(({ e }) => e.i);
-  const bodyRes = [onBody('rgb(18, 18, 18)'), onBody(undefined)];
-  const onPage = { elements: [{ i: 0, tag: 'div', box: [10, 10, 50, 50], style: { 'background-color': 'rgb(31, 31, 31)' } }] };
-  const inButton = { elements: [
+  ] }).map(({ e, unknown }) => `${e.i}${unknown ? '?' : ''}`);
+  // A see-through ancestor does not cover the page, so what is behind stays unknown.
+  const veiled = boxElements({ elements: [
+    { i: 0, tag: 'div', box: [0, 0, 400, 400], style: { 'background-color': 'rgba(0, 0, 0, 0.7)' } },
+    { i: 1, tag: 'div', box: [10, 10, 40, 40], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 },
+  ] }).map(({ e, unknown }) => `${e.i}${unknown ? '?' : ''}`);
+  const bodyRes = [onBody('rgb(18, 18, 18)'), onBody(undefined), veiled];
+  const onPage = { page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'div', box: [10, 10, 50, 50], style: { 'background-color': 'rgb(31, 31, 31)' } }] };
+  const inButton = { page: 'rgb(18, 18, 18)', elements: [
     { i: 0, tag: 'button', label: 'Go', box: [0, 0, 100, 100] },
     { i: 1, tag: 'div', box: [10, 10, 50, 50], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 },
   ] };
   const pageRes = boxCases(onPage, inButton).map((c) => c.pass);
-  if (JSON.stringify(faintRes) !== '[0,2,5,6]' || JSON.stringify(pageRes) !== '[true]' || JSON.stringify(bodyRes) !== '[[1],[0,1]]') fail(`box cases: perception floor want [0,2,5,6], got ${JSON.stringify(faintRes)}; on the page's background want [[1],[0,1]], got ${JSON.stringify(bodyRes)}; page-wide pairing want [true], got ${JSON.stringify(pageRes)}`);
+  const blind = boxCases({ elements: onPage.elements }, inButton).length;
+  if (JSON.stringify(faintRes) !== '[0,2,5,6]' || JSON.stringify(pageRes) !== '[true]' || JSON.stringify(bodyRes) !== '[["1"],["0?","1?"],["0?","1?"]]' || blind !== 0) fail(`box cases: perception floor want [0,2,5,6], got ${JSON.stringify(faintRes)}; on the page's background want [["1"],["0?","1?"],["0?","1?"]], got ${JSON.stringify(bodyRes)}; behind unknown want no case, got ${blind}; page-wide pairing want [true], got ${JSON.stringify(pageRes)}`);
 }
 
 // Press guard (the sweep's last look before a press, task-1c715b946dff6176, task-7521aa645350a9ed): the
