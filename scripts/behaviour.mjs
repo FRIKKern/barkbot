@@ -37,7 +37,7 @@ import { PINNED_VERSION } from './lib/pinned-version.mjs';
 import { timeRows } from './lib/time-rows.mjs';
 import { fileNumbers } from './lib/file-numbers.mjs';
 import { openFiles } from './lib/open-files.mjs';
-import { ownSessionDoors, ownSessionComposer } from './lib/own-session.mjs';
+import { ownSessionDoors, ownSessionComposer, ownFleet } from './lib/own-session.mjs';
 import { pictureViewer } from './lib/picture-viewer.mjs';
 
 const args = process.argv.slice(2);
@@ -208,7 +208,7 @@ await new Promise((ok) => httpServer((req, res) => {
         // As Barkpark: the stored rows first (a fresh page asks from 0), and the fleet's snapshot.
         if (req.url === '/v1/chat/events') {
           stub.fleetOpens++; stub.fleets.push(res); res.on('close', () => stub.fleets.splice(stub.fleets.indexOf(res), 1));
-          if (stub.fleet) res.write(`event: snapshot\ndata: ${JSON.stringify({ sessions: stub.sessions.map((x) => ({ session_id: x.id, agent_state: stub.stateBy.get(x.id) ?? stub.fleet })) })}\n\n`);
+          if (stub.fleet) res.write(`event: snapshot\ndata: ${JSON.stringify({ sessions: stub.sessions.map((x) => ({ session_id: x.id, agent_state: stub.stateBy.get(x.id) ?? stub.fleet, ts: null, title: x.title ?? null })) })}\n\n`);
         }
         else if (!quiet && req.headers['last-event-id'] !== undefined) (stub.rowsBy.get(req.url.split('/')[4]) ?? stub.rows).forEach((r) => res.write(`id: ${r.seq}\nevent: message\ndata: ${JSON.stringify(r)}\n\n`));
         if (req.url !== '/v1/chat/events') { stub.opened.push(req.url.split('/')[4]); stub.streams.push(res); res.on('close', () => stub.streams.splice(stub.streams.indexOf(res), 1)); }
@@ -1308,6 +1308,7 @@ else {
   await openFiles({ check, precondition, ev, open, base, until, stub, page, click, session: SESSION, note: NOTE, noteId });
   await ownSessionDoors({ check, precondition, ev, base, stub, session: SESSION, hostId: HOST_ID, otherHost: OTHER_HOST, note: NOTE, noteId, rec });
   await ownSessionComposer({ check, precondition, ev, open, base, until, key, page, wait, stub, hostId: HOST_ID });
+  await ownFleet({ check, precondition, base, stub, session: SESSION, hostId: HOST_ID });
   await pictureViewer({ check, precondition, ev, open, base, until, key, stub, click, session: SESSION, page });
   await fileNumbers({ check, precondition, ev, open, base, until, key, stub, page, path, port: CHROME_PORT, session: SESSION });
   await timeRows({ check, precondition, ev, open, base, until, wait, stub, page });
