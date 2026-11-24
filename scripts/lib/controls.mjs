@@ -77,3 +77,34 @@ export function unscoredBoxes(state) {
   for (const e of els) if (named.has(e.i)) for (const a of ancestors(els, e)) holder.add(a.i);
   return els.filter((e) => e.box[2] >= 20 && e.box[3] >= 20 && !named.has(e.i) && !holder.has(e.i) && !inArticle(els, e));
 }
+
+// Gate A's box cases (task-9350f7d5eee2c573 step 2): the unscored boxes above, less two kinds that
+// say nothing of their own (rev299 on #326): a box that is its parent's box again (a same-box
+// wrapper; the outermost of such a chain stays, as does the first of boxes at one place under one
+// element), and the conversation's log, everything in it and
+// the scroll boxes that hold it (transcript.mjs scores the conversation); and the parts of an svg
+// (its use, g, path: the svg's own box is the case). Each is keyed by where it sits, from structure only: the
+// nearest named element it is inside (its namedElements key, or the page), its role or else its
+// tag, and its place among the boxes of that kind there, in document order. Both sides are keyed
+// the same way, so a box pairs with the one in the same place on the other side.
+const sameBox = (a, b) => a.box.every((v, i) => Math.abs(v - b.box[i]) < 0.5);
+export function boxElements(state) {
+  const els = state.elements;
+  const keyOf = new Map(namedElements(state).map(({ key, e }) => [e.i, key]));
+  const logs = els.filter((e) => e.role === 'log');
+  const transcript = (e) => logs.some((l) => l === e || ancestors(els, e).includes(l) || ancestors(els, l).includes(e));
+  const counts = new Map();
+  const out = [];
+  for (const e of unscoredBoxes(state)) {
+    if (transcript(e) || ancestors(els, e).some((a) => a.tag === 'svg') || (e.parent !== undefined && sameBox(e, els[e.parent]))) continue;
+    const anchor = ancestors(els, e).find((a) => keyOf.has(a.i));
+    const where = anchor ? keyOf.get(anchor.i) : 'page';
+    // A box at the very place of one already kept under the same element is the same box again.
+    if (out.some((o) => o.where === where && sameBox(o.e, e))) continue;
+    const base = `box:${where} › ${e.role || e.tag}`;
+    const n = (counts.get(base) || 0) + 1;
+    counts.set(base, n);
+    out.push({ key: `${base}#${n}`, where, e });
+  }
+  return out;
+}

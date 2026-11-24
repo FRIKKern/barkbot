@@ -16,7 +16,7 @@ import { createServer } from 'node:net';
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { connect } from './oracle/cdp.mjs';
 import { collect } from './oracle/collect.mjs';
-import { controls, namedElements, claims, unscoredBoxes } from './lib/controls.mjs';
+import { controls, namedElements, claims, boxElements } from './lib/controls.mjs';
 import { transcriptCases, transcriptKeys } from './lib/transcript.mjs';
 import { path, ROOT, items as allItems } from './lib/data.mjs';
 import { judged } from './lib/versions.mjs';
@@ -77,15 +77,6 @@ function inventoryOf(state, ours) {
   return { id: state.id, controls: ctl, missing: ctl.filter((c) => !c.ours).length, untracked: ctl.filter((c) => !c.item).map((c) => c.name) };
 }
 
-// Report only (task-9350f7d5eee2c573): the oracle's boxes no case scores yet, per state. Not in the
-// record, so no count moves; --unscored lists them.
-let unscoredAll = 0;
-const unscored = (state) => {
-  const boxes = unscoredBoxes(state);
-  unscoredAll += boxes.length;
-  console.log(`Unscored · ${state.id} · ${boxes.length} boxes of 20x20 or more (report only)`);
-  if (process.argv.includes('--unscored')) for (const e of boxes) console.log(`  · ${e.tag}${e.role ? `[${e.role}]` : ''}${e.label ? ` "${e.label}"` : ''} ${e.box.map(Math.round).join(',')}`);
-};
 const report = { run: new Date().toISOString(), states: [] };
 const inventory = { run: report.run, states: [] };
 for (const state of states) {
@@ -97,11 +88,10 @@ for (const state of states) {
   const talk = !state.changed;
   // A captured state the app has no scene for yet scores 0: every case is open work.
   if ((await fetch(`${base}/gate/${state.id}`)).status === 404) {
-    const keys = [...theirs.map(({ key }) => key), ...(talk ? [...transcriptKeys(state), ...cardKeys(state)] : [])];
+    const keys = [...theirs.map(({ key }) => key), ...(talk ? [...transcriptKeys(state), ...cardKeys(state), ...boxElements(state).map(({ key }) => key)] : [])];
     report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: keys.length, pass: 0, scene: false, results: keys.map((key) => ({ key, pass: false, why: 'no scene' })) });
     inventory.states.push(inventoryOf(state, null));
     console.log(`Gate A · ${state.id} · 0/${keys.length} pass (no scene yet)`);
-    unscored(state);
     continue;
   }
   // One state, in a Chrome of its own. A Chrome that drops its connection or stops answering
@@ -191,6 +181,18 @@ for (const state of states) {
     try { ours = await limited(); } catch (e2) { console.error(`Gate A: ${state.id} could not be measured: ${e2?.message ?? e2?.type ?? e2}`); process.exit(1); }
   }
 
+  // Gate A's box cases (lib/controls.mjs boxElements): each unnamed box of theirs, paired by its
+  // structural key with ours, within 1 pt on every edge. The box only: a wrapper's look is the look
+  // of what it holds, which the named cases score.
+  const boxCases = (theirs, ours) => {
+    const mine = new Map(boxElements(ours).map((c) => [c.key, c]));
+    return boxElements(theirs).map(({ key, e }) => {
+      const m = mine.get(key);
+      if (!m) return { key, pass: false, why: 'missing' };
+      const d = e.box.map((v, i) => Math.round((m.e.box[i] - v) * 10) / 10);
+      return [d[0], d[1], d[0] + d[2], d[1] + d[3]].some((x) => Math.abs(x) > TOL) ? { key, pass: false, why: `box off by ${d.join(',')}` } : { key, pass: true };
+    });
+  };
   // Gate A: same name, box within 1 pt on every edge, the same look.
   const mine = new Map(namedElements(ours).map((c) => [c.key, c]));
   const cases = theirs.map(({ key, e }) => {
@@ -206,14 +208,13 @@ for (const state of states) {
     }
     return { key, pass: !why.length, why: why.join('; ') || undefined };
   });
-  if (talk) cases.push(...transcriptCases(state, ours), ...cardCases(state, ours));
+  if (talk) cases.push(...transcriptCases(state, ours), ...cardCases(state, ours), ...boxCases(state, ours));
   const pass = cases.filter((c) => c.pass).length;
   report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: cases.length, pass, results: cases });
 
   inventory.states.push(inventoryOf(state, ours));
 
   console.log(`Gate A · ${state.id} · ${pass}/${cases.length} pass`);
-  unscored(state);
   for (const c of cases.filter((x) => !x.pass).slice(0, Number(opt('show') || 12))) console.log(`  ✗ ${c.key}: ${c.why}`);
   const inv = inventory.states.at(-1);
   console.log(`Inventory · ${state.id} · ours has ${inv.controls.length - inv.missing}/${inv.controls.length} controls${inv.untracked.length ? ` · untracked: ${inv.untracked.join(', ')}` : ''}`);
@@ -223,7 +224,6 @@ const total = report.states.reduce((n, s) => n + s.cases, 0);
 const passed = report.states.reduce((n, s) => n + s.pass, 0);
 report.total = { cases: total, pass: passed };
 console.log(`Gate A · all ${report.states.length} states · ${passed}/${total} pass`);
-console.log(`Unscored · all ${report.states.length} states · ${unscoredAll} boxes (report only)`);
 if (!total) { console.error('Gate A: zero cases: a gate with nothing to check fails'); process.exit(1); }
 const dir = path('parity', 'gate-a');
 mkdirSync(dir, { recursive: true });
