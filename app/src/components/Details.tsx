@@ -5,7 +5,7 @@
 // with its Speed slider, and Language.
 import {useRef, useState} from 'react'
 import type {Scene} from './Shell'
-import {Icon} from './Composer'
+import {HeldIcon, Icon} from './Composer'
 import {Face, Pick, Row, Section, VoicePick, fit} from './parts'
 import {Tooltip, useHover} from './tips'
 
@@ -20,7 +20,7 @@ export function Details({scene, name, between, onRename, onClose}: {scene: Scene
     <aside className="details" aria-label="Conversation details" inert={!scene.panelOpen}>
       <header className="details-head">
         <button className="close" aria-label="Close" onClick={onClose}>
-          <Icon d="M4 4l8 8M12 4l-8 8" />
+          <HeldIcon d="M4 4l8 8M12 4l-8 8" />
         </button>
       </header>
       <div className={library ? 'details-body lib' : 'details-body'}>
@@ -61,7 +61,7 @@ export function Details({scene, name, between, onRename, onClose}: {scene: Scene
         ) : (
           <div role="tabpanel" className="tabpanel">
             <Section title="Suggested" action={<button className="section-hide">Hide</button>}>
-              <Row icon={<Icon d="M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 5v3l2 1.25" />} label="Create a routine" />
+              <Row icon={<HeldIcon d="M8 2.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zM8 5v3l2 1.25" />} label="Create a routine" />
             </Section>
             {scene.computer !== undefined && (
               <Section title="Computer">

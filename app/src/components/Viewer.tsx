@@ -5,7 +5,7 @@
 // of all the message's pictures, and a composer about this picture.
 // Mark up and this composer's send are drawn only: neither was captured working (A2).
 import {createContext, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent} from 'react'
-import {Composer, Icon} from './Composer'
+import {Composer, HeldIcon} from './Composer'
 
 /** What is open: the message's pictures by id and name, which one, how each loads, and the tile
  *  pressed, which gets focus back when the viewer closes. */
@@ -85,13 +85,13 @@ export function Viewer({viewing, onClose}: {viewing: Viewing; onClose: () => voi
         </span>
         <div className="viewer-actions">
           <button className="viewer-round" aria-label="Mark up image" aria-disabled="true">
-            <Icon d="M10.5 3l2.5 2.5-7 7H3.5V10zM9 4.5L11.5 7" />
+            <HeldIcon d="M10.5 3l2.5 2.5-7 7H3.5V10zM9 4.5L11.5 7" />
           </button>
           <button className="viewer-round" aria-label="Download media" onClick={download}>
-            <Icon d="M8 2.5V10M5 7l3 3 3-3M3 12.5h10" />
+            <HeldIcon d="M8 2.5V10M5 7l3 3 3-3M3 12.5h10" />
           </button>
           <button className="viewer-round" aria-label="Back to chat" onClick={shut}>
-            <Icon d="M4 4l8 8M12 4l-8 8" />
+            <HeldIcon d="M4 4l8 8M12 4l-8 8" />
           </button>
         </div>
       </div>

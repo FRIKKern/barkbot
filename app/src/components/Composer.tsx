@@ -333,6 +333,18 @@ function Round({label, area, tip, voice, popup, onClick, children}: {label: stri
   )
 }
 
+/** An icon in the 20x20 box the oracle holds it in (a span around its 16 i), where the captures show
+ *  one: New Bot, Connect apps, the panel's Close, Create a routine and the viewer's three round
+ *  buttons (task-9350f7d5eee2c573, Gate A's box cases). The box is centred where the icon was, so
+ *  the icon does not move. */
+export function HeldIcon({d}: {d: string}) {
+  return (
+    <span className="icon-held">
+      <Icon d={d} />
+    </span>
+  )
+}
+
 export function Icon({d}: {d: string}) {
   return (
     <svg className="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">

@@ -1,7 +1,7 @@
 // The rail: the main bot, the pinned bots, New Bot, Connect apps, the account (fixture rail, 0..88).
 import {useEffect, useState, type ReactNode} from 'react'
 import type {Scene} from './Shell'
-import {Icon} from './Composer'
+import {HeldIcon} from './Composer'
 import {Face} from './parts'
 import {Preview, Tooltip, useHover} from './tips'
 
@@ -47,12 +47,12 @@ export function Rail({scene, onPick, working = [], unread = [], names = {}}: {sc
       <div className="rail-foot">
         <div className="rail-slot">
           <IconTip label="New Bot">
-            <Icon d="M8 2.5v11M2.5 8h11" />
+            <HeldIcon d="M8 2.5v11M2.5 8h11" />
           </IconTip>
         </div>
         <div className="rail-slot">
           <IconTip label="Connect apps">
-            <Icon d="M2.5 2.5h4v4h-4zM9.5 2.5h4v4h-4zM2.5 9.5h4v4h-4zM11.5 9v5M9 11.5h5" />
+            <HeldIcon d="M2.5 2.5h4v4h-4zM9.5 2.5h4v4h-4zM2.5 9.5h4v4h-4zM11.5 9v5M9 11.5h5" />
           </IconTip>
         </div>
         <div className="rail-account">
