@@ -1308,7 +1308,7 @@ else {
   await openFiles({ check, precondition, ev, open, base, until, stub, page, click, session: SESSION, note: NOTE, noteId });
   await ownSessionDoors({ check, precondition, ev, base, stub, session: SESSION, hostId: HOST_ID, otherHost: OTHER_HOST, note: NOTE, noteId, rec });
   await ownSessionComposer({ check, precondition, ev, open, base, until, key, page, wait, stub, hostId: HOST_ID });
-  await pictureViewer({ check, precondition, ev, open, base, until, key, stub, click, session: SESSION });
+  await pictureViewer({ check, precondition, ev, open, base, until, key, stub, click, session: SESSION, page });
   await fileNumbers({ check, precondition, ev, open, base, until, key, stub, page, path, port: CHROME_PORT, session: SESSION });
   await timeRows({ check, precondition, ev, open, base, until, wait, stub, page });
   [notePath, zipPath, binPath].forEach((x) => rmSync(x, { force: true }));

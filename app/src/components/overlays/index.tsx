@@ -98,6 +98,8 @@ function triggered(el: Element | null): Open | null {
 // `onChoose` hears a picker's pick (the frame owns the row it changes); the picker closes after it.
 export function Overlay({name, scene, onOpenChange, onCreateBot, onChoose}: {name?: string; scene?: Scene; onOpenChange?: (name: string | null) => void; onCreateBot?: CreateBot; onChoose?: Choose}) {
   const [open, setOpen] = useState<Open | null>(null)
+  const openNow = useRef<Open | null>(null)
+  openNow.current = open
   const layer = useRef<HTMLDivElement>(null)
   const held = !!name
   const shownName = held ? name : (open?.name ?? null)
@@ -140,7 +142,13 @@ export function Overlay({name, scene, onOpenChange, onCreateBot, onChoose}: {nam
         return null
       })
     }
-    const onKey = (e: globalThis.KeyboardEvent) => e.key === 'Escape' && close(true)
+    // Escape closes what is open here and is taken, so what it opened from (the picture viewer)
+    // stays open; with nothing open here it is left for the page.
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== 'Escape' || !openNow.current) return
+      e.preventDefault()
+      close(true)
+    }
     const onDown = () => (prior.current = document.activeElement)
     document.addEventListener('pointerdown', onDown, true)
     document.addEventListener('click', onClick)
