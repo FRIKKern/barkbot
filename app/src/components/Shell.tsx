@@ -5,7 +5,7 @@ import {useCallback, useEffect, useMemo, useRef, useState, type ReactNode} from 
 import {Composer, Icon, placeholderFor, type ComposerStart} from './Composer'
 import {Rail} from './Rail'
 import {Details} from './Details'
-import {Face} from './parts'
+import {FacePicture} from './parts'
 import {Overlay, type CreateBot} from './overlays'
 import {Transcript, fromScene, type SceneRow} from './Transcript'
 import {scenePicture} from './Cards'
@@ -105,7 +105,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
           <header className="convo-head">
             {active && (
               <button className="bot-pill" aria-label="View conversation details" aria-expanded={panelOpen} onClick={() => setPanelOpen((o) => !o)}>
-                <Face size={24} />
+                <FacePicture size={24} />
                 <span role="heading" aria-level={1}>
                   {shown}
                 </span>
