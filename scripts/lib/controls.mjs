@@ -65,3 +65,15 @@ export function namedElements(state) {
 export function claims(item, name) {
   return (item.controls || []).some((c) => (c.startsWith('/') && c.endsWith('/') ? new RegExp(c.slice(1, -1)).test(name) : c === name));
 }
+
+// Boxes Gate A does not score yet (task-9350f7d5eee2c573; report only, no case, no record): every
+// element of 20x20 or more outside the conversation that namedElements does not name and that holds
+// no named element (a wrapper is measured through what it holds). An unlabelled picture, a stage, a
+// role=group div. In oracle-picture-viewer the viewer's picture (img 436,213 256x256) is one.
+export function unscoredBoxes(state) {
+  const els = state.elements;
+  const named = new Set(namedElements(state).map(({ e }) => e.i));
+  const holder = new Set();
+  for (const e of els) if (named.has(e.i)) for (const a of ancestors(els, e)) holder.add(a.i);
+  return els.filter((e) => e.box[2] >= 20 && e.box[3] >= 20 && !named.has(e.i) && !holder.has(e.i) && !inArticle(els, e));
+}

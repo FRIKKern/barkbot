@@ -7,7 +7,7 @@ import { path, read, items, journeys, slices } from './lib/data.mjs';
 import { roadmapSvg } from './generate-roadmap.mjs';
 import { journeysSvg, parityMd } from './generate-parity.mjs';
 import { heroSvg } from './generate-hero.mjs';
-import { controls, claims } from './lib/controls.mjs';
+import { controls, claims, unscoredBoxes } from './lib/controls.mjs';
 import { turnTraces } from './lib/turn-traces.mjs';
 import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
 import { guardBeforeSend } from './lib/host-guard.mjs';
@@ -375,6 +375,27 @@ for (const [name, c, want] of [
   }
 }
 
+// Unscored boxes (task-9350f7d5eee2c573, report only): Gate A prints, per state, the oracle's boxes of
+// 20x20 or more that no case scores. The viewer's picture is one: a box the gate never compares.
+{
+  const at = (id) => JSON.parse(read(`fixtures/states/${id}.json`));
+  const viewer = unscoredBoxes(at('oracle-picture-viewer'));
+  rule('unscored boxes', 1);
+  if (!viewer.some((e) => e.tag === 'img' && e.box.map(Math.round).join() === '436,213,256,256')) fail(`unscored boxes: oracle-picture-viewer's picture (img 436,213 256x256) is not in the unscored count (${viewer.length} boxes)`);
+  // Control: a named control is never counted, nor a box that holds one, nor the conversation's.
+  rule('unscored boxes', 1);
+  const fake = { elements: [
+    { i: 0, tag: 'div', box: [0, 0, 400, 400] },
+    { i: 1, tag: 'button', label: 'Send', box: [10, 10, 40, 40], parent: 0 },
+    { i: 2, tag: 'img', box: [100, 100, 50, 50] },
+    { i: 3, tag: 'div', role: 'article', box: [200, 200, 100, 100] },
+    { i: 4, tag: 'img', box: [210, 210, 40, 40], parent: 3 },
+    { i: 5, tag: 'span', box: [300, 300, 19, 40] },
+  ] };
+  const got = unscoredBoxes(fake).map((e) => e.i);
+  if (JSON.stringify(got) !== '[2]') fail(`unscored boxes: on the made-up state, want only the unlabelled img (2), got ${JSON.stringify(got)}`);
+}
+
 // Press guard (the sweep's last look before a press, task-1c715b946dff6176, task-7521aa645350a9ed): the
 // picked element is held in the page right after the pick (markPicked, found by collect's index and
 // checked by its box and visible name), and the press must reach that very element (the nearest
@@ -514,7 +535,7 @@ for (const [name, c, want] of [
 }
 
 // No skip-pass: every rule must have checked something.
-for (const name of ['own session', 'doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label', 'press guard']) {
+for (const name of ['own session', 'doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label', 'press guard', 'unscored boxes']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 
