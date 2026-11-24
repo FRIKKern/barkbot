@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 36,
- "pass": 36,
+ "cases": 53,
+ "pass": 41,
  "results": [
   {
    "key": "aside:Bots",
@@ -152,9 +152,89 @@
   {
    "key": "card#1 text(3)#2",
    "pass": true
+  },
+  {
+   "key": "box:aside:Bots › div#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot tile › span#1",
+   "pass": false,
+   "why": "box off by 1.2,1,-2,-2"
+  },
+  {
+   "key": "box:control:Bot tile › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot tile#2 › span#1",
+   "pass": false,
+   "why": "box off by -1.9,-0.6,4.2,1.3"
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:New Bot › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Connect apps › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Open account menu › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:View conversation details › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Close › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Edit Bot avatar › span#1",
+   "pass": false,
+   "why": "box off by 18.3,20.6,-36.6,-41.1"
+  },
+  {
+   "key": "box:aside:Conversation details › tabpanel#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › div#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › div#2",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › p#1",
+   "pass": true
   }
  ],
- "run": "2026-11-20T19:35:24.018Z",
+ "run": "2026-11-24T22:23:27.491Z",
  "inventory": {
   "id": "oracle-library",
   "controls": [

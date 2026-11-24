@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 79,
- "pass": 79,
+ "cases": 136,
+ "pass": 105,
  "results": [
   {
    "key": "aside:Bots",
@@ -324,9 +324,268 @@
   {
    "key": "card#1 text(3)#2",
    "pass": true
+  },
+  {
+   "key": "box:aside:Bots › div#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot tile › span#1",
+   "pass": false,
+   "why": "box off by 1.2,1,-2,-2"
+  },
+  {
+   "key": "box:control:Bot tile › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot tile#2 › span#1",
+   "pass": false,
+   "why": "box off by -1.9,-0.6,4.2,1.3"
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:New Bot › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Connect apps › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Open account menu › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:View conversation details › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Close › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Edit Bot avatar › span#1",
+   "pass": false,
+   "why": "box off by 18.3,20.6,-36.6,-41.1"
+  },
+  {
+   "key": "box:control:blob character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:blob character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:cloud character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:cloud character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:square character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:square character shape › span#2",
+   "pass": false,
+   "why": "box off by 5.6,5.6,-11.2,-11.2"
+  },
+  {
+   "key": "box:control:square character shape › span#3",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:sparkle character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:sparkle character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:clover character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:clover character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:heart character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:heart character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:flower character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:flower character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:teardrop character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:teardrop character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:tablet character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:tablet character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:wedge character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:wedge character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:house character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:house character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:star character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:star character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:hex character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:hex character shape › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Black character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Brown character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Red character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Orange character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Yellow character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Green character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Cyan character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Blue character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Violet character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Magenta character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Gray character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Create a routine › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Create a routine › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot's computer › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › span#2",
+   "pass": false,
+   "why": "box off by 0.2,1,-0.3,-2.1"
+  },
+  {
+   "key": "box:control:Bot's computer › span#3",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot's computer › span#4",
+   "pass": false,
+   "why": "missing"
   }
  ],
- "run": "2026-11-20T19:10:11.597Z",
+ "run": "2026-11-24T22:23:27.491Z",
  "inventory": {
   "id": "oracle-edit-avatar",
   "controls": [

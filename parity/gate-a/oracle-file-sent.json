@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 78,
- "pass": 77,
+ "cases": 97,
+ "pass": 79,
  "results": [
   {
    "key": "aside:Bots",
@@ -321,9 +321,102 @@
   {
    "key": "card#3 text(3)#1",
    "pass": true
+  },
+  {
+   "key": "box:aside:Bots › div#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot tile › span#1",
+   "pass": false,
+   "why": "box off by 1.2,1,-2,-2"
+  },
+  {
+   "key": "box:control:Bot tile › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot tile#2 › span#1",
+   "pass": false,
+   "why": "box off by -1.9,-0.6,4.2,1.3"
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:New Bot › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Connect apps › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Open account menu › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:View conversation details › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Close › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Edit Bot avatar › span#1",
+   "pass": false,
+   "why": "box off by 18.3,20.6,-36.6,-41.1"
+  },
+  {
+   "key": "box:control:Create a routine › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Create a routine › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot's computer › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › span#2",
+   "pass": false,
+   "why": "box off by 0.2,1,-0.3,-2.1"
+  },
+  {
+   "key": "box:control:Bot's computer › span#3",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Bot's computer › span#4",
+   "pass": false,
+   "why": "missing"
   }
  ],
- "run": "2026-11-22T19:17:10.771Z",
+ "run": "2026-11-24T22:23:27.491Z",
  "inventory": {
   "id": "oracle-file-sent",
   "controls": [
