@@ -130,3 +130,43 @@ export async function ownSessionComposer({ check, precondition, ev, open, base, 
   const b = await box();
   check('control: with our computer back, Enter sends the kept words and the box empties', stub.sent.length === sent0 + 1 && stub.sent.at(-1).content === WORDS && b.words === '' && b.bubbles === b0.bubbles + 1, { b0, b, sent: stub.sent.slice(sent0) });
 }
+
+// The fleet stream takes no id, but Barkpark's carries every session the token can see, each with
+// its title (written from the conversation), and title and heartbeat frames too. Ours passes on only
+// `snapshot` and `state`, each entry only {session_id, agent_state}, and only for our own sessions.
+export async function ownFleet({ check, precondition, base, stub, session, hostId }) {
+  const MATE = '00000000-0000-4000-8000-000000000781';
+  const TITLE = "a workspace-mate's plan for the merger";
+  const OURS = 'the title of our own conversation';
+  const mine = stub.sessions.find((x) => x.id === session);
+  precondition('our own conversation is in the stand-in fleet', !!mine, { session });
+  const t0 = mine.title, f0 = stub.fleet;
+  mine.title = OURS; stub.fleet = 'idle';
+  stub.sessions.push({ id: MATE, execution_target: 'registered_host', execution_host_id: hostId, inserted_at: '2026-11-13T10:00:00Z', status: 'active', title: TITLE });
+  const ac = new AbortController(); let text = '';
+  try {
+    const r = await fetch(`${base}/api/chat/events`, { signal: ac.signal });
+    const rd = r.body.getReader();
+    const readUntil = async (done, ms) => {
+      const end = Date.now() + ms;
+      while (!done() && Date.now() < end) {
+        const x = await Promise.race([rd.read(), new Promise((ok) => setTimeout(() => ok({ late: true }), end - Date.now()))]);
+        if (x.late || x.done) break;
+        text += Buffer.from(x.value).toString();
+      }
+    };
+    await readUntil(() => /event: snapshot\ndata: .*\n\n/.test(text), 8000);
+    const send = (s) => stub.fleets.forEach((res) => res.write(s));
+    send(`id: 9:1\nevent: state\ndata: ${JSON.stringify({ session_id: MATE, agent_state: 'working', ts: null, title: null })}\n\n`);
+    send(`event: title\ndata: ${JSON.stringify({ session_id: MATE, title: TITLE })}\n\n`);
+    send(`event: heartbeat\ndata: ${JSON.stringify({ session_id: MATE, ts: '2026-11-13T10:00:00Z' })}\n\n`);
+    send(`event: title\ndata: ${JSON.stringify({ session_id: session, title: OURS })}\n\n`);
+    send(`id: 9:2\nevent: state\ndata: ${JSON.stringify({ session_id: session, agent_state: 'working', ts: '2026-11-13T10:00:00Z', title: null })}\n\n`);
+    await readUntil(() => text.includes('9:2'), 8000);
+  } catch (e) { text += `\n[read failed: ${e}]`; } finally { ac.abort(); }
+  stub.sessions = stub.sessions.filter((x) => x.id !== MATE); mine.title = t0; stub.fleet = f0;
+  const snap = /event: snapshot\ndata: (.*)\n/.exec(text)?.[1];
+  let entries = null; try { entries = JSON.parse(snap).sessions; } catch {}
+  check("the fleet stream: a workspace-mate's conversation on our computer never goes out (no id, no state, no title), and no title or heartbeat frame does", !text.includes(MATE) && !text.includes(TITLE) && !/event: (title|heartbeat)/.test(text), { text: text.slice(0, 600) });
+  check('the fleet stream, our own conversation (control): the snapshot has it as only {session_id, agent_state}, and its state flip goes out with its id; its title does not', Array.isArray(entries) && entries.some((x) => x.session_id === session && JSON.stringify(Object.keys(x)) === '["session_id","agent_state"]') && /id: 9:2\nevent: state\ndata: \{"session_id":"[^"]+","agent_state":"working"\}\n\n/.test(text) && !text.includes(OURS), { entries, text: text.slice(0, 600) });
+}

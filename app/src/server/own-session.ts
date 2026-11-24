@@ -63,16 +63,49 @@ async function hostOf(id: string): Promise<string | null> {
   return s.execution_host_id
 }
 
-/** Whether one of the bot records a load reads names this session on this computer. A record that
- *  could not be read names nothing. */
-async function inRecord(id: string, host: string, hosts: OwnComputer[]): Promise<boolean> {
+/** [session id, computer] for every session a bot record (as a load reads them) names on one of
+ *  our computers. A record that could not be read names nothing; a failed list read throws. */
+async function namedByRecords(hosts: OwnComputer[]): Promise<[string, string][]> {
+  const named: [string, string][] = []
   const ids = (await listIds()) ?? []
   for (const r of await readListed(ids.slice(0, READ_CAP))) {
     if (r.is !== 'there') continue
     const bot = trusted(r.id, r.raw, hosts)
-    if (bot && bot.session_id === id && bot.host_id === host) return true
+    if (bot?.session_id) named.push([bot.session_id, bot.host_id])
   }
-  return false
+  return named
+}
+
+/** Whether one of the bot records names this session on this computer. */
+async function inRecord(id: string, host: string, hosts: OwnComputer[]): Promise<boolean> {
+  return (await namedByRecords(hosts)).some(([s, h]) => s === id && h === host)
+}
+
+/** For the fleet stream (server/fleet.ts), which takes no id but carries every session the token
+ *  sees: whether a session is ours, asked per frame. One this server made or proved (madeHere,
+ *  ownSession) is; else one a bot record names on one of our computers. The records are read when
+ *  first asked, and again for a session they did not name at most once every 10 s, so one saved
+ *  later is heard. A read that fails names nothing. */
+export function ourSessions(): (id: string) => Promise<boolean> {
+  let named = new Set<string>()
+  let at = -Infinity
+  let reading: Promise<void> | null = null
+  const read = () => (reading ??= (async () => {
+    try {
+      named = new Set((await namedByRecords(await ownHosts())).map(([s]) => s))
+    } catch (e) {
+      named = new Set()
+      console.warn(`barkbot: could not read your bots for the fleet stream (${(e as Error).message})`)
+    } finally {
+      at = Date.now()
+      reading = null
+    }
+  })())
+  return async (id) => {
+    if (known.has(id) || named.has(id)) return true
+    if (Date.now() - at >= 10_000) await read()
+    return named.has(id)
+  }
 }
 
 /** True only when the session is one of BarkBot's own, as above. Any failure: false. */
