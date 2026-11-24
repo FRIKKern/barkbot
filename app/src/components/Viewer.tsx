@@ -4,7 +4,7 @@
 // picture's name in a pill, Mark up, Download and Back to chat; under it the name and place, a strip
 // of all the message's pictures, and a composer about this picture.
 // Mark up and this composer's send are drawn only: neither was captured working (A2).
-import {createContext, useEffect, useRef, useState} from 'react'
+import {createContext, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent} from 'react'
 import {Composer, Icon} from './Composer'
 
 /** What is open: the message's pictures by id and name, which one, how each loads, and the tile
@@ -26,17 +26,48 @@ export function Viewer({viewing, onClose}: {viewing: Viewing; onClose: () => voi
   const name = nameOf(viewing, at)
   const src = viewing.picture(viewing.ids[at])
   // The oracle's viewer opens with its composer's Prompt focused (the box's border is the focused
-  // 0.22, oracle-picture-viewer 340). Escape closes from anywhere in it, as Back to chat does.
+  // 0.22, oracle-picture-viewer 340). Escape closes from anywhere in it, as Back to chat does, but
+  // not an Escape something else already took (the composer menu closes alone: overlays/index.tsx).
+  // It is modal: the page behind is inert while it is open (no focus, no clicks), each attribute
+  // taken back on close only where this set it; an overlay it opens (the composer menu) is not.
+  // Tab and Shift+Tab wrap at its ends, so focus never leaves it.
+  // The page behind is let go before onClose, which gives focus back to the tile behind it.
+  const behind = useRef<Element[]>([])
+  const letGo = () => {
+    behind.current.forEach((c) => c.removeAttribute('inert'))
+    behind.current = []
+  }
+  const shut = () => {
+    letGo()
+    close.current()
+  }
   useEffect(() => {
-    root.current?.querySelector<HTMLElement>('.prompt')?.focus()
+    const el = root.current
+    el?.querySelector<HTMLElement>('.prompt')?.focus()
+    behind.current = el?.parentElement ? [...el.parentElement.children].filter((c) => c !== el && !c.classList.contains('overlay') && !c.hasAttribute('inert')) : []
+    behind.current.forEach((c) => c.setAttribute('inert', ''))
     const key = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
+      if (e.key !== 'Escape' || e.defaultPrevented) return
       e.preventDefault()
-      close.current()
+      shut()
     }
     window.addEventListener('keydown', key)
-    return () => window.removeEventListener('keydown', key)
+    return () => {
+      window.removeEventListener('keydown', key)
+      letGo()
+    }
   }, [])
+  const wrap = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'Tab' || !root.current) return
+    const all = [...root.current.querySelectorAll<HTMLElement>('button, [href], input, textarea, select, [contenteditable=true], [tabindex]')].filter((x) => x.tabIndex >= 0 && !x.hasAttribute('disabled') && x.getClientRects().length > 0)
+    if (all.length === 0) return
+    const first = all[0], last = all[all.length - 1]
+    const at = document.activeElement
+    if (e.shiftKey ? at === first || !root.current.contains(at) : at === last || !root.current.contains(at)) {
+      e.preventDefault()
+      ;(e.shiftKey ? last : first).focus()
+    }
+  }
   // Download: the picture by the same route its <img> loads (routes/api/chat.$id.attachments.$aid.ts),
   // saved under its name. The route serves only the four picture types, as themselves, nosniff.
   const download = () => {
@@ -47,7 +78,7 @@ export function Viewer({viewing, onClose}: {viewing: Viewing; onClose: () => voi
     a.click()
   }
   return (
-    <div className="viewer" role="dialog" aria-modal="true" aria-labelledby="viewer-name" ref={root}>
+    <div className="viewer" role="dialog" aria-modal="true" aria-labelledby="viewer-name" ref={root} onKeyDown={wrap}>
       <div className="viewer-top">
         <span className="viewer-pill">
           <span id="viewer-name">{name}</span>
@@ -59,7 +90,7 @@ export function Viewer({viewing, onClose}: {viewing: Viewing; onClose: () => voi
           <button className="viewer-round" aria-label="Download media" onClick={download}>
             <Icon d="M8 2.5V10M5 7l3 3 3-3M3 12.5h10" />
           </button>
-          <button className="viewer-round" aria-label="Back to chat" onClick={onClose}>
+          <button className="viewer-round" aria-label="Back to chat" onClick={shut}>
             <Icon d="M4 4l8 8M12 4l-8 8" />
           </button>
         </div>
