@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 79,
- "pass": 79,
+ "cases": 122,
+ "pass": 97,
  "results": [
   {
    "key": "aside:Bots",
@@ -324,9 +324,206 @@
   {
    "key": "card#1 text(3)#2",
    "pass": true
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": false,
+   "why": "box off by 10.8,10.6,-21.2,-21.2"
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": false,
+   "why": "box off by 7.7,9,-15,-17.9"
+  },
+  {
+   "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:View conversation details › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Edit Bot avatar › svg#1",
+   "pass": false,
+   "why": "box off by 18.3,20.6,-36.6,-41.1"
+  },
+  {
+   "key": "box:aside:Conversation details › dialog#1",
+   "pass": false,
+   "why": "box off by -11.5,-78,23,360.5"
+  },
+  {
+   "key": "box:control:blob character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:cloud character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:square character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:square character shape › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:sparkle character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:clover character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:heart character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:flower character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:teardrop character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:tablet character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:wedge character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:house character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:star character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:hex character shape › svg#1",
+   "pass": false,
+   "why": "box off by 9.6,9.6,-19.2,-19.2"
+  },
+  {
+   "key": "box:control:Black character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Brown character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Red character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Orange character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Yellow character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Green character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Cyan character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Blue character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Violet character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Magenta character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Gray character color › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › div#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#2",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › svg#1",
+   "pass": false,
+   "why": "box off by 7,7.8,-13.9,-15.7"
+  },
+  {
+   "key": "box:aside:Conversation details › ul#3",
+   "pass": true
+  },
+  {
+   "key": "box:main:Conversation transcript › header extra@88,0,632,60",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:main:Conversation transcript › div extra@104,700,600,44",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:page › dialog extra@732,138,297,340",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-20T19:10:11.597Z",
+ "run": "2026-11-24T22:48:13.157Z",
  "inventory": {
   "id": "oracle-edit-avatar",
   "controls": [

@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 78,
- "pass": 77,
+ "cases": 95,
+ "pass": 83,
  "results": [
   {
    "key": "aside:Bots",
@@ -321,9 +321,88 @@
   {
    "key": "card#3 text(3)#1",
    "pass": true
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": false,
+   "why": "box off by 10.8,10.6,-21.2,-21.2"
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": false,
+   "why": "box off by 7.7,9,-15,-17.9"
+  },
+  {
+   "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:View conversation details › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Edit Bot avatar › svg#1",
+   "pass": false,
+   "why": "box off by 18.3,20.6,-36.6,-41.1"
+  },
+  {
+   "key": "box:aside:Conversation details › div#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#2",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › svg#1",
+   "pass": false,
+   "why": "box off by 7.3,8.1,-14.6,-16.4"
+  },
+  {
+   "key": "box:aside:Conversation details › ul#3",
+   "pass": true
+  },
+  {
+   "key": "box:main:Conversation transcript › header extra@88,0,632,60",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:main:Conversation transcript › div extra@104,700,600,44",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:aside:Conversation details › div extra@720,60,320,700",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-22T19:17:10.771Z",
+ "run": "2026-11-24T22:48:13.157Z",
  "inventory": {
   "id": "oracle-file-sent",
   "controls": [

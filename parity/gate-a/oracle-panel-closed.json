@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 39,
- "pass": 39,
+ "cases": 49,
+ "pass": 40,
  "results": [
   {
    "key": "aside:Bots",
@@ -164,9 +164,58 @@
   {
    "key": "card#1 text(3)#4",
    "pass": true
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": false,
+   "why": "box off by 10.8,10.6,-21.2,-21.2"
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": false,
+   "why": "box off by 7.7,9,-15,-17.9"
+  },
+  {
+   "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:View conversation details › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#3",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:main:Conversation transcript › header extra@88,0,952,60",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:main:Conversation transcript › div extra@104,700,920,44",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-20T19:37:38.602Z",
+ "run": "2026-11-24T22:48:13.157Z",
  "inventory": {
   "id": "oracle-panel-closed",
   "controls": [
