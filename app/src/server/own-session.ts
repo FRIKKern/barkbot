@@ -82,19 +82,24 @@ async function inRecord(id: string, host: string, hosts: OwnComputer[]): Promise
 }
 
 /** For the fleet stream (server/fleet.ts), which takes no id but carries every session the token
- *  sees: whether a session is ours, asked per frame. One this server made or proved (madeHere,
- *  ownSession) is; else one a bot record names on one of our computers. The records are read when
- *  first asked, and again for a session they did not name at most once every 10 s, so one saved
- *  later is heard. A read that fails names nothing. */
+ *  sees: whether a session is ours, asked per frame. It is when it runs on one of our computers now
+ *  and this server made or proved it (madeHere, ownSession), or a bot record names it there. Our
+ *  computers and the records are read when first asked and again on any frame once 10 s have gone
+ *  by, so a conversation saved later is heard, and a revoked computer's stop going out on an open
+ *  stream within 10 s (rev299 on #324). A read that fails names nothing. */
 export function ourSessions(): (id: string) => Promise<boolean> {
-  let named = new Set<string>()
+  let named = new Map<string, string>()
+  let hosts = new Set<string>()
   let at = -Infinity
   let reading: Promise<void> | null = null
   const read = () => (reading ??= (async () => {
     try {
-      named = new Set((await namedByRecords(await ownHosts())).map(([s]) => s))
+      const own = await ownHosts()
+      hosts = new Set(own.map((h) => h.id))
+      named = new Map(await namedByRecords(own))
     } catch (e) {
-      named = new Set()
+      hosts = new Set()
+      named = new Map()
       console.warn(`barkbot: could not read your bots for the fleet stream (${(e as Error).message})`)
     } finally {
       at = Date.now()
@@ -102,9 +107,9 @@ export function ourSessions(): (id: string) => Promise<boolean> {
     }
   })())
   return async (id) => {
-    if (known.has(id) || named.has(id)) return true
     if (Date.now() - at >= 10_000) await read()
-    return named.has(id)
+    const host = known.get(id) ?? named.get(id)
+    return host !== undefined && hosts.has(host)
   }
 }
 
