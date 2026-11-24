@@ -55,6 +55,9 @@ npm run board    # snapshot the Barkpark board (needs bp)
 npm run docs     # redraw the pictures and PARITY.md
 npm run gate     # Gate A and the inventory: the app against every captured oracle state
 npm run host:enroll  # once: make this Mac the bot's computer (token from Studio > Chat hosts)
-npm run host         # keep running while the bot works
+npm run host         # keep running while the bot works, or instead:
+npm run host:install-agent  # a LaunchAgent: starts at login, restarts on failure, no terminal (-- --replace stops one in a terminal)
+npm run host:agent-status   # installed, loaded, pid, logs (~/Library/Logs/BarkBot); host:uninstall-agent removes it
+npm run test:host-agent     # the LaunchAgent commands against a scratch HOME and a stand-in launchctl (macOS)
 cd app && pnpm install && pnpm dev   # the app on http://localhost:3170
 ```
