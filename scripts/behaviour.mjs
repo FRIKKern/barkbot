@@ -62,7 +62,9 @@ process.on('SIGINT', () => process.exit(130));
 // sessions, the per-account prefs that hold the bots) and keeps every write, so the rules can count them.
 // stub.sessions is every session Barkpark holds; its list answers fewer (below). stub.fail makes one
 // pref call fail: 'GET barkbot.bots' → 500; stub.failShow (session id, or '*' for every one → status) makes a session's own read fail. stub.to is the session each message or answer went to.
-const stub = { failHosts: false, bodies: [], quiet: false, quietOpened: [], quietBytes: new Map(), noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+const stub = { tokenId: 'tok-ours', failToken: 0, tokenReads: 0, failHosts: false, bodies: [], quiet: false, quietOpened: [], quietBytes: new Map(), noFolders: false, unsupported: false, prefs: new Map(), reads: 0, writes: [], opened: [], other: [], hosts: [], sessions: [], answers: [], choices: [], streams: [], rows: [], rowsBy: new Map(), fleet: null, stateBy: new Map(), fleets: [], fleetOpens: 0, uploads: [], sent: [], pictures: new Map(), refused: [], noFiles: false, createDelay: 0, holdSend: false, heldSends: [], idem: new Map(), keyed: [], replays: 0, inUse: 0, reuseNext: false, holdTake: false, holdDrop: false, holdUpload: false, heldUploads: [], slowNew: false, slow: new Set(), readDelay: 0, failCreate: false, failSend: false, failedSends: [], dropAnswer: false, afterTake: null, deafNew: false, deaf: new Set(), fail: new Map(), failShow: new Map(), hangPut: null, hung: [], readAs: new Map(), slowReads: 0, dropPatch: null, failAfterPatch: null, latePatch: null, holdShow: new Set(), heldShows: [], shown: [], made: [], to: [], readKeys: [] };
+// What Barkpark writes as created_by for a session this token makes (`madeBy` names another).
+const OURS = `api_token:${stub.tokenId}`;
 // The stand-in's side of a conversation's event stream: say an event to every open page.
 const say = (kind, more = {}) => stub.streams.forEach((res) => res.write(`event: runtime\ndata: ${JSON.stringify({ kind, ...more })}\n\n`));
 // The fleet stream's side: one session's state flips, said to every open fleet stream (Barkpark's `event: state`).
@@ -174,21 +176,24 @@ await new Promise((ok) => httpServer((req, res) => {
     if (req.url.startsWith('/w/default/v1/chat-hosts')) return stub.failHosts ? json(500, { error: { code: 'internal', message: 'the stand-in fails this read' } }) : json(200, { hosts: stub.hosts });
     // As Barkpark (studio_chat.ex list_sessions): the list leaves out archived sessions and holds
     // only the 50 most recently active. A session's own read answers any session the admin token
-    // can see, archived too, and 404 for an unknown id; it always carries bot_folder, null when none
-    // (chat_controller.ex full_session_json).
+    // can see, archived too, and 404 for an unknown id; it always carries bot_folder, null when none,
+    // and created_by (chat_controller.ex full_session_json): ours unless the case names another.
+    // Who the token is (auth_controller.ex token): its id is what a session's created_by names,
+    // "api_token:<id>" (preview_links.ex actor_ref). `failToken`: that many reads answer 500.
+    if (req.url === '/v1/auth/token' && req.method === 'GET') { stub.tokenReads++; if (stub.failToken > 0) { stub.failToken--; return json(500, { error: { code: 'internal', message: 'the stand-in fails this read' } }); } return json(200, { id: stub.tokenId, name: 'stand-in', kind: 'personal', permissions: ['admin'] }); }
     if (req.url === '/v1/chat/sessions' && req.method === 'GET') return json(200, { sessions: listed() });
     if (/^\/v1\/chat\/sessions\/[^/?]+(\?.*)?$/.test(req.url) && req.method === 'GET') {
       const id = decodeURIComponent(req.url.split('?')[0].split('/')[4]); stub.shown.push(id); const x = stub.sessions.find((y) => y.id === id);
       // `holdShow`: a read of that session that Barkpark never answers (released by destroying it).
       if (stub.holdShow.has(id)) return void stub.heldShows.push(res);
       if (stub.failShow.has(id) || stub.failShow.has('*')) return json(stub.failShow.get(id) ?? stub.failShow.get('*'), { error: { code: 'internal', message: 'the stand-in fails this read' } });
-      return x ? json(200, { archived_at: null, bot_folder: null, ...x, messages: [] }) : json(404, { error: { code: 'not_found', message: 'chat session not found' } });
+      return x ? json(200, { archived_at: null, bot_folder: null, created_by: OURS, ...x, messages: [] }) : json(404, { error: { code: 'not_found', message: 'chat session not found' } });
     }
     // A new conversation on a computer, as Barkpark. `createDelay` holds the answer (Create's Creating…).
     if (req.url === '/v1/chat/sessions' && req.method === 'POST') {
       // `failCreate`: Barkpark cannot make the conversation (after the same hold).
       if (stub.failCreate) return setTimeout(() => json(500, { error: { code: 'internal_error', message: 'the stand-in could not make it' } }), stub.createDelay);
-      const b = JSON.parse(body); const x = { id: `00000000-0000-4000-8000-${String(900000000000 + madeN++)}`, execution_target: b.execution_target, execution_host_id: b.execution_host_id, inserted_at: new Date().toISOString(), status: 'active' };
+      const b = JSON.parse(body); const x = { id: `00000000-0000-4000-8000-${String(900000000000 + madeN++)}`, execution_target: b.execution_target, execution_host_id: b.execution_host_id, inserted_at: new Date().toISOString(), status: 'active', created_by: stub.madeBy ?? OURS };
       x.bot_folder = b.bot_folder ?? null; stub.bodies.push({ id: x.id, body: b }); stub.made.push(x.id); stub.sessions.push(x); if (stub.deafNew) stub.deaf.add(x.id); if (stub.slowNew) stub.slow.add(x.id); return setTimeout(() => json(201, x), stub.createDelay);
     }
     if (/^\/v1\/chat\/sessions\/[^/]+\/events$/.test(req.url) || req.url === '/v1/chat/events') {
@@ -560,6 +565,15 @@ else {
     await until(async () => (await live()).header === want, 15000, `the page to show "${want}"`).catch(() => {}); await wait(500);
     return live().catch(() => ({ header: null, tiles: [], rect: null }));
   };
+  // Who this server is cannot be read (GET /v1/auth/token answers 500; task-7baccaa5734a64bd): no
+  // conversation can be shown as ours, so the move-in takes none. A token read that worked is kept
+  // for the life of the server, so the rule says something only if this load asked (the control).
+  stub.sessions = [session(S1)]; stub.rows = [];
+  freshStore({ name: 'Legacy Name' }); stub.failToken = 1000; const tok0 = stub.tokenReads;
+  s = await showing('Legacy Name');
+  const noToken = { asked: stub.tokenReads - tok0, record: stub.prefs.get(`barkbot.bot.${ids()[0]}`) ?? null, opened: stub.opened };
+  stub.failToken = 0;
+  check('who this server is to Barkpark cannot be read: today\'s bot moves in with no conversation, not the newest of its computer (control: this load asked who it is)', noToken.asked > 0 && noToken.record?.session_id === null && !noToken.opened.includes(S1), noToken);
   stub.sessions = [session(S1)]; stub.rows = [];
   freshStore({ name: 'Legacy Name' }); let w0 = stub.writes.length;
   s = await showing('Legacy Name');
@@ -860,10 +874,25 @@ else {
   stub.prefs.set('barkbot.bots', { ids: [PIP] }); stub.prefs.set(`barkbot.bot.${PIP}`, rec('Pip', HOST_ID, null));
   s = await showing('Pip');
   check('control: the same newest conversation with no folder is today\'s bot\'s, as before', stub.prefs.get(KEY)?.session_id === S_PLAIN, { record: stub.prefs.get(KEY) ?? null });
+  // Who made it (created_by; task-7baccaa5734a64bd): the move-in takes only a conversation this
+  // server's token made. A workspace-mate's, newest on our computer and with no folder, is passed
+  // over for an older one of ours (the control above is ours); one a person made, or one with no
+  // maker (made before Barkpark kept one, #28693), is passed over too.
+  const S_MATE = '00000000-0000-4000-8000-0000000000f3';
+  freshStore({ name: 'Legacy Name' }); stub.sessions = [{ ...session(S_OLD), inserted_at: '2026-11-15T08:00:00Z' }, { ...session(S_MATE), inserted_at: '2026-11-15T10:00:00Z', created_by: 'api_token:tok-mate' }];
+  stub.prefs.set('barkbot.bots', { ids: [PIP] }); stub.prefs.set(`barkbot.bot.${PIP}`, rec('Pip', HOST_ID, null));
+  s = await showing('Pip');
+  check('a workspace-mate\'s token made the newest conversation on our computer, with no folder: today\'s bot moves in with an older one of ours, never the mate\'s', stub.prefs.get(KEY)?.session_id === S_OLD && !stub.opened.includes(S_MATE), { record: stub.prefs.get(KEY) ?? null, opened: stub.opened });
+  for (const [by, what, id] of [[null, 'no maker', '00000000-0000-4000-8000-0000000000f7'], ['user:5f0c2d1e-0000-4000-8000-000000000001', 'a person', '00000000-0000-4000-8000-0000000000f8']]) {
+    freshStore({ name: 'Legacy Name' }); stub.sessions = [{ ...session(id), inserted_at: '2026-11-15T10:00:00Z', created_by: by }];
+    stub.prefs.set('barkbot.bots', { ids: [PIP] }); stub.prefs.set(`barkbot.bot.${PIP}`, rec('Pip', HOST_ID, null));
+    stub.shown = []; s = await showing('Pip');
+    check(`the only conversation on our computer has ${what} (created_by ${by}): today's bot moves in with no conversation (control: it was read)`, stub.prefs.has(KEY) && stub.prefs.get(KEY)?.session_id === null && stub.shown.includes(id) && !stub.opened.includes(id), { record: stub.prefs.get(KEY) ?? null, shown: stub.shown, opened: stub.opened });
+  }
   // A read that fails is not "no folder": the newest conversation's own read answers 500, then 503,
   // and today's bot moves in with no conversation, never that one (it may be a made bot's).
   for (const code of [500, 503]) {
-    // A session never read before: a read that worked is kept (app/src/chat/api.ts folderKnown).
+    // A session never read before: a read that worked is kept (app/src/chat/api.ts shownOnce).
     const unread = { ...foldered, id: code === 500 ? '00000000-0000-4000-8000-0000000000f5' : '00000000-0000-4000-8000-0000000000f6' };
     freshStore({ name: 'Legacy Name' }); stub.sessions = [{ ...session(S_OLD), inserted_at: '2026-11-15T08:00:00Z' }, unread]; stub.failShow.set(unread.id, code);
     stub.prefs.set('barkbot.bots', { ids: [PIP] }); stub.prefs.set(`barkbot.bot.${PIP}`, rec('Pip', HOST_ID, null));
@@ -1464,7 +1493,7 @@ else {
     const at = (iso, x) => ({ ...x, inserted_at: iso });
     // A read held open costs the page one bound (8 s, app/src/server/barkpark.ts READ_MS), then it is
     // a failed read: the move-in takes no conversation, not that one and not an older one.
-    // Each load has its own sessions: a read that worked is kept (app/src/chat/api.ts folderKnown).
+    // Each load has its own sessions: a read that worked is kept (app/src/chat/api.ts shownOnce).
     const HOLD = '00000000-0000-4000-8000-0000000001b1', OLDER = '00000000-0000-4000-8000-0000000001b0';
     const CTL_NEW = '00000000-0000-4000-8000-0000000001b3', CTL_OLD = '00000000-0000-4000-8000-0000000001b2';
     const twoOnHost = (newer, older) => [at('2026-11-15T08:00:00Z', session(older)), at('2026-11-15T10:00:00Z', session(newer))];
@@ -1627,6 +1656,35 @@ else {
       const d = { ...r, lineNow, firstTo, sentFirst, box1, nextTo, newMade, recNow: stub.prefs.get(KEYP) ?? null };
       check(`not saved (${what}): one line says so; the first message goes once to the new conversation; the next send goes there too, no second create; the record is not written`, NOT_KEPT.test(lineNow ?? '') && r.made.length === 1 && JSON.stringify(firstTo) === JSON.stringify([r.made[0]]) && sentFirst === `first ${what}` && box1 === '' && JSON.stringify(nextTo) === JSON.stringify([r.made[0]]) && newMade === 0 && recOk(stub.prefs.get(KEYP)), d);
       await clearPrompt(); stub.hosts = host(true);
+    }
+    // Barkpark's answer to the new conversation names another maker (created_by not this server's
+    // token; task-7baccaa5734a64bd): it is not taken as made here, so with its record not saved no
+    // message goes to it. The 'write fails' case above is the control: there the first message does.
+    {
+      const t0 = stub.to.length; stub.madeBy = 'api_token:tok-mate';
+      const r = await firstMessage('first not ours', () => { stub.fail.set(`PATCH ${KEYP}`, 500); });
+      stub.madeBy = null; stub.fail.clear();
+      await until(() => stub.to.length > t0, 12000, 'a message to it').catch(() => {});
+      const d = { ...r, to: stub.to.slice(t0), recNow: stub.prefs.get(KEYP) ?? null };
+      check("the create answer names another maker and the record is not saved: no message goes to that conversation (control: it was made)", r.made.length === 1 && !d.to.includes(r.made[0]) && d.recNow?.session_id === null, d);
+      await clearPrompt();
+    }
+    // Control (task-7baccaa5734a64bd): strict is for adopting and making only, never for what is
+    // already ours. A conversation a bot record already names, with no maker (created_by null, as
+    // every one made before Barkpark #28693), still opens, takes a message, and opens on a reload.
+    {
+      const S_NULL = '00000000-0000-4000-8000-0000000002c1';
+      stub.sessions = [{ ...session(S_NULL), created_by: null }]; freshStore(); stub.prefs.set('barkbot.bots', { ids: main ? [PIA, main[0].slice('barkbot.bot.'.length)] : [PIA] }); stub.prefs.set(KEYP, rec('Pia', HOST_ID, S_NULL));
+      if (main) stub.prefs.set(...main);
+      stub.opened = []; const m0 = stub.made.length, t0 = stub.to.length;
+      await open(`${base}/?bot=${PIA}`); await until(() => stub.opened.includes(S_NULL), 15000, "Pia's conversation to open").catch(() => {}); await wait(500);
+      const first = stub.opened.includes(S_NULL);
+      await typeSend('hello from before'); await until(() => stub.to.length > t0, 12000, 'the message').catch(() => {}); await wait(500);
+      const to = stub.to.slice(t0);
+      stub.opened = []; await open(`${base}/?bot=${PIA}`); await until(() => stub.opened.includes(S_NULL), 15000, "Pia's conversation to open again").catch(() => {}); await wait(500);
+      const d = { first, to, again: stub.opened.includes(S_NULL), made: stub.made.length - m0, rec: stub.prefs.get(KEYP)?.session_id ?? null };
+      check("control: a conversation a bot record already names, with no maker (created_by null), opens, takes a message and opens again on a reload; no conversation is made", d.first && JSON.stringify(d.to) === JSON.stringify([S_NULL]) && d.again && d.made === 0 && d.rec === S_NULL, d);
+      await clearPrompt();
     }
     await clearPrompt(); stub.sessions = []; freshStore();
   }

@@ -5,11 +5,13 @@
 //  (a) Barkpark shows it as a registered-host session on one of the caller's own enrolled,
 //      unrevoked computers (ownHosts), and
 //  (b) BarkBot itself knows it: a bot record names it, on that computer, or this server made it
-//      (startChat calls madeHere; that covers a conversation whose record was not saved, kept:false).
+//      (startChat calls madeHere; that covers a conversation whose record was not saved, kept:false,
+//      and only when Barkpark's create answer names this server's token its maker: ourRef).
 // (a) alone is not enough: Barkpark lists every computer of the workspace (chat_hosts/context.ex
 // list_hosts), and any member with chat access can make and drive a session on one
 // (chat_controller.ex create; host_execution_gate.ex authorize_turn passes every registered-host
-// turn). Barkpark task-7efaf895e8bc88e4 would record who made a session.
+// turn). Since #28693 Barkpark records who made a session (created_by) and lets only an owner or
+// admin seat, or a token an owner holds, make or drive one on a registered computer.
 // A read that fails or does not answer is never a yes: the door answers as for a stranger's.
 // Known misses (accepted): after a restart, a kept:false conversation is not known until its record
 // is saved; a conversation on a computer that was revoked does not open (the list leaves it out).
@@ -39,10 +41,33 @@ const keep = (m: Map<string, string>, id: string, host: string) => {
   if (m.size > KEEP) m.delete(m.keys().next().value as string)
 }
 
+// Who this server is to Barkpark: "api_token:" and its token's id, as Barkpark writes a session's
+// created_by (sharing/preview_links.ex actor_ref; chat_controller.ex create, since #28693). Asked
+// once per process (GET /v1/auth/token). A read that fails, or names no id, is not kept: until one
+// works, ourRef is null and no conversation is taken as made by us.
+let me: Promise<string> | null = null
+export async function ourRef(): Promise<string | null> {
+  me ??= bp<{id?: unknown}>('/v1/auth/token').then((t) => {
+    if (typeof t?.id !== 'string' || t.id === '') throw new Error('Barkpark named no token id')
+    return `api_token:${t.id}`
+  })
+  const asked = me
+  try {
+    return await asked
+  } catch (e) {
+    if (me === asked) me = null
+    console.warn(`barkbot: could not read who this server is to Barkpark (${(e as Error).message})`)
+    return null
+  }
+}
+
 /** A conversation this server just made (startChat), saved to its bot or not, as Barkpark's own
- *  create answer shows it: its computer is known without another read. */
-export function madeHere(s: {id: string; execution_target?: unknown; execution_host_id?: unknown}) {
+ *  create answer shows it: its computer is known without another read. Only one whose created_by
+ *  is this server's token (ourRef) is kept; never throws. */
+export async function madeHere(s: {id: string; execution_target?: unknown; execution_host_id?: unknown; created_by?: unknown}) {
   if (s.execution_target !== 'registered_host' || typeof s.execution_host_id !== 'string') return
+  const ours = await ourRef()
+  if (ours === null || s.created_by !== ours) return
   keep(runsOn, s.id, s.execution_host_id)
   keep(known, s.id, s.execution_host_id)
 }
