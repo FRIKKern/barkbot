@@ -16,7 +16,8 @@ import { createServer } from 'node:net';
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { connect } from './oracle/cdp.mjs';
 import { collect } from './oracle/collect.mjs';
-import { controls, namedElements, claims, unscoredBoxes } from './lib/controls.mjs';
+import { controls, namedElements, claims } from './lib/controls.mjs';
+import { boxCases, boxElements } from './lib/box-cases.mjs';
 import { transcriptCases, transcriptKeys } from './lib/transcript.mjs';
 import { path, ROOT, items as allItems } from './lib/data.mjs';
 import { judged } from './lib/versions.mjs';
@@ -77,15 +78,6 @@ function inventoryOf(state, ours) {
   return { id: state.id, controls: ctl, missing: ctl.filter((c) => !c.ours).length, untracked: ctl.filter((c) => !c.item).map((c) => c.name) };
 }
 
-// Report only (task-9350f7d5eee2c573): the oracle's boxes no case scores yet, per state. Not in the
-// record, so no count moves; --unscored lists them.
-let unscoredAll = 0;
-const unscored = (state) => {
-  const boxes = unscoredBoxes(state);
-  unscoredAll += boxes.length;
-  console.log(`Unscored · ${state.id} · ${boxes.length} boxes of 20x20 or more (report only)`);
-  if (process.argv.includes('--unscored')) for (const e of boxes) console.log(`  · ${e.tag}${e.role ? `[${e.role}]` : ''}${e.label ? ` "${e.label}"` : ''} ${e.box.map(Math.round).join(',')}`);
-};
 const report = { run: new Date().toISOString(), states: [] };
 const inventory = { run: report.run, states: [] };
 for (const state of states) {
@@ -97,11 +89,10 @@ for (const state of states) {
   const talk = !state.changed;
   // A captured state the app has no scene for yet scores 0: every case is open work.
   if ((await fetch(`${base}/gate/${state.id}`)).status === 404) {
-    const keys = [...theirs.map(({ key }) => key), ...(talk ? [...transcriptKeys(state), ...cardKeys(state)] : [])];
+    const keys = [...theirs.map(({ key }) => key), ...(talk ? [...transcriptKeys(state), ...cardKeys(state), ...boxElements(state).filter((b) => !b.unknown).map(({ key }) => key)] : [])];
     report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: keys.length, pass: 0, scene: false, results: keys.map((key) => ({ key, pass: false, why: 'no scene' })) });
     inventory.states.push(inventoryOf(state, null));
     console.log(`Gate A · ${state.id} · 0/${keys.length} pass (no scene yet)`);
-    unscored(state);
     continue;
   }
   // One state, in a Chrome of its own. A Chrome that drops its connection or stops answering
@@ -206,14 +197,17 @@ for (const state of states) {
     }
     return { key, pass: !why.length, why: why.join('; ') || undefined };
   });
-  if (talk) cases.push(...transcriptCases(state, ours), ...cardCases(state, ours));
+  if (talk) cases.push(...transcriptCases(state, ours), ...cardCases(state, ours), ...boxCases(state, ours, TOL));
   const pass = cases.filter((c) => c.pass).length;
   report.states.push({ id: state.id, captured: state.captured, viewport: state.viewport, cases: cases.length, pass, results: cases });
 
   inventory.states.push(inventoryOf(state, ours));
 
   console.log(`Gate A · ${state.id} · ${pass}/${cases.length} pass`);
-  unscored(state);
+  // Boxes of the oracle's not scored because what is behind them is not in its capture (no page
+  // background, no opaque ancestor: lib/box-cases.mjs paints). Counted, never guessed.
+  const blind = talk ? boxElements(state).filter((b) => b.unknown) : [];
+  if (blind.length) console.log(`  Unscored · ${blind.length} box(es) behind unknown: ${blind.map((b) => `${b.key} @${b.e.box.map(Math.round).join(',')}`).join('; ')}`);
   for (const c of cases.filter((x) => !x.pass).slice(0, Number(opt('show') || 12))) console.log(`  ✗ ${c.key}: ${c.why}`);
   const inv = inventory.states.at(-1);
   console.log(`Inventory · ${state.id} · ours has ${inv.controls.length - inv.missing}/${inv.controls.length} controls${inv.untracked.length ? ` · untracked: ${inv.untracked.join(', ')}` : ''}`);
@@ -223,7 +217,6 @@ const total = report.states.reduce((n, s) => n + s.cases, 0);
 const passed = report.states.reduce((n, s) => n + s.pass, 0);
 report.total = { cases: total, pass: passed };
 console.log(`Gate A · all ${report.states.length} states · ${passed}/${total} pass`);
-console.log(`Unscored · all ${report.states.length} states · ${unscoredAll} boxes (report only)`);
 if (!total) { console.error('Gate A: zero cases: a gate with nothing to check fails'); process.exit(1); }
 const dir = path('parity', 'gate-a');
 mkdirSync(dir, { recursive: true });

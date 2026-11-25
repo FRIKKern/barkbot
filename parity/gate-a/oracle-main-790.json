@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 59,
- "pass": 37,
+ "cases": 71,
+ "pass": 48,
  "results": [
   {
    "key": "aside:Bots",
@@ -266,9 +266,58 @@
    "key": "card#1 text(3)#4",
    "pass": false,
    "why": "missing"
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:View conversation details › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Edit Bot avatar › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#2",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#3",
+   "pass": true
   }
  ],
- "run": "2026-11-21T09:41:13.060Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-main-790",
   "controls": [

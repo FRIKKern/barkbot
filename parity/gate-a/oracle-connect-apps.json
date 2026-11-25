@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 121,
- "pass": 118,
+ "cases": 159,
+ "pass": 142,
  "results": [
   {
    "key": "aside:Bots",
@@ -495,9 +495,175 @@
   {
    "key": "card#1 text(3)#2",
    "pass": true
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:View conversation details › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Edit Bot avatar › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#2",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#3",
+   "pass": true
+  },
+  {
+   "key": "box:control:Your plugins › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#2",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot templates › svg#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Open Browserless › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open Browserless › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Open incident.io › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open incident.io › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Open Turso › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open Turso › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Open Lightrun › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open Lightrun › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Open Knock › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open Knock › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Open Google Drive › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open Google Drive › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:control:Open Messages › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open Notes › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open Reminders › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open Calendar › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open Location › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open Contacts › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:extra › svg@111,558,24,24",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:extra › svg@544,558,24,24",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:extra › svg@111,624,24,24",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:extra › svg@111,690,24,24",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:extra › svg@544,690,24,24",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-21T14:17:56.578Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-connect-apps",
   "controls": [

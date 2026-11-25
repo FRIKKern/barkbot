@@ -8,6 +8,7 @@ import { roadmapSvg } from './generate-roadmap.mjs';
 import { journeysSvg, parityMd } from './generate-parity.mjs';
 import { heroSvg } from './generate-hero.mjs';
 import { controls, claims, unscoredBoxes } from './lib/controls.mjs';
+import { boxCases, boxElements } from './lib/box-cases.mjs';
 import { turnTraces } from './lib/turn-traces.mjs';
 import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
 import { guardBeforeSend } from './lib/host-guard.mjs';
@@ -394,6 +395,104 @@ for (const [name, c, want] of [
   ] };
   const got = unscoredBoxes(fake).map((e) => e.i);
   if (JSON.stringify(got) !== '[2]') fail(`unscored boxes: on the made-up state, want only the unlabelled img (2), got ${JSON.stringify(got)}`);
+  // Gate A's box cases (lib/box-cases.mjs): the viewer's picture is one.
+  rule('box cases', 1);
+  const pic = boxElements(at('oracle-picture-viewer')).find(({ e }) => e.tag === 'img' && e.box.map(Math.round).join() === '436,213,256,256');
+  if (pic?.key !== 'box:page › img#1') fail(`box cases: oracle-picture-viewer's picture is not the case box:page › img#1 (${pic?.key ?? 'none'})`);
+  // Only what paints is a case: a clear wrapper (1) is not; a background (2), a top border (3), a
+  // shadow (4), an img (5) and own text (6) are; a 19-wide box (7), a named control (8), the
+  // control's own box again (9) and the transcript's time row (10) are not.
+  rule('box cases', 1);
+  const bg = { 'background-color': 'rgb(31, 31, 31)' };
+  const paintState = { elements: [
+    { i: 0, tag: 'div', box: [0, 0, 100, 100], style: { 'background-color': 'rgba(0, 0, 0, 0)' }, parent: 11 },
+    { i: 1, tag: 'div', box: [0, 0, 90, 90], style: {}, parent: 0 },
+    { i: 2, tag: 'div', box: [100, 0, 40, 40], style: bg, parent: 11 },
+    { i: 3, tag: 'div', box: [150, 0, 40, 40], style: { 'border-top-width': '1px', 'border-top-color': 'rgba(245, 245, 245, 0.06)' }, parent: 11 },
+    { i: 4, tag: 'div', box: [200, 0, 40, 40], style: { 'box-shadow': 'rgba(0, 0, 0, 0.2) 0px 1px 2px 0px' }, parent: 11 },
+    { i: 5, tag: 'img', box: [250, 0, 40, 40], style: {}, parent: 11 },
+    { i: 6, tag: 'p', box: [300, 0, 40, 40], style: {}, textLength: 12, parent: 11 },
+    { i: 7, tag: 'div', box: [350, 0, 19, 40], style: bg, parent: 11 },
+    { i: 8, tag: 'button', label: 'Go', box: [400, 0, 40, 40], style: bg, parent: 11 },
+    { i: 9, tag: 'span', box: [400, 0, 40, 40], style: bg, parent: 8 },
+    { i: 10, tag: 'time', box: [450, 0, 80, 28], style: {}, textLength: 13, parent: 11 },
+    { i: 11, tag: 'div', box: [0, 0, 600, 100], style: { 'background-color': 'rgb(18, 18, 18)' } },
+  ] };
+  const painted = boxElements(paintState).map(({ e }) => e.i);
+  if (JSON.stringify(painted) !== '[2,3,4,5,6,11]') fail(`box cases: what paints, want [2,3,4,5,6,11], got ${JSON.stringify(painted)}`);
+  // Pairing by overlap, one to one, floor IoU > 0: ours has an extra painted box first and lacks one
+  // of theirs. The extra reds only itself (extra) and moves nothing; the lacking one reds (missing);
+  // concentric near-equal boxes pair with their own (24 and 25 of theirs; ours has only the 25: the
+  // 24 is missing, never a green on the 25). A box of ours that shares no point with theirs (60,200)
+  // does not pair with theirs at 0,200: both red.
+  rule('box cases', 1);
+  const els = (bs) => ({ page: 'rgb(18, 18, 18)', elements: bs.map(([x, y, w, h], i) => ({ i, tag: 'div', box: [x, y, w, h], style: bg })) });
+  const them = els([[0, 0, 40, 40], [100, 0, 40, 40], [200, 0, 24, 24], [200, 0, 25, 25], [0, 200, 40, 40]]);
+  const us = els([[50, 50, 30, 30], [0, 0, 40, 40], [100.5, 0, 40, 40], [200, 0, 25, 25], [60, 200, 40, 40]]);
+  const res = boxCases(them, us).map((c) => (c.pass ? 'pass' : c.why.split(':')[0]));
+  if (JSON.stringify(res) !== '["pass","pass","missing","pass","missing","extra","extra"]') fail(`box cases: pairing by overlap, want pass, pass, missing, pass, missing, extra, extra, got ${JSON.stringify(res)}`);
+  // An svg by its centre, never its size: a padded 55 around a tight 33 at one centre passes; one
+  // 2 pt off-centre fails. A background the colour of the box under it, opaque, is not paint (1 in 0);
+  // a see-through one is (3 in 2), and so is another colour (4 in 0).
+  rule('box cases', 1);
+  const svg = (box) => ({ elements: [{ i: 0, tag: 'svg', box, style: {} }, { i: 1, tag: 'path', box: [box[0] + 2, box[1] + 2, 10, 10], style: {}, parent: 0 }] });
+  const svgRes = [boxCases(svg([0, 0, 55, 55]), svg([11, 11, 33, 33]))[0].pass, boxCases(svg([0, 0, 55, 55]), svg([13, 11, 33, 33]))[0].pass];
+  // Centre-only is for the oracle's svg alone. The oracle's 46 tile (a fill) against our 36 svg at its
+  // centre is judged by the box and fails; an empty svg (no drawn part) is no paint at all, so the
+  // oracle's 33 svg against our empty one at its place is missing (and ours is no extra).
+  const tile = { page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'div', box: [100, 100, 46, 46], style: { 'background-color': 'rgba(245, 245, 245, 0.22)' } }] };
+  const emptySvg = (box) => ({ elements: [{ i: 0, tag: 'svg', box, style: {} }, { i: 1, tag: 'g', box, style: {}, parent: 0 }] });
+  const svgRes2 = [boxCases(tile, svg([105, 105, 36, 36])).map((c) => c.why?.split(' by')[0] ?? 'pass'), boxCases(svg([0, 0, 33, 33]), emptySvg([0, 0, 33, 33])).map((c) => c.why ?? 'pass')];
+  if (JSON.stringify(svgRes2) !== '[["box off"],["missing"]]') fail(`box cases: centre-only for the oracle's svg only, and an svg paints only with a drawn part: want [["box off"],["missing"]], got ${JSON.stringify(svgRes2)}`);
+  const same = { elements: [
+    { i: 0, tag: 'div', box: [0, 0, 300, 300], style: { 'background-color': 'rgb(18, 18, 18)' } },
+    { i: 1, tag: 'div', box: [10, 10, 100, 100], style: { 'background-color': 'rgb(18, 18, 18)' }, parent: 0 },
+    { i: 2, tag: 'div', box: [120, 10, 100, 100], style: { 'background-color': 'rgba(245, 245, 245, 0.04)' }, parent: 0 },
+    { i: 3, tag: 'div', box: [130, 20, 50, 50], style: { 'background-color': 'rgba(245, 245, 245, 0.04)' }, parent: 2 },
+    { i: 4, tag: 'div', box: [10, 120, 100, 100], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 },
+  ] };
+  const sameRes = boxElements(same).map(({ e }) => e.i);
+  if (JSON.stringify(svgRes) !== '[true,false]' || JSON.stringify(sameRes) !== '[0,2,3,4]') fail(`box cases: svg by centre want [true,false], got ${JSON.stringify(svgRes)}; same-colour background want [0,2,3,4], got ${JSON.stringify(sameRes)}`);
+  // The perception floor: laid over what is behind it, a fill or top border must move the pixel by
+  // 4/255 or more. On rgb(18,18,18) (0, which paints): a 0.01 white fill moves it 2.4 (1, no), a 0.06
+  // white hairline 14 (2, yes), the same colour 0 (3, no), a 0.01 border 2.3 (4, no), a 0.02 fill 4.5
+  // (5, yes), and a 0.06 hairline on a box filled the page's colour 14 (6, yes). And the
+  // page-wide pairing: one box, under the page on the oracle's side and under a named button on ours,
+  // is one passing case, not a missing one and an extra.
+  rule('box cases', 1);
+  const line = (a) => ({ 'border-top-width': '1px', 'border-top-color': `rgba(255, 255, 255, ${a})` });
+  const faint = { elements: [
+    { i: 0, tag: 'div', box: [0, 0, 600, 100], style: { 'background-color': 'rgb(18, 18, 18)' } },
+    { i: 1, tag: 'div', box: [0, 0, 40, 40], style: { 'background-color': 'rgba(255, 255, 255, 0.01)' }, parent: 0 },
+    { i: 2, tag: 'div', box: [50, 0, 40, 40], style: line(0.06), parent: 0 },
+    { i: 3, tag: 'div', box: [100, 0, 40, 40], style: { 'background-color': 'rgb(18, 18, 18)' }, parent: 0 },
+    { i: 4, tag: 'div', box: [150, 0, 40, 40], style: line(0.01), parent: 0 },
+    { i: 5, tag: 'div', box: [200, 0, 40, 40], style: { 'background-color': 'rgba(255, 255, 255, 0.02)' }, parent: 0 },
+    { i: 6, tag: 'div', box: [250, 0, 40, 40], style: { 'background-color': 'rgb(18, 18, 18)', ...line(0.06) }, parent: 0 },
+  ] };
+  const faintRes = boxElements(faint).map(({ e }) => e.i);
+  // With no painted ancestor a box lies on the page's own background (body's): rgb(18,18,18) on a
+  // page of that colour is no paint (0), rgb(31,31,31) is (1). With no page in the capture (the
+  // oracle's, before `page`) what is behind is unknown: both are kept marked unknown (?), and no
+  // case is made of an unknown box of theirs, nor of the box of ours it pairs with.
+  const onBody = (page) => boxElements({ page, elements: [
+    { i: 0, tag: 'div', box: [0, 0, 40, 40], style: { 'background-color': 'rgb(18, 18, 18)' } },
+    { i: 1, tag: 'div', box: [50, 0, 40, 40], style: { 'background-color': 'rgb(31, 31, 31)' } },
+  ] }).map(({ e, unknown }) => `${e.i}${unknown ? '?' : ''}`);
+  // A see-through ancestor does not cover the page, so what is behind stays unknown.
+  const veiled = boxElements({ elements: [
+    { i: 0, tag: 'div', box: [0, 0, 400, 400], style: { 'background-color': 'rgba(0, 0, 0, 0.7)' } },
+    { i: 1, tag: 'div', box: [10, 10, 40, 40], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 },
+  ] }).map(({ e, unknown }) => `${e.i}${unknown ? '?' : ''}`);
+  const bodyRes = [onBody('rgb(18, 18, 18)'), onBody(undefined), veiled];
+  const onPage = { page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'div', box: [10, 10, 50, 50], style: { 'background-color': 'rgb(31, 31, 31)' } }] };
+  const inButton = { page: 'rgb(18, 18, 18)', elements: [
+    { i: 0, tag: 'button', label: 'Go', box: [0, 0, 100, 100] },
+    { i: 1, tag: 'div', box: [10, 10, 50, 50], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 },
+  ] };
+  const pageRes = boxCases(onPage, inButton).map((c) => c.pass);
+  const blind = boxCases({ elements: onPage.elements }, inButton).length;
+  if (JSON.stringify(faintRes) !== '[0,2,5,6]' || JSON.stringify(pageRes) !== '[true]' || JSON.stringify(bodyRes) !== '[["1"],["0?","1?"],["0?","1?"]]' || blind !== 0) fail(`box cases: perception floor want [0,2,5,6], got ${JSON.stringify(faintRes)}; on the page's background want [["1"],["0?","1?"],["0?","1?"]], got ${JSON.stringify(bodyRes)}; behind unknown want no case, got ${blind}; page-wide pairing want [true], got ${JSON.stringify(pageRes)}`);
 }
 
 // Press guard (the sweep's last look before a press, task-1c715b946dff6176, task-7521aa645350a9ed): the
@@ -535,7 +634,7 @@ for (const [name, c, want] of [
 }
 
 // No skip-pass: every rule must have checked something.
-for (const name of ['own session', 'doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label', 'press guard', 'unscored boxes']) {
+for (const name of ['own session', 'doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label', 'press guard', 'unscored boxes', 'box cases']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 

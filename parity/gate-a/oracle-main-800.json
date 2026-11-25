@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 36,
- "pass": 36,
+ "cases": 48,
+ "pass": 47,
  "results": [
   {
    "key": "aside:Bots",
@@ -152,9 +152,58 @@
   {
    "key": "bubble:assistant#1 place",
    "pass": true
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:View conversation details › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Edit Bot avatar › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#2",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#3",
+   "pass": true
   }
  ],
- "run": "2026-11-20T03:13:13.557Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-main-800",
   "controls": [

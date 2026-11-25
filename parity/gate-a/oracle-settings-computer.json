@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 82,
- "pass": 81,
+ "cases": 102,
+ "pass": 97,
  "results": [
   {
    "key": "aside:Bots",
@@ -337,9 +337,93 @@
   {
    "key": "card#1 text(3)#2",
    "pass": true
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:View conversation details › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Edit Bot avatar › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#2",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › span#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot's computer › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › ul#3",
+   "pass": true
+  },
+  {
+   "key": "box:page › div#2",
+   "pass": true
+  },
+  {
+   "key": "box:page › span#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › combobox#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › span#2",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#3",
+   "pass": true
+  },
+  {
+   "key": "box:page › div#4",
+   "pass": true
+  },
+  {
+   "key": "box:page › div#5",
+   "pass": true
+  },
+  {
+   "key": "box:page › span#3",
+   "pass": false,
+   "why": "missing"
   }
  ],
- "run": "2026-11-22T08:06:43.301Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-settings-computer",
   "controls": [

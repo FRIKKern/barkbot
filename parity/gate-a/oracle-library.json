@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 36,
- "pass": 36,
+ "cases": 44,
+ "pass": 43,
  "results": [
   {
    "key": "aside:Bots",
@@ -152,9 +152,42 @@
   {
    "key": "card#1 text(3)#2",
    "pass": true
+  },
+  {
+   "key": "box:control:Bot tile › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Bot tile#2 › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:View conversation details › img#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#1",
+   "pass": true
+  },
+  {
+   "key": "box:control:Edit Bot avatar › svg#1",
+   "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › p#1",
+   "pass": true
   }
  ],
- "run": "2026-11-20T19:35:24.018Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-library",
   "controls": [
