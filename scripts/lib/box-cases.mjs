@@ -32,8 +32,9 @@ const behind = (els, e, page) => {
   return up.reverse().reduce((b, a) => { const x = rgba(a.style?.['background-color']); return x ? over(x, b) : [128, 128, 128]; }, canvas);
 };
 // A text-less <i> is an icon glyph: the oracle draws its icons so, by a font or a pseudo-element the
-// capture cannot see. It paints like an svg and is scored like one, by its centre (the lead's
-// ruling on the 103-miss sort, family 2).
+// capture cannot see. On the oracle's side only, it paints like an svg and is scored like one, by
+// its centre (the lead's ruling on the 103-miss sort, family 2). On ours an empty <i> is what a
+// broken icon font looks like, so it paints only as any box does (rev299's round 1 on #330).
 const glyph = (e) => e.tag === 'i' && !e.text && !e.textLength;
 const icon = (e) => e.tag === 'svg' || glyph(e);
 // True, 'line' when only its top border paints (it is scored as that line), false, or null for
@@ -46,9 +47,9 @@ const icon = (e) => e.tag === 'svg' || glyph(e);
 // The capture keeps no fill or stroke, so a part drawn with none still counts: a known blind spot.
 const DRAWN = new Set(['path', 'circle', 'rect', 'ellipse', 'line', 'polyline', 'polygon', 'use', 'text', 'image']);
 const drawsInside = (els, e) => els.some((x) => DRAWN.has(x.tag) && ancestors(els, x).includes(e));
-export function paints(e, els = [], page) {
+export function paints(e, els = [], page, oracle = false) {
   const s = e.style || {};
-  if (e.tag === 'img' || glyph(e)) return true;
+  if (e.tag === 'img' || (oracle && glyph(e))) return true;
   if (e.tag === 'svg') return drawsInside(els, e);
   if (s['background-image'] && s['background-image'] !== 'none') return true;
   if (s['box-shadow'] && s['box-shadow'] !== 'none') return true;
@@ -67,8 +68,9 @@ const sameBox = (a, b) => a.box.every((v, i) => Math.abs(v - b.box[i]) < 0.5);
  *  and the boxes that hold the log: transcript.mjs scores it) and not an svg's parts (the svg is
  *  the box). A box at the place of its named parent, or of a box already kept, is that box again.
  *  Each carries `where`: the nearest named element it is inside (its namedElements key, or the
- *  page), and a key from the oracle's order there, for the report only: pairing never reads them. */
-export function boxElements(state) {
+ *  page), and a key from the oracle's order there, for the report only: pairing never reads them.
+ *  `oracle`: the state is the oracle's (a text-less <i> paints there only). */
+export function boxElements(state, { oracle = false } = {}) {
   const els = state.elements;
   const named = namedElements(state);
   const keyOf = new Map(named.map(({ key, e }) => [e.i, key]));
@@ -79,7 +81,7 @@ export function boxElements(state) {
   for (const e of els) {
     // Scored by another case already: a named one (box and look), the transcript's time row.
     if (e.box[2] < 20 || keyOf.has(e.i) || e.tag === 'time') continue;
-    const paint = paints(e, els, state.page);
+    const paint = paints(e, els, state.page, oracle);
     // A line is as tall as its border, so only its length must reach 20.
     if (paint === false || (e.box[3] < 20 && paint !== 'line')) continue;
     const up = ancestors(els, e);
@@ -111,12 +113,14 @@ const iou = (a, b) => {
  *  missing, and a painted box of ours with none fails as extra (it is drawn where the oracle draws
  *  nothing), so either reds only itself and moves no other pairing. The look is not compared: a
  *  painted box's look is for a later step. */
-// A line pairs and is judged by its top edge alone: the strip its border draws, never the box under
-// it (the lead's ruling on the 103-miss sort, family 5).
+// A line pairs by its top edge alone: the strip its border draws, never the box under it (the lead's
+// ruling on the 103-miss sort, family 5). It is judged by that edge only when both sides are lines:
+// a line paired with a fill is judged by the boxes, so a missing rule or a missing fill reds by the
+// height (rev299's round 1 on #330).
 const drawn = (b) => (b.line ? [b.e.box[0], b.e.box[1], b.e.box[2], Math.max(1, parseFloat(b.e.style['border-top-width']))] : b.e.box);
 export function boxCases(theirs, ours, tol = 1) {
   const mine = boxElements(ours);
-  const want = boxElements(theirs);
+  const want = boxElements(theirs, { oracle: true });
   const pairs = [];
   for (const [a, t] of want.entries()) for (const [b, o] of mine.entries()) {
     const v = iou(drawn(t), drawn(o));
@@ -132,7 +136,7 @@ export function boxCases(theirs, ours, tol = 1) {
     const m = got.get(a);
     if (!m) return { key, pass: false, why: 'missing' };
     const d = e.box.map((v, i) => Math.round((m.e.box[i] - v) * 10) / 10);
-    if (t.line || m.line) {
+    if (t.line && m.line) {
       const l = [d[0], d[1], d[0] + d[2]].map((x) => Math.round(x * 10) / 10);
       return l.some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `line off by ${l.join(',')}` } : { key, pass: true };
     }
