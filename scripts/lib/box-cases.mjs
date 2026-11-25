@@ -31,7 +31,14 @@ const behind = (els, e, page) => {
   const canvas = rgba(page) ? over(rgba(page), [255, 255, 255]) : [255, 255, 255];
   return up.reverse().reduce((b, a) => { const x = rgba(a.style?.['background-color']); return x ? over(x, b) : [128, 128, 128]; }, canvas);
 };
-// True, false, or null for "behind unknown": the box would paint only by a fill or top border, no
+// A text-less <i> is an icon glyph: the oracle draws its icons so, by a font or a pseudo-element the
+// capture cannot see. On the oracle's side only, it paints like an svg and is scored like one, by
+// its centre (the lead's ruling on the 103-miss sort, family 2). On ours an empty <i> is what a
+// broken icon font looks like, so it paints only as any box does (rev299's round 1 on #330).
+const glyph = (e) => e.tag === 'i' && !e.text && !e.textLength;
+const icon = (e) => e.tag === 'svg' || glyph(e);
+// True, 'line' when only its top border paints (it is scored as that line), false, or null for
+// "behind unknown": the box would paint only by a fill or top border, no
 // ancestor has an opaque background, and the capture has no page background (the oracle's captures
 // predate `page`). What such a box is laid over is not in the capture, so it is not judged: no
 // colour is guessed (the lead's ruling on #328 round 3).
@@ -40,9 +47,9 @@ const behind = (els, e, page) => {
 // The capture keeps no fill or stroke, so a part drawn with none still counts: a known blind spot.
 const DRAWN = new Set(['path', 'circle', 'rect', 'ellipse', 'line', 'polyline', 'polygon', 'use', 'text', 'image']);
 const drawsInside = (els, e) => els.some((x) => DRAWN.has(x.tag) && ancestors(els, x).includes(e));
-export function paints(e, els = [], page) {
+export function paints(e, els = [], page, oracle = false) {
   const s = e.style || {};
-  if (e.tag === 'img') return true;
+  if (e.tag === 'img' || (oracle && glyph(e))) return true;
   if (e.tag === 'svg') return drawsInside(els, e);
   if (s['background-image'] && s['background-image'] !== 'none') return true;
   if (s['box-shadow'] && s['box-shadow'] !== 'none') return true;
@@ -53,7 +60,7 @@ export function paints(e, els = [], page) {
   const back = behind(els, e, page);
   if (shows(s['background-color'], back)) return true;
   // The top border is drawn over the box's own background.
-  return parseFloat(s['border-top-width'] || '0') > 0 && shows(s['border-top-color'], fill ? over(fill, back) : back);
+  return parseFloat(s['border-top-width'] || '0') > 0 && shows(s['border-top-color'], fill ? over(fill, back) : back) ? 'line' : false;
 }
 const sameBox = (a, b) => a.box.every((v, i) => Math.abs(v - b.box[i]) < 0.5);
 
@@ -61,8 +68,9 @@ const sameBox = (a, b) => a.box.every((v, i) => Math.abs(v - b.box[i]) < 0.5);
  *  and the boxes that hold the log: transcript.mjs scores it) and not an svg's parts (the svg is
  *  the box). A box at the place of its named parent, or of a box already kept, is that box again.
  *  Each carries `where`: the nearest named element it is inside (its namedElements key, or the
- *  page), and a key from the oracle's order there, for the report only: pairing never reads them. */
-export function boxElements(state) {
+ *  page), and a key from the oracle's order there, for the report only: pairing never reads them.
+ *  `oracle`: the state is the oracle's (a text-less <i> paints there only). */
+export function boxElements(state, { oracle = false } = {}) {
   const els = state.elements;
   const named = namedElements(state);
   const keyOf = new Map(named.map(({ key, e }) => [e.i, key]));
@@ -72,9 +80,10 @@ export function boxElements(state) {
   const out = [];
   for (const e of els) {
     // Scored by another case already: a named one (box and look), the transcript's time row.
-    if (e.box[2] < 20 || e.box[3] < 20 || keyOf.has(e.i) || e.tag === 'time') continue;
-    const paint = paints(e, els, state.page);
-    if (paint === false) continue;
+    if (e.box[2] < 20 || keyOf.has(e.i) || e.tag === 'time') continue;
+    const paint = paints(e, els, state.page, oracle);
+    // A line is as tall as its border, so only its length must reach 20.
+    if (paint === false || (e.box[3] < 20 && paint !== 'line')) continue;
     const up = ancestors(els, e);
     if (e.role === 'article' || up.some((a) => a.role === 'article' || a.tag === 'svg') || transcript(e)) continue;
     if (e.parent !== undefined && keyOf.has(e.parent) && sameBox(e, els[e.parent])) continue;
@@ -84,7 +93,7 @@ export function boxElements(state) {
     const base = `box:${where} › ${e.role || e.tag}`;
     const n = (counts.get(base) || 0) + 1;
     counts.set(base, n);
-    out.push({ key: `${base}#${n}`, where, e, ...(paint === null && { unknown: true }) });
+    out.push({ key: `${base}#${n}`, where, e, ...(paint === null && { unknown: true }), ...(paint === 'line' && { line: true }) });
   }
   return out;
 }
@@ -104,12 +113,17 @@ const iou = (a, b) => {
  *  missing, and a painted box of ours with none fails as extra (it is drawn where the oracle draws
  *  nothing), so either reds only itself and moves no other pairing. The look is not compared: a
  *  painted box's look is for a later step. */
+// A line pairs by its top edge alone: the strip its border draws, never the box under it (the lead's
+// ruling on the 103-miss sort, family 5). It is judged by that edge only when both sides are lines:
+// a line paired with a fill is judged by the boxes, so a missing rule or a missing fill reds by the
+// height (rev299's round 1 on #330).
+const drawn = (b) => (b.line ? [b.e.box[0], b.e.box[1], b.e.box[2], Math.max(1, parseFloat(b.e.style['border-top-width']))] : b.e.box);
 export function boxCases(theirs, ours, tol = 1) {
   const mine = boxElements(ours);
-  const want = boxElements(theirs);
+  const want = boxElements(theirs, { oracle: true });
   const pairs = [];
   for (const [a, t] of want.entries()) for (const [b, o] of mine.entries()) {
-    const v = iou(t.e.box, o.e.box);
+    const v = iou(drawn(t), drawn(o));
     if (v > 0) pairs.push([v, a, b]);
   }
   pairs.sort((x, y) => y[0] - x[0] || x[1] - y[1] || x[2] - y[2]);
@@ -117,17 +131,23 @@ export function boxCases(theirs, ours, tol = 1) {
   for (const [, a, b] of pairs) if (!got.has(a) && !used.has(b)) { got.set(a, mine[b]); used.add(b); }
   // A box of theirs whose paint is unknown pairs like any other, so the box of ours it takes is no
   // extra, but neither side is a case: it is counted in the unscored report instead.
-  const cases = want.flatMap(({ key, e, unknown }, a) => (unknown ? [] : [[{ key, e }, a]])).map(([{ key, e }, a]) => {
+  const cases = want.flatMap((t, a) => (t.unknown ? [] : [[t, a]])).map(([t, a]) => {
+    const { key, e } = t;
     const m = got.get(a);
     if (!m) return { key, pass: false, why: 'missing' };
     const d = e.box.map((v, i) => Math.round((m.e.box[i] - v) * 10) / 10);
-    // The oracle's svg by its centre only, never its size: its box is its viewBox, padding and all,
-    // and the capture cannot see where its ink is (the lead's ruling on #328, family 2). Only when the
-    // oracle's box is the svg: a box of the oracle's with a known size is judged by its box, whatever
-    // ours is (the lead's cut on #328 round 3: our 36 svg glyph greened Grok's 46 selected tile).
-    if (e.tag === 'svg') {
+    if (t.line && m.line) {
+      const l = [d[0], d[1], d[0] + d[2]].map((x) => Math.round(x * 10) / 10);
+      return l.some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `line off by ${l.join(',')}` } : { key, pass: true };
+    }
+    // The oracle's svg or icon glyph by its centre only, never its size: its box is its viewBox (or
+    // glyph box), padding and all, and the capture cannot see where its ink is (the lead's ruling on
+    // #328, family 2). Only when the oracle's box is the icon: a box of the oracle's with a known size
+    // is judged by its box, whatever ours is (the lead's cut on #328 round 3: our 36 svg glyph greened
+    // Grok's 46 selected tile).
+    if (icon(e)) {
       const c = [d[0] + d[2] / 2, d[1] + d[3] / 2].map((x) => Math.round(x * 10) / 10);
-      return c.some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `svg centre off by ${c.join(',')}` } : { key, pass: true };
+      return c.some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `${e.tag} centre off by ${c.join(",")}` } : { key, pass: true };
     }
     return [d[0], d[1], d[0] + d[2], d[1] + d[3]].some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `box off by ${d.join(',')}` } : { key, pass: true };
   });

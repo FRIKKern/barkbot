@@ -12,7 +12,7 @@ import { boxCases, boxElements } from './lib/box-cases.mjs';
 import { turnTraces } from './lib/turn-traces.mjs';
 import { EXCEPTIONS, exception, judged } from './lib/versions.mjs';
 import { guardBeforeSend } from './lib/host-guard.mjs';
-import { sceneCard } from './lib/cards.mjs';
+import { cardCases, sceneCard } from './lib/cards.mjs';
 import { hostedNote, CLOCKS } from './lib/gate-b-hosted.mjs';
 import { pickByLabel } from './lib/hover-label.mjs';
 import { appSources, doorReds } from './lib/session-doors.mjs';
@@ -493,6 +493,42 @@ for (const [name, c, want] of [
   const pageRes = boxCases(onPage, inButton).map((c) => c.pass);
   const blind = boxCases({ elements: onPage.elements }, inButton).length;
   if (JSON.stringify(faintRes) !== '[0,2,5,6]' || JSON.stringify(pageRes) !== '[true]' || JSON.stringify(bodyRes) !== '[["1"],["0?","1?"],["0?","1?"]]' || blind !== 0) fail(`box cases: perception floor want [0,2,5,6], got ${JSON.stringify(faintRes)}; on the page's background want [["1"],["0?","1?"],["0?","1?"]], got ${JSON.stringify(bodyRes)}; behind unknown want no case, got ${blind}; page-wide pairing want [true], got ${JSON.stringify(pageRes)}`);
+  // An icon glyph: on the oracle's side a text-less 24x24 <i> paints, and pairs with an svg by its
+  // centre (a 24 svg at its place passes, 2 pt off fails); an <i> with text is text, an <i> under 20
+  // is no box. On ours an empty <i> paints nothing: against the oracle's svg, or the oracle's own
+  // glyph, at its place it is missing (rev299's round 1 on #330).
+  rule('box cases', 1);
+  const glyphs = (x) => ({ page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'i', box: [x, 0, 24, 24], style: {} }, { i: 1, tag: 'i', box: [100, 0, 16, 16], style: {} }] });
+  const asSvg = (x) => ({ page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'svg', box: [x, 0, 24, 24], style: {} }, { i: 1, tag: 'path', box: [x + 4, 4, 16, 16], style: {}, parent: 0 }] });
+  const glyphRes = [boxElements(glyphs(0), { oracle: true }).map(({ e }) => e.i), boxCases(glyphs(0), asSvg(0)).map((c) => c.pass), boxCases(glyphs(0), asSvg(2)).map((c) => c.pass)];
+  const ourGlyph = [boxElements(glyphs(0)).map(({ e }) => e.i), boxCases(asSvg(0), glyphs(0)).map((c) => c.why ?? 'pass'), boxCases(glyphs(0), glyphs(0)).map((c) => c.why ?? 'pass')];
+  if (JSON.stringify(ourGlyph) !== '[[],["missing"],["missing"]]') fail(`box cases: our empty <i> paints nothing, want [[],["missing"],["missing"]], got ${JSON.stringify(ourGlyph)}`);
+  // A line: a box painted only by its top border is that border. Theirs a 216 x 1 rule at 23,503,
+  // ours a 216 x 107 group whose top border is drawn half a point lower: one line, passing. Two
+  // lower, the two strips share no point, so neither is the other's line: missing and extra.
+  const rule1 = { page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'div', box: [23, 503, 216, 1], style: { 'border-top-width': '1px', 'border-top-color': 'rgba(255, 255, 255, 0.1)' } }] };
+  const group = (y) => ({ page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'div', box: [23, y, 216, 107], style: { 'border-top-width': '0.5px', 'border-top-color': 'rgba(255, 255, 255, 0.1)' } }] });
+  // And a line pairs by the strip it draws, not the box under it: theirs' menu item fill below the
+  // rule must not pair with our group's box (it overlaps it 0.84), so the rule passes, the fill is missing.
+  const item = { i: 1, tag: 'div', box: [23, 510, 216, 90], style: { 'background-color': 'rgb(31, 31, 31)' } };
+  const lineRes = [boxCases(rule1, group(503.5)).map((c) => c.pass), boxCases(rule1, group(505)).map((c) => c.why?.split(':')[0] ?? 'pass'),
+    boxCases({ ...rule1, elements: [...rule1.elements, item] }, group(503)).map((c) => c.why?.split(':')[0] ?? 'pass')];
+  // A line paired with a fill is judged by the boxes, never by the top edge alone (rev299's round 1
+  // on #330): theirs the rule, ours a 216 x 90 fill with no rule at its top, reds (our rule is
+  // missing); theirs the 216 x 90 fill, ours only the rule at its top, reds (our fill is missing).
+  const fill = { page: 'rgb(18, 18, 18)', elements: [{ ...item, i: 0, box: [23, 503, 216, 90] }] };
+  const mixed = [boxCases(rule1, fill).map((c) => c.why?.split(' by')[0] ?? 'pass'), boxCases(fill, rule1).map((c) => c.why?.split(' by')[0] ?? 'pass')];
+  if (JSON.stringify(mixed) !== '[["box off"],["box off"]]') fail(`box cases: a line paired with a fill, want [["box off"],["box off"]], got ${JSON.stringify(mixed)}`);
+  // Card parts pair by overlap within a kind, never by order: ours has one more box part above the
+  // two of theirs, which still pass; theirs' third, shifted 5 on ours, fails alone; and theirs' img
+  // at the place of our extra box is missing: a part pairs only with a part of its own kind.
+  const fileCard = (boxes, img) => ({ elements: [
+    { i: 0, tag: 'div', role: 'article', box: [100, 0, 300, 400], style: {} },
+    ...boxes.map((b, k) => ({ i: k + 1, tag: 'div', box: b, style: { 'background-color': 'rgb(37, 37, 37)' }, parent: 0 })),
+    ...(img ? [{ i: boxes.length + 1, tag: 'img', box: img, style: { 'background-color': 'rgb(37, 37, 37)' }, parent: 0 }] : []),
+  ] });
+  const cardRes = cardCases(fileCard([[100, 100, 200, 72], [100, 180, 200, 72], [100, 260, 200, 72]], [100, 20, 200, 72]), fileCard([[100, 20, 200, 72], [100, 100, 200, 72], [100, 180, 200, 72], [100, 265, 200, 72]])).filter((c) => !c.key.endsWith('parts')).map((c) => c.pass);
+  if (JSON.stringify(glyphRes) !== '[[0],[true],[false]]' || JSON.stringify(lineRes) !== '[[true],["missing","extra"],["pass","missing"]]' || JSON.stringify(cardRes) !== '[true,true,false,false]') fail(`box cases: icon glyph want [[0],[true],[false]], got ${JSON.stringify(glyphRes)}; line want [[true],["missing","extra"],["pass","missing"]], got ${JSON.stringify(lineRes)}; card parts by overlap want [true,true,false,false], got ${JSON.stringify(cardRes)}`);
 }
 
 // Press guard (the sweep's last look before a press, task-1c715b946dff6176, task-7521aa645350a9ed): the

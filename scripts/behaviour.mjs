@@ -331,7 +331,7 @@ const name = () => ev(() => {
   const i = document.querySelector('.who-name'), a = document.activeElement, cs = getComputedStyle(i), r = i.getBoundingClientRect();
   const props = i[Object.keys(i).find((k) => k.startsWith('__reactProps$'))];
   return { value: i.value, react: props?.value, header: document.querySelector('.bot-pill [role=heading]')?.textContent, tile: document.querySelectorAll('.rail-tile')[1]?.getAttribute('aria-label'),
-    placeholder: document.querySelector('[data-placeholder]')?.getAttribute('data-placeholder'), active: a === document.body ? 'body' : a.getAttribute('aria-label') || a.tagName,
+    placeholder: document.querySelector('[data-placeholder]')?.getAttribute('data-placeholder'), active: a === document.body ? 'body' : a.getAttribute('aria-label') || a.tagName, activeRole: a.getAttribute('role'),
     sel: a === i ? [i.selectionStart, i.selectionEnd] : null, bg: cs.backgroundColor, transition: cs.transition, rect: [r.x, r.y, r.width, r.height] };
 });
 const nextFrame = () => ev(() => new Promise((r) => requestAnimationFrame(() => r())));
@@ -415,11 +415,11 @@ check('empty + Enter: keeps the old name, focus on body (control: the field was 
 await fresh();
 await into(); await key('End'); await typeIn('X'); const away = await name();
 await click(400, 300); s = await name();
-check('click away on the transcript: saves, focus on the transcript (control: old name until then)', away.header === 'Oracle' && s.value === 'OracleX' && s.header === 'OracleX' && s.tile === 'OracleX' && s.active === 'Conversation transcript', s);
+check('click away on the transcript: saves, focus on the transcript log, role=log as on the oracle (control: old name until then)', away.header === 'Oracle' && s.value === 'OracleX' && s.header === 'OracleX' && s.tile === 'OracleX' && s.active === 'Conversation transcript' && s.activeRole === 'log', s);
 
 await fresh();
 await click(400, 300); s = await name();
-check('control: a click on the transcript alone renames nothing, focus on the transcript', s.header === 'Oracle' && s.value === 'Oracle' && s.active === 'Conversation transcript', s);
+check('control: a click on the transcript alone renames nothing, focus on the transcript log (role=log)', s.header === 'Oracle' && s.value === 'Oracle' && s.active === 'Conversation transcript' && s.activeRole === 'log', s);
 
 await fresh();
 await into(); await key('End'); await typeIn('X'); await click(44, 155); s = await name();
