@@ -435,8 +435,15 @@ for (const [name, c, want] of [
   // 2 pt off-centre fails. A background the colour of the box under it, opaque, is not paint (1 in 0);
   // a see-through one is (3 in 2), and so is another colour (4 in 0).
   rule('box cases', 1);
-  const svg = (box) => ({ elements: [{ i: 0, tag: 'svg', box, style: {} }] });
+  const svg = (box) => ({ elements: [{ i: 0, tag: 'svg', box, style: {} }, { i: 1, tag: 'path', box: [box[0] + 2, box[1] + 2, 10, 10], style: {}, parent: 0 }] });
   const svgRes = [boxCases(svg([0, 0, 55, 55]), svg([11, 11, 33, 33]))[0].pass, boxCases(svg([0, 0, 55, 55]), svg([13, 11, 33, 33]))[0].pass];
+  // Centre-only is for the oracle's svg alone. The oracle's 46 tile (a fill) against our 36 svg at its
+  // centre is judged by the box and fails; an empty svg (no drawn part) is no paint at all, so the
+  // oracle's 33 svg against our empty one at its place is missing (and ours is no extra).
+  const tile = { page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'div', box: [100, 100, 46, 46], style: { 'background-color': 'rgba(245, 245, 245, 0.22)' } }] };
+  const emptySvg = (box) => ({ elements: [{ i: 0, tag: 'svg', box, style: {} }, { i: 1, tag: 'g', box, style: {}, parent: 0 }] });
+  const svgRes2 = [boxCases(tile, svg([105, 105, 36, 36])).map((c) => c.why?.split(' by')[0] ?? 'pass'), boxCases(svg([0, 0, 33, 33]), emptySvg([0, 0, 33, 33])).map((c) => c.why ?? 'pass')];
+  if (JSON.stringify(svgRes2) !== '[["box off"],["missing"]]') fail(`box cases: centre-only for the oracle's svg only, and an svg paints only with a drawn part: want [["box off"],["missing"]], got ${JSON.stringify(svgRes2)}`);
   const same = { elements: [
     { i: 0, tag: 'div', box: [0, 0, 300, 300], style: { 'background-color': 'rgb(18, 18, 18)' } },
     { i: 1, tag: 'div', box: [10, 10, 100, 100], style: { 'background-color': 'rgb(18, 18, 18)' }, parent: 0 },

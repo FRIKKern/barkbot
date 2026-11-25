@@ -7,7 +7,7 @@
   2
  ],
  "cases": 112,
- "pass": 105,
+ "pass": 104,
  "results": [
   {
    "key": "aside:Bots",
@@ -379,7 +379,8 @@
   },
   {
    "key": "box:control:View conversation details › img#1",
-   "pass": true
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "box:page › div#1",
@@ -465,7 +466,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-24T23:27:59.214Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-settings",
   "controls": [

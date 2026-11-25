@@ -7,7 +7,7 @@
   2
  ],
  "cases": 122,
- "pass": 120,
+ "pass": 118,
  "results": [
   {
    "key": "aside:Bots",
@@ -355,7 +355,8 @@
   },
   {
    "key": "box:control:View conversation details › img#1",
-   "pass": true
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "box:page › div#1",
@@ -416,7 +417,8 @@
   },
   {
    "key": "box:control:heart character shape › span#1",
-   "pass": true
+   "pass": false,
+   "why": "box off by 5,5,-10,-10"
   },
   {
    "key": "box:control:flower character shape › svg#1",
@@ -500,7 +502,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-24T23:27:59.214Z",
+ "run": "2026-11-24T23:56:40.387Z",
  "inventory": {
   "id": "oracle-new-bot-dialog",
   "controls": [

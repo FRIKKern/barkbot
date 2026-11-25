@@ -7,7 +7,7 @@
   2
  ],
  "cases": 74,
- "pass": 72,
+ "pass": 71,
  "results": [
   {
    "key": "aside:Bots",
@@ -263,7 +263,8 @@
   },
   {
    "key": "box:control:View conversation details › img#1",
-   "pass": true
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "box:page › div#1",
@@ -308,7 +309,7 @@
    "why": "missing"
   }
  ],
- "run": "2026-11-24T23:27:59.214Z",
+ "run": "2026-11-24T23:24:07.374Z",
  "inventory": {
   "id": "oracle-get-mobile",
   "controls": [
