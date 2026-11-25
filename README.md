@@ -23,14 +23,14 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## News
 
 <!-- news:start -->
+**Monday 23 November.** 13 pull requests merged. A press on a sent picture now opens BarkBot's own picture viewer at that picture, built from two new Grok Bot 1.2.3 captures that each pass 79 of 79 cases in Gate A, and a sent text file or PDF now downloads from its card. BarkBot now opens only its own conversations: a conversation on a computer or bot it does not know gets a 404 and nothing is sent. Five PRs made the oracle sweep and Gate B harder to fool. [The full day](docs/news/2026-11-23.md)
+- **Files and pictures:** a picture opens our viewer at that picture, 79 of 79 on both captures; a text file or PDF downloads from its card ([#322](https://github.com/FRIKKern/barkbot/pull/322), [#315](https://github.com/FRIKKern/barkbot/pull/315), [#317](https://github.com/FRIKKern/barkbot/pull/317))
+- **Own conversations only:** both routes and the four server functions refuse a conversation that is not BarkBot's own ([#320](https://github.com/FRIKKern/barkbot/pull/320))
+- **Checks:** the sweep presses only the element it picked; Gate B calls a hosted drop runner timing only for a tagged clock ([#318](https://github.com/FRIKKern/barkbot/pull/318), [#321](https://github.com/FRIKKern/barkbot/pull/321), [#314](https://github.com/FRIKKern/barkbot/pull/314), [#319](https://github.com/FRIKKern/barkbot/pull/319))
+
 **Saturday 21 November.** 5 pull requests merged, one of them Friday's News. The account menu, the Connect Apps dialog and all four Settings pages now follow Grok Bot 1.2.3, and in those four pages every measured case passes. A conversation now shows a time row above a message sent an hour or more after the one before it, or on another day, from the messages' own times. Gate A, which measures our screens against the oracle's, passed 1,977 of 2,103 cases at the day's last merge, up from 1,522. [The full day](docs/news/2026-11-21.md)
 - **Menus and Settings:** the account menu in three groups; Connect Apps and the four Settings pages as in 1.2.3, several of their buttons not working yet ([#281](https://github.com/FRIKKern/barkbot/pull/281), [#280](https://github.com/FRIKKern/barkbot/pull/280))
 - **Conversation:** a time row above a message an hour or more after the last, or on another day; a file card stacks two files, and the details panel stays open under 800 wide ([#297](https://github.com/FRIKKern/barkbot/pull/297), [#295](https://github.com/FRIKKern/barkbot/pull/295))
-
-**Friday 20 November.** 10 pull requests merged, one of them Thursday's News. The first message to a new conversation is now sent, Thursday's open snag, and a fresh conversation on the bot's virtual machine got its reply in 7.4 s. The Voice chat card follows Grok Bot 1.2.3: one Voice row opens a dialog with a speed slider over 28 voices. Gate A, which measures our screens against the oracle's, passed 1,522 of 2,103 cases at the day's last merge, up from 1,032 of 2,004. [The full day](docs/news/2026-11-20.md)
-- **In the app:** the first message to a new conversation is sent once, with no error line; the Voice row opens a dialog of 28 voices under a speed slider ([#287](https://github.com/FRIKKern/barkbot/pull/287), [#284](https://github.com/FRIKKern/barkbot/pull/284))
-- **Oracle:** the Voice picker read on 1.2.3; five screens made by sends captured again with the pointer parked, so Suggested's Hide shows ([#285](https://github.com/FRIKKern/barkbot/pull/285), [#292](https://github.com/FRIKKern/barkbot/pull/292))
-- **Host:** a fresh VM conversation answered in 7.4 s; host enrollment keeps a pasted code with no newline and says what to do when the host program is too old ([#288](https://github.com/FRIKKern/barkbot/pull/288), [#291](https://github.com/FRIKKern/barkbot/pull/291), [#289](https://github.com/FRIKKern/barkbot/pull/289))
 <!-- news:end -->
 
 ## Where things live (one fact, one home)
