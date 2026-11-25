@@ -1653,6 +1653,23 @@ else {
       check("the create answer names another maker and the record is not saved: no message goes to that conversation (control: it was made)", r.made.length === 1 && !d.to.includes(r.made[0]) && d.recNow?.session_id === null, d);
       await clearPrompt();
     }
+    // Control (task-7baccaa5734a64bd): strict is for adopting and making only, never for what is
+    // already ours. A conversation a bot record already names, with no maker (created_by null, as
+    // every one made before Barkpark #28693), still opens, takes a message, and opens on a reload.
+    {
+      const S_NULL = '00000000-0000-4000-8000-0000000002c1';
+      stub.sessions = [{ ...session(S_NULL), created_by: null }]; freshStore(); stub.prefs.set('barkbot.bots', { ids: main ? [PIA, main[0].slice('barkbot.bot.'.length)] : [PIA] }); stub.prefs.set(KEYP, rec('Pia', HOST_ID, S_NULL));
+      if (main) stub.prefs.set(...main);
+      stub.opened = []; const m0 = stub.made.length, t0 = stub.to.length;
+      await open(`${base}/?bot=${PIA}`); await until(() => stub.opened.includes(S_NULL), 15000, "Pia's conversation to open").catch(() => {}); await wait(500);
+      const first = stub.opened.includes(S_NULL);
+      await typeSend('hello from before'); await until(() => stub.to.length > t0, 12000, 'the message').catch(() => {}); await wait(500);
+      const to = stub.to.slice(t0);
+      stub.opened = []; await open(`${base}/?bot=${PIA}`); await until(() => stub.opened.includes(S_NULL), 15000, "Pia's conversation to open again").catch(() => {}); await wait(500);
+      const d = { first, to, again: stub.opened.includes(S_NULL), made: stub.made.length - m0, rec: stub.prefs.get(KEYP)?.session_id ?? null };
+      check("control: a conversation a bot record already names, with no maker (created_by null), opens, takes a message and opens again on a reload; no conversation is made", d.first && JSON.stringify(d.to) === JSON.stringify([S_NULL]) && d.again && d.made === 0 && d.rec === S_NULL, d);
+      await clearPrompt();
+    }
     await clearPrompt(); stub.sessions = []; freshStore();
   }
 
