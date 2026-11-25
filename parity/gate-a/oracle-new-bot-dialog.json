@@ -7,7 +7,7 @@
   2
  ],
  "cases": 122,
- "pass": 118,
+ "pass": 119,
  "results": [
   {
    "key": "aside:Bots",
@@ -355,8 +355,7 @@
   },
   {
    "key": "box:control:View conversation details › img#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:page › div#1",
@@ -502,7 +501,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-24T23:56:40.387Z",
+ "run": "2026-11-25T06:51:11.816Z",
  "inventory": {
   "id": "oracle-new-bot-dialog",
   "controls": [

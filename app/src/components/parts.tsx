@@ -85,3 +85,17 @@ export function VoicePick({voice, speed, open = false}: {voice: string; speed: n
 export function Face({size}: {size: number}) {
   return <span className="face" style={{width: size, height: size * 0.88}} />
 }
+
+// The same face drawn inside a size x size picture, as the oracle's pill draws its mascot: an img of
+// 24 x 24 (oracle-main-1280 i55) with the tilt inside the image, not a CSS rotate on the box. The face
+// is scaled so its tilted corners stay inside the square.
+const TILT = 14, TALL = 0.88
+export function FacePicture({size}: {size: number}) {
+  const r = (TILT * Math.PI) / 180
+  const w = size / (Math.cos(r) + TALL * Math.sin(r)), h = w * TALL, c = size / 2
+  return (
+    <svg className="face-picture" width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+      <rect x={c - w / 2} y={c - h / 2} width={w} height={h} rx={w * 0.22} ry={h * 0.22} transform={`rotate(${-TILT} ${c} ${c})`} style={{fill: 'var(--face)'}} />
+    </svg>
+  )
+}
