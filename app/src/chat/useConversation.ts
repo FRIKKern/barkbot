@@ -93,6 +93,24 @@ export function askOf(id: string, tool: string, input: Frame | undefined): Ask {
   }
 }
 
+// The answered card of each single-choice question that has its chosen label among its options,
+// as the oracle keeps it (1.0.3, oracle-choice-answered): its chosen row alone. A pick-several
+// question, or an answer that names no option, has none.
+function answeredCards(questions: Question[], answers: Record<string, unknown>): NonNullable<Bubble['answered']>[] {
+  return questions.flatMap((q) => {
+    const label = answers[q.question]
+    const i = q.options.findIndex((o) => o.label === label)
+    return !q.multi && typeof label === 'string' && i >= 0 ? [{question: q.question, letter: LETTERS[i] ?? '·', label}] : []
+  })
+}
+// Each answered card is keyed by its ask and its place, so the live answer and Barkpark's stored
+// row of it (replayed on every stream open) are one card, never two.
+const answeredBubbles = (id: string, cards: NonNullable<Bubble['answered']>[], at: string): Bubble[] => cards.map((c, i) => ({key: `answered-${id}-${i}`, role: 'assistant', text: '', answered: c, at}))
+const withNew = (all: Bubble[], more: Bubble[]) => {
+  const fresh = more.filter((b) => !all.some((x) => x.key === b.key))
+  return fresh.length ? [...all, ...fresh] : all
+}
+
 let n = 0
 const key = () => `local-${++n}`
 
@@ -278,6 +296,14 @@ export function useConversation(sessionId: string | null, transport: Transport =
       }
       // An ask that was still waiting when the page loaded (a reload in the middle of one).
       const meta = m.metadata
+      // A question already answered: Barkpark's row keeps the chosen answers (metadata.answers,
+      // Barkpark #28852), so after a reload its card is back, answered, where it was asked.
+      if (m.role === 'question' && meta?.approval_status === 'allowed' && typeof meta.request_id === 'string' && meta.answers && typeof meta.answers === 'object' && !Array.isArray(meta.answers)) {
+        const cards = answeredCards(questionsOf(meta.input), meta.answers as Record<string, unknown>)
+        const at = typeof m.inserted_at === 'string' && Number.isFinite(Date.parse(m.inserted_at)) ? m.inserted_at : new Date().toISOString()
+        if (cards.length) setBubbles((all) => withNew(all, answeredBubbles(meta.request_id as string, cards, at)))
+        return
+      }
       if (['approval', 'plan', 'question'].includes(m.role) && meta?.approval_status === 'pending' && typeof meta.request_id === 'string')
         setAsk((a) => (a && !a.stored ? a : {...askOf(meta.request_id, String(meta.tool_name ?? 'a tool'), meta.input), stored: true}))
     }
@@ -563,11 +589,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
         await transport.choose(sessionId, id, answers)
         // Once the bot takes the answer the card stays in the conversation, answered (oracle 1.0.3,
         // oracle-choice-answered): one per single-choice question, its chosen row alone.
-        answered.current = {id, cards: (ask.questions ?? []).flatMap((q) => {
-          const label = answers[q.question]
-          const i = q.options.findIndex((o) => o.label === label)
-          return !q.multi && typeof label === 'string' && i >= 0 ? [{question: q.question, letter: LETTERS[i] ?? '·', label}] : []
-        })}
+        answered.current = {id, cards: answeredCards(ask.questions ?? [], answers)}
       } catch (e) {
         setAsk((a) => (a?.id === id ? {...a, answering: null} : a))
         setError(`Your answer did not reach the bot: ${e instanceof Error ? e.message : String(e)}`)
@@ -581,7 +603,7 @@ export function useConversation(sessionId: string | null, transport: Transport =
     const done = answered.current
     if (!done || ask?.id === done.id) return
     answered.current = null
-    if (done.cards.length) setBubbles((all) => [...all, ...done.cards.map((c, i): Bubble => ({key: `answered-${done.id}-${i}`, role: 'assistant', text: '', answered: c, at: new Date().toISOString()}))])
+    if (done.cards.length) setBubbles((all) => withNew(all, answeredBubbles(done.id, done.cards, new Date().toISOString())))
   }, [ask])
 
   const picture = useCallback((id: string) => (sessionId && transport.picture ? transport.picture(sessionId, id) : null), [sessionId, transport])
