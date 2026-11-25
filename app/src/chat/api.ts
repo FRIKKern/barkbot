@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs'
 import {createServerFn} from '@tanstack/react-start'
 import {bp, conf, BarkparkError, READ_MS} from '../server/barkpark'
 import {CREATE_UNSURE} from './create-unsure'
-import {madeHere, ownHosts, requireOwnSessionFn} from '../server/own-session'
+import {madeHere, ourRef, ownHosts, requireOwnSessionFn} from '../server/own-session'
 import {addId, botFolder, dropBot, freshId, keyTaken, legacyName, listIds, mainBotId, NO_MESSAGES, oneAtATime, putBot, READ_CAP, readBot, readBots, readListed, removeId, sessionOf, setBotField, trusted, validColour, validName, validShape, write, type Bot, type OwnSession, type SessionCheck} from '../server/bots'
 
 /** A computer the bot runs on. `lastSeenAt`: when Barkpark last heard from it (its last_seen_at,
@@ -21,7 +21,7 @@ export type ChatBot = {id: string; name: string; main?: boolean}
 export type Chat = {bots: ChatBot[]; botId: string; bot: string; host: Host | null; sessionId: string | null; startedAt: string | null; notice: string | null; sessions: Record<string, string>}
 
 type RawHost = {id: string; name: string; online: boolean; enrolled: boolean; revoked: boolean; last_seen_at?: string | null}
-type RawSession = {id: string; execution_target: string; execution_host_id?: string | null; inserted_at: string; status: string}
+type RawSession = {id: string; execution_target: string; execution_host_id?: string | null; inserted_at: string; status: string; created_by?: string | null}
 
 // Phase 1 has one bot, on one computer: the host enrolled under this name (npm run host:enroll).
 const HOST_NAME = () => process.env.BARKBOT_HOST_NAME || 'BarkBot Mac'
@@ -33,39 +33,47 @@ async function findHost(): Promise<Host | null> {
   return h ? {id: h.id, name: h.name, online: h.online, lastSeenAt: h.last_seen_at ?? null} : null
 }
 
-// Whether a conversation has a bot folder, as a read that worked showed it. Barkpark sets the folder
-// only when it makes the conversation, so the answer never changes: it is kept for the life of this
-// server and not asked again (with no bot list and the saved name unreadable, every load picks the
-// Main Bot's conversation anew). A read that failed is never kept. The oldest goes first past 500.
-const folderKnown = new Map<string, boolean>()
-const remember = (id: string, has: boolean) => {
-  folderKnown.delete(id)
-  folderKnown.set(id, has)
-  if (folderKnown.size > 500) folderKnown.delete(folderKnown.keys().next().value as string)
+// What a read that worked showed of a conversation: whether it has a bot folder, and who made it
+// (created_by). Barkpark sets both only when it makes the conversation, so the answer never changes:
+// it is kept for the life of this server and not asked again (with no bot list and the saved name
+// unreadable, every load picks the Main Bot's conversation anew). A read that failed is never kept.
+// The oldest goes first past 500.
+type Shown = {folder: boolean; by: unknown}
+const shownOnce = new Map<string, Shown>()
+const remember = (id: string, shown: Shown) => {
+  shownOnce.delete(id)
+  shownOnce.set(id, shown)
+  if (shownOnce.size > 500) shownOnce.delete(shownOnce.keys().next().value as string)
 }
 
-/** Today's conversation for the Main Bot: the newest of `onHost` that no listed bot names (`taken`)
- *  and that Barkpark shows with no bot folder. A conversation with a folder is a made bot's, whose
- *  record may never have saved it, and the Main Bot works in the computer's shared root, never in a
- *  bot's folder. Barkpark's list carries no bot_folder, so each one is read on its own, newest
- *  first, unless an earlier read already showed it (folderKnown). One that is gone (404) is passed
- *  over; a read that fails, or does not answer within READ_MS, is not "no folder", so none is picked. */
+/** Today's conversation for the Main Bot: the newest of `onHost` that no listed bot names (`taken`),
+ *  that Barkpark shows with no bot folder, and that Barkpark shows this server's token made
+ *  (created_by is ourRef). A conversation with a folder is a made bot's, whose record may never have
+ *  saved it, and the Main Bot works in the computer's shared root, never in a bot's folder. One made
+ *  by anyone else, a workspace-mate's token or a person, or with no maker (made before Barkpark kept
+ *  one, #28693), is passed over. Barkpark's list carries neither field, so each one is read on its
+ *  own, newest first, unless an earlier read already showed it (shownOnce). One that is gone (404) is
+ *  passed over; a read that fails, or does not answer within READ_MS, is not "no folder", so none is
+ *  picked, and none is when who we are cannot be read. */
 async function folderless<S extends {id: string}>(onHost: S[], taken: Set<string | null>): Promise<S | undefined> {
-  for (const s of onHost) {
-    if (taken.has(s.id)) continue
-    const known = folderKnown.get(s.id)
-    if (known === false) return s
-    if (known === true) continue
-    try {
-      const shown = await bp<{bot_folder?: unknown}>(`/v1/chat/sessions/${encodeURIComponent(s.id)}?since=${NO_MESSAGES}`)
-      const has = !(shown.bot_folder === null || shown.bot_folder === undefined)
-      remember(s.id, has)
-      if (!has) return s
-    } catch (e) {
-      if (e instanceof BarkparkError && e.status === 404) continue
-      console.warn(`barkbot: could not read a conversation for the Main Bot (${(e as Error).message})`)
-      return undefined
+  const candidates = onHost.filter((s) => !taken.has(s.id))
+  if (candidates.length === 0) return undefined
+  const ours = await ourRef()
+  if (ours === null) return undefined
+  for (const s of candidates) {
+    let shown = shownOnce.get(s.id)
+    if (!shown) {
+      try {
+        const read = await bp<{bot_folder?: unknown; created_by?: unknown}>(`/v1/chat/sessions/${encodeURIComponent(s.id)}?since=${NO_MESSAGES}`)
+        shown = {folder: !(read.bot_folder === null || read.bot_folder === undefined), by: read.created_by ?? null}
+        remember(s.id, shown)
+      } catch (e) {
+        if (e instanceof BarkparkError && e.status === 404) continue
+        console.warn(`barkbot: could not read a conversation for the Main Bot (${(e as Error).message})`)
+        return undefined
+      }
     }
+    if (!shown.folder && shown.by === ours) return s
   }
   return undefined
 }
@@ -345,8 +353,9 @@ export const startChat = createServerFn({method: 'POST'})
       if ((e as Error)?.name === 'TimeoutError') throw new Error(`This message was not sent: Barkpark did not open its conversation within ${READ_MS / 1000} s. Send it again.`)
       throw e
     }
-    // Made here: its doors open for this server even if the bot record below is not saved (kept:false).
-    madeHere(s)
+    // Made here: its doors open for this server even if the bot record below is not saved
+    // (kept:false), when Barkpark's answer names this server's token its maker.
+    await madeHere(s)
     let kept = false
     try {
       kept = await oneAtATime(data.botId, async (write) => {
