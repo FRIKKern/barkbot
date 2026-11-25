@@ -435,8 +435,15 @@ for (const [name, c, want] of [
   // 2 pt off-centre fails. A background the colour of the box under it, opaque, is not paint (1 in 0);
   // a see-through one is (3 in 2), and so is another colour (4 in 0).
   rule('box cases', 1);
-  const svg = (box) => ({ elements: [{ i: 0, tag: 'svg', box, style: {} }] });
+  const svg = (box) => ({ elements: [{ i: 0, tag: 'svg', box, style: {} }, { i: 1, tag: 'path', box: [box[0] + 2, box[1] + 2, 10, 10], style: {}, parent: 0 }] });
   const svgRes = [boxCases(svg([0, 0, 55, 55]), svg([11, 11, 33, 33]))[0].pass, boxCases(svg([0, 0, 55, 55]), svg([13, 11, 33, 33]))[0].pass];
+  // Centre-only is for the oracle's svg alone. The oracle's 46 tile (a fill) against our 36 svg at its
+  // centre is judged by the box and fails; an empty svg (no drawn part) is no paint at all, so the
+  // oracle's 33 svg against our empty one at its place is missing (and ours is no extra).
+  const tile = { page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'div', box: [100, 100, 46, 46], style: { 'background-color': 'rgba(245, 245, 245, 0.22)' } }] };
+  const emptySvg = (box) => ({ elements: [{ i: 0, tag: 'svg', box, style: {} }, { i: 1, tag: 'g', box, style: {}, parent: 0 }] });
+  const svgRes2 = [boxCases(tile, svg([105, 105, 36, 36])).map((c) => c.why?.split(' by')[0] ?? 'pass'), boxCases(svg([0, 0, 33, 33]), emptySvg([0, 0, 33, 33])).map((c) => c.why ?? 'pass')];
+  if (JSON.stringify(svgRes2) !== '[["box off"],["missing"]]') fail(`box cases: centre-only for the oracle's svg only, and an svg paints only with a drawn part: want [["box off"],["missing"]], got ${JSON.stringify(svgRes2)}`);
   const same = { elements: [
     { i: 0, tag: 'div', box: [0, 0, 300, 300], style: { 'background-color': 'rgb(18, 18, 18)' } },
     { i: 1, tag: 'div', box: [10, 10, 100, 100], style: { 'background-color': 'rgb(18, 18, 18)' }, parent: 0 },
@@ -490,7 +497,7 @@ for (const [name, c, want] of [
   // place passes, 2 pt off fails); an <i> with text is text, an <i> under 20 is no box.
   rule('box cases', 1);
   const glyphs = (x) => ({ page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'i', box: [x, 0, 24, 24], style: {} }, { i: 1, tag: 'i', box: [100, 0, 16, 16], style: {} }] });
-  const asSvg = (x) => ({ page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'svg', box: [x, 0, 24, 24], style: {} }] });
+  const asSvg = (x) => ({ page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'svg', box: [x, 0, 24, 24], style: {} }, { i: 1, tag: 'path', box: [x + 4, 4, 16, 16], style: {}, parent: 0 }] });
   const glyphRes = [boxElements(glyphs(0)).map(({ e }) => e.i), boxCases(glyphs(0), asSvg(0)).map((c) => c.pass), boxCases(glyphs(0), asSvg(2)).map((c) => c.pass)];
   // A line: a box painted only by its top border is that border. Theirs a 216 x 1 rule at 23,503,
   // ours a 216 x 107 group whose top border is drawn half a point lower: one line, passing. Two

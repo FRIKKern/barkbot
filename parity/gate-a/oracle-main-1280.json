@@ -199,17 +199,17 @@
   {
    "key": "card#1 box#5",
    "pass": false,
-   "why": "missing"
+   "why": "box off by -24,32,330,68; background-color rgb(37, 37, 37) ≠ rgba(245, 245, 245, 0.24); border-radius 22px ≠ 2px; box-shadow rgba(245, 245, 245, 0.12) 0px 0px 0px 0.5px, rgba(245, 245, 245, 0) 0px 1px 4px 0px, rgba(245, 245, 245, 0) 0px 6px 12px 0px ≠ none"
   },
   {
    "key": "card#1 box#6",
    "pass": false,
-   "why": "missing"
+   "why": "box off by -4,41,21,36; background-color rgb(52, 52, 52) ≠ rgba(245, 245, 245, 0.24); border-radius 6px ≠ 2px; box-shadow rgba(245, 245, 245, 0.16) 0px 0px 0px 0.5px, rgba(245, 245, 245, 0) 0px 2px 6px 0px ≠ none"
   },
   {
    "key": "card#1 text(3)#1",
    "pass": false,
-   "why": "box off by 0,9,0,-2; color rgba(245, 245, 245, 0.66) ≠ rgb(245, 245, 245); font-size 13px ≠ 14px; font-weight 425 ≠ 500; line-height 18px ≠ 20px"
+   "why": "box off by 0,-12,0,0"
   },
   {
    "key": "card#1 text(11)#1",
@@ -224,7 +224,7 @@
   {
    "key": "card#1 text(3)#2",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,-12,0,0"
   },
   {
    "key": "box:control:Bot tile › svg#1",
@@ -275,7 +275,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-24T23:51:46.421Z",
+ "run": "2026-11-25T06:51:11.816Z",
  "inventory": {
   "id": "oracle-main-1280",
   "controls": [

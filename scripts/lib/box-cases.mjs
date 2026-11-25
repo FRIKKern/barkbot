@@ -41,9 +41,15 @@ const icon = (e) => e.tag === 'svg' || glyph(e);
 // ancestor has an opaque background, and the capture has no page background (the oracle's captures
 // predate `page`). What such a box is laid over is not in the capture, so it is not judged: no
 // colour is guessed (the lead's ruling on #328 round 3).
+// An svg paints only when it holds a drawn part the capture kept (a path, shape, use, text or image
+// of 1x1 or more): an empty svg is what a broken icon looks like (the lead's cut on #328 round 3).
+// The capture keeps no fill or stroke, so a part drawn with none still counts: a known blind spot.
+const DRAWN = new Set(['path', 'circle', 'rect', 'ellipse', 'line', 'polyline', 'polygon', 'use', 'text', 'image']);
+const drawsInside = (els, e) => els.some((x) => DRAWN.has(x.tag) && ancestors(els, x).includes(e));
 export function paints(e, els = [], page) {
   const s = e.style || {};
-  if (e.tag === 'img' || icon(e)) return true;
+  if (e.tag === 'img' || glyph(e)) return true;
+  if (e.tag === 'svg') return drawsInside(els, e);
   if (s['background-image'] && s['background-image'] !== 'none') return true;
   if (s['box-shadow'] && s['box-shadow'] !== 'none') return true;
   if (e.text || e.textLength) return true;
@@ -130,9 +136,12 @@ export function boxCases(theirs, ours, tol = 1) {
       const l = [d[0], d[1], d[0] + d[2]].map((x) => Math.round(x * 10) / 10);
       return l.some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `line off by ${l.join(',')}` } : { key, pass: true };
     }
-    // An svg by its centre only, never its size: an svg's box is its viewBox, padding and all, and
-    // the capture cannot see where its ink is (the lead's ruling on #328, family 2).
-    if (icon(e) || icon(m.e)) {
+    // The oracle's svg or icon glyph by its centre only, never its size: its box is its viewBox (or
+    // glyph box), padding and all, and the capture cannot see where its ink is (the lead's ruling on
+    // #328, family 2). Only when the oracle's box is the icon: a box of the oracle's with a known size
+    // is judged by its box, whatever ours is (the lead's cut on #328 round 3: our 36 svg glyph greened
+    // Grok's 46 selected tile).
+    if (icon(e)) {
       const c = [d[0] + d[2] / 2, d[1] + d[3] / 2].map((x) => Math.round(x * 10) / 10);
       return c.some((x) => Math.abs(x) > tol) ? { key, pass: false, why: `${e.tag} centre off by ${c.join(",")}` } : { key, pass: true };
     }

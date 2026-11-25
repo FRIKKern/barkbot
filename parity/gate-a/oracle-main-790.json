@@ -7,7 +7,7 @@
   2
  ],
  "cases": 71,
- "pass": 50,
+ "pass": 49,
  "results": [
   {
    "key": "aside:Bots",
@@ -185,12 +185,12 @@
   {
    "key": "card#1 box#3",
    "pass": false,
-   "why": "missing"
+   "why": "box off by -24,22,196,68; background-color rgb(37, 37, 37) ≠ rgba(245, 245, 245, 0.24); border-radius 22px ≠ 2px; box-shadow rgba(245, 245, 245, 0.12) 0px 0px 0px 0.5px, rgba(245, 245, 245, 0) 0px 1px 4px 0px, rgba(245, 245, 245, 0) 0px 6px 12px 0px ≠ none"
   },
   {
    "key": "card#1 box#4",
    "pass": false,
-   "why": "missing"
+   "why": "box off by -4,31,21,36; background-color rgb(52, 52, 52) ≠ rgba(245, 245, 245, 0.24); border-radius 6px ≠ 2px; box-shadow rgba(245, 245, 245, 0.16) 0px 0px 0px 0.5px, rgba(245, 245, 245, 0) 0px 2px 6px 0px ≠ none"
   },
   {
    "key": "card#1 text(3)#1",
@@ -200,17 +200,17 @@
   {
    "key": "card#1 text(11)#1",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,56,-3.8,0"
   },
   {
    "key": "card#1 text(4)#1",
    "pass": false,
-   "why": "missing"
+   "why": "box off by -3.8,56,0.1,0"
   },
   {
    "key": "card#1 text(3)#2",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,35,0,2; color rgb(245, 245, 245) ≠ rgba(245, 245, 245, 0.66); font-size 14px ≠ 13px; font-weight 500 ≠ 425; line-height 20px ≠ 18px"
   },
   {
    "key": "card#1 control:Open oracle-note.txt (2)#1",
@@ -220,21 +220,22 @@
   {
    "key": "card#1 box#5",
    "pass": false,
-   "why": "box off by 0,-22,0,0"
+   "why": "box off by 24,-2,-209,-68; background-color rgba(245, 245, 245, 0.24) ≠ rgb(37, 37, 37); border-radius 2px ≠ 22px; box-shadow none ≠ rgba(245, 245, 245, 0.12) 0px 0px 0px 0.5px, rgba(245, 245, 245, 0) 0px 1px 4px 0px, rgba(245, 245, 245, 0) 0px 6px 12px 0px"
   },
   {
    "key": "card#1 box#6",
    "pass": false,
-   "why": "box off by 0,-22,0,0"
+   "why": "box off by 4,-11,-8,-36; background-color rgba(245, 245, 245, 0.24) ≠ rgb(52, 52, 52); border-radius 2px ≠ 6px; box-shadow none ≠ rgba(245, 245, 245, 0.16) 0px 0px 0px 0.5px, rgba(245, 245, 245, 0) 0px 2px 6px 0px"
   },
   {
    "key": "card#1 box#7",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,-8,13,0"
   },
   {
    "key": "card#1 box#8",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,-8,-13,0"
   },
   {
    "key": "card#1 box#9",
@@ -315,7 +316,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-24T23:51:46.421Z",
+ "run": "2026-11-25T06:51:11.816Z",
  "inventory": {
   "id": "oracle-main-790",
   "controls": [

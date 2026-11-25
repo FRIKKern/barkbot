@@ -7,7 +7,7 @@
   2
  ],
  "cases": 159,
- "pass": 147,
+ "pass": 143,
  "results": [
   {
    "key": "aside:Bots",
@@ -617,15 +617,7 @@
    "pass": true
   },
   {
-   "key": "box:control:Open Messages › i#1",
-   "pass": true
-  },
-  {
    "key": "box:control:Open Notes › span#1",
-   "pass": true
-  },
-  {
-   "key": "box:control:Open Notes › i#1",
    "pass": true
   },
   {
@@ -641,24 +633,36 @@
    "pass": true
   },
   {
-   "key": "box:control:Open Location › i#1",
-   "pass": true
-  },
-  {
    "key": "box:control:Open Contacts › span#1",
    "pass": true
   },
   {
-   "key": "box:control:Open Contacts › i#1",
-   "pass": true
+   "key": "box:extra › svg@111,558,24,24",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:extra › svg@544,558,24,24",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
   },
   {
    "key": "box:extra › svg@111,624,24,24",
    "pass": false,
    "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:extra › svg@111,690,24,24",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
+  },
+  {
+   "key": "box:extra › svg@544,690,24,24",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-24T23:51:46.421Z",
+ "run": "2026-11-25T06:51:11.816Z",
  "inventory": {
   "id": "oracle-connect-apps",
   "controls": [
