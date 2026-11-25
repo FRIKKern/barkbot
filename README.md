@@ -23,15 +23,15 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## News
 
 <!-- news:start -->
+**Tuesday 24 November.** 4 pull requests merged. BarkBot's live status stream no longer passes on other people's conversations: only its own conversations go out, each as its id and one of four state words, so a workspace-mate's conversation id and title never reach the page. The picture viewer is now modal: Tab stays inside it, the page behind is inert, and Escape in its composer menu closes only the menu. Gate A now reports, per screen, the oracle's boxes no case scores: 3,013 over 54 screens. [The full day](docs/news/2026-11-24.md)
+- **Own conversations only:** the status stream sends only our own conversations' state, a known word, and drops a revoked computer's within 10 s ([#324](https://github.com/FRIKKern/barkbot/pull/324), [#327](https://github.com/FRIKKern/barkbot/pull/327))
+- **Picture viewer:** modal: Tab stays inside, the page behind is inert, Escape closes the composer menu first ([#325](https://github.com/FRIKKern/barkbot/pull/325))
+- **Gate A:** a report of the oracle's boxes no case scores, 3,013 over 54 screens ([#326](https://github.com/FRIKKern/barkbot/pull/326))
+
 **Monday 23 November.** 13 pull requests merged. A press on a sent picture now opens BarkBot's own picture viewer at that picture, built from two new Grok Bot 1.2.3 captures that each pass 79 of 79 cases in Gate A, and a sent text file or PDF now downloads from its card. BarkBot now opens only its own conversations: a conversation on a computer or bot it does not know gets a 404 and nothing is sent. Five PRs made the oracle sweep and Gate B harder to fool. [The full day](docs/news/2026-11-23.md)
 - **Files and pictures:** a picture opens our viewer at that picture, 79 of 79 on both captures; a text file or PDF downloads from its card ([#322](https://github.com/FRIKKern/barkbot/pull/322), [#315](https://github.com/FRIKKern/barkbot/pull/315), [#317](https://github.com/FRIKKern/barkbot/pull/317))
 - **Own conversations only:** both routes and the four server functions refuse a conversation that is not BarkBot's own ([#320](https://github.com/FRIKKern/barkbot/pull/320))
 - **Checks:** the sweep presses only the element it picked; Gate B calls a hosted drop runner timing only for a tagged clock ([#318](https://github.com/FRIKKern/barkbot/pull/318), [#321](https://github.com/FRIKKern/barkbot/pull/321), [#314](https://github.com/FRIKKern/barkbot/pull/314), [#319](https://github.com/FRIKKern/barkbot/pull/319))
-
-**Sunday 22 November.** 10 pull requests merged, one of them Saturday's News. Settings now shows the real computer's last-seen time, kept live, and the app's own build version, where it showed the capture's. Two files of one message that share a name are numbered (1) and (2) on the live page, and a control that says it opens a menu now opens one. Gate A, which measures our screens against the oracle's, gained 48 cases on the Voice dialog scrolled to the top and 14 on a file waiting to send, after Settings gave up 4. [The full day](docs/news/2026-11-22.md)
-- **In the app:** Settings shows the live computer and build; same-named files are numbered; no Invalid Date time row; Support and More no longer promise a menu ([#299](https://github.com/FRIKKern/barkbot/pull/299), [#306](https://github.com/FRIKKern/barkbot/pull/306), [#301](https://github.com/FRIKKern/barkbot/pull/301), [#298](https://github.com/FRIKKern/barkbot/pull/298))
-- **Gate A:** the Voice dialog scrolled to the top 0 to 48 of 48; a file waiting to send 52 to 66 of 66 ([#307](https://github.com/FRIKKern/barkbot/pull/307), [#308](https://github.com/FRIKKern/barkbot/pull/308))
-- **Checks:** every layer the app can show opens from the live page as a person opens it; CI runs the type check; scenes may not carry gate-only spacing ([#303](https://github.com/FRIKKern/barkbot/pull/303), [#304](https://github.com/FRIKKern/barkbot/pull/304), [#302](https://github.com/FRIKKern/barkbot/pull/302))
 <!-- news:end -->
 
 ## Where things live (one fact, one home)
