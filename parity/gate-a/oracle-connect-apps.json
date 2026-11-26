@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 159,
- "pass": 147,
+ "cases": 158,
+ "pass": 146,
  "results": [
   {
    "key": "aside:Bots",
@@ -509,10 +509,6 @@
    "pass": true
   },
   {
-   "key": "box:page › header#1",
-   "pass": true
-  },
-  {
    "key": "box:control:View conversation details › img#1",
    "pass": true
   },
@@ -658,7 +654,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-25T06:55:38.393Z",
+ "run": "2026-11-26T09:53:57.150Z",
  "inventory": {
   "id": "oracle-connect-apps",
   "controls": [

@@ -409,7 +409,7 @@ for (const [name, c, want] of [
     { i: 1, tag: 'div', box: [0, 0, 90, 90], style: {}, parent: 0 },
     { i: 2, tag: 'div', box: [100, 0, 40, 40], style: bg, parent: 11 },
     { i: 3, tag: 'div', box: [150, 0, 40, 40], style: { 'border-top-width': '1px', 'border-top-color': 'rgba(245, 245, 245, 0.06)' }, parent: 11 },
-    { i: 4, tag: 'div', box: [200, 0, 40, 40], style: { 'box-shadow': 'rgba(0, 0, 0, 0.2) 0px 1px 2px 0px' }, parent: 11 },
+    { i: 4, tag: 'div', box: [200, 0, 40, 40], style: { 'box-shadow': 'rgba(0, 0, 0, 0.5) 0px 1px 2px 0px' }, parent: 11 },
     { i: 5, tag: 'img', box: [250, 0, 40, 40], style: {}, parent: 11 },
     { i: 6, tag: 'p', box: [300, 0, 40, 40], style: {}, textLength: 12, parent: 11 },
     { i: 7, tag: 'div', box: [350, 0, 19, 40], style: bg, parent: 11 },
@@ -493,6 +493,29 @@ for (const [name, c, want] of [
   const pageRes = boxCases(onPage, inButton).map((c) => c.pass);
   const blind = boxCases({ elements: onPage.elements }, inButton).length;
   if (JSON.stringify(faintRes) !== '[0,2,5,6]' || JSON.stringify(pageRes) !== '[true]' || JSON.stringify(bodyRes) !== '[["1"],["0?","1?"],["0?","1?"]]' || blind !== 0) fail(`box cases: perception floor want [0,2,5,6], got ${JSON.stringify(faintRes)}; on the page's background want [["1"],["0?","1?"],["0?","1?"]], got ${JSON.stringify(bodyRes)}; behind unknown want no case, got ${blind}; page-wide pairing want [true], got ${JSON.stringify(pageRes)}`);
+  // Paint that draws nothing is no paint (task-ebfec4c81747864d): each kind at the fills' 4/255
+  // floor, at the box's opacity (collect.mjs `alpha`: its own times its ancestors'), on the page's
+  // rgb(18,18,18). One row per kind; in each, the clear one (first) is no box, the one that shows
+  // (second) is. A box with no `alpha` (the oracle's 1.2.3 captures) is at 1.
+  const kinds = (a, b) => boxElements({ page: 'rgb(18, 18, 18)', elements: [{ i: 0, ...a, box: [0, 0, 40, 40] }, { i: 1, ...b, box: [50, 0, 40, 40] }] }).map(({ e }) => e.i);
+  const fillOf = { tag: 'div', style: { 'background-color': 'rgb(245, 245, 245)' } };
+  rule('box cases', 1);
+  const byOpacity = kinds({ ...fillOf, alpha: 0.01 }, { ...fillOf, alpha: 0.5 });
+  if (JSON.stringify(byOpacity) !== '[1]') fail(`box cases: a white fill at opacity 0.01 is no paint, at 0.5 it is: want [1], got ${JSON.stringify(byOpacity)}`);
+  rule('box cases', 1);
+  const byText = kinds({ tag: 'p', textLength: 12, style: { color: 'rgba(0, 0, 0, 0)' } }, { tag: 'p', textLength: 12, style: { color: 'rgb(245, 245, 245)' } });
+  if (JSON.stringify(byText) !== '[1]') fail(`box cases: text in a clear colour is no paint, in white it is: want [1], got ${JSON.stringify(byText)}`);
+  rule('box cases', 1);
+  const byGradient = kinds({ tag: 'div', style: { 'background-image': 'linear-gradient(rgba(0, 0, 0, 0), rgba(255, 255, 255, 0))' } }, { tag: 'div', style: { 'background-image': 'linear-gradient(rgba(0, 0, 0, 0), rgba(255, 255, 255, 0.5))' } });
+  if (JSON.stringify(byGradient) !== '[1]') fail(`box cases: a gradient whose stops are all clear is no paint, one with a stop that shows is: want [1], got ${JSON.stringify(byGradient)}`);
+  // A stop in a colour function this does not read (Chrome's color(srgb ... / a) for a space-syntax
+  // rgb in a gradient) beside a clear rgba one: it counts as showing, so the gradient paints (rev299's
+  // round 1 on #337), and so does a shadow list written the same way.
+  const byFunction = kinds({ tag: 'div', style: { 'background-image': 'linear-gradient(90deg, color(srgb 0.960784 0.960784 0.960784 / 0.4) 0%, rgba(0, 0, 0, 0) 100%)' } }, { tag: 'div', style: { 'box-shadow': 'color(srgb 1 1 1 / 0.5) 0px 0px 0px 1px, rgba(0, 0, 0, 0) 0px 0px 0px 0px' } });
+  if (JSON.stringify(byFunction) !== '[0,1]') fail(`box cases: a color(srgb ...) stop or shadow beside a clear rgba one paints: want [0,1], got ${JSON.stringify(byFunction)}`);
+  rule('box cases', 1);
+  const byShadow = kinds({ tag: 'div', style: { 'box-shadow': 'rgba(0, 0, 0, 0) 0px 1px 2px 0px' } }, { tag: 'div', style: { 'box-shadow': 'rgba(0, 0, 0, 0.5) 0px 1px 2px 0px' } });
+  if (JSON.stringify(byShadow) !== '[1]') fail(`box cases: a shadow in a clear colour is no paint, one that shows is: want [1], got ${JSON.stringify(byShadow)}`);
   // An icon glyph: on the oracle's side a text-less 24x24 <i> paints, and pairs with an svg by its
   // centre (a 24 svg at its place passes, 2 pt off fails); an <i> with text is text, an <i> under 20
   // is no box. On ours an empty <i> paints nothing: against the oracle's svg, or the oracle's own

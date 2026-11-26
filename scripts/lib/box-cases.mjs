@@ -7,8 +7,9 @@
 // text of its own. The capture keeps only those (collect.mjs KEYS): a box drawn only by a side or
 // bottom border, an outline, ::before/::after or a mask reads as paintless and is not scored. A
 // paintless wrapper's box comes from what it holds, which the other cases score, so it is no case.
-// A fill or top border paints only when it shows: laid over what is behind it, it changes the
-// pixel by at least 4/255 in some channel (the lead's ruling on #328 round 3, a perception floor,
+// A fill, top border, gradient, shadow or text paints only when it shows, at the box's opacity
+// (its own times its ancestors', collect.mjs `alpha`; task-ebfec4c81747864d): laid over what is
+// behind it, it changes the pixel by at least 4/255 in some channel (the lead's ruling on #328 round 3, a perception floor,
 // not a number from any capture). A 0.06 white hairline on rgb(18,18,18) moves it 14 and paints; a
 // 0.01 fill, or an opaque one the colour already behind it, moves it 0 or 2 and does not.
 import { namedElements } from './controls.mjs';
@@ -47,20 +48,50 @@ const icon = (e) => e.tag === 'svg' || glyph(e);
 // The capture keeps no fill or stroke, so a part drawn with none still counts: a known blind spot.
 const DRAWN = new Set(['path', 'circle', 'rect', 'ellipse', 'line', 'polyline', 'polygon', 'use', 'text', 'image']);
 const drawsInside = (els, e) => els.some((x) => DRAWN.has(x.tag) && ancestors(els, x).includes(e));
+// How see-through a box is as drawn: its own opacity times every ancestor's (collect.mjs `alpha`,
+// left out when 1). A capture from before `alpha` (the oracle's 1.2.3) has none: 1, never a guess.
+const alphaOf = (e) => (typeof e.alpha === 'number' ? e.alpha : 1);
+// A colour drawn at the box's opacity `k` shows over `b`: it moves the pixel by 4/255 or more in
+// some channel (the fills' perception floor). With `b` unknown (null) only the most it could move
+// is known, its alpha times 255, so only a colour too clear to move any pixel is ruled out. An
+// unreadable colour counts as paint.
+const showsAt = (c, b, k) => {
+  const x = rgba(c);
+  if (!x) return true;
+  const y = [x[0], x[1], x[2], x[3] * k];
+  return b ? over(y, b).some((v, i) => Math.abs(v - b[i]) >= 4) : y[3] * 255 >= 4;
+};
+// Whether a gradient's stops or a shadow list's colours show: any one is enough. Every colour
+// function is taken, not only rgb(a): Chrome writes a space-syntax rgb with alpha inside a gradient
+// as color(srgb ...), and one this cannot read counts as showing (showsAt; rev299's round 1 on #337).
+// A value past the capture's 160-character cut, or with no colour at all, is judged by the opacity alone.
+const anyShows = (v, b, k) => {
+  const cs = v.length < 160 ? v.match(/\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([^)]*\)/g) : null;
+  return cs ? cs.some((c) => showsAt(c, b, k)) : k * 255 >= 4;
+};
 export function paints(e, els = [], page, oracle = false) {
   const s = e.style || {};
+  const k = alphaOf(e);
+  // A box drawn at an opacity that cannot move a pixel by 4/255 draws nothing, whatever it holds.
+  if (k * 255 < 4) return false;
+  // An img, a glyph or a drawn svg: their own colours are not in the capture.
   if (e.tag === 'img' || (oracle && glyph(e))) return true;
   if (e.tag === 'svg') return drawsInside(els, e);
-  if (s['background-image'] && s['background-image'] !== 'none') return true;
-  if (s['box-shadow'] && s['box-shadow'] !== 'none') return true;
-  if (e.text || e.textLength) return true;
+  const known = !!page || ancestors(els, e).some((a) => rgba(a.style?.['background-color'])?.[3] === 1);
+  const back = known ? behind(els, e, page) : null;
   const fill = rgba(s['background-color']);
+  // A gradient (by its stops), a shadow (by its colours) and text (its colour over the box's own
+  // fill) paint only when they show, as a fill does. A url() image is a picture: it paints.
+  const bgi = s['background-image'];
+  if (bgi && bgi !== 'none' && (/gradient\(/.test(bgi) ? anyShows(bgi, back, k) : true)) return true;
+  if (s['box-shadow'] && s['box-shadow'] !== 'none' && anyShows(s['box-shadow'], back, k)) return true;
+  if ((e.text || e.textLength) && (s.color ? showsAt(s.color, back && fill ? over(fill, back) : back, k) : true)) return true;
   const line = parseFloat(s['border-top-width'] || '0') > 0 ? rgba(s['border-top-color']) : [0, 0, 0, 0];
-  if ((!fill || fill[3] > 0 || !line || line[3] > 0) && !page && !ancestors(els, e).some((a) => rgba(a.style?.['background-color'])?.[3] === 1)) return null;
-  const back = behind(els, e, page);
-  if (shows(s['background-color'], back)) return true;
+  // Nothing else to show and nothing behind it known: a clear fill and border are no paint.
+  if (!known) return !fill || fill[3] > 0 || !line || line[3] > 0 ? null : false;
+  if (showsAt(s['background-color'], back, k)) return true;
   // The top border is drawn over the box's own background.
-  return parseFloat(s['border-top-width'] || '0') > 0 && shows(s['border-top-color'], fill ? over(fill, back) : back) ? 'line' : false;
+  return parseFloat(s['border-top-width'] || '0') > 0 && showsAt(s['border-top-color'], fill ? over(fill, back) : back, k) ? 'line' : false;
 }
 const sameBox = (a, b) => a.box.every((v, i) => Math.abs(v - b.box[i]) < 0.5);
 
