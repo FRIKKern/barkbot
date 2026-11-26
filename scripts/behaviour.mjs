@@ -1219,6 +1219,22 @@ else {
   const n = stub.answers.length;
   if (k.allow) { await click(...k.allow); await until(() => stub.answers.length > n, 5000, 'the answer').catch(() => {}); }
   check('a reload while the bot waits: the card is back and Allow answers that ask (control: no card when the bot is idle and the row is stale)', !idleShown && k.shown && /asks to write a\.txt/.test(k.what ?? '') && stub.answers.at(-1)?.request_id === 'ask-9' && stub.answers.length === n + 1, { idleShown, k, answers: stub.answers.slice(n) });
+  // An answered question after a reload (task-189078c39ac04e2d): Barkpark's stored question row
+  // keeps the chosen answers (metadata.answers, Barkpark #28852), so the card is back answered, in
+  // its place between the message and the reply, its chosen row alone. The pick-several question has
+  // no card, as live. When the stream opens again its rows come again: still one card.
+  stub.rows = [{ seq: 1, role: 'user', source_markdown: 'pick a fruit', metadata: {} },
+    { seq: 2, role: 'question', source_markdown: 'AskUserQuestion', metadata: { request_id: 'q-9', tool_name: 'AskUserQuestion', approval_status: 'allowed', input: { questions: [{ question: 'Which fruit?', multiSelect: false, options: [{ label: 'apple' }, { label: 'pear' }, { label: 'plum' }] }, { question: 'Which days?', multiSelect: true, options: ['Mon', 'Tue'] }] }, answers: { 'Which fruit?': 'plum', 'Which days?': ['Mon'] } } },
+    { seq: 3, role: 'assistant', source_markdown: 'Plum it is.', metadata: {} }];
+  stub.fleet = 'idle';
+  await open(`${base}/`);
+  await until(async () => (await kept()).length > 0, 10000, 'the answered card after the reload').catch(() => {}); await wait(500);
+  const placed = () => ev(() => { const all = [...document.querySelectorAll('.bubble, .turn-card [aria-label="Your answer"]')]; const at = (f) => all.findIndex(f); return [at((e) => e.textContent.includes('pick a fruit')), at((e) => e.matches('[aria-label="Your answer"]')), at((e) => e.textContent.includes('Plum it is.'))]; });
+  const k9 = await kept(), p9 = await placed();
+  stub.streams.forEach((r) => r.destroy());
+  await until(() => stub.streams.length > 0, 10000, 'the stream to open again').catch(() => {}); await wait(1500);
+  const again9 = await kept();
+  check('a reload after a question was answered: its card is back answered, C plum alone, between the message and the reply; the pick-several one has none; the stream opening again adds no second card (control: no choices to press)', k9.length === 1 && k9[0].q === 'Which fruit?' && k9[0].letter === 'C' && k9[0].label === 'plum' && k9[0].rows === 1 && p9[0] >= 0 && p9[0] < p9[1] && p9[1] < p9[2] && again9.length === 1 && (await choices()).length === 0, { k9, p9, again9 });
 
   // A picture goes with a message (Barkpark: store it for the conversation, then name it by id).
   console.log('Behaviour · a picture with a message (the live page, against the stand-in Barkpark)');
