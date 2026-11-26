@@ -23,7 +23,8 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## News
 
 <!-- news:start -->
-**Wednesday 25 November.** 5 pull requests merged, three of them the News for Sunday to Tuesday. Gate A, which measures BarkBot's screens against the oracle's captures, now also scores the painted boxes no other case scores: 530 such cases over 33 screens, each paired with ours by where it sits on the page. With card parts, icon glyphs and border lines read too, 2,693 of its 2,791 cases pass, 499 of the 530 box cases. Nothing in the app changed. [The full day](docs/news/2026-11-25.md)
+**Wednesday 25 November.** 6 pull requests merged, three of them the News for Sunday to Tuesday. The conversation transcript is now a log named Conversation transcript, as on Grok Bot, so a screen reader finds it by the same name, and the face on the View conversation details pill is a 24 by 24 picture with its tilt drawn inside. Gate A, which measures BarkBot's screens against the oracle's captures, now also scores the painted boxes no other case scores: 530 such cases over 33 screens, each paired with ours by where it sits on the page. With the new pill face, and card parts, icon glyphs and border lines read too, 2,693 of its 2,791 cases pass, 499 of the 530 box cases. [The full day](docs/news/2026-11-25.md)
+- **Transcript and pill:** the transcript is the named log, as on Grok Bot; the pill face is a 24 by 24 picture, and its 33 box cases pass ([#329](https://github.com/FRIKKern/barkbot/pull/329))
 - **Gate A boxes:** a painted box no case scored is now a case, paired page-wide by overlap; 499 of 530 pass ([#328](https://github.com/FRIKKern/barkbot/pull/328))
 - **Gate A reads:** card parts pair by overlap, a text-less i icon by its centre, a top-border line by its edge; the misses that are not ours are named ([#330](https://github.com/FRIKKern/barkbot/pull/330))
 
