@@ -508,6 +508,11 @@ for (const [name, c, want] of [
   rule('box cases', 1);
   const byGradient = kinds({ tag: 'div', style: { 'background-image': 'linear-gradient(rgba(0, 0, 0, 0), rgba(255, 255, 255, 0))' } }, { tag: 'div', style: { 'background-image': 'linear-gradient(rgba(0, 0, 0, 0), rgba(255, 255, 255, 0.5))' } });
   if (JSON.stringify(byGradient) !== '[1]') fail(`box cases: a gradient whose stops are all clear is no paint, one with a stop that shows is: want [1], got ${JSON.stringify(byGradient)}`);
+  // A stop in a colour function this does not read (Chrome's color(srgb ... / a) for a space-syntax
+  // rgb in a gradient) beside a clear rgba one: it counts as showing, so the gradient paints (rev299's
+  // round 1 on #337), and so does a shadow list written the same way.
+  const byFunction = kinds({ tag: 'div', style: { 'background-image': 'linear-gradient(90deg, color(srgb 0.960784 0.960784 0.960784 / 0.4) 0%, rgba(0, 0, 0, 0) 100%)' } }, { tag: 'div', style: { 'box-shadow': 'color(srgb 1 1 1 / 0.5) 0px 0px 0px 1px, rgba(0, 0, 0, 0) 0px 0px 0px 0px' } });
+  if (JSON.stringify(byFunction) !== '[0,1]') fail(`box cases: a color(srgb ...) stop or shadow beside a clear rgba one paints: want [0,1], got ${JSON.stringify(byFunction)}`);
   rule('box cases', 1);
   const byShadow = kinds({ tag: 'div', style: { 'box-shadow': 'rgba(0, 0, 0, 0) 0px 1px 2px 0px' } }, { tag: 'div', style: { 'box-shadow': 'rgba(0, 0, 0, 0.5) 0px 1px 2px 0px' } });
   if (JSON.stringify(byShadow) !== '[1]') fail(`box cases: a shadow in a clear colour is no paint, one that shows is: want [1], got ${JSON.stringify(byShadow)}`);

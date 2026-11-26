@@ -61,10 +61,12 @@ const showsAt = (c, b, k) => {
   const y = [x[0], x[1], x[2], x[3] * k];
   return b ? over(y, b).some((v, i) => Math.abs(v - b[i]) >= 4) : y[3] * 255 >= 4;
 };
-// Whether a gradient's stops or a shadow list's colours show: any one is enough. A value past the
-// capture's 160-character cut, or with no colour this reads, is judged by the opacity alone.
+// Whether a gradient's stops or a shadow list's colours show: any one is enough. Every colour
+// function is taken, not only rgb(a): Chrome writes a space-syntax rgb with alpha inside a gradient
+// as color(srgb ...), and one this cannot read counts as showing (showsAt; rev299's round 1 on #337).
+// A value past the capture's 160-character cut, or with no colour at all, is judged by the opacity alone.
 const anyShows = (v, b, k) => {
-  const cs = v.length < 160 ? v.match(/rgba?\([^)]*\)/g) : null;
+  const cs = v.length < 160 ? v.match(/\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([^)]*\)/g) : null;
   return cs ? cs.some((c) => showsAt(c, b, k)) : k * 255 >= 4;
 };
 export function paints(e, els = [], page, oracle = false) {
