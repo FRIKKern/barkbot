@@ -9,6 +9,14 @@ export function collect() {
   const els = [];
   const all = document.body.querySelectorAll('*');
   const index = new Map();
+  // An element's opacity as drawn: its own times every ancestor's (CSS opacity multiplies down the
+  // tree). Kept as `alpha` when under 1; a capture without it is at 1 (lib/box-cases.mjs).
+  const alphas = new Map();
+  const alphaOf = (el) => {
+    if (!el) return 1;
+    if (!alphas.has(el)) alphas.set(el, Number(getComputedStyle(el).opacity) * alphaOf(el.parentElement));
+    return alphas.get(el);
+  };
   for (const el of all) {
     const r = el.getBoundingClientRect();
     if (r.width < 1 || r.height < 1 || r.right < 0 || r.bottom < 0 || r.left > innerWidth || r.top > innerHeight) continue;
@@ -32,6 +40,8 @@ export function collect() {
       textLength: own && !(sectionTitle || (ctl && !inBubble)) ? own.length : undefined,
     };
     if (el.tagName.toLowerCase() === 'svg') e.icon = true;
+    const alpha = alphaOf(el);
+    if (alpha < 1) e.alpha = Math.round(alpha * 10000) / 10000;
     index.set(el, e.i);
     let p = el.parentElement;
     while (p && !index.has(p)) p = p.parentElement;
