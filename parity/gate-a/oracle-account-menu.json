@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 81,
- "pass": 78,
+ "cases": 79,
+ "pass": 76,
  "results": [
   {
    "key": "aside:Bots",
@@ -282,10 +282,6 @@
    "pass": true
   },
   {
-   "key": "box:page › header#1",
-   "pass": true
-  },
-  {
    "key": "box:control:View conversation details › img#1",
    "pass": true
   },
@@ -318,10 +314,6 @@
    "pass": true
   },
   {
-   "key": "box:page › presentation#1",
-   "pass": true
-  },
-  {
    "key": "box:control:Weekly usage › span#1",
    "pass": false,
    "why": "missing"
@@ -337,7 +329,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-25T06:51:11.816Z",
+ "run": "2026-11-26T09:53:57.150Z",
  "inventory": {
   "id": "oracle-account-menu",
   "controls": [

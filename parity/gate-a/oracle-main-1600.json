@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 72,
- "pass": 72,
+ "cases": 71,
+ "pass": 71,
  "results": [
   {
    "key": "aside:Bots",
@@ -262,10 +262,6 @@
    "pass": true
   },
   {
-   "key": "box:page › header#1",
-   "pass": true
-  },
-  {
    "key": "box:control:View conversation details › img#1",
    "pass": true
   },
@@ -298,7 +294,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-25T06:51:11.816Z",
+ "run": "2026-11-26T09:53:57.150Z",
  "inventory": {
   "id": "oracle-main-1600",
   "controls": [
