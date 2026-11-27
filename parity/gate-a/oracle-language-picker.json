@@ -7,7 +7,7 @@
   2
  ],
  "cases": 99,
- "pass": 81,
+ "pass": 99,
  "results": [
   {
    "key": "aside:Bots",
@@ -151,93 +151,75 @@
   },
   {
    "key": "span:Auto-detect#2",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:English",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Arabic (Egypt)",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Arabic (Saudi Arabia)",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Arabic (United Arab Emirates)",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Bengali",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Catalan",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Chinese (Simplified)",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Danish",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Dutch",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Finnish",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:French",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:German",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Hindi",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Hungarian",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Indonesian",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Italian",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Japanese",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -424,7 +406,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-27T13:51:37.630Z",
+ "run": "2026-11-27T13:56:38.318Z",
  "inventory": {
   "id": "oracle-language-picker",
   "controls": [

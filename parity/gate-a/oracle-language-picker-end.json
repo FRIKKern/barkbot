@@ -7,85 +7,70 @@
   2
  ],
  "cases": 15,
- "pass": 0,
+ "pass": 15,
  "results": [
   {
    "key": "span:Hungarian",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Indonesian",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Italian",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Japanese",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Korean",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Polish",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Portuguese (Brazil)",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Portuguese (Portugal)",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Russian",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Spanish (Mexico)",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Spanish (Spain)",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Swedish",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Thai",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Turkish",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Vietnamese",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   }
  ],
- "run": "2026-11-27T13:51:37.630Z",
+ "run": "2026-11-27T13:56:38.318Z",
  "inventory": {
   "id": "oracle-language-picker-end",
   "controls": [
