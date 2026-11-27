@@ -23,15 +23,15 @@ read · one gesture · read ─────► fixtures/ and traces/
 ## News
 
 <!-- news:start -->
+**Thursday 26 November.** 5 pull requests merged, one of them the News for Wednesday. The Main Bot now moves in, or keeps as made here, only a conversation Barkpark shows this server's token made, so a workspace-mate's newest conversation is never taken over. An answered question card now comes back answered after a reload, and on a Mac the chat host can run as a LaunchAgent, so it outlives its Terminal and comes back after a restart and login. Gate A no longer counts paint too clear to move a pixel: 37 box cases that passed are gone, and 2,656 of its 2,754 cases pass. [The full day](docs/news/2026-11-26.md)
+- **Own conversations only:** move-in and made here take only a conversation this server's token made; a failed read of who we are adopts nothing ([#334](https://github.com/FRIKKern/barkbot/pull/334))
+- **Chat:** an answered question card comes back after a reload; the Mac's host can run as a LaunchAgent ([#335](https://github.com/FRIKKern/barkbot/pull/335), [#323](https://github.com/FRIKKern/barkbot/pull/323))
+- **Gate A:** paint too clear to move a pixel is no paint: 37 box cases gone, 2,656 of 2,754 pass ([#337](https://github.com/FRIKKern/barkbot/pull/337))
+
 **Wednesday 25 November.** 6 pull requests merged, three of them the News for Sunday to Tuesday. The conversation transcript is now a log named Conversation transcript, as on Grok Bot, so a screen reader finds it by the same name, and the face on the View conversation details pill is a 24 by 24 picture with its tilt drawn inside. Gate A, which measures BarkBot's screens against the oracle's captures, now also scores the painted boxes no other case scores: 530 such cases over 33 screens, each paired with ours by where it sits on the page. With the new pill face, and card parts, icon glyphs and border lines read too, 2,693 of its 2,791 cases pass, 499 of the 530 box cases. [The full day](docs/news/2026-11-25.md)
 - **Transcript and pill:** the transcript is the named log, as on Grok Bot; the pill face is a 24 by 24 picture, and its 33 box cases pass ([#329](https://github.com/FRIKKern/barkbot/pull/329))
 - **Gate A boxes:** a painted box no case scored is now a case, paired page-wide by overlap; 499 of 530 pass ([#328](https://github.com/FRIKKern/barkbot/pull/328))
 - **Gate A reads:** card parts pair by overlap, a text-less i icon by its centre, a top-border line by its edge; the misses that are not ours are named ([#330](https://github.com/FRIKKern/barkbot/pull/330))
-
-**Tuesday 24 November.** 4 pull requests merged. BarkBot's live status stream no longer passes on other people's conversations: only its own conversations go out, each as its id and one of four state words, so a workspace-mate's conversation id and title never reach the page. The picture viewer is now modal: Tab stays inside it, the page behind is inert, and Escape in its composer menu closes only the menu. Gate A now reports, per screen, the oracle's boxes no case scores: 3,013 over 54 screens. [The full day](docs/news/2026-11-24.md)
-- **Own conversations only:** the status stream sends only our own conversations' state, a known word, and drops a revoked computer's within 10 s ([#324](https://github.com/FRIKKern/barkbot/pull/324), [#327](https://github.com/FRIKKern/barkbot/pull/327))
-- **Picture viewer:** modal: Tab stays inside, the page behind is inert, Escape closes the composer menu first ([#325](https://github.com/FRIKKern/barkbot/pull/325))
-- **Gate A:** a report of the oracle's boxes no case scores, 3,013 over 54 screens ([#326](https://github.com/FRIKKern/barkbot/pull/326))
 <!-- news:end -->
 
 ## Where things live (one fact, one home)
