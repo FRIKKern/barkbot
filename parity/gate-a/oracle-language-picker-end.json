@@ -12,80 +12,80 @@
   {
    "key": "span:Hungarian",
    "pass": false,
-   "why": "box off by 20,30,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Indonesian",
    "pass": false,
-   "why": "box off by 20,28,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Italian",
    "pass": false,
-   "why": "box off by 20,26,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Japanese",
    "pass": false,
-   "why": "box off by 20,24,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Korean",
    "pass": false,
-   "why": "box off by 20,22,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Polish",
    "pass": false,
-   "why": "box off by 20,20,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Portuguese (Brazil)",
    "pass": false,
-   "why": "box off by 20,18,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Portuguese (Portugal)",
    "pass": false,
-   "why": "box off by 20,16,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Russian",
    "pass": false,
-   "why": "box off by 20,14,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Spanish (Mexico)",
    "pass": false,
-   "why": "box off by 20,12,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Spanish (Spain)",
    "pass": false,
-   "why": "box off by 20,10,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Swedish",
    "pass": false,
-   "why": "box off by 20,8,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Thai",
    "pass": false,
-   "why": "box off by 20,6,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Turkish",
    "pass": false,
-   "why": "box off by 20,4,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
    "key": "span:Vietnamese",
    "pass": false,
-   "why": "box off by 20,2,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "why": "box off by -1.8,0,1.8,0"
   }
  ],
- "run": "2026-11-27T08:54:02.199Z",
+ "run": "2026-11-27T13:51:37.630Z",
  "inventory": {
   "id": "oracle-language-picker-end",
   "controls": [
