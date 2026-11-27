@@ -40,8 +40,9 @@ export function collect() {
       textLength: own && !(sectionTitle || (ctl && !inBubble)) ? own.length : undefined,
     };
     if (el.tagName.toLowerCase() === 'svg') e.icon = true;
-    // A sticky or fixed box is drawn over whatever scrolls under it, not over its ancestors (lib/box-cases.mjs).
-    if (cs.position === 'sticky' || cs.position === 'fixed') e.position = cs.position;
+    // A positioned overlay (sticky, fixed or absolute) can have content pass under it, which is no
+    // ancestor of it (lib/box-cases.mjs).
+    if (cs.position === 'sticky' || cs.position === 'fixed' || cs.position === 'absolute') e.position = cs.position;
     const alpha = alphaOf(el);
     if (alpha < 1) e.alpha = Math.round(alpha * 10000) / 10000;
     index.set(el, e.i);

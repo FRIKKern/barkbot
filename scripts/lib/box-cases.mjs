@@ -69,11 +69,13 @@ const anyShows = (v, b, k) => {
   const cs = v.length < 160 ? v.match(/\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([^)]*\)/g) : null;
   return cs ? cs.some((c) => showsAt(c, b, k)) : k * 255 >= 4;
 };
-// Whether what is behind a box is in the capture: its ancestors' backgrounds on the page's. A sticky
-// or fixed box (collect.mjs `position`) is drawn over whatever scrolls under it, which is no ancestor,
-// so behind it is unknown, and so for a box inside one unless an opaque fill comes first on the way
-// up (task-f7fdf44d2aa63bf3). With no `position` (the oracle's 1.2.3 captures) nothing is pinned.
-const pinned = (e) => e.position === 'sticky' || e.position === 'fixed';
+// Whether what is behind a box is in the capture: its ancestors' backgrounds on the page's. Content
+// can pass under a positioned overlay (collect.mjs `position`: sticky, fixed or absolute), which is
+// no ancestor of it, so behind such a box is unknown, and so for a box inside one unless an opaque
+// fill comes first on the way up (task-f7fdf44d2aa63bf3). All three alike: absolute or sticky is a
+// DOM choice, and the gate scores a look (our .convo-head scrim is absolute, a sticky one draws the
+// same). With no `position` (the oracle's 1.2.3 captures) nothing is an overlay.
+const pinned = (e) => e.position === 'sticky' || e.position === 'fixed' || e.position === 'absolute';
 const opaque = (e) => rgba(e.style?.['background-color'])?.[3] === 1;
 const knownBehind = (els, e, page) => {
   if (pinned(e)) return false;
