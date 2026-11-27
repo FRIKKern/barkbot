@@ -7,12 +7,12 @@
  "controls": [
   "Route traffic through this computer",
   "Reset Bot's Computer",
-  "Add Rule to Always Ask",
-  "Add Rule to Allow without Asking",
-  "Automatic Updates",
-  "Check for Updates",
-  "Read Texts",
-  "Send Texts",
+  "Add rule to always ask",
+  "Add rule to allow without asking",
+  "Automatic updates",
+  "Check for updates",
+  "Read texts",
+  "Send texts",
   "Update Bot's Computer",
   "Approvals"
  ],

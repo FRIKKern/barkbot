@@ -330,14 +330,16 @@ for (const [name, c, want] of [
 // newest message's own group wholly on screen; a cut one or a tile's nested group is passed over,
 // and a prefix with nothing to hover throws instead of capturing the resting screen.
 {
-  const st = (id) => JSON.parse(read(`fixtures/states/${id}.json`));
+  const cut = (state, prefix) => ({ ...state, elements: state.elements.map((e) => (e.label?.startsWith(prefix) ? { ...e, box: [e.box[0], -40, e.box[2], e.box[3]] } : e)) });
   const ORACLE = 'Message actions for Oracle message', YOURS = 'Message actions for your message';
   for (const [name, id, prefix, want] of [
     ["Oracle's one message", 'oracle-file-sent', ORACLE, 118],
     ['yours: the earlier message is cut off at the top', 'oracle-file-sent', YOURS, 143],
     ['yours: two wholly on screen, the newest wins', 'oracle-pictures-sent', YOURS, 135],
     ["yours: the message's own group, not its last tile's", 'oracle-ask-choice', YOURS, 93],
-    ['yours: the only one is cut off', 'oracle-turn-1040', YOURS, /none wholly on screen/],
+    // 1.3.0's turn-1040 shows its one message of yours whole (decision 0011), so the cut one is that
+    // capture with the message's group lifted 40 above the top: a cut one is passed over.
+    ['yours: the only one is cut off', 'oracle-turn-1040:cut', YOURS, /none wholly on screen/],
     ['a label nothing carries', 'oracle-turn-1040', 'Message actions for nobody', /nothing by that label on screen/],
     // The sweep's pressLabel (oracle-picture-viewer*): the openers inside the five-picture message.
     ['the viewer from a tile: the last whole tile, not the +3 one', 'oracle-pictures-sent', 'Open image full screen', 145],
@@ -345,7 +347,9 @@ for (const [name, c, want] of [
   ]) {
     rule('hover label', 1);
     let got;
-    try { got = pickByLabel(st(id), prefix).e.i; } catch (e) { got = e.message; }
+    const [file, how] = id.split(':');
+    const state = JSON.parse(read(`fixtures/states/${file}.json`));
+    try { got = pickByLabel(how === 'cut' ? cut(state, YOURS) : state, prefix).e.i; } catch (e) { got = e.message; }
     const ok = want instanceof RegExp ? typeof got === 'string' && want.test(got) : got === want;
     if (!ok) fail(`hover label: ${name} (${id}): got ${got}, want ${want}`);
   }
