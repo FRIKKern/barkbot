@@ -516,6 +516,15 @@ for (const [name, c, want] of [
   rule('box cases', 1);
   const byShadow = kinds({ tag: 'div', style: { 'box-shadow': 'rgba(0, 0, 0, 0) 0px 1px 2px 0px' } }, { tag: 'div', style: { 'box-shadow': 'rgba(0, 0, 0, 0.5) 0px 1px 2px 0px' } });
   if (JSON.stringify(byShadow) !== '[1]') fail(`box cases: a shadow in a clear colour is no paint, one that shows is: want [1], got ${JSON.stringify(byShadow)}`);
+  // A sticky or fixed box is drawn over what scrolls under it, so what is behind it is unknown
+  // (task-f7fdf44d2aa63bf3): a header whose gradient fades from the page's own colour to clear,
+  // sticky, is a case; the same box not sticky moves no pixel over its ancestors and is none. A box
+  // inside a fixed one with an opaque fill of its own lies on that fill, so behind it stays known.
+  rule('box cases', 1);
+  const scrim = { tag: 'header', style: { 'background-image': 'linear-gradient(rgb(18, 18, 18), rgba(0, 0, 0, 0))' } };
+  const byPinned = kinds({ ...scrim, position: 'sticky' }, scrim);
+  const onFixed = boxElements({ page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'div', position: 'fixed', box: [0, 0, 400, 400], style: { 'background-color': 'rgb(31, 31, 31)' } }, { i: 1, tag: 'div', box: [10, 10, 40, 40], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 }] }).map(({ e, unknown }) => `${e.i}${unknown ? '?' : ''}`);
+  if (JSON.stringify(byPinned) !== '[0]' || JSON.stringify(onFixed) !== '["0?"]') fail(`box cases: a sticky scrim paints, the same not sticky does not: want [0], got ${JSON.stringify(byPinned)}; inside a fixed opaque box behind is known: want ["0?"], got ${JSON.stringify(onFixed)}`);
   // An icon glyph: on the oracle's side a text-less 24x24 <i> paints, and pairs with an svg by its
   // centre (a 24 svg at its place passes, 2 pt off fails); an <i> with text is text, an <i> under 20
   // is no box. On ours an empty <i> paints nothing: against the oracle's svg, or the oracle's own

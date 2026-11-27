@@ -69,6 +69,17 @@ const anyShows = (v, b, k) => {
   const cs = v.length < 160 ? v.match(/\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([^)]*\)/g) : null;
   return cs ? cs.some((c) => showsAt(c, b, k)) : k * 255 >= 4;
 };
+// Whether what is behind a box is in the capture: its ancestors' backgrounds on the page's. A sticky
+// or fixed box (collect.mjs `position`) is drawn over whatever scrolls under it, which is no ancestor,
+// so behind it is unknown, and so for a box inside one unless an opaque fill comes first on the way
+// up (task-f7fdf44d2aa63bf3). With no `position` (the oracle's 1.2.3 captures) nothing is pinned.
+const pinned = (e) => e.position === 'sticky' || e.position === 'fixed';
+const opaque = (e) => rgba(e.style?.['background-color'])?.[3] === 1;
+const knownBehind = (els, e, page) => {
+  if (pinned(e)) return false;
+  for (const a of ancestors(els, e)) { if (opaque(a)) return true; if (pinned(a)) return false; }
+  return !!page;
+};
 export function paints(e, els = [], page, oracle = false) {
   const s = e.style || {};
   const k = alphaOf(e);
@@ -77,7 +88,7 @@ export function paints(e, els = [], page, oracle = false) {
   // An img, a glyph or a drawn svg: their own colours are not in the capture.
   if (e.tag === 'img' || (oracle && glyph(e))) return true;
   if (e.tag === 'svg') return drawsInside(els, e);
-  const known = !!page || ancestors(els, e).some((a) => rgba(a.style?.['background-color'])?.[3] === 1);
+  const known = knownBehind(els, e, page);
   const back = known ? behind(els, e, page) : null;
   const fill = rgba(s['background-color']);
   // A gradient (by its stops), a shadow (by its colours) and text (its colour over the box's own

@@ -40,6 +40,8 @@ export function collect() {
       textLength: own && !(sectionTitle || (ctl && !inBubble)) ? own.length : undefined,
     };
     if (el.tagName.toLowerCase() === 'svg') e.icon = true;
+    // A sticky or fixed box is drawn over whatever scrolls under it, not over its ancestors (lib/box-cases.mjs).
+    if (cs.position === 'sticky' || cs.position === 'fixed') e.position = cs.position;
     const alpha = alphaOf(el);
     if (alpha < 1) e.alpha = Math.round(alpha * 10000) / 10000;
     index.set(el, e.i);
