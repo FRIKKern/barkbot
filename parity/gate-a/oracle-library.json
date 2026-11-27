@@ -72,7 +72,7 @@
   {
    "key": "control:Search",
    "pass": false,
-   "why": "missing"
+   "why": "background-color rgb(31, 31, 31) ≠ rgba(0, 0, 0, 0); color rgba(245, 245, 245, 0.9) ≠ rgb(255, 255, 255)"
   },
   {
    "key": "control:Close",
@@ -268,7 +268,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T10:52:29.308Z",
  "inventory": {
   "id": "oracle-library",
   "controls": [
@@ -325,7 +325,7 @@
    {
     "name": "Search",
     "item": "A3",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Close",
@@ -353,7 +353,7 @@
     "ours": true
    }
   ],
-  "missing": 1,
+  "missing": 0,
   "untracked": []
  }
 }

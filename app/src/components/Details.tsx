@@ -1,5 +1,6 @@
 // The details panel (aside "Conversation details", 720..1040): the bot, its tabs, and the
-// Activity cards: Suggested, Computer, Voice chat. Library shows its empty state.
+// Activity cards: Suggested, Computer, Voice chat. Library shows its empty state and, in its
+// header, a Search button (1.3.0).
 // Grok 1.2.3 (decision 0010): Suggested holds Create a routine only (Add to Slack is gone), and
 // Voice chat has two rows: Voice, a button reading "<voice> <speed>" that opens the Voice dialog
 // with its Speed slider, and Language.
@@ -19,6 +20,13 @@ export function Details({scene, name, between, onRename, onClose}: {scene: Scene
   return (
     <aside className="details" aria-label="Conversation details" inert={!scene.panelOpen}>
       <header className="details-head">
+        {/* Grok 1.3.0 (decision 0011, oracle-library): Library's header gains a Search button at its
+            left, drawn as Close is. Look only (0005): what it does is not captured yet. */}
+        {library && (
+          <button className="close lib-search" aria-label="Search">
+            <Icon d="M7 2.5a4.5 4.5 0 1 1 0 9a4.5 4.5 0 1 1 0-9M10.5 10.5l3 3" />
+          </button>
+        )}
         <button className="close" aria-label="Close" onClick={onClose}>
           <Icon d="M4 4l8 8M12 4l-8 8" />
         </button>
