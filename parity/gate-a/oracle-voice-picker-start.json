@@ -7,280 +7,226 @@
   2
  ],
  "cases": 54,
- "pass": 0,
+ "pass": 54,
  "results": [
   {
    "key": "control:Altair",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Altair",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Elegant & refined",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Altair preview",
-   "pass": false,
-   "why": "box off by 0,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Ara",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Ara",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Warm & friendly",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Ara preview",
-   "pass": false,
-   "why": "box off by 2,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Atlas",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Atlas",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Firm & reassuring",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Atlas preview",
-   "pass": false,
-   "why": "box off by 0,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Aurora",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Aurora",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Serene & steady",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Aurora preview",
-   "pass": false,
-   "why": "box off by 2,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Carina",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Carina",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Soft & empathetic",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Carina preview",
-   "pass": false,
-   "why": "box off by 0,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Castor",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Castor",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Easygoing & real",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Castor preview",
-   "pass": false,
-   "why": "box off by 2,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Celeste",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Celeste",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Caring & confident",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Celeste preview",
-   "pass": false,
-   "why": "box off by 0,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Cosmo",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Cosmo",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Bright & curious",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Cosmo preview",
-   "pass": false,
-   "why": "box off by 2,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Eve",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Eve",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Energetic & upbeat",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Eve preview",
-   "pass": false,
-   "why": "box off by 0,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Helios",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Helios",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Upbeat & versatile",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Helios preview",
-   "pass": false,
-   "why": "box off by 2,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Helix",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Helix",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Bold & dynamic",
-   "pass": false,
-   "why": "box off by -2,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Helix preview",
-   "pass": false,
-   "why": "box off by 0,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Iris",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Iris",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "span:Friendly & charming",
-   "pass": false,
-   "why": "box off by 0,48,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Iris preview",
-   "pass": false,
-   "why": "box off by 2,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Kepler",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Kepler",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Kepler preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Leo",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Leo",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Play the Leo preview",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   }
  ],
- "run": "2026-11-27T08:54:02.199Z",
+ "run": "2026-11-27T13:06:21.271Z",
  "inventory": {
   "id": "oracle-voice-picker-start",
   "controls": [
@@ -512,25 +458,25 @@
    {
     "name": "Kepler",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Kepler preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Leo",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Play the Leo preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 4,
+  "missing": 0,
   "untracked": []
  }
 }
