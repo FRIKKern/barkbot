@@ -7,7 +7,7 @@
   2
  ],
  "cases": 41,
- "pass": 6,
+ "pass": 41,
  "results": [
   {
    "key": "bdi:Asleep",
@@ -15,18 +15,15 @@
   },
   {
    "key": "control:Naksh",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Naksh",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Warm & thoughtful",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Naksh preview",
@@ -34,38 +31,31 @@
   },
   {
    "key": "control:Orion",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Orion",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Rich & cinematic",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Orion preview",
-   "pass": false,
-   "why": "box off by 2,0,0,0"
+   "pass": true
   },
   {
    "key": "control:Perseus",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Perseus",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Strong & trusted",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Perseus preview",
@@ -73,38 +63,31 @@
   },
   {
    "key": "control:Rex",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Rex",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Confident & clear",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Rex preview",
-   "pass": false,
-   "why": "box off by 2,0,0,0"
+   "pass": true
   },
   {
    "key": "control:Rigel",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Rigel",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Crisp & composed",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Rigel preview",
@@ -112,38 +95,31 @@
   },
   {
    "key": "control:Sal",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Sal",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Smooth & balanced",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Sal preview",
-   "pass": false,
-   "why": "box off by 2,0,0,0"
+   "pass": true
   },
   {
    "key": "control:Sirius",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Sirius",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Clever & playful",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Sirius preview",
@@ -151,38 +127,31 @@
   },
   {
    "key": "control:Ursa",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Ursa",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Friendly & warm",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Ursa preview",
-   "pass": false,
-   "why": "box off by 2,0,0,0"
+   "pass": true
   },
   {
    "key": "control:Zagan",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Zagan",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Deep & dramatic",
-   "pass": false,
-   "why": "box off by -2,0,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Zagan preview",
@@ -190,26 +159,22 @@
   },
   {
    "key": "control:Zenith",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Zenith",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "span:Sharp & focused",
-   "pass": false,
-   "why": "box off by 0,0,2,0"
+   "pass": true
   },
   {
    "key": "control:Play the Zenith preview",
-   "pass": false,
-   "why": "box off by 2,0,0,0"
+   "pass": true
   }
  ],
- "run": "2026-11-27T08:54:02.199Z",
+ "run": "2026-11-27T13:06:21.271Z",
  "inventory": {
   "id": "oracle-voice-picker-end",
   "controls": [

@@ -6,7 +6,7 @@
   760,
   2
  ],
- "cases": 133,
+ "cases": 132,
  "pass": 132,
  "results": [
   {
@@ -536,14 +536,9 @@
   {
    "key": "box:aside:Conversation details › ul#3",
    "pass": true
-  },
-  {
-   "key": "box:extra › span@968,382,24,22",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-27T09:51:20.370Z",
+ "run": "2026-11-27T12:24:58.427Z",
  "inventory": {
   "id": "oracle-edit-avatar",
   "controls": [

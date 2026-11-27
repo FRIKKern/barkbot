@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 165,
- "pass": 81,
+ "cases": 160,
+ "pass": 88,
  "results": [
   {
    "key": "aside:Bots",
@@ -151,353 +151,347 @@
   },
   {
    "key": "span:Speed",
-   "pass": false,
-   "why": "box off by 0,48,0,0"
+   "pass": true
   },
   {
    "key": "control:Speed",
-   "pass": false,
-   "why": "box off by 0.1,48,0,0"
+   "pass": true
   },
   {
    "key": "span:1",
-   "pass": false,
-   "why": "box off by -0.9,48.5,-0.1,-0.5"
+   "pass": true
   },
   {
    "key": "span:.",
-   "pass": false,
-   "why": "box off by -1,48.5,0.7,-0.5"
+   "pass": true
   },
   {
    "key": "span:0",
-   "pass": false,
-   "why": "box off by -0.2,48.5,-0.1,-0.5"
+   "pass": true
   },
   {
    "key": "span:x",
-   "pass": false,
-   "why": "box off by -0.3,48.5,0.3,-0.5"
+   "pass": true
   },
   {
    "key": "control:Carina",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Carina",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Soft & empathetic",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Carina preview",
    "pass": false,
-   "why": "box off by 0,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Castor",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Castor",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Easygoing & real",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Castor preview",
    "pass": false,
-   "why": "box off by 2,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Celeste",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Celeste",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Caring & confident",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Celeste preview",
    "pass": false,
-   "why": "box off by 0,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Cosmo",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Cosmo",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Bright & curious",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Cosmo preview",
    "pass": false,
-   "why": "box off by 2,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Eve",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Eve",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Energetic & upbeat",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Eve preview",
    "pass": false,
-   "why": "box off by 0,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Helios",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Helios",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Upbeat & versatile",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Helios preview",
    "pass": false,
-   "why": "box off by 2,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Helix",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Helix",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Bold & dynamic",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Helix preview",
    "pass": false,
-   "why": "box off by 0,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Iris",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Iris",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Friendly & charming",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Iris preview",
    "pass": false,
-   "why": "box off by 2,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Kepler",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Kepler",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Witty & inventive",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Kepler preview",
    "pass": false,
-   "why": "box off by 0,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Leo",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Leo",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Strong & assured",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Leo preview",
    "pass": false,
-   "why": "box off by 2,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Liora",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Liora",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Calm & grounded",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Liora preview",
    "pass": false,
-   "why": "box off by 0,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Lumen",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Lumen",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Warm & articulate",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Lumen preview",
    "pass": false,
-   "why": "box off by 2,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Luna",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Luna",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Gentle & patient",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Luna preview",
    "pass": false,
-   "why": "box off by 0,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Lux",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Lux",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Quiet & wise",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Lux preview",
    "pass": false,
-   "why": "box off by 2,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Naksh",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Naksh",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Warm & thoughtful",
    "pass": false,
-   "why": "box off by -2,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Naksh preview",
    "pass": false,
-   "why": "box off by 0,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Orion",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Orion",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "span:Rich & cinematic",
    "pass": false,
-   "why": "box off by 0,44,2,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Play the Orion preview",
    "pass": false,
-   "why": "box off by 2,44,0,0"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Perseus",
@@ -512,7 +506,7 @@
   {
    "key": "control:Play the Perseus preview",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "control:Rex",
@@ -527,7 +521,7 @@
   {
    "key": "control:Play the Rex preview",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,23,0,0"
   },
   {
    "key": "bubble:user#1 look",
@@ -715,46 +709,20 @@
   },
   {
    "key": "box:page › div#3",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
-   "key": "box:extra › div@784,158,159,20",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › span@784,158,66,20",
+   "key": "box:extra › radio@725,734,138,84",
    "pass": false,
    "why": "extra: the oracle draws no box here"
   },
   {
-   "key": "box:extra › div@830,158,20,20",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › radio@723,-73,140,84",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › radio@871,-73,140,84",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › radio@723,755,140,84",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › radio@871,755,140,84",
+   "key": "box:extra › radio@871,734,138,84",
    "pass": false,
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T13:06:21.271Z",
  "inventory": {
   "id": "oracle-voice-picker",
   "controls": [
@@ -1031,7 +999,7 @@
    {
     "name": "Play the Perseus preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Rex",
@@ -1041,10 +1009,10 @@
    {
     "name": "Play the Rex preview",
     "item": "N4",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 4,
+  "missing": 2,
   "untracked": []
  }
 }
