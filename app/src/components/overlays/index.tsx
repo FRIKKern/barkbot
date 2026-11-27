@@ -51,7 +51,7 @@ const overlays: Record<string, Render> = {
     <VoiceDialog picked={scene?.voice?.voice} speed={scene?.voice?.speed} onPick={(v) => change('voice-picker', v)} onSpeed={(n) => change('voice-speed', n)} />
   ),
   'language-picker': ({picked, scene, choose}) => <LanguagePicker picked={picked ?? scene?.voice?.language} onPick={choose} />,
-  'new-bot-dialog': ({close, create}) => <NewBotDialog onClose={close} onCreate={create} />,
+  'new-bot-dialog': ({close, create, scene}) => <NewBotDialog onClose={close} onCreate={create} pick={scene?.newBot} />,
   'connect-apps': ({close, scene}) => <ConnectApps onClose={close} today={scene?.apps?.today} />,
   'get-mobile': ({close}) => <GetMobile onClose={close} />,
   'edit-avatar': () => <AvatarEditor />,

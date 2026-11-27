@@ -1,4 +1,5 @@
-import {computers} from './transcripts'
+import {computers, newBots, previews} from './transcripts'
+import {filler} from '../chat/turn'
 import type {Scene} from '../components/Shell'
 import {seenAtCapture} from './scenes/oracle'
 
@@ -19,6 +20,9 @@ export const scenes: Record<string, Scene> = Object.fromEntries(
 // stamped now so the time is the capture's whenever the page is drawn.
 export const sceneFor = (id: string): Scene | undefined => {
   const s = scenes[id] ?? scenes[id.replace(/-(start|end|named|hover)$/, '')] ?? (id.startsWith('oracle-hover-') ? scenes['oracle-turn-1040'] : undefined)
-  // The Bot's computer status word is live (gate/transcripts.ts computers): the scene shows the one its capture shows.
-  return s && {...s, seen: seenAtCapture(), ...(s.computer !== undefined && computers[id] ? {computer: computers[id]} : {})}
+  // The Bot's computer status word, a chat preview's line and Create new Bot's opening pick are live
+  // (gate/transcripts.ts computers, previews, newBots): the scene shows what its capture shows, the
+  // line as placeholder words of its length.
+  const line = previews[id] && Object.fromEntries(Object.entries(previews[id]).map(([bot, n]) => [bot, filler(n)]))
+  return s && {...s, seen: seenAtCapture(), ...(s.computer !== undefined && computers[id] ? {computer: computers[id]} : {}), ...(line ? {previews: line} : {}), ...(newBots[id] ? {newBot: newBots[id]} : {})}
 }

@@ -1,5 +1,4 @@
 import type {Scene} from '../../components/Shell'
-import {filler} from '../../chat/turn'
 import {lifts, transcripts} from '../transcripts'
 
 // The oracle bot's screen as captured (fixtures/states/oracle-turn-1040.json): the base most scenes start from.
@@ -10,8 +9,6 @@ export const oracle: Scene = {
   panelOpen: true,
   computer: 'Asleep',
   voice: {voice: 'Helix', speed: 1, language: 'Auto-detect'},
-  // The preview's line is the bot's last message: the fixture keeps only its length (185), so placeholder words.
-  previews: {Oracle: filler(185)},
   // The conversation behind the baseline's states as oracle-turn-1040 shows it, scrolled to its end
   // (gate/transcripts.ts, from the 1.3.0 captures).
   transcript: {bubbles: transcripts.main},

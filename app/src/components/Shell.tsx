@@ -30,6 +30,8 @@ export type Scene = {
   previews?: Record<string, string>
   /** An open menu, picker or dialog, by name (components/overlays). */
   overlay?: string
+  /** Create new Bot's opening pick, shape and colour, as its capture shows it (gate/transcripts.ts newBots). */
+  newBot?: {shape: string; colour: string}
   /** The conversation on screen, as lengths (gate/transcripts.ts); `time` shows its time row, `lift` where its scroll was left. */
   transcript?: {bubbles: SceneRow[]; time?: string; lift?: number}
   /** The composer as captured: words typed, pictures or a file waiting (gate scenes). */

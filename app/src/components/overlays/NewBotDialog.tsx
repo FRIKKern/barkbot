@@ -36,7 +36,8 @@ export function Shape({name, size}: {name: string; size: number}) {
   )
 }
 
-export function NewBotDialog({onClose, onCreate}: {onClose?: () => void; onCreate?: CreateBot}) {
+// `pick`: the shape and colour it opens on (a gate scene passes its capture's; else hex and Blue).
+export function NewBotDialog({onClose, onCreate, pick}: {onClose?: () => void; onCreate?: CreateBot; pick?: {shape: string; colour: string}}) {
   const [name, setName] = useState('')
   const [creating, setCreating] = useState(false)
   const [failed, setFailed] = useState<string | null>(null)
@@ -61,8 +62,8 @@ export function NewBotDialog({onClose, onCreate}: {onClose?: () => void; onCreat
       setCreating(false)
     }
   }
-  const [shape, setShape] = useState('hex')
-  const [colour, setColour] = useState('Blue')
+  const [shape, setShape] = useState(pick?.shape ?? 'hex')
+  const [colour, setColour] = useState(pick?.colour ?? 'Blue')
   const fill = colours.find(([c]) => c === colour)?.[1]
   return (
     <>

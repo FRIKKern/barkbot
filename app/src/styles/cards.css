@@ -70,9 +70,14 @@
 
 /* Pictures: square tiles 6 apart across the bubble's own width (480 of 600: three of 156),
    radius 12, a 0.5 ring; past three the third is dimmed to half black and says +N in 22 at 600
-   (oracle-pictures-sent, articles 128-148). */
+   (oracle-pictures-sent, articles 128-148). Grok Bot 1.3.0 sizes each tile in whole points,
+   rounded down, and sets the row to the right: articles 440, 560, 600, 670 and 840+ give tiles
+   113, 145, 156, 174 and 182 (oracle-main-880, -1000, turn-1040, main-790, main-1280/-1600/-2000,
+   panel-closed), where a third of 352, 448, 536 and 560 less the gaps is 113.3, 145.3, 174.7, 182.7.
+   Chrome resolves a percentage in 1/64 px units and truncates, so a third of 468 reads 155.984; one
+   such unit (1px / 64) is added before rounding so an exact whole stays whole. */
 .picture-tiles { width: min(80%, 560px, calc(100% - 82px)); display: flex; justify-content: flex-end; gap: 6px; }
-.tile { position: relative; width: calc((100% - 12px) / 3); aspect-ratio: 1; border-radius: 12px; overflow: hidden; box-shadow: rgba(245, 245, 245, 0.06) 0 0 0 0.5px; }
+.tile { position: relative; width: round(down, calc((100% - 12px) / 3 + 1px / 64), 1px); flex: none; aspect-ratio: 1; border-radius: 12px; overflow: hidden; box-shadow: rgba(245, 245, 245, 0.06) 0 0 0 0.5px; }
 .tile-open { display: block; width: 100%; height: 100%; color: rgb(255, 255, 255); }
 .tile-open img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .tile-more { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; background-color: rgba(0, 0, 0, 0.5); color: rgba(255, 255, 255, 0.96); font-size: 22px; font-weight: 600; line-height: normal; letter-spacing: 0.22px; }
