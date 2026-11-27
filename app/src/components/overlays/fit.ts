@@ -18,6 +18,8 @@ export const APP: Table = {
 }
 // Section titles, 14/20 weight 500 on 0.14px.
 export const SECTION: Table = {'Recommended for you': '0.008px', 'This Mac': '-0.46px', 'Password managers': '-0.16px'} // This Mac: 4.8 pt too wide; Password managers (1.3.0): 5.1
+// Language labels, 14/20 on 0.14px (oracle-language-picker, 1.3.0). The widest sets the list's width (max-content).
+export const LANGUAGE: Table = {'Arabic (United Arab Emirates)': '0.078px'} // 1.8 pt too wide
 // Category filters, 13/18 on 0.195px.
 export const CATEGORY: Table = {All: '0.028px', Productivity: '0.128px', 'Design & media': '0.124px', 'Developer tools': '0.155px', More: '-0.28px'} // 1.3.0: Design & media 1 pt too wide, Developer tools 0.6
 // Settings words (oracle-settings).
