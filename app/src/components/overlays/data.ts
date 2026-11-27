@@ -102,10 +102,10 @@ export const colours: [string, string][] = [
 // so this is a placeholder of that length; real usage replaces it when the menu is wired.
 export const weeklyUsage = '–% used'
 
-// oracle-connect-apps (1.2.3): the filters and the sections on screen when captured. App names are
+// oracle-connect-apps (Grok Bot 1.3.0): the filters and the sections on screen when captured. App names are
 // third-party product names: text only, never their logos (a tile of the captured colour stands in).
 // This Mac's apps carry a line under the name, and Location's action is Open settings.
-export const appCategories = ['All', 'Mac', 'Password managers', 'Productivity', 'Communication', 'Design']
+export const appCategories = ['All', 'Mac', 'Password managers', 'Productivity', 'Communication', 'Design & media', 'Developer tools']
 export type App = {name: string; tile?: string; desc?: string; action?: string}
 export type AppSection = {title: string; viewAll: boolean; mac?: boolean; apps: App[]}
 export const appSections: AppSection[] = [
@@ -113,12 +113,12 @@ export const appSections: AppSection[] = [
     title: 'Recommended for you',
     viewAll: true,
     apps: [
-      {name: 'Browserless', tile: 'rgb(13, 15, 18)'},
-      {name: 'incident.io', tile: 'rgb(243, 85, 51)'},
-      {name: 'Turso', tile: 'rgb(43, 44, 49)'},
-      {name: 'Lightrun', tile: 'rgb(27, 153, 248)'},
-      {name: 'Knock', tile: 'rgb(38, 38, 38)'},
       {name: 'Google Drive', tile: 'rgb(255, 255, 255)'},
+      {name: 'Google Calendar', tile: 'rgb(255, 255, 255)'},
+      {name: 'Notion', tile: 'rgb(255, 255, 255)'},
+      {name: 'Slack', tile: 'rgb(245, 245, 245)'},
+      {name: 'Granola', tile: 'rgb(178, 194, 72)'},
+      {name: 'Firecrawl', tile: 'rgb(255, 255, 255)'},
     ],
   },
   {
