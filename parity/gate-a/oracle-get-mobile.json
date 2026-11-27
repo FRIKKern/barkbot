@@ -7,7 +7,7 @@
   2
  ],
  "cases": 92,
- "pass": 81,
+ "pass": 90,
  "results": [
   {
    "key": "aside:Bots",
@@ -151,43 +151,35 @@
   },
   {
    "key": "control:Close dialog",
-   "pass": false,
-   "why": "box off by 0,35,0,0"
+   "pass": true
   },
   {
    "key": "h2:Grok Bot on your phone",
-   "pass": false,
-   "why": "box off by 0.6,-35,-1.2,0"
+   "pass": true
   },
   {
    "key": "p:Scan with your camera to get the app",
-   "pass": false,
-   "why": "box off by -0.4,-35,0.9,0"
+   "pass": true
   },
   {
    "key": "span:Works on iPhone and Android",
-   "pass": false,
-   "why": "box off by 0,-35,0,0"
+   "pass": true
   },
   {
    "key": "control:Open App Store",
-   "pass": false,
-   "why": "box off by 0,-35,0,0"
+   "pass": true
   },
   {
    "key": "span:Open App Store",
-   "pass": false,
-   "why": "box off by 0.1,-35,-0.3,0"
+   "pass": true
   },
   {
    "key": "control:Done",
-   "pass": false,
-   "why": "box off by 0,-35,0,0"
+   "pass": true
   },
   {
    "key": "span:Done",
-   "pass": false,
-   "why": "box off by 0,-35,0,0"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -380,8 +372,7 @@
   },
   {
    "key": "box:page › div#3",
-   "pass": false,
-   "why": "box off by 0,-35,0,0"
+   "pass": true
   },
   {
    "key": "box:page › img#1",
@@ -389,7 +380,7 @@
    "why": "missing"
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T14:47:56.166Z",
  "inventory": {
   "id": "oracle-get-mobile",
   "controls": [

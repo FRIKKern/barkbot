@@ -1,7 +1,8 @@
 // Get Grok Bot for mobile (account menu > Get Grok Bot for mobile; fixtures/states/oracle-get-mobile.json):
-// a 320 x 401 dialog centred over the scrim, a code to scan in a white frame, three lines, two
-// pills. The oracle's code and the mark in its middle are its own art (O2): a plain white frame of
-// the same size stands in, and the code opens nothing here. Open App Store opens nothing yet (0005).
+// a 320 x 471 dialog centred over the scrim (Grok Bot 1.3.0; 1.2.3: 401), the app's mark, a code to
+// scan in a white frame, three lines, two pills. The oracle's code and its mark are its own art (O2):
+// a plain white frame of the same size stands in for the code; the mark is not drawn, the body's top
+// padding keeps its place (mobile.css), and the code opens nothing here. Open App Store opens nothing yet (0005).
 import {Icon} from '../Composer'
 
 export function GetMobile({onClose}: {onClose?: () => void}) {
