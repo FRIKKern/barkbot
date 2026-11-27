@@ -24,6 +24,8 @@ import { cmdHints } from './lib/cmd-hints.mjs';
 import { newBotHides } from './lib/new-bot-hides.mjs';
 import { pickerPick } from './lib/picker-pick.mjs';
 import { avatarPencil } from './lib/avatar-pencil.mjs';
+import { librarySearch } from './lib/library-search.mjs';
+import { panelNarrow } from './lib/panel-narrow.mjs';
 import { popupOpens } from './lib/popup-opens.mjs';
 import { railMain } from './lib/rail-main.mjs';
 import { renameReach } from './lib/rename-reach.mjs';
@@ -499,6 +501,14 @@ await pickerPick({ check, precondition, ev, open, base, click, wait, until, wind
 // ── The avatar pencil stays lit while the avatar editor is open (oracle-edit-avatar) ──
 console.log('Behaviour · the avatar pencil follows the open editor (oracle-edit-avatar)');
 await avatarPencil({ check, precondition, ev, open, base, click, wait, until, windowFocus, page });
+
+// ── Library's header shows Search, Activity's does not (oracle-library 1.3.0) ──
+console.log("Behaviour · Library's Search shows on its tab only (oracle-library)");
+await librarySearch({ check, precondition, ev, open, base, until });
+
+// ── Below 800 no panel is drawn; a press still opens it (oracle-main-720, -790, -800 on 1.3.0) ──
+console.log('Behaviour · below 800 the panel is not drawn until pressed open (oracle-main-720)');
+await panelNarrow({ check, precondition, ev, open, base, click, wait, until, page });
 
 // ── A control that says it opens something opens it (aria-haspopup, task-b4c296c9fce46e06) ──
 console.log('Behaviour · every aria-haspopup control opens what it names');
