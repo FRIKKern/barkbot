@@ -33,15 +33,19 @@
 /* Account: its foot 4 pt above the account button (698 -> 694), left 17, 228 wide (oracle-account-menu, 1.2.3). */
 .account-menu { left: 17px; bottom: 66px; width: 228px; }
 
-/* ── Pickers: 4 pt above the row's button, right edges aligned (1016.5); 13/18. The Voice dialog: styles/voice.css ── */
-.picker { right: 23.5px; width: 200px; transform: translateY(-100%); font-size: 13px; font-weight: 425; line-height: 18px; letter-spacing: -0.08px; }
-.language-picker { top: 506.5px; right: 23.3px; width: 211.2px; } /* Language button top 510.5 (1.2.3) */
+/* ── Pickers: 4 pt above the row's button, right edges aligned; 14/20 (Grok Bot 1.3.0, 1.2.3: 13/18). The Voice dialog: styles/voice.css ── */
+.picker { right: 23.5px; width: 200px; transform: translateY(-100%); font-size: 14px; font-weight: 425; line-height: 20px; letter-spacing: 0.14px; }
+/* Language button top 510.5; its right edge 1016.4 (oracle-language-picker 1.3.0; 1.2.3: 1016.7). The width is the
+   list's own (max-content): its widest label, Arabic (United Arab Emirates), in Grok's type, 230.9 (1.2.3 at 13/18: 211.2).
+   Our stand-in font sets that label 1.8 narrower (max-content gives 229.1), so the width is read, not left to max-content. */
+.language-picker { top: 506.5px; right: 23.6px; width: 230.9px; }
 .picker-scroll { max-height: 360px; overflow-y: auto; scrollbar-width: none; border-radius: inherit; }
 .picker-scroll::-webkit-scrollbar { display: none; }
-/* A list that scrolls keeps a 7 pt gutter for its bar (listbox 204.2 of 211.2). */
+/* A list that scrolls keeps a 7 pt gutter for its bar (listbox 223.9 of 230.9). */
 .language-picker .picker-scroll { padding-right: 7px; }
 .listbox { padding: 6px 0; display: flex; flex-direction: column; gap: 2px; }
-.option { height: 30px; flex: none; display: flex; align-items: center; gap: 20px; padding: 0 14px; outline: none; }
+/* Rows 32 tall, 2 apart (1.2.3: 30): text 14 in, the check 20 after it and 14 from the right. */
+.option { height: 32px; flex: none; display: flex; align-items: center; gap: 20px; padding: 0 14px; outline: none; }
 .option-text { flex: 1; min-width: 0; }
 .option-text > div, .option-text span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .option-check { width: 12px; height: 12px; flex: none; display: grid; place-items: center; color: var(--ink-90); }

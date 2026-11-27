@@ -1,4 +1,4 @@
-// The Voice chat card's two pickers (Grok 1.2.3, decision 0010). Each opens 4 pt above its row's
+// The Voice chat card's two pickers (Grok 1.2.3, decision 0010; the Language list's size Grok Bot 1.3.0, decision 0011). Each opens 4 pt above its row's
 // button, right edges aligned (fixtures/states/oracle-{voice,language}-picker.json).
 // Language: a list that scrolls inside 360 pt with a 7 pt gutter; the picked option carries a check.
 // Voice: a dialog, the Speed slider over a grid of voices (VoiceDialog.tsx).
