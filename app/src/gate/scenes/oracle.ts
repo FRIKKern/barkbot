@@ -12,8 +12,8 @@ export const oracle: Scene = {
   voice: {voice: 'Helix', speed: 1, language: 'Auto-detect'},
   // The preview's line is the bot's last message: the fixture keeps only its length (185), so placeholder words.
   previews: {Oracle: filler(185)},
-  // The conversation behind the baseline's states as oracle-turn-1040 shows it: a message carrying
-  // two files, then the long answer, scrolled to its end (gate/transcripts.ts).
+  // The conversation behind the baseline's states as oracle-turn-1040 shows it, scrolled to its end
+  // (gate/transcripts.ts, from the 1.3.0 captures).
   transcript: {bubbles: transcripts.main},
 }
 
