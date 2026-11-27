@@ -1,8 +1,8 @@
 // Get Grok Bot for mobile (account menu > Get Grok Bot for mobile; fixtures/states/oracle-get-mobile.json):
 // a 320 x 471 dialog centred over the scrim (Grok Bot 1.3.0; 1.2.3: 401), the app's mark, a code to
 // scan in a white frame, three lines, two pills. The oracle's code and its mark are its own art (O2):
-// a plain white frame of the same size stands in for the code, the mark's 50 pt are held and nothing
-// is drawn there, and the code opens nothing here. Open App Store opens nothing yet (0005).
+// a plain white frame of the same size stands in for the code; the mark is not drawn, the body's top
+// padding keeps its place (mobile.css), and the code opens nothing here. Open App Store opens nothing yet (0005).
 import {Icon} from '../Composer'
 
 export function GetMobile({onClose}: {onClose?: () => void}) {
@@ -16,7 +16,6 @@ export function GetMobile({onClose}: {onClose?: () => void}) {
           </span>
         </button>
         <div className="mobile-body">
-          <span className="mobile-mark" aria-hidden="true" />
           <div className="mobile-code" role="img" aria-label="QR code that opens Grok Bot in your phone's app store" />
           <h2>Grok Bot on your phone</h2>
           <p>Scan with your camera to get the app</p>
