@@ -7,7 +7,7 @@
   2
  ],
  "cases": 133,
- "pass": 131,
+ "pass": 132,
  "results": [
   {
    "key": "aside:Bots",
@@ -231,8 +231,7 @@
   },
   {
    "key": "bdi:Unreachable",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Voice chat",
@@ -544,7 +543,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T09:51:20.370Z",
  "inventory": {
   "id": "oracle-edit-avatar",
   "controls": [

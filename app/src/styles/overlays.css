@@ -1,4 +1,4 @@
-/* Overlays: menus, pickers, the Create New Bot dialog. Every number is read from
+/* Overlays: menus, pickers, the Create new Bot dialog. Every number is read from
    fixtures/states/oracle-{composer-menu,account-menu,language-picker,new-bot-dialog}.json
    (1040 x 760 pt). Each overlay is a fixed layer; its anchor is named where it is placed. */
 
@@ -47,7 +47,7 @@
 .option-check { width: 12px; height: 12px; flex: none; display: grid; place-items: center; color: var(--ink-90); }
 .option-check .icon { width: 12px; height: 12px; }
 
-/* ── Create New Bot: 440 x 579 centred, 70% black scrim ── */
+/* ── Create new Bot: 440 x 579 centred, 70% black scrim ── */
 .scrim { position: fixed; inset: 0; z-index: 30; background: rgb(0 0 0 / 0.698); }
 .dialog { position: fixed; z-index: 31; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 440px; background: var(--bg-raised); border: 0.5px solid var(--wash-10); border-radius: 14px; font-size: 13px; letter-spacing: normal; color: var(--ink); }
 /* 1.2.3: 64% ink on 18 pt lines (0.79.3: 66%, normal). */

@@ -11,7 +11,7 @@ export const ORACLE_BOT = process.env.ORACLE_BOT || 'Oracle';
 export const RECIPES = {
   // Creates the throwaway bot and records its first-run greeting (J12).
   'new-bot': { kind: 'click', label: 'New Bot', sends: false },
-  // In the Create New Bot dialog: name the throwaway bot and create it (J12 starts here).
+  // In the Create new Bot dialog (1.3.0's sentence case): name the throwaway bot and create it (J12 starts here).
   'create-oracle': { kind: 'create', sends: false },
   'say-hi': { kind: 'send', text: 'Say hi in one short sentence.', sends: true },
   // The hero's turn: the bot checks its own computer before answering.
@@ -88,7 +88,7 @@ export async function run(page, name) {
     const ok = await page.evaluate(() => {
       const d = document.querySelector('[role=dialog]');
       const h = d?.querySelector('h2');
-      if (!h || h.innerText.trim() !== 'Create New Bot') return 'no Create New Bot dialog';
+      if (!h || h.innerText.trim() !== 'Create new Bot') return 'no Create new Bot dialog';
       const input = d.querySelector('input[aria-label="Bot name"]');
       input.focus();
       return document.activeElement === input ? 'ok' : 'could not focus the name field';

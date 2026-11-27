@@ -7,7 +7,7 @@
   2
  ],
  "cases": 139,
- "pass": 136,
+ "pass": 137,
  "results": [
   {
    "key": "aside:Bots",
@@ -155,8 +155,7 @@
   },
   {
    "key": "h2:Create new Bot",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Bot name#2",
@@ -569,7 +568,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T10:30:00.289Z",
  "inventory": {
   "id": "oracle-new-bot-dialog",
   "controls": [

@@ -1,5 +1,5 @@
 // The avatar editor, a captured view over the main screen, look only (nothing in it acts yet,
-// 0005; oracle-edit-avatar.json). Connect Apps and Settings have their own files (ConnectApps.tsx,
+// 0005; oracle-edit-avatar.json). Connect apps and Settings have their own files (ConnectApps.tsx,
 // Settings.tsx); Settings is re-exported here.
 import {useState} from 'react'
 import {CharacterLooks} from './NewBotDialog'

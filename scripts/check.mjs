@@ -530,6 +530,17 @@ for (const [name, c, want] of [
   const byPinned = [kinds({ ...scrim, position: 'sticky' }, scrim), kinds({ ...scrim, position: 'absolute' }, scrim)];
   const onFixed = boxElements({ page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'div', position: 'fixed', box: [0, 0, 400, 400], style: { 'background-color': 'rgb(31, 31, 31)' } }, { i: 1, tag: 'div', box: [10, 10, 40, 40], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 }] }).map(({ e, unknown }) => `${e.i}${unknown ? '?' : ''}`);
   if (JSON.stringify(byPinned) !== '[[0],[0]]' || JSON.stringify(onFixed) !== '["0?"]') fail(`box cases: a sticky or absolute scrim paints, the same in the flow does not: want [[0],[0]], got ${JSON.stringify(byPinned)}; inside a fixed opaque box behind is known: want ["0?"], got ${JSON.stringify(onFixed)}`);
+  // Inside a pinned box behind stays unknown until an opaque fill comes first on the way up
+  // (box-cases.mjs knownBehind; rev299's round 1 on #340: its pinned-ancestor arm had no row). A
+  // fill the page's colour inside a sticky box is no paint over the page, but what it lies on is
+  // what scrolls under the sticky box, so it is unknown; with an opaque fill between, it lies on that
+  // fill, the same colour, and paints nothing.
+  rule('box cases', 1);
+  const sticky = { i: 0, tag: 'div', position: 'sticky', box: [0, 0, 400, 400], style: {} };
+  const inPinned = (mid) => boxElements({ page: 'rgb(18, 18, 18)', elements: [sticky, ...(mid ? [{ i: 1, tag: 'div', box: [5, 5, 100, 100], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 }] : []),
+    { i: 2, tag: 'div', box: [10, 10, 40, 40], style: { 'background-color': mid ? 'rgb(31, 31, 31)' : 'rgb(18, 18, 18)' }, parent: mid ? 1 : 0 }] }).map(({ e, unknown }) => `${e.i}${unknown ? '?' : ''}`);
+  const pinRes = [inPinned(false), inPinned(true)];
+  if (JSON.stringify(pinRes) !== '[["2?"],["1?"]]') fail(`box cases: inside a sticky box behind is unknown until an opaque fill: want [["2?"],["1?"]], got ${JSON.stringify(pinRes)}`);
   // An icon glyph: on the oracle's side a text-less 24x24 <i> paints, and pairs with an svg by its
   // centre (a 24 svg at its place passes, 2 pt off fails); an <i> with text is text, an <i> under 20
   // is no box. On ours an empty <i> paints nothing: against the oracle's svg, or the oracle's own

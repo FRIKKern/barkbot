@@ -7,7 +7,7 @@
   2
  ],
  "cases": 118,
- "pass": 106,
+ "pass": 112,
  "results": [
   {
    "key": "aside:Bots",
@@ -187,13 +187,11 @@
   },
   {
    "key": "control:Usage & billing",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Usage & billing",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Updates",
@@ -246,23 +244,19 @@
   },
   {
    "key": "span:Read texts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Read texts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Send texts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Send texts",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h3:Bot's computer",
@@ -271,7 +265,7 @@
   {
    "key": "span:Update Bot's computer",
    "pass": false,
-   "why": "missing"
+   "why": "box off by 0,-1.5,0,-0.5"
   },
   {
    "key": "bubble:user#1 look",
@@ -494,7 +488,7 @@
    "why": "missing"
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T10:30:00.289Z",
  "inventory": {
   "id": "oracle-settings-computer",
   "controls": [
@@ -621,7 +615,7 @@
    {
     "name": "Usage & billing",
     "item": "F13",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Updates",
@@ -641,15 +635,15 @@
    {
     "name": "Read texts",
     "item": "F14",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Send texts",
     "item": "F14",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 3,
+  "missing": 0,
   "untracked": []
  }
 }

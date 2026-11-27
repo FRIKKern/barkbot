@@ -1,5 +1,5 @@
 // Settings pages beside General (item F14: oracle-settings-computer, -permissions, -updates, Grok 1.2.3).
-// Look only: the switches toggle; the selects, Update, Reset, Add Rule, Open apps and Check for
+// Look only: the switches toggle; the selects, Update, Reset, Add rule, Open apps and Check for
 // Updates do nothing yet (0005). Nothing here installs, updates or resets anything.
 import type {ReactNode} from 'react'
 import {Icon} from '../Composer'
@@ -62,16 +62,16 @@ function ComputerPage({seen}: PageProps) {
         </div>
       </Group>
       <Group title="Messages">
-        <DescRow label="Read Texts" desc={{width: 470.4}}>
-          <Switch label="Read Texts" on={false} />
+        <DescRow label="Read texts" desc={{width: 470.4}}>
+          <Switch label="Read texts" on={false} />
         </DescRow>
-        <DescRow label="Send Texts" desc={{width: 373.2}}>
-          <Switch label="Send Texts" on={false} />
+        <DescRow label="Send texts" desc={{width: 373.2}}>
+          <Switch label="Send texts" on={false} />
         </DescRow>
       </Group>
       <Group title="Bot's computer">
-        <DescRow label="Update Bot's Computer" desc={{lines: 2}} nested>
-          <PillButton text="Update" label="Update Bot's Computer" />
+        <DescRow label="Update Bot's computer" desc={{lines: 2}} nested>
+          <PillButton text="Update" label="Update Bot's computer" />
         </DescRow>
         <DescRow label="Reset Bot's Computer" desc={{lines: 2}}>
           <button aria-label="Reset Bot's Computer" className="set-danger">
@@ -97,8 +97,8 @@ function Rule({title, width}: {title: string; width: number}) {
           </p>
         </div>
         <div>
-          <button aria-label={`Add Rule to ${title}`} className="set-add">
-            <span style={fit(SETTINGS, 'Add Rule')}>Add Rule</span>
+          <button aria-label={`Add rule to ${title.toLowerCase()}`} className="set-add">
+            <span style={fit(SETTINGS, 'Add rule')}>Add rule</span>
           </button>
         </div>
       </div>
@@ -117,8 +117,8 @@ function PermissionsPage() {
         </div>
       </section>
       <div className="set-rules">
-        <Rule title="Always Ask" width={281.4} />
-        <Rule title="Allow without Asking" width={338.3} />
+        <Rule title="Always ask" width={281.4} />
+        <Rule title="Allow without asking" width={338.3} />
       </div>
       <section>
         <div className="set-card flush">
@@ -133,9 +133,9 @@ function PermissionsPage() {
 
 function UpdatesPage() {
   return (
-    <Group title="Grok Bot Updates">
-      <DescRow label="Automatic Updates" desc={{width: 312.2}}>
-        <Switch label="Automatic Updates" />
+    <Group title="Grok Bot updates">
+      <DescRow label="Automatic updates" desc={{width: 312.2}}>
+        <Switch label="Automatic updates" />
       </DescRow>
       <div className="set-drow">
         <div>
@@ -156,7 +156,7 @@ function UpdatesPage() {
           </span>
         </div>
         <div>
-          <PillButton text="Check for Updates" />
+          <PillButton text="Check for updates" />
         </div>
       </div>
     </Group>

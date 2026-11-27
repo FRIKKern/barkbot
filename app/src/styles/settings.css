@@ -96,5 +96,5 @@
 .set-add > span { display: block; }
 .set-uptodate { display: block; color: var(--ink-66); line-height: 18px; letter-spacing: 0.195px; }
 .set-notes { margin: 0 1.5px 0 2px; } /* the line runs 1.5 past its last icon on the oracle */
-/* Check for Updates, Update, Open apps: 30 tall, 13/18. */
+/* Check for updates, Update, Open apps: 30 tall, 13/18. */
 .set-pill { height: 30px; padding: 0 12px; font-size: 13px; line-height: 18px; letter-spacing: 0.195px; box-shadow: var(--wash-04) 0 0 0 0.5px inset; }
