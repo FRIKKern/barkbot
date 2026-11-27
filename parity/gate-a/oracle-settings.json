@@ -7,7 +7,7 @@
   2
  ],
  "cases": 130,
- "pass": 111,
+ "pass": 123,
  "results": [
   {
    "key": "aside:Bots",
@@ -187,13 +187,11 @@
   },
   {
    "key": "control:Usage & billing",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Usage & billing",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Updates",
@@ -237,23 +235,19 @@
   },
   {
    "key": "control:Add account",
-   "pass": false,
-   "why": "box off by -2.2,0,0,0"
+   "pass": true
   },
   {
    "key": "span:Add account",
-   "pass": false,
-   "why": "box off by -2.2,0,0,0"
+   "pass": true
   },
   {
    "key": "control:Sign out",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Sign out",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h3:Appearance",
@@ -265,8 +259,7 @@
   },
   {
    "key": "span:Follow system",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Accent",
@@ -282,23 +275,19 @@
   },
   {
    "key": "control:Language#2",
-   "pass": false,
-   "why": "box off by -1.8,0,1.8,0"
+   "pass": true
   },
   {
    "key": "span:Follow system#2",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Check spelling while typing",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Check spelling while typing",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Send with ⌘↵",
@@ -541,15 +530,14 @@
   },
   {
    "key": "box:page › combobox#1",
-   "pass": false,
-   "why": "line off by -1.8,0,0"
+   "pass": true
   },
   {
    "key": "box:page › combobox#2",
    "pass": true
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T10:30:00.289Z",
  "inventory": {
   "id": "oracle-settings",
   "controls": [
@@ -676,7 +664,7 @@
    {
     "name": "Usage & billing",
     "item": "F13",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Updates",
@@ -711,12 +699,12 @@
    {
     "name": "Sign out",
     "item": "F13",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Check spelling while typing",
     "item": "F13",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Send with ⌘↵",
@@ -724,7 +712,7 @@
     "ours": true
    }
   ],
-  "missing": 3,
+  "missing": 0,
   "untracked": []
  }
 }

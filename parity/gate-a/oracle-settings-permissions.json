@@ -7,7 +7,7 @@
   2
  ],
  "cases": 111,
- "pass": 102,
+ "pass": 110,
  "results": [
   {
    "key": "aside:Bots",
@@ -187,13 +187,11 @@
   },
   {
    "key": "control:Usage & billing",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Usage & billing",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Updates",
@@ -221,33 +219,27 @@
   },
   {
    "key": "h3:Always ask",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Add rule to always ask",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Add rule",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "h3:Allow without asking",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Add rule to allow without asking",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Add rule#2",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:App permissions",
@@ -463,7 +455,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T10:30:00.289Z",
  "inventory": {
   "id": "oracle-settings-permissions",
   "controls": [
@@ -590,7 +582,7 @@
    {
     "name": "Usage & billing",
     "item": "F13",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Updates",
@@ -605,12 +597,12 @@
    {
     "name": "Add rule to always ask",
     "item": "F14",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Add rule to allow without asking",
     "item": "F14",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open apps",
@@ -618,7 +610,7 @@
     "ours": true
    }
   ],
-  "missing": 3,
+  "missing": 0,
   "untracked": []
  }
 }
