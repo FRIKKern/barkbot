@@ -1,4 +1,5 @@
 import {conversationOf} from './oracle'
 
-// fixtures/states/oracle-main-720.json: the base scene, its conversation at this width. The panel stays open and narrows to 208; the scroll was left 374 above the end.
+// fixtures/states/oracle-main-720.json (1.3.0): the base scene, its conversation at this width. Below 800 no panel is
+// drawn (Shell useNarrow), so the conversation takes the width the panel left.
 export default conversationOf('main-720')

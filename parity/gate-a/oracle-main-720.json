@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 62,
- "pass": 26,
+ "cases": 55,
+ "pass": 53,
  "results": [
   {
    "key": "aside:Bots",
@@ -35,28 +35,23 @@
   },
   {
    "key": "control:View conversation details",
-   "pass": false,
-   "why": "box off by -104,0,0.1,0"
+   "pass": true
   },
   {
    "key": "span:Oracle",
-   "pass": false,
-   "why": "box off by -104,0,0.1,0"
+   "pass": true
   },
   {
    "key": "control:Share",
-   "pass": false,
-   "why": "box off by -171.4,0,-36.6,0"
+   "pass": true
   },
   {
    "key": "span:Share",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Prompt",
-   "pass": false,
-   "why": "box off by 0,0,-208,0"
+   "pass": true
   },
   {
    "key": "control:Composer actions",
@@ -64,13 +59,11 @@
   },
   {
    "key": "control:Start voice input",
-   "pass": false,
-   "why": "box off by -208,0.5,0,0"
+   "pass": true
   },
   {
    "key": "control:Start voice chat",
-   "pass": false,
-   "why": "box off by -208,0.5,0,0"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -78,8 +71,7 @@
   },
   {
    "key": "bubble:user#1 place",
-   "pass": false,
-   "why": "right edge off by -208"
+   "pass": true
   },
   {
    "key": "bubble:assistant#1 look",
@@ -103,8 +95,7 @@
   },
   {
    "key": "bubble:user#2 place",
-   "pass": false,
-   "why": "right edge off by -208; gap above off by -55.7"
+   "pass": true
   },
   {
    "key": "bubble:assistant#3 look",
@@ -120,8 +111,7 @@
   },
   {
    "key": "bubble:user#3 place",
-   "pass": false,
-   "why": "right edge off by -208; width (filled) off by -170"
+   "pass": true
   },
   {
    "key": "bubble:assistant#4 look",
@@ -134,22 +124,19 @@
   {
    "key": "card#1 parts",
    "pass": false,
-   "why": "box 6 ≠ 2; text(11) 1 ≠ 0; text(4) 1 ≠ 0"
+   "why": "text(3) 0 ≠ 1"
   },
   {
    "key": "card#1 control:Open oracle-note.txt#1",
-   "pass": false,
-   "why": "box off by -128,56,-80,0"
+   "pass": true
   },
   {
    "key": "card#1 box#1",
-   "pass": false,
-   "why": "box off by -128,56,-80,0"
+   "pass": true
   },
   {
    "key": "card#1 box#2",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#1 text(3)#1",
@@ -162,53 +149,43 @@
   },
   {
    "key": "card#2 box#1",
-   "pass": false,
-   "why": "box off by 67.3,56,-56.7,-56.7"
+   "pass": true
   },
   {
    "key": "card#2 control:Open image full screen#1",
-   "pass": false,
-   "why": "box off by 67.3,56,-56.7,-56.7"
+   "pass": true
   },
   {
    "key": "card#2 img#1",
-   "pass": false,
-   "why": "box off by 67.3,56,-56.7,-56.7"
+   "pass": true
   },
   {
    "key": "card#2 box#2",
-   "pass": false,
-   "why": "box off by 10.7,56,-56.7,-56.7"
+   "pass": true
   },
   {
    "key": "card#2 control:Open image full screen#2",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#2 img#2",
-   "pass": false,
-   "why": "box off by 10.7,56,-56.7,-56.7"
+   "pass": true
   },
   {
    "key": "card#2 box#3",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#2 control:Open the remaining 3 images full screen#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#2 img#3",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#2 text(2)#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "card#3 parts",
@@ -216,8 +193,7 @@
   },
   {
    "key": "card#3 box#1",
-   "pass": false,
-   "why": "box off by 0,0.3,-170,0"
+   "pass": true
   },
   {
    "key": "card#3 text:Which tree do you prefer?#1",
@@ -245,56 +221,18 @@
   },
   {
    "key": "box:page › header#1",
-   "pass": false,
-   "why": "box off by 0,0,-208,0"
+   "pass": true
   },
   {
    "key": "box:control:View conversation details › img#1",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "box:page › div#1",
-   "pass": false,
-   "why": "box off by 0,0,-208,0"
-  },
-  {
-   "key": "box:extra › svg@257,18,24,24",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › span@585,72,62,57",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › ul@528,267,176,45",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › ul@528,362,176,61",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › span@628,373,64,40",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › span@648,382,24,22",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
-  },
-  {
-   "key": "box:extra › ul@528,473,176,69",
-   "pass": false,
-   "why": "extra: the oracle draws no box here"
+   "pass": true
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T11:46:23.694Z",
  "inventory": {
   "id": "oracle-main-720",
   "controls": [
