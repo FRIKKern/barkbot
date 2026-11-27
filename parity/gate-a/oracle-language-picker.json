@@ -7,7 +7,7 @@
   2
  ],
  "cases": 99,
- "pass": 81,
+ "pass": 99,
  "results": [
   {
    "key": "aside:Bots",
@@ -151,93 +151,75 @@
   },
   {
    "key": "span:Auto-detect#2",
-   "pass": false,
-   "why": "box off by 20,0,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:English",
-   "pass": false,
-   "why": "box off by 20,-2,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Arabic (Egypt)",
-   "pass": false,
-   "why": "box off by 20,-4,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Arabic (Saudi Arabia)",
-   "pass": false,
-   "why": "box off by 20,-6,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Arabic (United Arab Emirates)",
-   "pass": false,
-   "why": "box off by 20,-8,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Bengali",
-   "pass": false,
-   "why": "box off by 20,-10,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Catalan",
-   "pass": false,
-   "why": "box off by 20,-12,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Chinese (Simplified)",
-   "pass": false,
-   "why": "box off by 20,-14,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Danish",
-   "pass": false,
-   "why": "box off by 20,-16,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Dutch",
-   "pass": false,
-   "why": "box off by 20,-18,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Finnish",
-   "pass": false,
-   "why": "box off by 20,-20,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:French",
-   "pass": false,
-   "why": "box off by 20,-22,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:German",
-   "pass": false,
-   "why": "box off by 20,-24,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Hindi",
-   "pass": false,
-   "why": "box off by 20,-26,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Hungarian",
-   "pass": false,
-   "why": "box off by 20,-28,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Indonesian",
-   "pass": false,
-   "why": "box off by 20,-30,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Italian",
-   "pass": false,
-   "why": "box off by 20,-32,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "span:Japanese",
-   "pass": false,
-   "why": "box off by 20,-34,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -424,7 +406,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T13:56:38.318Z",
  "inventory": {
   "id": "oracle-language-picker",
   "controls": [

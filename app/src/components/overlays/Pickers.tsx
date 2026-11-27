@@ -1,10 +1,11 @@
-// The Voice chat card's two pickers (Grok 1.2.3, decision 0010). Each opens 4 pt above its row's
+// The Voice chat card's two pickers (Grok 1.2.3, decision 0010; the Language list's size Grok Bot 1.3.0, decision 0011). Each opens 4 pt above its row's
 // button, right edges aligned (fixtures/states/oracle-{voice,language}-picker.json).
 // Language: a list that scrolls inside 360 pt with a 7 pt gutter; the picked option carries a check.
 // Voice: a dialog, the Speed slider over a grid of voices (VoiceDialog.tsx).
 import {useState} from 'react'
 import {Icon} from '../Composer'
 import {languages} from './data'
+import {LANGUAGE, fit} from './fit'
 
 const check = <Icon d="M3.5 8.5l3 3 6-7" />
 
@@ -43,7 +44,7 @@ function Picker({
             >
               <span className="option-text">
                 <div>
-                  <span>{o}</span>
+                  <span style={fit(LANGUAGE, o)}>{o}</span>
                 </div>
               </span>
               {o === value && <span className="option-check">{check}</span>}
