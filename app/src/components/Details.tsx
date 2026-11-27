@@ -83,8 +83,11 @@ export function Details({scene, name, between, onRename, onClose}: {scene: Scene
                         <bdi>{scene.computer}</bdi>
                       </span>
                     </span>
+                    {/* While the computer is Unreachable Grok 1.3.0 keeps the tile but draws no
+                        screen in it, only a 16 glyph at its centre (oracle-edit-avatar: i 971.5,384.5);
+                        Asleep shows the screen (task-eb971645686aa637). The glyph is our own. */}
                     <span className="thumb">
-                      <Face size={20} />
+                      {scene.computer === 'Unreachable' ? <Icon d="M3 3l10 10M5.5 5.5A4 4 0 0 0 8 12.5M10.5 10.5A4 4 0 0 0 8 3.5" /> : <Face size={20} />}
                     </span>
                   </button>
                 </li>
