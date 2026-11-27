@@ -1124,20 +1124,22 @@ else {
   stub.sessions = []; stub.rowsBy.clear(); stub.stateBy.clear(); stub.fleet = null; freshStore(); stub.sent = []; stub.to = []; stub.made = []; stub.refused = [];
 
   console.log('Behaviour · the computer goes away (the live page, against the stand-in Barkpark)');
-  const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null }));
+  const computer = () => ev(() => ({ state: document.querySelector('.computer-state')?.textContent ?? null, alert: document.querySelector('.chat-error')?.textContent ?? null, tile: !!document.querySelector('.computer .thumb'), screen: !!document.querySelector('.computer .thumb .face') }));
   stub.hosts = host(true);
   await open(`${base}/`);
   await until(async () => (await computer()).state === 'Asleep', 30000, 'the live page with a computer that is on').catch(() => {});
   let c = await computer();
   precondition('the live page shows a reachable computer and no alert', c.state === 'Asleep' && c.alert === null, c);
+  check('control: while the computer is Asleep the Computer row draws its tile with the screen in it', c.tile && c.screen, c);
   stub.hosts = host(false);
   await until(async () => (await computer()).alert !== null, 10000, 'the page to notice').catch(() => {});
   c = await computer();
   check('the computer stops: within 10 s the card says Unreachable and the conversation says why (control: neither, while it was on)', c.state === 'Unreachable' && /unreachable/.test(c.alert ?? '') && /npm run host/.test(c.alert ?? ''), c);
+  check('while the computer is Unreachable the Computer row keeps its tile but draws no screen in it (Grok 1.3.0, oracle-edit-avatar)', c.state === 'Unreachable' && c.tile && !c.screen, c);
   stub.hosts = host(true);
   await until(async () => (await computer()).alert === null, 10000, 'the page to notice').catch(() => {});
   c = await computer();
-  check('the computer comes back: the alert goes and the card is as before', c.state === 'Asleep' && c.alert === null, c);
+  check('the computer comes back: the alert goes and the card is as before, its screen drawn again', c.state === 'Asleep' && c.alert === null && c.screen, c);
 
   // The bot asks leave before it acts (Barkpark's approval_requested, seen live 2026-11-13: plan
   // mode asks for its plan, then for each step). Nothing may be answered until the person presses.
