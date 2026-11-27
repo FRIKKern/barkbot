@@ -39,7 +39,8 @@ export function transcriptReds(files, keys, states) {
   for (const { path, src } of files) {
     if (path.endsWith('/gate/transcripts.ts')) continue;
     const code = codeOf(src);
-    for (const m of code.matchAll(/(?<![\w$.])transcripts\s*([[.])/g)) {
+    // Not a member of another object (one dot before), but a spread (three) is a read.
+    for (const m of code.matchAll(/(?<![\w$])(?<![^.]\.)transcripts\s*([[.])/g)) {
       const where = `${path}:${lineOf(src, m.index)}`;
       const after = m.index + m[0].length;
       const key = m[1] === '.' ? /^[A-Za-z_$][\w$]*/.exec(code.slice(after))?.[0] ?? null : literalAt(src, after);
@@ -51,7 +52,7 @@ export function transcriptReds(files, keys, states) {
       reads.push({ where, kind: 'read', key });
       if (!keys.has(key)) reds.push(`${where}: transcripts['${key}'] is not in app/src/gate/transcripts.ts (run node scripts/transcript-scenes.mjs, or read it through conversationOf)`);
     }
-    for (const m of code.matchAll(/(?<![\w$.])conversationOf\s*(=|\()/g)) {
+    for (const m of code.matchAll(/(?<![\w$])(?<![^.]\.)conversationOf\s*(=|\()/g)) {
       if (m[1] === '=') continue;
       const where = `${path}:${lineOf(src, m.index)}`;
       const key = literalAt(src, m.index + m[0].length);
@@ -73,6 +74,9 @@ export const CASES = [
   ['a computed key', f('const b = transcripts[id]'), keys, states, 1, /not a literal/],
   ['conversationOf a captured state with no entry of its own', f("export default conversationOf('main-1280')"), keys, states, 0],
   ['conversationOf a state never captured', f("export default conversationOf('main-1208')"), keys, states, 1, /names no captured state/],
+  ['a spread conversationOf a state never captured', f("export default {...conversationOf('panel-closd'), panelOpen: false}"), keys, states, 1, /'panel-closd'\) names no captured state/],
+  ['a spread transcripts read of a dropped key', f("const rows = [...transcripts['picture-viewer']]"), keys, states, 1, /\['picture-viewer'\] is not in/],
+  ['a member called conversationOf on another object', f("const s = other.conversationOf('nowhere')"), keys, states, 0],
   ["conversationOf's own body, the fallback", f('export const conversationOf = (key: string): Scene => ({...oracle, transcript: {bubbles: transcripts[key] ?? transcripts.main}})'), keys, states, 0],
   ['words in a comment or a string are not reads', f("// gate/transcripts.ts holds transcripts['gone']\nimport {transcripts} from '../transcripts'\nconst s = \"transcripts['gone']\""), keys, states, 0],
   ['a property of another object is not the import', f("const n = scene.transcripts['gone']"), keys, states, 0],
