@@ -57,7 +57,15 @@ const voiceRows: Record<string, keyof NonNullable<Scene['voice']>> = {'voice-pic
 // `unreadBots`: ids of bots the page itself marks unread; Shell adds its own by the oracle's rule
 // (useUnread below).
 export function Shell({scene: start, transcript, composer, onPickBot, onRenameBot, onCreateBot, workingBots = [], unreadBots = [], picked: pageActive}: {scene: Scene; transcript?: ReactNode; composer?: ReactNode; onPickBot?: (id: string) => void; picked?: string; onRenameBot?: (id: string, name: string) => void; onCreateBot?: CreateBot; workingBots?: string[]; unreadBots?: string[]}) {
-  const [panelOpen, setPanelOpen] = useState(start.panelOpen)
+  const [wanted, setWanted] = useState(start.panelOpen)
+  // Grok 1.3.0 (decision 0011): below 800 the panel is not drawn (oracle-main-720, -790: no panel;
+  // oracle-main-800: 288, the narrowest it is drawn), and it comes back at 800. A press on View
+  // conversation details there still opens it, until the window is widened or narrowed again.
+  const narrow = useNarrow()
+  const [narrowOpen, setNarrowOpen] = useState(false)
+  useEffect(() => setNarrowOpen(false), [narrow])
+  const panelOpen = narrow ? narrowOpen : wanted
+  const setPanelOpen = (open: (o: boolean) => boolean) => (narrow ? setNarrowOpen : setWanted)(open)
   // The Voice chat card's values as the person picked them (a pick in its picker changes the row).
   const [voice, setVoice] = useState(start.voice)
   const [picked, setPicked] = useState<string | undefined>(undefined)
@@ -96,7 +104,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
   }
   return (
     <OpenViewer.Provider value={setViewing}>
-      <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-viewing={viewing ? '' : undefined}>
+      <div className="app" data-panel={panelOpen ? 'open' : 'closed'} data-narrow-open={narrow && narrowOpen ? '' : undefined} data-viewing={viewing ? '' : undefined}>
         <Rail scene={scene} onPick={pick} working={workingBots} unread={[...new Set([...unreadBots, ...unread])]} names={names} />
 
         {/* The transcript (Transcript.tsx) is the oracle's role=log, named "Conversation transcript" and
@@ -132,7 +140,7 @@ export function Shell({scene: start, transcript, composer, onPickBot, onRenameBo
           if (between) return
           setNames((m) => ({...m, [active]: n}))
           onRenameBot?.(active, n)
-        }} onClose={() => setPanelOpen(false)} />
+        }} onClose={() => setPanelOpen(() => false)} />
         <Overlay name={scene.overlay} scene={scene} onOpenChange={setOpened} onCreateBot={onCreateBot} onChoose={(overlay, value) => {
           const key = voiceRows[overlay]
           if (key) setVoice((v) => v && {...v, [key]: value})
@@ -165,4 +173,23 @@ export function useUnread(working: string[]) {
     return () => window.removeEventListener('focus', clear)
   }, [])
   return unread
+}
+
+// The width below which Grok 1.3.0 draws no panel: 790 has none, 800 has one (288 wide), so the
+// line is taken at the narrowest width a capture shows the panel. The panel's width rule
+// (styles/base.css --panel) gives 288 there.
+const NARROW = '(max-width: 799.98px)'
+function useNarrow() {
+  // The first render is the server's, which has no window: the panel's look below 800 is the CSS
+  // rule's (styles/details.css), and this only brings the open state (aria-expanded, inert) in line.
+  const [narrow, setNarrow] = useState(false)
+  useEffect(() => {
+    if (typeof matchMedia !== 'function') return
+    const m = matchMedia(NARROW)
+    const on = () => setNarrow(m.matches)
+    on()
+    m.addEventListener('change', on)
+    return () => m.removeEventListener('change', on)
+  }, [])
+  return narrow
 }
