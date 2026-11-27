@@ -1,20 +1,21 @@
 {
  "id": "oracle-hover-bot-tile-2",
- "captured": "2026-11-19",
+ "captured": "2026-11-27",
  "viewport": [
   1040,
   760,
   2
  ],
  "cases": 1,
- "pass": 1,
+ "pass": 0,
  "results": [
   {
    "key": "span:Oracle#2",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,-9,0.4,0"
   }
  ],
- "run": "2026-11-20T19:34:18.229Z",
+ "run": "2026-11-27T08:54:02.199Z",
  "inventory": {
   "id": "oracle-hover-bot-tile-2",
   "controls": [

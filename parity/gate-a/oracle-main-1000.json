@@ -1,13 +1,13 @@
 {
  "id": "oracle-main-1000",
- "captured": "2026-11-19",
+ "captured": "2026-11-27",
  "viewport": [
   1000,
   760,
   2
  ],
- "cases": 53,
- "pass": 53,
+ "cases": 80,
+ "pass": 80,
  "results": [
   {
    "key": "aside:Bots",
@@ -166,15 +166,119 @@
    "pass": true
   },
   {
+   "key": "bubble:assistant#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": true
+  },
+  {
    "key": "card#1 parts",
    "pass": true
   },
   {
-   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "key": "card#1 control:Open oracle-note.txt#1",
    "pass": true
   },
   {
    "key": "card#1 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 parts",
+   "pass": true
+  },
+  {
+   "key": "card#2 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 control:Open image full screen#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 img#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 box#2",
+   "pass": true
+  },
+  {
+   "key": "card#2 control:Open image full screen#2",
+   "pass": true
+  },
+  {
+   "key": "card#2 img#2",
+   "pass": true
+  },
+  {
+   "key": "card#2 box#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 control:Open the remaining 3 images full screen#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 img#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 text(2)#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 parts",
+   "pass": true
+  },
+  {
+   "key": "card#3 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Which tree do you prefer?#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:B#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Cedar#1",
    "pass": true
   },
   {
@@ -187,6 +291,10 @@
   },
   {
    "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
    "pass": true
   },
   {
@@ -222,7 +330,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-26T09:53:57.150Z",
+ "run": "2026-11-27T09:15:19.813Z",
  "inventory": {
   "id": "oracle-main-1000",
   "controls": [

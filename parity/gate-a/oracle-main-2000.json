@@ -1,13 +1,13 @@
 {
  "id": "oracle-main-2000",
- "captured": "2026-11-19",
+ "captured": "2026-11-27",
  "viewport": [
   2000,
   760,
   2
  ],
- "cases": 48,
- "pass": 47,
+ "cases": 77,
+ "pass": 71,
  "results": [
   {
    "key": "aside:Bots",
@@ -150,13 +150,130 @@
    "pass": true
   },
   {
+   "key": "bubble:user#1 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#1 place",
+   "pass": true
+  },
+  {
    "key": "bubble:assistant#1 look",
    "pass": true
   },
   {
    "key": "bubble:assistant#1 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": true
+  },
+  {
+   "key": "card#1 parts",
+   "pass": true
+  },
+  {
+   "key": "card#1 box#1",
    "pass": false,
-   "why": "bottom off by 242"
+   "why": "box off by -2,-0.5,0.7,0.7"
+  },
+  {
+   "key": "card#1 control:Open image full screen#1",
+   "pass": false,
+   "why": "box off by -2,-0.5,0.7,0.7"
+  },
+  {
+   "key": "card#1 img#1",
+   "pass": false,
+   "why": "box off by -2,-0.5,0.7,0.7"
+  },
+  {
+   "key": "card#1 box#2",
+   "pass": false,
+   "why": "box off by -1.3,-0.5,0.7,0.7"
+  },
+  {
+   "key": "card#1 control:Open image full screen#2",
+   "pass": false,
+   "why": "box off by -1.3,-0.5,0.7,0.7"
+  },
+  {
+   "key": "card#1 img#2",
+   "pass": false,
+   "why": "box off by -1.3,-0.5,0.7,0.7"
+  },
+  {
+   "key": "card#1 box#3",
+   "pass": true
+  },
+  {
+   "key": "card#1 control:Open the remaining 3 images full screen#1",
+   "pass": true
+  },
+  {
+   "key": "card#1 img#3",
+   "pass": true
+  },
+  {
+   "key": "card#1 text(2)#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 parts",
+   "pass": true
+  },
+  {
+   "key": "card#2 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 text:Which tree do you prefer?#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 text:B#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 text:Cedar#1",
+   "pass": true
   },
   {
    "key": "box:control:Bot tile › svg#1",
@@ -168,6 +285,10 @@
   },
   {
    "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
    "pass": true
   },
   {
@@ -203,7 +324,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-26T09:53:57.150Z",
+ "run": "2026-11-27T09:15:19.813Z",
  "inventory": {
   "id": "oracle-main-2000",
   "controls": [

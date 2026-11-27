@@ -1,13 +1,13 @@
 {
  "id": "oracle-get-mobile",
- "captured": "2026-11-19",
+ "captured": "2026-11-27",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 73,
- "pass": 71,
+ "cases": 92,
+ "pass": 81,
  "results": [
   {
    "key": "aside:Bots",
@@ -151,35 +151,43 @@
   },
   {
    "key": "control:Close dialog",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,35,0,0"
   },
   {
    "key": "h2:Grok Bot on your phone",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.6,-35,-1.2,0"
   },
   {
    "key": "p:Scan with your camera to get the app",
-   "pass": true
+   "pass": false,
+   "why": "box off by -0.4,-35,0.9,0"
   },
   {
    "key": "span:Works on iPhone and Android",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,-35,0,0"
   },
   {
    "key": "control:Open App Store",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,-35,0,0"
   },
   {
    "key": "span:Open App Store",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0.1,-35,-0.3,0"
   },
   {
    "key": "control:Done",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,-35,0,0"
   },
   {
    "key": "span:Done",
-   "pass": true
+   "pass": false,
+   "why": "box off by 0,-35,0,0"
   },
   {
    "key": "bubble:user#1 look",
@@ -198,11 +206,51 @@
    "pass": true
   },
   {
+   "key": "bubble:assistant#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": true
+  },
+  {
    "key": "card#1 parts",
    "pass": true
   },
   {
-   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "key": "card#1 control:Open oracle-note.txt#1",
    "pass": true
   },
   {
@@ -214,35 +262,67 @@
    "pass": true
   },
   {
-   "key": "card#1 box#3",
+   "key": "card#2 parts",
    "pass": true
   },
   {
-   "key": "card#1 box#4",
+   "key": "card#2 box#1",
    "pass": true
   },
   {
-   "key": "card#1 box#5",
+   "key": "card#2 control:Open image full screen#1",
    "pass": true
   },
   {
-   "key": "card#1 box#6",
+   "key": "card#2 img#1",
    "pass": true
   },
   {
-   "key": "card#1 text(3)#1",
+   "key": "card#2 box#2",
    "pass": true
   },
   {
-   "key": "card#1 text(11)#1",
+   "key": "card#2 control:Open image full screen#2",
    "pass": true
   },
   {
-   "key": "card#1 text(4)#1",
+   "key": "card#2 img#2",
    "pass": true
   },
   {
-   "key": "card#1 text(3)#2",
+   "key": "card#2 box#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 control:Open the remaining 3 images full screen#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 img#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 text(2)#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 parts",
+   "pass": true
+  },
+  {
+   "key": "card#3 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Which tree do you prefer?#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:B#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Cedar#1",
    "pass": true
   },
   {
@@ -255,6 +335,10 @@
   },
   {
    "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
    "pass": true
   },
   {
@@ -290,21 +374,22 @@
    "pass": true
   },
   {
-   "key": "box:page › div#2",
-   "pass": true
+   "key": "box:page › svg#1",
+   "pass": false,
+   "why": "missing"
+  },
+  {
+   "key": "box:page › div#3",
+   "pass": false,
+   "why": "box off by 0,-35,0,0"
   },
   {
    "key": "box:page › img#1",
    "pass": false,
    "why": "missing"
-  },
-  {
-   "key": "box:page › svg#1",
-   "pass": false,
-   "why": "missing"
   }
  ],
- "run": "2026-11-26T09:53:57.150Z",
+ "run": "2026-11-27T09:15:19.813Z",
  "inventory": {
   "id": "oracle-get-mobile",
   "controls": [

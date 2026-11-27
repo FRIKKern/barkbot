@@ -6,8 +6,8 @@
   760,
   2
  ],
- "cases": 79,
- "pass": 77,
+ "cases": 53,
+ "pass": 49,
  "results": [
   {
    "key": "aside:Bots",
@@ -90,90 +90,6 @@
    "pass": true
   },
   {
-   "key": "aside:Conversation details",
-   "pass": true
-  },
-  {
-   "key": "control:Close",
-   "pass": true
-  },
-  {
-   "key": "control:Edit Bot avatar",
-   "pass": true
-  },
-  {
-   "key": "control:Bot name",
-   "pass": true
-  },
-  {
-   "key": "control:Activity",
-   "pass": true
-  },
-  {
-   "key": "control:Library",
-   "pass": true
-  },
-  {
-   "key": "span:Suggested",
-   "pass": true
-  },
-  {
-   "key": "control:Hide",
-   "pass": true
-  },
-  {
-   "key": "control:Create a routine",
-   "pass": true
-  },
-  {
-   "key": "span:Create a routine",
-   "pass": true
-  },
-  {
-   "key": "span:Computer",
-   "pass": true
-  },
-  {
-   "key": "control:Bot's computer",
-   "pass": true
-  },
-  {
-   "key": "bdi:Bot's computer",
-   "pass": true
-  },
-  {
-   "key": "bdi:Asleep",
-   "pass": true
-  },
-  {
-   "key": "span:Voice chat",
-   "pass": true
-  },
-  {
-   "key": "span:Voice",
-   "pass": true
-  },
-  {
-   "key": "control:Voice",
-   "pass": true
-  },
-  {
-   "key": "span:Helix 1.0x",
-   "pass": true
-  },
-  {
-   "key": "span:Language",
-   "pass": true
-  },
-  {
-   "key": "control:Language",
-   "pass": true
-  },
-  {
-   "key": "span:Auto-detect",
-   "pass": true
-  },
-  {
    "key": "span:Oracle replied",
    "pass": true
   },
@@ -183,7 +99,8 @@
   },
   {
    "key": "bubble:assistant#1 place",
-   "pass": true
+   "pass": false,
+   "why": "top off by 173.5"
   },
   {
    "key": "bubble:user#1 look",
@@ -299,28 +216,9 @@
    "pass": true
   },
   {
-   "key": "box:control:Edit Bot avatar › svg#1",
-   "pass": true
-  },
-  {
-   "key": "box:aside:Conversation details › ul#1",
-   "pass": true
-  },
-  {
-   "key": "box:aside:Conversation details › ul#2",
-   "pass": true
-  },
-  {
-   "key": "box:control:Bot's computer › span#1",
-   "pass": true
-  },
-  {
-   "key": "box:control:Bot's computer › svg#1",
-   "pass": true
-  },
-  {
-   "key": "box:aside:Conversation details › ul#3",
-   "pass": true
+   "key": "box:extra › header@88,0,632,60",
+   "pass": false,
+   "why": "extra: the oracle draws no box here"
   },
   {
    "key": "box:extra › alert@254,574,300,28",
@@ -328,7 +226,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-26T09:53:57.150Z",
+ "run": "2026-11-27T09:15:19.813Z",
  "inventory": {
   "id": "oracle-pictures-waiting",
   "controls": [
@@ -390,56 +288,6 @@
    {
     "name": "Send message",
     "item": "T4",
-    "ours": true
-   },
-   {
-    "name": "Close",
-    "item": "F3",
-    "ours": true
-   },
-   {
-    "name": "Edit Bot avatar",
-    "item": "F3",
-    "ours": true
-   },
-   {
-    "name": "Bot name",
-    "item": "F3",
-    "ours": true
-   },
-   {
-    "name": "Activity",
-    "item": "F3",
-    "ours": true
-   },
-   {
-    "name": "Library",
-    "item": "F3",
-    "ours": true
-   },
-   {
-    "name": "Hide",
-    "item": "N3",
-    "ours": true
-   },
-   {
-    "name": "Create a routine",
-    "item": "N3",
-    "ours": true
-   },
-   {
-    "name": "Bot's computer",
-    "item": "F4",
-    "ours": true
-   },
-   {
-    "name": "Voice",
-    "item": "N4",
-    "ours": true
-   },
-   {
-    "name": "Language",
-    "item": "N4",
     "ours": true
    }
   ],

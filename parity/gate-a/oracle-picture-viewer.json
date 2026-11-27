@@ -1,6 +1,6 @@
 {
  "id": "oracle-picture-viewer",
- "captured": "2026-11-23",
+ "captured": "2026-11-27",
  "viewport": [
   1040,
   760,
@@ -338,6 +338,10 @@
    "pass": true
   },
   {
+   "key": "box:page › header#1",
+   "pass": true
+  },
+  {
    "key": "box:control:View conversation details › img#1",
    "pass": true
   },
@@ -366,10 +370,6 @@
    "pass": true
   },
   {
-   "key": "box:page › span#1",
-   "pass": true
-  },
-  {
    "key": "box:page › img#1",
    "pass": false,
    "why": "box off by 0,-19,0,0"
@@ -395,11 +395,11 @@
    "pass": true
   },
   {
-   "key": "box:page › div#1",
+   "key": "box:page › div#2",
    "pass": true
   }
  ],
- "run": "2026-11-26T09:53:57.150Z",
+ "run": "2026-11-27T08:54:02.199Z",
  "inventory": {
   "id": "oracle-picture-viewer",
   "controls": [
