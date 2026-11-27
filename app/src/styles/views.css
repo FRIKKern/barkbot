@@ -1,4 +1,4 @@
-/* Views over the main screen: Connect Apps, the avatar editor (Settings: settings.css). Numbers read from
+/* Views over the main screen: Connect apps, the avatar editor (Settings: settings.css). Numbers read from
    fixtures/states/oracle-{connect-apps,edit-avatar,settings}.json (1040 x 760 pt). */
 
 /* A neutral placeholder for what the fixture keeps only as a length (owner data, counts, copy). */
@@ -10,7 +10,7 @@
 .view-scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
 .view-scroll::-webkit-scrollbar { display: none; }
 
-/* ── Connect Apps ── */
+/* ── Connect apps ── */
 .connect-apps { background: var(--bg-raised); }
 /* Close dialog (1.2.3): 32 at 14 pt from the top right, an 18 pt slot, a 14 pt cross, 18 pt lines. */
 .ca-close { top: 14px; right: 14px; width: 32px; height: 32px; color: var(--ink-64); line-height: 18px; }

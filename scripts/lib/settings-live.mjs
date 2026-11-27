@@ -28,7 +28,7 @@ export async function settingsLive({ check, precondition, ev, open, base, click,
       device: d?.querySelector('.set-device-state')?.textContent.trim() ?? null,
       version: d?.querySelector('.set-label bdi')?.textContent ?? null,
       status: d?.querySelector('.set-uptodate')?.textContent ?? null,
-      readTexts: d?.querySelector('[role=switch][aria-label="Read Texts"]')?.getAttribute('aria-checked') ?? null,
+      readTexts: d?.querySelector('[role=switch][aria-label="Read texts"]')?.getAttribute('aria-checked') ?? null,
     };
   });
   const page = async (seen) => {
@@ -47,13 +47,13 @@ export async function settingsLive({ check, precondition, ev, open, base, click,
 
   // A flipped switch stays flipped when its page is left and opened again.
   const before = two.readTexts;
-  await clickOn('.overlay [role=switch][aria-label="Read Texts"]');
+  await clickOn('.overlay [role=switch][aria-label="Read texts"]');
   const flipped = (await read()).readTexts;
   await tab('Updates');
   const updates = await read();
   await tab('Computer');
   const back = (await read()).readTexts;
-  check('a switch flipped on one Settings page is still flipped after another tab and back (control: Read Texts was off and the click turned it on)', before === 'false' && flipped === 'true' && back === 'true', { before, flipped, back });
+  check('a switch flipped on one Settings page is still flipped after another tab and back (control: Read texts was off and the click turned it on)', before === 'false' && flipped === 'true' && back === 'true', { before, flipped, back });
 
   // Updates shows this build, and claims nothing it cannot know.
   // The app runs with BARKBOT_VERSION pinned (behaviour.mjs), so the page must show that value.

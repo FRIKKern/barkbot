@@ -11,5 +11,5 @@
   "Reset character to default"
  ],
  "gate": "Gate A oracle-edit-avatar 68/68",
- "evidence": "app/src/components/overlays/Views.tsx (AvatarEditor), shapes and colours shared with Create New Bot (CharacterLooks); opens under the details avatar from Edit Bot avatar. Generate and Upload show their tab only (0005). Done on 0.79.3; on 1.2.3 (decision 0010) oracle-edit-avatar is 54/79."
+ "evidence": "app/src/components/overlays/Views.tsx (AvatarEditor), shapes and colours shared with Create new Bot (CharacterLooks); opens under the details avatar from Edit Bot avatar. Generate and Upload show their tab only (0005). Done on 0.79.3; on 1.2.3 (decision 0010) oracle-edit-avatar is 54/79."
 }

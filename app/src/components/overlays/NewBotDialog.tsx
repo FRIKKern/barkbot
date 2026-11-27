@@ -1,4 +1,4 @@
-// Create New Bot (fixtures/states/oracle-new-bot-dialog.json): 440 x 579, centred over a 70%
+// Create new Bot (fixtures/states/oracle-new-bot-dialog.json): 440 x 579, centred over a 70%
 // black scrim. A preview of the character, its name, 13 shapes, 11 colours; Create stays disabled
 // until the bot has a name. The shapes are plain geometric stand-ins drawn here, never the
 // oracle's character art (O2). Create makes the bot (onCreate): it reads Creating… while that is
@@ -72,7 +72,7 @@ export function NewBotDialog({onClose, onCreate}: {onClose?: () => void; onCreat
           <Icon d="M4 4l8 8M12 4l-8 8" />
         </button>
         <div className="dialog-head">
-          <h2 id="new-bot-title">Create New Bot</h2>
+          <h2 id="new-bot-title">Create new Bot</h2>
         </div>
         <div className="dialog-body">
           <div className="new-bot-form">
@@ -97,7 +97,7 @@ export function NewBotDialog({onClose, onCreate}: {onClose?: () => void; onCreat
   )
 }
 
-// The 13 shapes and 11 colours, shared by Create New Bot and the avatar editor (oracle-edit-avatar):
+// The 13 shapes and 11 colours, shared by Create new Bot and the avatar editor (oracle-edit-avatar):
 // both lay them out the same way, rows of 5, 5, 3 and 6, 5.
 export function CharacterLooks({
   shape,

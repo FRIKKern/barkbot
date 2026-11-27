@@ -2,7 +2,7 @@
  "id": "F11",
  "slice": "S2",
  "journey": null,
- "title": "Connect Apps view: header with the connected count, Your plugins, Bot templates, category filters, Recommended for you and This Mac with each app's Open and Connect (oracle-connect-apps). Look only: Connect and Open act outside the page and are their own items",
+ "title": "Connect apps view: header with the connected count, Your plugins, Bot templates, category filters, Recommended for you and This Mac with each app's Open and Connect (oracle-connect-apps). Look only: Connect and Open act outside the page and are their own items",
  "status": "partial",
  "controls": [
   "Your plugins",

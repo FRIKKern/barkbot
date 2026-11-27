@@ -105,7 +105,7 @@ export const weeklyUsage = '–% used'
 // oracle-connect-apps (1.2.3): the filters and the sections on screen when captured. App names are
 // third-party product names: text only, never their logos (a tile of the captured colour stands in).
 // This Mac's apps carry a line under the name, and Location's action is Open settings.
-export const appCategories = ['All', 'Mac', 'Password Managers', 'Productivity', 'Communication', 'Design']
+export const appCategories = ['All', 'Mac', 'Password managers', 'Productivity', 'Communication', 'Design']
 export type App = {name: string; tile?: string; desc?: string; action?: string}
 export type AppSection = {title: string; viewAll: boolean; mac?: boolean; apps: App[]}
 export const appSections: AppSection[] = [
@@ -135,9 +135,9 @@ export const appSections: AppSection[] = [
     ],
   },
   // Below the fold on 1.2.3 (only this title is on screen); its row is as 0.79.3 showed it.
-  {title: 'Password Managers', viewAll: false, apps: [{name: '1Password', tile: 'rgb(48, 49, 54)'}]},
+  {title: 'Password managers', viewAll: false, apps: [{name: '1Password', tile: 'rgb(48, 49, 54)'}]},
 ]
 export const labelledConnect = new Set(['1Password'])
 
 // oracle-settings: the sections of the settings sidebar.
-export const settingsSections = ['General', 'Computer', 'Permissions', 'Vault', 'Usage & Billing', 'Updates']
+export const settingsSections = ['General', 'Computer', 'Permissions', 'Vault', 'Usage & billing', 'Updates']

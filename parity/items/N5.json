@@ -2,7 +2,7 @@
  "id": "N5",
  "slice": "S7",
  "journey": "J12",
- "title": "Create New Bot dialog: name, 13 shapes, 11 colours, Cancel and Create (Create stays disabled until named)",
+ "title": "Create new Bot dialog: name, 13 shapes, 11 colours, Cancel and Create (Create stays disabled until named)",
  "status": "partial",
  "controls": [
   "/ character (color|shape)$/",
