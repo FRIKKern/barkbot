@@ -7,15 +7,14 @@
   2
  ],
  "cases": 1,
- "pass": 0,
+ "pass": 1,
  "results": [
   {
    "key": "div:Edit avatar",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   }
  ],
- "run": "2026-11-27T08:54:02.199Z",
+ "run": "2026-11-27T10:30:00.289Z",
  "inventory": {
   "id": "oracle-hover-edit-bot-avatar",
   "controls": [

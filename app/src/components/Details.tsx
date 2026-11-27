@@ -42,7 +42,7 @@ export function Details({scene, name, between, onRename, onClose}: {scene: Scene
             </i>
           </button>
           <Tooltip box={avatar.box} side="bottom">
-            Edit Avatar
+            Edit avatar
           </Tooltip>
           <BotName key={active} name={name ?? ''} readOnly={between} onRename={onRename} />
         </div>

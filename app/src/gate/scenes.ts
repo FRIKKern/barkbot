@@ -1,3 +1,4 @@
+import {computers} from './transcripts'
 import type {Scene} from '../components/Shell'
 import {seenAtCapture} from './scenes/oracle'
 
@@ -18,5 +19,6 @@ export const scenes: Record<string, Scene> = Object.fromEntries(
 // stamped now so the time is the capture's whenever the page is drawn.
 export const sceneFor = (id: string): Scene | undefined => {
   const s = scenes[id] ?? scenes[id.replace(/-(start|end|named|hover)$/, '')] ?? (id.startsWith('oracle-hover-') ? scenes['oracle-turn-1040'] : undefined)
-  return s && {...s, seen: seenAtCapture()}
+  // The Bot's computer status word is live (gate/transcripts.ts computers): the scene shows the one its capture shows.
+  return s && {...s, seen: seenAtCapture(), ...(s.computer !== undefined && computers[id] ? {computer: computers[id]} : {})}
 }

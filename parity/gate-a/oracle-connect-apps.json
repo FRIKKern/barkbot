@@ -7,7 +7,7 @@
   2
  ],
  "cases": 179,
- "pass": 150,
+ "pass": 153,
  "results": [
   {
    "key": "aside:Bots",
@@ -155,8 +155,7 @@
   },
   {
    "key": "h2:Connect apps",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Your plugins",
@@ -176,8 +175,7 @@
   },
   {
    "key": "control:Password managers",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Productivity",
@@ -200,7 +198,7 @@
   {
    "key": "control:More",
    "pass": false,
-   "why": "box off by -180.1,0,0,0"
+   "why": "box off by -178.8,0,0,0"
   },
   {
    "key": "h3:Recommended for you",
@@ -454,8 +452,7 @@
   },
   {
    "key": "h3:Password managers",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -755,7 +752,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T10:30:00.289Z",
  "inventory": {
   "id": "oracle-connect-apps",
   "controls": [
@@ -887,7 +884,7 @@
    {
     "name": "Password managers",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Productivity",
@@ -990,7 +987,7 @@
     "ours": true
    }
   ],
-  "missing": 8,
+  "missing": 7,
   "untracked": []
  }
 }

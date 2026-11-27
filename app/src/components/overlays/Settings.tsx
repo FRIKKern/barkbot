@@ -1,7 +1,7 @@
 // Settings, as captured on Grok 1.2.3: the General page (item F13, fixtures/states/oracle-settings.json)
 // and the pages beside it (F14, SettingsPages.tsx). Look only (0005): nothing here acts outside the page.
 // The owner's name, e-mail, photo and promo copy are lengths only in the fixtures, so they show as
-// plain placeholders of the captured size, never text. Vault and Usage & Billing are never captured
+// plain placeholders of the captured size, never text. Vault and Usage & billing are never captured
 // (O2): their tabs highlight but show General.
 import {useState} from 'react'
 import {Icon} from '../Composer'
@@ -16,7 +16,7 @@ const sectionIcons: Record<string, string> = {
   Computer: 'M2.5 3.5h11v7h-11zM6 13.5h4M8 10.5v3',
   Permissions: 'M8 2l5 2v4c0 3-2.2 5-5 6-2.8-1-5-3-5-6V4z',
   Vault: 'M3 6.5h10v7H3zM5 6.5V5a3 3 0 0 1 6 0v1.5',
-  'Usage & Billing': 'M2.5 4h11v8h-11zM2.5 7h11',
+  'Usage & billing': 'M2.5 4h11v8h-11zM2.5 7h11',
   Updates: 'M13 8a5 5 0 1 1-1.5-3.55M13 2.5v2.5h-2.5',
 }
 
@@ -69,7 +69,7 @@ function GeneralPage() {
                 <span style={fit(SETTINGS, 'Add account')}>Add account</span>
               </button>
               <button className="pill">
-                <span>Sign Out</span>
+                <span>Sign out</span>
               </button>
             </div>
           </div>
@@ -79,19 +79,19 @@ function GeneralPage() {
         <GroupHead title="Appearance" />
         <div className="set-card">
           <SettingRow label="Theme">
-            <Select label="Theme" value="Follow System" />
+            <Select label="Theme" value="Follow system" />
           </SettingRow>
           <SettingRow label="Accent">
             <Select label="Accent" value="Bot color" />
           </SettingRow>
           <SettingRow label="Language">
-            <button aria-label="Language, Follow System" className="set-select">
-              <span>Follow System</span>
+            <button aria-label="Language, Follow system" className="set-select">
+              <span>Follow system</span>
               {chevronDown}
             </button>
           </SettingRow>
-          <SettingRow label="Check Spelling While Typing" short>
-            <Switch label="Check Spelling While Typing" />
+          <SettingRow label="Check spelling while typing" short>
+            <Switch label="Check spelling while typing" />
           </SettingRow>
           <PlainRow label="Send with ⌘↵" width={351.3}>
             <Switch label="Send with ⌘↵" on={false} />
