@@ -17,6 +17,7 @@ import { hostedNote, CLOCKS } from './lib/gate-b-hosted.mjs';
 import { pickByLabel } from './lib/hover-label.mjs';
 import { appSources, doorReds } from './lib/session-doors.mjs';
 import { CASES as DOOR_CASES } from './lib/session-doors-cases.mjs';
+import { CASES as KEY_CASES, transcriptKeysOf, transcriptReds } from './lib/transcript-keys.mjs';
 import { VIEWER, dropPicked, labelPressAllowed, markPicked, pickedName, underPoint } from './lib/press-guard.mjs';
 
 const fails = [];
@@ -380,6 +381,26 @@ for (const [name, c, want] of [
   }
 }
 
+// Transcript keys (task-b4e7f5ce76c81c7f, lib/transcript-keys.mjs): a scene's transcripts['x'] is a key of
+// the generated gate/transcripts.ts, and its conversationOf('x') a captured state. tsc cannot see either.
+{
+  const keys = transcriptKeysOf(read('app/src/gate/transcripts.ts'));
+  const states = new Set(readdirSync(path('fixtures', 'states')).filter((f) => f.endsWith('.json')).map((f) => f.slice(0, -5)));
+  rule('transcript keys', 1);
+  if (!keys?.has('main')) fail('transcript keys: app/src/gate/transcripts.ts has no transcripts.main: the key reader is broken');
+  const { reads, reds } = transcriptReds(appSources(path('app')), keys ?? new Set(), states);
+  for (const r of reads) rule('transcript keys', 1);
+  for (const r of reds) fail(`transcript keys: ${r}`);
+  // A floor: a scan that finds no direct read or no conversationOf call is broken, not clean.
+  rule('transcript keys', 1);
+  if (!reads.some((r) => r.kind === 'read') || !reads.some((r) => r.kind === 'conversation')) fail(`transcript keys: the scan found ${reads.length} read(s) but no direct transcripts read or no conversationOf call`);
+  for (const [name, files, k, st, want, like] of KEY_CASES) {
+    rule('transcript keys', 1);
+    const got = transcriptReds(files, k, st).reds;
+    if (got.length !== want || (like && !got.every((r) => like.test(r)))) fail(`transcript keys: ${name}: the scan gave ${got.length} red(s), want ${want}${like ? ` like ${like}` : ''}: ${JSON.stringify(got)}`);
+  }
+}
+
 // Unscored boxes (task-9350f7d5eee2c573, report only): Gate A prints, per state, the oracle's boxes of
 // 20x20 or more that no case scores. The viewer's picture is one: a box the gate never compares.
 {
@@ -718,7 +739,7 @@ for (const [name, c, want] of [
 }
 
 // No skip-pass: every rule must have checked something.
-for (const name of ['own session', 'doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label', 'press guard', 'unscored boxes', 'box cases']) {
+for (const name of ['own session', 'transcript keys', 'doc caps', 'links', 'items', 'journeys covered', 'fresh pictures', 'secrets', 'controls tracked', 'one oracle version', 'gate records', 'turn records', 'host guard', 'scene cards', 'scene spacers', 'gate b hosted', 'hover label', 'press guard', 'unscored boxes', 'box cases']) {
   if (!ran[name]) fail(`${name}: checked nothing`);
 }
 
