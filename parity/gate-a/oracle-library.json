@@ -1,13 +1,13 @@
 {
  "id": "oracle-library",
- "captured": "2026-11-19",
+ "captured": "2026-11-27",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 43,
- "pass": 43,
+ "cases": 64,
+ "pass": 62,
  "results": [
   {
    "key": "aside:Bots",
@@ -70,6 +70,11 @@
    "pass": true
   },
   {
+   "key": "control:Search",
+   "pass": false,
+   "why": "missing"
+  },
+  {
    "key": "control:Close",
    "pass": true
   },
@@ -106,11 +111,51 @@
    "pass": true
   },
   {
+   "key": "bubble:assistant#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": true
+  },
+  {
    "key": "card#1 parts",
    "pass": true
   },
   {
-   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "key": "card#1 control:Open oracle-note.txt#1",
    "pass": true
   },
   {
@@ -122,35 +167,67 @@
    "pass": true
   },
   {
-   "key": "card#1 box#3",
+   "key": "card#2 parts",
    "pass": true
   },
   {
-   "key": "card#1 box#4",
+   "key": "card#2 box#1",
    "pass": true
   },
   {
-   "key": "card#1 box#5",
+   "key": "card#2 control:Open image full screen#1",
    "pass": true
   },
   {
-   "key": "card#1 box#6",
+   "key": "card#2 img#1",
    "pass": true
   },
   {
-   "key": "card#1 text(3)#1",
+   "key": "card#2 box#2",
    "pass": true
   },
   {
-   "key": "card#1 text(11)#1",
+   "key": "card#2 control:Open image full screen#2",
    "pass": true
   },
   {
-   "key": "card#1 text(4)#1",
+   "key": "card#2 img#2",
    "pass": true
   },
   {
-   "key": "card#1 text(3)#2",
+   "key": "card#2 box#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 control:Open the remaining 3 images full screen#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 img#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 text(2)#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 parts",
+   "pass": true
+  },
+  {
+   "key": "card#3 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Which tree do you prefer?#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:B#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Cedar#1",
    "pass": true
   },
   {
@@ -166,12 +243,21 @@
    "pass": true
   },
   {
+   "key": "box:page › header#1",
+   "pass": true
+  },
+  {
    "key": "box:control:View conversation details › img#1",
    "pass": true
   },
   {
    "key": "box:page › div#1",
    "pass": true
+  },
+  {
+   "key": "box:aside:Conversation details › div#1",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "box:control:Edit Bot avatar › svg#1",
@@ -182,7 +268,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-26T09:53:57.150Z",
+ "run": "2026-11-27T09:15:19.813Z",
  "inventory": {
   "id": "oracle-library",
   "controls": [
@@ -237,6 +323,11 @@
     "ours": true
    },
    {
+    "name": "Search",
+    "item": "A3",
+    "ours": false
+   },
+   {
     "name": "Close",
     "item": "F3",
     "ours": true
@@ -262,7 +353,7 @@
     "ours": true
    }
   ],
-  "missing": 0,
+  "missing": 1,
   "untracked": []
  }
 }

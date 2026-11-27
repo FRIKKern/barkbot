@@ -1,12 +1,12 @@
 {
  "id": "oracle-language-picker",
- "captured": "2026-11-19",
+ "captured": "2026-11-27",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 81,
+ "cases": 99,
  "pass": 81,
  "results": [
   {
@@ -151,79 +151,93 @@
   },
   {
    "key": "span:Auto-detect#2",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,0,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:English",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-2,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Arabic (Egypt)",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-4,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Arabic (Saudi Arabia)",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-6,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Arabic (United Arab Emirates)",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-8,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Bengali",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-10,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Catalan",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-12,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Chinese (Simplified)",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-14,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Danish",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-16,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Dutch",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-18,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Finnish",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-20,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:French",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-22,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:German",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-24,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Hindi",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-26,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Hungarian",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-28,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Indonesian",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-30,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Italian",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-32,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "span:Japanese",
-   "pass": true
-  },
-  {
-   "key": "span:Korean",
-   "pass": true
+   "pass": false,
+   "why": "box off by 20,-34,-19.7,-2; font-size 13px ≠ 14px; line-height 18px ≠ 20px"
   },
   {
    "key": "bubble:user#1 look",
@@ -242,11 +256,51 @@
    "pass": true
   },
   {
+   "key": "bubble:assistant#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": true
+  },
+  {
    "key": "card#1 parts",
    "pass": true
   },
   {
-   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "key": "card#1 control:Open oracle-note.txt#1",
    "pass": true
   },
   {
@@ -258,35 +312,67 @@
    "pass": true
   },
   {
-   "key": "card#1 box#3",
+   "key": "card#2 parts",
    "pass": true
   },
   {
-   "key": "card#1 box#4",
+   "key": "card#2 box#1",
    "pass": true
   },
   {
-   "key": "card#1 box#5",
+   "key": "card#2 control:Open image full screen#1",
    "pass": true
   },
   {
-   "key": "card#1 box#6",
+   "key": "card#2 img#1",
    "pass": true
   },
   {
-   "key": "card#1 text(3)#1",
+   "key": "card#2 box#2",
    "pass": true
   },
   {
-   "key": "card#1 text(11)#1",
+   "key": "card#2 control:Open image full screen#2",
    "pass": true
   },
   {
-   "key": "card#1 text(4)#1",
+   "key": "card#2 img#2",
    "pass": true
   },
   {
-   "key": "card#1 text(3)#2",
+   "key": "card#2 box#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 control:Open the remaining 3 images full screen#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 img#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 text(2)#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 parts",
+   "pass": true
+  },
+  {
+   "key": "card#3 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Which tree do you prefer?#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:B#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Cedar#1",
    "pass": true
   },
   {
@@ -299,6 +385,10 @@
   },
   {
    "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
    "pass": true
   },
   {
@@ -334,7 +424,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-26T09:53:57.150Z",
+ "run": "2026-11-27T09:15:19.813Z",
  "inventory": {
   "id": "oracle-language-picker",
   "controls": [

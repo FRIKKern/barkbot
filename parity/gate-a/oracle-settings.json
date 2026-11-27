@@ -1,13 +1,13 @@
 {
  "id": "oracle-settings",
- "captured": "2026-11-19",
+ "captured": "2026-11-27",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 111,
- "pass": 104,
+ "cases": 130,
+ "pass": 111,
  "results": [
   {
    "key": "aside:Bots",
@@ -186,12 +186,14 @@
    "pass": true
   },
   {
-   "key": "control:Usage & Billing",
-   "pass": true
+   "key": "control:Usage & billing",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Usage & Billing",
-   "pass": true
+   "key": "span:Usage & billing",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Updates",
@@ -235,19 +237,23 @@
   },
   {
    "key": "control:Add account",
-   "pass": true
+   "pass": false,
+   "why": "box off by -2.2,0,0,0"
   },
   {
    "key": "span:Add account",
-   "pass": true
+   "pass": false,
+   "why": "box off by -2.2,0,0,0"
   },
   {
-   "key": "control:Sign Out",
-   "pass": true
+   "key": "control:Sign out",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Sign Out",
-   "pass": true
+   "key": "span:Sign out",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "h3:Appearance",
@@ -258,8 +264,9 @@
    "pass": true
   },
   {
-   "key": "span:Follow System",
-   "pass": true
+   "key": "span:Follow system",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "span:Accent",
@@ -275,19 +282,23 @@
   },
   {
    "key": "control:Language#2",
-   "pass": true
+   "pass": false,
+   "why": "box off by -1.8,0,1.8,0"
   },
   {
-   "key": "span:Follow System#2",
-   "pass": true
+   "key": "span:Follow system#2",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Check Spelling While Typing",
-   "pass": true
+   "key": "span:Check spelling while typing",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "control:Check Spelling While Typing",
-   "pass": true
+   "key": "control:Check spelling while typing",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "span:Send with ⌘↵",
@@ -314,11 +325,51 @@
    "pass": true
   },
   {
+   "key": "bubble:assistant#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": true
+  },
+  {
    "key": "card#1 parts",
    "pass": true
   },
   {
-   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "key": "card#1 control:Open oracle-note.txt#1",
    "pass": true
   },
   {
@@ -330,35 +381,67 @@
    "pass": true
   },
   {
-   "key": "card#1 box#3",
+   "key": "card#2 parts",
    "pass": true
   },
   {
-   "key": "card#1 box#4",
+   "key": "card#2 box#1",
    "pass": true
   },
   {
-   "key": "card#1 box#5",
+   "key": "card#2 control:Open image full screen#1",
    "pass": true
   },
   {
-   "key": "card#1 box#6",
+   "key": "card#2 img#1",
    "pass": true
   },
   {
-   "key": "card#1 text(3)#1",
+   "key": "card#2 box#2",
    "pass": true
   },
   {
-   "key": "card#1 text(11)#1",
+   "key": "card#2 control:Open image full screen#2",
    "pass": true
   },
   {
-   "key": "card#1 text(4)#1",
+   "key": "card#2 img#2",
    "pass": true
   },
   {
-   "key": "card#1 text(3)#2",
+   "key": "card#2 box#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 control:Open the remaining 3 images full screen#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 img#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 text(2)#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 parts",
+   "pass": true
+  },
+  {
+   "key": "card#3 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Which tree do you prefer?#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:B#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Cedar#1",
    "pass": true
   },
   {
@@ -371,6 +454,10 @@
   },
   {
    "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
    "pass": true
   },
   {
@@ -440,7 +527,7 @@
    "why": "missing"
   },
   {
-   "key": "box:page › div#2",
+   "key": "box:page › div#3",
    "pass": true
   },
   {
@@ -449,19 +536,20 @@
    "why": "missing"
   },
   {
-   "key": "box:page › div#3",
+   "key": "box:page › div#4",
    "pass": true
   },
   {
    "key": "box:page › combobox#1",
-   "pass": true
+   "pass": false,
+   "why": "line off by -1.8,0,0"
   },
   {
    "key": "box:page › combobox#2",
    "pass": true
   }
  ],
- "run": "2026-11-26T09:53:57.150Z",
+ "run": "2026-11-27T09:15:19.813Z",
  "inventory": {
   "id": "oracle-settings",
   "controls": [
@@ -586,9 +674,9 @@
     "ours": true
    },
    {
-    "name": "Usage & Billing",
+    "name": "Usage & billing",
     "item": "F13",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Updates",
@@ -621,14 +709,14 @@
     "ours": true
    },
    {
-    "name": "Sign Out",
+    "name": "Sign out",
     "item": "F13",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Check Spelling While Typing",
+    "name": "Check spelling while typing",
     "item": "F13",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Send with ⌘↵",
@@ -636,7 +724,7 @@
     "ours": true
    }
   ],
-  "missing": 0,
+  "missing": 3,
   "untracked": []
  }
 }

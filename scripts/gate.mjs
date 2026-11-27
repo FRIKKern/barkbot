@@ -181,6 +181,9 @@ for (const state of states) {
     console.error(`Gate A · ${state.id} · the browser failed (${e?.message ?? e?.type ?? e}); trying once more`);
     try { ours = await limited(); } catch (e2) { console.error(`Gate A: ${state.id} could not be measured: ${e2?.message ?? e2?.type ?? e2}`); process.exit(1); }
   }
+  // An excepted state's not-judged parts (lib/versions.mjs judged) are left out on our side too, so
+  // our details panel there is neither named nor a box of its own: no extras from what is not judged.
+  ours = judged({ ...ours, id: state.id });
 
   // Gate A: same name, box within 1 pt on every edge, the same look.
   const mine = new Map(namedElements(ours).map((c) => [c.key, c]));

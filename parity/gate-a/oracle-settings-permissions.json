@@ -1,13 +1,13 @@
 {
  "id": "oracle-settings-permissions",
- "captured": "2026-11-19",
+ "captured": "2026-11-27",
  "viewport": [
   1040,
   760,
   2
  ],
- "cases": 92,
- "pass": 91,
+ "cases": 111,
+ "pass": 102,
  "results": [
   {
    "key": "aside:Bots",
@@ -186,12 +186,14 @@
    "pass": true
   },
   {
-   "key": "control:Usage & Billing",
-   "pass": true
+   "key": "control:Usage & billing",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Usage & Billing",
-   "pass": true
+   "key": "span:Usage & billing",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "control:Updates",
@@ -218,28 +220,34 @@
    "pass": true
   },
   {
-   "key": "h3:Always Ask",
-   "pass": true
+   "key": "h3:Always ask",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "control:Add Rule to Always Ask",
-   "pass": true
+   "key": "control:Add rule to always ask",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Add Rule",
-   "pass": true
+   "key": "span:Add rule",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "h3:Allow without Asking",
-   "pass": true
+   "key": "h3:Allow without asking",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "control:Add Rule to Allow without Asking",
-   "pass": true
+   "key": "control:Add rule to allow without asking",
+   "pass": false,
+   "why": "missing"
   },
   {
-   "key": "span:Add Rule#2",
-   "pass": true
+   "key": "span:Add rule#2",
+   "pass": false,
+   "why": "missing"
   },
   {
    "key": "span:App permissions",
@@ -270,11 +278,51 @@
    "pass": true
   },
   {
+   "key": "bubble:assistant#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#2 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:user#3 place",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 look",
+   "pass": true
+  },
+  {
+   "key": "bubble:assistant#4 place",
+   "pass": true
+  },
+  {
    "key": "card#1 parts",
    "pass": true
   },
   {
-   "key": "card#1 control:Open oracle-note.txt (2)#1",
+   "key": "card#1 control:Open oracle-note.txt#1",
    "pass": true
   },
   {
@@ -286,35 +334,67 @@
    "pass": true
   },
   {
-   "key": "card#1 box#3",
+   "key": "card#2 parts",
    "pass": true
   },
   {
-   "key": "card#1 box#4",
+   "key": "card#2 box#1",
    "pass": true
   },
   {
-   "key": "card#1 box#5",
+   "key": "card#2 control:Open image full screen#1",
    "pass": true
   },
   {
-   "key": "card#1 box#6",
+   "key": "card#2 img#1",
    "pass": true
   },
   {
-   "key": "card#1 text(3)#1",
+   "key": "card#2 box#2",
    "pass": true
   },
   {
-   "key": "card#1 text(11)#1",
+   "key": "card#2 control:Open image full screen#2",
    "pass": true
   },
   {
-   "key": "card#1 text(4)#1",
+   "key": "card#2 img#2",
    "pass": true
   },
   {
-   "key": "card#1 text(3)#2",
+   "key": "card#2 box#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 control:Open the remaining 3 images full screen#1",
+   "pass": true
+  },
+  {
+   "key": "card#2 img#3",
+   "pass": true
+  },
+  {
+   "key": "card#2 text(2)#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 parts",
+   "pass": true
+  },
+  {
+   "key": "card#3 box#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Which tree do you prefer?#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:B#1",
+   "pass": true
+  },
+  {
+   "key": "card#3 text:Cedar#1",
    "pass": true
   },
   {
@@ -327,6 +407,10 @@
   },
   {
    "key": "box:control:Open account menu › img#1",
+   "pass": true
+  },
+  {
+   "key": "box:page › header#1",
    "pass": true
   },
   {
@@ -362,7 +446,7 @@
    "pass": true
   },
   {
-   "key": "box:page › div#2",
+   "key": "box:page › div#3",
    "pass": true
   },
   {
@@ -375,11 +459,11 @@
    "pass": true
   },
   {
-   "key": "box:page › div#3",
+   "key": "box:page › div#4",
    "pass": true
   }
  ],
- "run": "2026-11-26T09:53:57.150Z",
+ "run": "2026-11-27T09:15:19.813Z",
  "inventory": {
   "id": "oracle-settings-permissions",
   "controls": [
@@ -504,9 +588,9 @@
     "ours": true
    },
    {
-    "name": "Usage & Billing",
+    "name": "Usage & billing",
     "item": "F13",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Updates",
@@ -519,14 +603,14 @@
     "ours": true
    },
    {
-    "name": "Add Rule to Always Ask",
+    "name": "Add rule to always ask",
     "item": "F14",
-    "ours": true
+    "ours": false
    },
    {
-    "name": "Add Rule to Allow without Asking",
+    "name": "Add rule to allow without asking",
     "item": "F14",
-    "ours": true
+    "ours": false
    },
    {
     "name": "Open apps",
@@ -534,7 +618,7 @@
     "ours": true
    }
   ],
-  "missing": 0,
+  "missing": 3,
   "untracked": []
  }
 }

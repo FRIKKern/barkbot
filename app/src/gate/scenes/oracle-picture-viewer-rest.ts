@@ -1,6 +1,5 @@
-import {oracle} from './oracle'
-import {transcripts} from '../transcripts'
+import {conversationOf} from './oracle'
 
-// fixtures/states/oracle-picture-viewer-rest.json (1.2.3): the +3 tile pressed; the viewer open at
+// fixtures/states/oracle-picture-viewer-rest.json (1.3.0): the +3 tile pressed; the viewer open at
 // the first picture that tile stands for, the third ("3 / 5").
-export default {...oracle, transcript: {bubbles: transcripts['picture-viewer-rest']}, viewer: {at: 2}}
+export default {...conversationOf('picture-viewer-rest'), viewer: {at: 2}}

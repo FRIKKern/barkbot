@@ -4,6 +4,7 @@
  "journey": "J09",
  "title": "Library: what the bot saved, newest first",
  "status": "partial",
+ "controls": ["Search"],
  "gate": "Gate A oracle-library 50/50 (the Library tab, empty)",
  "evidence": "Details.tsx: the Library tab and its empty state, as the oracle's (oracle-library, 0.79.3). Missing: the list itself. The oracle's Library was only captured empty, so the look of a saved item and its order are unread (needs a capture after the oracle's bot has saved something, which needs a send; none left). BarkBot reads nothing the bot saved yet: no Barkpark source for it is wired."
 }

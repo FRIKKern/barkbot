@@ -330,14 +330,16 @@ for (const [name, c, want] of [
 // newest message's own group wholly on screen; a cut one or a tile's nested group is passed over,
 // and a prefix with nothing to hover throws instead of capturing the resting screen.
 {
-  const st = (id) => JSON.parse(read(`fixtures/states/${id}.json`));
+  const cut = (state, prefix) => ({ ...state, elements: state.elements.map((e) => (e.label?.startsWith(prefix) ? { ...e, box: [e.box[0], -40, e.box[2], e.box[3]] } : e)) });
   const ORACLE = 'Message actions for Oracle message', YOURS = 'Message actions for your message';
   for (const [name, id, prefix, want] of [
     ["Oracle's one message", 'oracle-file-sent', ORACLE, 118],
     ['yours: the earlier message is cut off at the top', 'oracle-file-sent', YOURS, 143],
     ['yours: two wholly on screen, the newest wins', 'oracle-pictures-sent', YOURS, 135],
     ["yours: the message's own group, not its last tile's", 'oracle-ask-choice', YOURS, 93],
-    ['yours: the only one is cut off', 'oracle-turn-1040', YOURS, /none wholly on screen/],
+    // 1.3.0's turn-1040 shows its one message of yours whole (decision 0011), so the cut one is that
+    // capture with the message's group lifted 40 above the top: a cut one is passed over.
+    ['yours: the only one is cut off', 'oracle-turn-1040:cut', YOURS, /none wholly on screen/],
     ['a label nothing carries', 'oracle-turn-1040', 'Message actions for nobody', /nothing by that label on screen/],
     // The sweep's pressLabel (oracle-picture-viewer*): the openers inside the five-picture message.
     ['the viewer from a tile: the last whole tile, not the +3 one', 'oracle-pictures-sent', 'Open image full screen', 145],
@@ -345,7 +347,9 @@ for (const [name, c, want] of [
   ]) {
     rule('hover label', 1);
     let got;
-    try { got = pickByLabel(st(id), prefix).e.i; } catch (e) { got = e.message; }
+    const [file, how] = id.split(':');
+    const state = JSON.parse(read(`fixtures/states/${file}.json`));
+    try { got = pickByLabel(how === 'cut' ? cut(state, YOURS) : state, prefix).e.i; } catch (e) { got = e.message; }
     const ok = want instanceof RegExp ? typeof got === 'string' && want.test(got) : got === want;
     if (!ok) fail(`hover label: ${name} (${id}): got ${got}, want ${want}`);
   }
@@ -516,6 +520,27 @@ for (const [name, c, want] of [
   rule('box cases', 1);
   const byShadow = kinds({ tag: 'div', style: { 'box-shadow': 'rgba(0, 0, 0, 0) 0px 1px 2px 0px' } }, { tag: 'div', style: { 'box-shadow': 'rgba(0, 0, 0, 0.5) 0px 1px 2px 0px' } });
   if (JSON.stringify(byShadow) !== '[1]') fail(`box cases: a shadow in a clear colour is no paint, one that shows is: want [1], got ${JSON.stringify(byShadow)}`);
+  // Content can pass under a positioned overlay (sticky, fixed or absolute), so what is behind it is
+  // unknown (task-f7fdf44d2aa63bf3): a header whose gradient fades from the page's own colour to
+  // clear, sticky, is a case, and so is the same scrim absolute (our .convo-head); the same box in
+  // the flow moves no pixel over its ancestors and is none. A box inside a fixed one with an opaque
+  // fill of its own lies on that fill, so behind it stays known.
+  rule('box cases', 1);
+  const scrim = { tag: 'header', style: { 'background-image': 'linear-gradient(rgb(18, 18, 18), rgba(0, 0, 0, 0))' } };
+  const byPinned = [kinds({ ...scrim, position: 'sticky' }, scrim), kinds({ ...scrim, position: 'absolute' }, scrim)];
+  const onFixed = boxElements({ page: 'rgb(18, 18, 18)', elements: [{ i: 0, tag: 'div', position: 'fixed', box: [0, 0, 400, 400], style: { 'background-color': 'rgb(31, 31, 31)' } }, { i: 1, tag: 'div', box: [10, 10, 40, 40], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 }] }).map(({ e, unknown }) => `${e.i}${unknown ? '?' : ''}`);
+  if (JSON.stringify(byPinned) !== '[[0],[0]]' || JSON.stringify(onFixed) !== '["0?"]') fail(`box cases: a sticky or absolute scrim paints, the same in the flow does not: want [[0],[0]], got ${JSON.stringify(byPinned)}; inside a fixed opaque box behind is known: want ["0?"], got ${JSON.stringify(onFixed)}`);
+  // Inside a pinned box behind stays unknown until an opaque fill comes first on the way up
+  // (box-cases.mjs knownBehind; rev299's round 1 on #340: its pinned-ancestor arm had no row). A
+  // fill the page's colour inside a sticky box is no paint over the page, but what it lies on is
+  // what scrolls under the sticky box, so it is unknown; with an opaque fill between, it lies on that
+  // fill, the same colour, and paints nothing.
+  rule('box cases', 1);
+  const sticky = { i: 0, tag: 'div', position: 'sticky', box: [0, 0, 400, 400], style: {} };
+  const inPinned = (mid) => boxElements({ page: 'rgb(18, 18, 18)', elements: [sticky, ...(mid ? [{ i: 1, tag: 'div', box: [5, 5, 100, 100], style: { 'background-color': 'rgb(31, 31, 31)' }, parent: 0 }] : []),
+    { i: 2, tag: 'div', box: [10, 10, 40, 40], style: { 'background-color': mid ? 'rgb(31, 31, 31)' : 'rgb(18, 18, 18)' }, parent: mid ? 1 : 0 }] }).map(({ e, unknown }) => `${e.i}${unknown ? '?' : ''}`);
+  const pinRes = [inPinned(false), inPinned(true)];
+  if (JSON.stringify(pinRes) !== '[["2?"],["1?"]]') fail(`box cases: inside a sticky box behind is unknown until an opaque fill: want [["2?"],["1?"]], got ${JSON.stringify(pinRes)}`);
   // An icon glyph: on the oracle's side a text-less 24x24 <i> paints, and pairs with an svg by its
   // centre (a 24 svg at its place passes, 2 pt off fails); an <i> with text is text, an <i> under 20
   // is no box. On ours an empty <i> paints nothing: against the oracle's svg, or the oracle's own
