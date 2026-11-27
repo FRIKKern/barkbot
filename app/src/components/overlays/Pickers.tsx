@@ -5,6 +5,7 @@
 import {useState} from 'react'
 import {Icon} from '../Composer'
 import {languages} from './data'
+import {LANGUAGE, fit} from './fit'
 
 const check = <Icon d="M3.5 8.5l3 3 6-7" />
 
@@ -43,7 +44,7 @@ function Picker({
             >
               <span className="option-text">
                 <div>
-                  <span>{o}</span>
+                  <span style={fit(LANGUAGE, o)}>{o}</span>
                 </div>
               </span>
               {o === value && <span className="option-check">{check}</span>}
