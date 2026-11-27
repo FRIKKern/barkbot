@@ -1,8 +1,10 @@
-// The Voice picker on Grok 1.2.3 (decision 0010): a dialog, 300 wide, its foot 4 pt above the
+// The Voice picker on Grok Bot 1.3.0 (decision 0011): a dialog, 300 wide, its foot 4 pt above the
 // Voice row's button and right edges aligned (fixtures/states/oracle-voice-picker.json). The Speed
-// slider runs along its top; under it a grid of voices, two to a row, scrolls inside 268 pt and
-// opens with the picked voice in its middle (Helix's row at 294.5, the grid's middle at 336.5).
-// Every number is read from that capture and oracle-voice-picker-end.
+// slider runs along its top; under it a grid of voices, two to a row, scrolls inside 322 pt and
+// opens with the picked voice's row in its middle, as 1.2.3 did. 1.3.0 opens it 96 under the grid's
+// top (Helix's row at 250.5, the grid's top at 154.5): a row pitch (92) and 4, which no rule we can
+// name gives from one capture, so it is not built (H4; task-5ead377f77510a2d opens it with another
+// voice picked). Every other number is read from that capture, -start and -end.
 //
 // The voice-picker trace (fixtures/oracle-1.2.3/traces/2026-11-19-voice-picker.json): focus opens on
 // the chosen voice; a pick changes the row at once ("Helios 1.0x") and leaves the dialog open; the
