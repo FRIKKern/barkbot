@@ -7,12 +7,12 @@
 // trigger, found by the trigger's captured label, so the frame needs no handler of its own yet;
 // Escape or a click outside closes it.
 //
-// A modal (Create New Bot, Connect Apps, Settings) hides the rest of the window while it is open
+// A modal (Create new Bot, Connect apps, Settings) hides the rest of the window while it is open
 // (aria-hidden, and inert): traces/2026-11-08-new-bot.json shows the oracle (Floating UI) setting
 // aria-hidden on the rail, the conversation and the panel the moment the dialog appears.
 //
 // Keys and focus, as traces/2026-11-09-keys.json measured them on the oracle:
-//   on open   a modal focuses the dialog itself (Create New Bot: its name field); a menu focuses
+//   on open   a modal focuses the dialog itself (Create new Bot: its name field); a menu focuses
 //             the menu with no row highlighted; a picker focuses its picked option, highlighted
 //             (traced on 0.79.3's Speed list; 1.2.3's Voice dialog focuses its checked voice: ours)
 //   arrows    move focus and data-highlighted through the rows (no wrap)

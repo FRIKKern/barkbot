@@ -85,7 +85,7 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
   await press('Escape'); st.escape = await focused(); st.after = await shown();
   // The trace (0.79.3) named the close button Close; 1.2.3 names it Close dialog (oracle-connect-apps).
   check('Connect apps (keys trace): open puts focus on the dialog itself; Tab goes to Close dialog; Escape closes it and gives focus back to Connect apps',
-    ca.open === 'dialog Connect Apps (overlay)' && ca.tab === 'button Close dialog (overlay)' && ca.escape === 'button Connect apps' && ca.after === null, ca);
+    ca.open === 'dialog Connect apps (overlay)' && ca.tab === 'button Close dialog (overlay)' && ca.escape === 'button Connect apps' && ca.after === null, ca);
   check('Settings from the account menu (keys trace): open puts focus on the dialog itself; Tab goes to General; Escape closes it and gives focus back to what had it before the account menu opened, Connect apps (control: the account menu opened)',
     st.before === 'button Connect apps' && st.menu === 'account-menu' && st.shown === 'settings' && st.open === 'dialog Grok Bot settings (overlay)' && st.tab === 'button General (overlay)' && st.escape === 'button Connect apps' && st.after === null, st);
   // Outside clicks on the modals (the trace records one for each).
@@ -103,7 +103,7 @@ export async function overlayKeys({ check, precondition, ev, open, base, click, 
   // (overlays/index.tsx); this is the live path to the same states, so a scene feeds only what the
   // live page draws. Each page is named by its heading, its tab's aria-current and one row only it has.
   await fresh();
-  const marks = ['Unlock the ultimate AI subscription', 'Read Texts', 'Approvals', 'Automatic Updates'];
+  const marks = ['Unlock the ultimate AI subscription', 'Read texts', 'Approvals', 'Automatic updates'];
   const pageOf = () => ev((m) => {
     const d = document.querySelector('.overlay [role=dialog]');
     const body = d?.querySelector('.set-body')?.textContent ?? '';

@@ -1,4 +1,4 @@
-// Connect Apps, look only (fixtures/states/oracle-connect-apps.json, Grok 1.2.3). Nothing here acts
+// Connect apps, look only (fixtures/states/oracle-connect-apps.json, Grok 1.2.3). Nothing here acts
 // outside the page (0005): Open and Connect do nothing yet, Close and Escape close the view, the
 // filters toggle. The connected count is a length only in the fixture (O2), so a placeholder bar.
 //
@@ -82,7 +82,7 @@ export function ConnectApps({onClose, today}: {onClose?: () => void; today?: str
   return (
     <>
       <div className="scrim" />
-      <div role="dialog" tabIndex={-1} aria-modal="true" aria-label="Connect Apps" className="view connect-apps">
+      <div role="dialog" tabIndex={-1} aria-modal="true" aria-label="Connect apps" className="view connect-apps">
         <button aria-label="Close dialog" className="view-close ca-close" onClick={onClose}>
           <span>{x}</span>
         </button>
@@ -90,7 +90,7 @@ export function ConnectApps({onClose, today}: {onClose?: () => void; today?: str
         <div className="view-scroll">
           <div className="ca-body">
             <div className="ca-title">
-              <h2>Connect Apps</h2>
+              <h2>Connect apps</h2>
               <div className="ca-plugins-wrap">
                 <button aria-label="Your plugins" className="ca-plugins">
                   <span className="ca-stack">

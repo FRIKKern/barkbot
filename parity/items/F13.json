@@ -2,7 +2,7 @@
  "id": "F13",
  "slice": "S2",
  "journey": null,
- "title": "Settings, General page: General, Computer, Permissions, Vault, Usage & Billing, Updates; Account (name and e-mail are the owner's: lengths only), Add account, Sign Out; Appearance; Spelling; Microphone (oracle-settings). Look only",
+ "title": "Settings, General page: General, Computer, Permissions, Vault, Usage & billing, Updates; Account (name and e-mail are the owner's: lengths only), Add account, Sign out; Appearance; Spelling; Microphone (oracle-settings). Look only",
  "status": "partial",
  "controls": [
   "General",
@@ -19,5 +19,5 @@
   "Send with ⌘↵"
  ],
  "gate": "Gate A on 1.2.3: oracle-settings 88/88 (box cases 16/23) (0.79.3: 108/108)",
- "evidence": "app/src/components/overlays/Settings.tsx (Settings, GeneralPage; parts in SettingsParts.tsx), styles/settings.css; opens from Settings in the account menu, Close dialog and Escape close it, the switches toggle. Matches Grok 1.2.3 (decision 0010) inside the dialog: Close dialog, Change profile photo (a plain disc: the owner's photo is theirs, O2), Send with ⌘↵ (off). Name, e-mail, photo, promo copy and art are placeholders of the captured size (lengths only); Computer, Permissions and Updates show their own pages (F14); Vault and Usage & Billing highlight but show General (never captured, O2). Look only: Change profile photo, Add account, Sign Out and the selects do nothing yet (0005). The System section is below the 1.2.3 capture and kept from 0.79.3, unchecked."
+ "evidence": "app/src/components/overlays/Settings.tsx (Settings, GeneralPage; parts in SettingsParts.tsx), styles/settings.css; opens from Settings in the account menu, Close dialog and Escape close it, the switches toggle. Matches Grok 1.2.3 (decision 0010) inside the dialog: Close dialog, Change profile photo (a plain disc: the owner's photo is theirs, O2), Send with ⌘↵ (off). Name, e-mail, photo, promo copy and art are placeholders of the captured size (lengths only); Computer, Permissions and Updates show their own pages (F14); Vault and Usage & billing highlight but show General (never captured, O2). Look only: Change profile photo, Add account, Sign out and the selects do nothing yet (0005). The System section is below the 1.2.3 capture and kept from 0.79.3, unchecked."
 }

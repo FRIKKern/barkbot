@@ -114,7 +114,7 @@ export function Switch({label, on = true}: {label: string; on?: boolean}) {
   )
 }
 
-// A grey pill button: Check for Updates, Update, Open apps. Look only: none acts yet (0005).
+// A grey pill button: Check for updates, Update, Open apps. Look only: none acts yet (0005).
 export function PillButton({text, label}: {text: string; label?: string}) {
   return (
     <button aria-label={label} className="pill set-pill">

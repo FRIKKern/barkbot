@@ -7,7 +7,7 @@
   2
  ],
  "cases": 105,
- "pass": 95,
+ "pass": 102,
  "results": [
   {
    "key": "aside:Bots",
@@ -187,13 +187,11 @@
   },
   {
    "key": "control:Usage & billing",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Usage & billing",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Updates",
@@ -213,18 +211,15 @@
   },
   {
    "key": "h3:Grok Bot updates",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Automatic updates",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Automatic updates",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Version",
@@ -243,13 +238,11 @@
   },
   {
    "key": "control:Check for updates",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Check for updates",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "bubble:user#1 look",
@@ -440,7 +433,7 @@
    "pass": true
   }
  ],
- "run": "2026-11-27T09:15:19.813Z",
+ "run": "2026-11-27T10:30:00.289Z",
  "inventory": {
   "id": "oracle-settings-updates",
   "controls": [
@@ -567,7 +560,7 @@
    {
     "name": "Usage & billing",
     "item": "F13",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Updates",
@@ -582,15 +575,15 @@
    {
     "name": "Automatic updates",
     "item": "F14",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Check for updates",
     "item": "F14",
-    "ours": false
+    "ours": true
    }
   ],
-  "missing": 3,
+  "missing": 0,
   "untracked": []
  }
 }
