@@ -5,13 +5,15 @@
 // a word can sit in more than one place, so each place has its own table.
 type Table = Record<string, string>
 
-// App names, 13/18 weight 500 on 0.195px (oracle-connect-apps, 1.2.3).
+// App names, 13/18 weight 500 on 0.195px (oracle-connect-apps, 1.2.3 and 1.3.0).
 export const APP: Table = {
-  Browserless: '-0.105px', // 3.3 pt too wide
-  Turso: '-0.305px', // 2.5 pt too wide
-  Lightrun: '-0.18px', // 3 pt too wide
-  Knock: '-0.185px', // 1.9 pt too wide
   'Google Drive': '-0.013px', // 2.5 pt too wide
+  // 1.3.0's new names: base 0.195 minus the gap over the characters.
+  'Google Calendar': '-0.005px', // 3 pt too wide
+  Notion: '-0.072px', // 1.6 pt too wide
+  Slack: '-0.045px', // 1.2 pt too wide
+  Granola: '-0.134px', // 2.3 pt too wide
+  Firecrawl: '-0.072px', // 2.4 pt too wide
   '1Password': '-0.205px',
 }
 // Section titles, 14/20 weight 500 on 0.14px.
@@ -19,7 +21,7 @@ export const SECTION: Table = {'Recommended for you': '0.008px', 'This Mac': '-0
 // Language labels, 14/20 on 0.14px (oracle-language-picker, 1.3.0). The widest sets the list's width (max-content).
 export const LANGUAGE: Table = {'Arabic (United Arab Emirates)': '0.078px'} // 1.8 pt too wide
 // Category filters, 13/18 on 0.195px.
-export const CATEGORY: Table = {All: '0.028px', Productivity: '0.128px', More: '-0.28px'}
+export const CATEGORY: Table = {All: '0.028px', Productivity: '0.128px', 'Design & media': '0.124px', 'Developer tools': '0.155px', More: '-0.28px'} // 1.3.0: Design & media 1 pt too wide, Developer tools 0.6
 // Settings words (oracle-settings).
 export const SETTINGS: Table = {
   Permissions: '0.095px',

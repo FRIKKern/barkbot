@@ -7,7 +7,7 @@
   2
  ],
  "cases": 179,
- "pass": 153,
+ "pass": 168,
  "results": [
   {
    "key": "aside:Bots",
@@ -187,18 +187,15 @@
   },
   {
    "key": "control:Design & media",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Developer tools",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:More",
-   "pass": false,
-   "why": "box off by -178.8,0,0,0"
+   "pass": true
   },
   {
    "key": "h3:Recommended for you",
@@ -210,13 +207,11 @@
   },
   {
    "key": "control:Open Google Drive",
-   "pass": false,
-   "why": "box off by 433,132,0,0"
+   "pass": true
   },
   {
    "key": "span:Google Drive",
-   "pass": false,
-   "why": "box off by 433,132,0,0"
+   "pass": true
   },
   {
    "key": "control:Connect",
@@ -228,13 +223,11 @@
   },
   {
    "key": "control:Open Google Calendar",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Google Calendar",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#2",
@@ -246,13 +239,11 @@
   },
   {
    "key": "control:Open Notion",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Notion",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#3",
@@ -264,13 +255,11 @@
   },
   {
    "key": "control:Open Slack",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Slack",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#4",
@@ -282,13 +271,11 @@
   },
   {
    "key": "control:Open Granola",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Granola",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#5",
@@ -300,13 +287,11 @@
   },
   {
    "key": "control:Open Firecrawl",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "span:Firecrawl",
-   "pass": false,
-   "why": "missing"
+   "pass": true
   },
   {
    "key": "control:Connect#6",
@@ -752,7 +737,7 @@
    "why": "extra: the oracle draws no box here"
   }
  ],
- "run": "2026-11-27T10:30:00.289Z",
+ "run": "2026-11-27T15:15:59.912Z",
  "inventory": {
   "id": "oracle-connect-apps",
   "controls": [
@@ -899,12 +884,12 @@
    {
     "name": "Design & media",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Developer tools",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "More",
@@ -929,27 +914,27 @@
    {
     "name": "Open Google Calendar",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Notion",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Slack",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Granola",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Firecrawl",
     "item": "F11",
-    "ours": false
+    "ours": true
    },
    {
     "name": "Open Messages",
@@ -987,7 +972,7 @@
     "ours": true
    }
   ],
-  "missing": 7,
+  "missing": 0,
   "untracked": []
  }
 }
